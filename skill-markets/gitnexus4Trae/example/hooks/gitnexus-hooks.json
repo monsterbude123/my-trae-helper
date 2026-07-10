@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "name": "gitnexus-index-check",
+        "enabled": true,
+        "command": "powershell -ExecutionPolicy Bypass -File .trae/hooks/index-check.ps1"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "name": "gitnexus-impact-gate",
+        "enabled": true,
+        "matcher": "Write|Edit",
+        "command": "powershell -ExecutionPolicy Bypass -File .trae/hooks/impact-gate.ps1"
+      }
+    ],
+    "Stop": [
+      {
+        "name": "gitnexus-changes-verify",
+        "enabled": true,
+        "command": "powershell -ExecutionPolicy Bypass -File .trae/hooks/changes-verify.ps1"
+      }
+    ]
+  }
+}

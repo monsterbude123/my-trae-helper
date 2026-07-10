@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>{{PROJECT_NAME}} — 文档</title>
+
+  <!-- docsify-themeable 现代化主题 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
+
+  <!-- zoom-image -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-zoom-image@1/dist/zoom-image.min.css">
+
+  <!-- Prism 代码高亮 + 行号 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/line-numbers/prism-line-numbers.css">
+
+  <!-- 自定义样式 (覆盖主题) -->
+  <link rel="stylesheet" href="custom.css">
+</head>
+<body>
+  <div id="app">加载中...</div>
+
+  <script>
+    window.$docsify = {
+      el: '#app',
+      basePath: '/',
+      relativePath: false,
+      name: '{{PROJECT_NAME}}',
+      repo: '',
+      loadSidebar: '_sidebar.md',
+      loadNavbar: '_navbar.md',
+      coverpage: '_coverpage.md',
+      logo: '',
+      auto2top: true,
+      topMargin: 0,
+      subMaxLevel: 3,
+      sidebarSubLevel: 2,
+      search: {
+        maxAge: 86400000,
+        paths: 'auto',
+        placeholder: '搜索文档...',
+        noData: '没有结果',
+        depth: 4,
+        hideOtherSidebarContent: false,
+        namespace: '{{PROJECT_NAME_NAMESPACE}}'
+      },
+      pagination: {
+        previous: '上一页',
+        next: '下一页',
+        crossChapter: true
+      },
+      count: {
+        countable: true,
+        fontsize: '0.8em',
+        color: '#7c5cfc',
+        language: 'chinese'
+      },
+      plugins: [
+        function(hook, vm) {
+          // ====== 全局状态 ======
+          var currentMarkdown = '';
+          var isMarkmapMode = false;
+          var markmapInstance = null;
+          var currentRoute = '';
+          var toolbarInjected = false;
+          var overlayInjected = false;
+
+          // ====== 注入工具栏 HTML（只注入一次） ======
+          function injectToolbar() {
+            if (toolbarInjected) return;
+            if (!document.querySelector('.content')) return;
+            var toolbar = document.createElement('div');
+            toolbar.className = 'deer-toolbar';
+            toolbar.innerHTML = '' +
+              '<button class="deer-tb-btn" data-action="back-to-top" title="回到顶部">' +
+                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>' +
+                '<span>顶部</span>' +
+              '</button>' +
+              '<button class="deer-tb-btn deer-tb-markmap" data-action="toggle-markmap" title="思维导图模式">' +
+                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v7m0 6v7m-4.95-6.95l-4.95-4.95m16.9 4.95l4.95-4.95m-4.95 9.9l-4.95 4.95m16.9-4.95l4.95 4.95"/></svg>' +
+                '<span>导图</span>' +
+              '</button>';
+            document.body.appendChild(toolbar);
+            toolbarInjected = true;
+          }
+
+          // ====== 注入全屏遮罩 HTML（只注入一次） ======
+          function injectOverlay() {
+            if (overlayInjected) return;
+            var overlay = document.createElement('div');
+            overlay.className = 'deer-fullscreen-overlay';
+            overlay.id = 'deerFullscreenOverlay';
+            overlay.style.display = 'none';
+            overlay.innerHTML = '' +
+              '<div class="deer-fs-header">' +
+                '<span class="deer-fs-title">Mermaid 图表</span>' +
+                '<div class="deer-fs-actions">' +
+                  '<button class="deer-fs-btn" data-action="zoom-in" title="放大">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>' +
+                  '</button>' +
+                  '<button class="deer-fs-btn" data-action="zoom-out" title="缩小">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M8 11h6"/></svg>' +
+                  '</button>' +
+                  '<button class="deer-fs-btn" data-action="zoom-reset" title="重置">1:1</button>' +
+                  '<span class="deer-fs-sep"></span>' +
+                  '<button class="deer-fs-btn deer-fs-export" data-action="export-svg" title="导出 SVG">SVG</button>' +
+                  '<button class="deer-fs-btn deer-fs-export" data-action="export-png" title="导出 PNG">PNG</button>' +
+                  '<span class="deer-fs-sep"></span>' +
+                  '<button class="deer-fs-btn deer-fs-close" data-action="close" title="关闭 (Esc)">✕</button>' +
+                '</div>' +
+              '</div>' +
+              '<div class="deer-fs-body" id="deerFsBody"></div>';
+            document.body.appendChild(overlay);
+            overlayInjected = true;
+
+            // 全屏操作事件委托
+            overlay.addEventListener('click', function(e) {
+              var action = e.target.closest('[data-action]');
+              if (!action) return;
+              var act = action.getAttribute('data-action');
+              handleOverlayAction(act);
+            });
+
+            // Esc 关闭
+            document.addEventListener('keydown', function(e) {
+              if (e.key === 'Escape' && overlay.style.display !== 'none') {
+                closeFullscreen();
+              }
+            });
+          }
+
+          // ====== 全屏操作处理 ======
+          var fsScale = 1;
+          var fsSvgClone = null;
+
+          function openFullscreen(svgEl) {
+            var overlay = document.getElementById('deerFullscreenOverlay');
+            if (!overlay) return;
+            var body = document.getElementById('deerFsBody');
+            fsScale = 1;
+            fsSvgClone = svgEl.cloneNode(true);
+            fsSvgClone.style.maxWidth = '100%';
+            fsSvgClone.style.maxHeight = '100%';
+            fsSvgClone.style.width = 'auto';
+            fsSvgClone.style.height = 'auto';
+            fsSvgClone.style.transform = 'scale(1)';
+            fsSvgClone.style.transformOrigin = 'center center';
+            fsSvgClone.style.transition = 'transform 0.2s ease';
+            body.innerHTML = '';
+            body.appendChild(fsSvgClone);
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+          }
+
+          function closeFullscreen() {
+            var overlay = document.getElementById('deerFullscreenOverlay');
+            if (!overlay) return;
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+            fsSvgClone = null;
+            fsScale = 1;
+          }
+
+          function handleOverlayAction(action) {
+            switch (action) {
+              case 'close':
+                closeFullscreen();
+                break;
+              case 'zoom-in':
+                fsScale = Math.min(fsScale + 0.25, 5);
+                if (fsSvgClone) fsSvgClone.style.transform = 'scale(' + fsScale + ')';
+                break;
+              case 'zoom-out':
+                fsScale = Math.max(fsScale - 0.25, 0.25);
+                if (fsSvgClone) fsSvgClone.style.transform = 'scale(' + fsScale + ')';
+                break;
+              case 'zoom-reset':
+                fsScale = 1;
+                if (fsSvgClone) fsSvgClone.style.transform = 'scale(1)';
+                break;
+              case 'export-svg':
+                exportDiagram('svg');
+                break;
+              case 'export-png':
+                exportDiagram('png');
+                break;
+            }
+          }
+
+          function exportDiagram(format) {
+            var body = document.getElementById('deerFsBody');
+            var svg = body ? body.querySelector('svg') : null;
+            if (!svg) return;
+
+            var bbox = svg.getBBox ? svg.getBBox() : null;
+            var w = (bbox && bbox.width) || svg.viewBox?.baseVal?.width || svg.getAttribute('width') || 800;
+            var h = (bbox && bbox.height) || svg.viewBox?.baseVal?.height || svg.getAttribute('height') || 600;
+
+            var clone = svg.cloneNode(true);
+            clone.setAttribute('width', w);
+            clone.setAttribute('height', h);
+            var svgData = new XMLSerializer().serializeToString(clone);
+            var svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+
+            if (format === 'svg') {
+              var url = URL.createObjectURL(svgBlob);
+              var a = document.createElement('a');
+              a.href = url;
+              a.download = 'mermaid-' + Date.now() + '.svg';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            } else if (format === 'png') {
+              var img = new Image();
+              var url = URL.createObjectURL(svgBlob);
+              img.onload = function() {
+                var canvas = document.createElement('canvas');
+                var scale = 2;
+                canvas.width = w * scale;
+                canvas.height = h * scale;
+                var ctx = canvas.getContext('2d');
+                ctx.scale(scale, scale);
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob(function(blob) {
+                  var a = document.createElement('a');
+                  a.href = URL.createObjectURL(blob);
+                  a.download = 'mermaid-' + Date.now() + '.png';
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                }, 'image/png');
+                URL.revokeObjectURL(url);
+              };
+              img.src = url;
+            }
+          }
+
+          // ====== 回到顶部 ======
+          function scrollToTop() {
+            var content = document.querySelector('.content');
+            if (content) {
+              content.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+
+          // ====== Markmap 思维导图 ======
+          function getMarkmapContainer() {
+            var container = document.getElementById('deerMarkmapContainer');
+            if (!container) {
+              container = document.createElement('div');
+              container.id = 'deerMarkmapContainer';
+              container.className = 'deer-markmap-container';
+              container.innerHTML = '<div class="deer-markmap-loading"><div class="deer-spinner"></div><p>正在生成思维导图…</p></div>';
+              var content = document.querySelector('.content');
+              if (content) {
+                content.appendChild(container);
+              }
+            }
+            return container;
+          }
+
+          function toggleMarkmap() {
+            var markdownSection = document.querySelector('.markdown-section');
+            var container = getMarkmapContainer();
+            var toolbar = document.querySelector('.deer-toolbar');
+            var mapBtn = toolbar ? toolbar.querySelector('[data-action="toggle-markmap"]') : null;
+
+            if (!isMarkmapMode) {
+              isMarkmapMode = true;
+              if (markdownSection) markdownSection.style.display = 'none';
+              container.style.display = 'flex';
+              if (mapBtn) mapBtn.classList.add('active');
+              renderMarkmap(container);
+            } else {
+              isMarkmapMode = false;
+              if (markdownSection) markdownSection.style.display = '';
+              container.style.display = 'none';
+              if (markmapInstance) {
+                markmapInstance = null;
+              }
+              container.innerHTML = '<div class="deer-markmap-loading"><div class="deer-spinner"></div><p>正在生成思维导图…</p></div>';
+              if (mapBtn) mapBtn.classList.remove('active');
+            }
+          }
+
+          function renderMarkmap(container) {
+            if (!container) container = getMarkmapContainer();
+            if (!currentMarkdown || !currentMarkdown.trim()) {
+              container.innerHTML = '<div class="deer-markmap-empty"><p>当前页面没有可渲染的内容</p></div>';
+              return;
+            }
+
+            var md = currentMarkdown.replace(/^---[\s\S]*?---\n*/, '');
+
+            if (typeof window.markmap === 'undefined') {
+              container.innerHTML = '<div class="deer-markmap-empty"><p>Markmap 库正在加载中，请稍候…</p></div>';
+              setTimeout(function() {
+                if (isMarkmapMode) renderMarkmap();
+              }, 1000);
+              return;
+            }
+
+            container.innerHTML = '';
+
+            try {
+              var Transformer = window.markmap.Transformer;
+              var Markmap = window.markmap.Markmap;
+              var transformer = new Transformer();
+              var result = transformer.transform(md);
+
+              var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+              svg.setAttribute('style', 'width:100%;height:100%;display:block;');
+              container.appendChild(svg);
+
+              markmapInstance = Markmap.create(svg, {
+                autoFit: true,
+                fitRatio: 0.85,
+                colorFreezeLevel: 2,
+                duration: 400,
+                maxWidth: 360,
+                initialExpandLevel: 2
+              }, result.root);
+
+              svg.style.background = 'var(--bg-primary, #f8f9fa)';
+            } catch (err) {
+              console.error('Markmap render error:', err);
+              container.innerHTML = '<div class="deer-markmap-empty"><p>思维导图渲染失败: ' + err.message + '</p></div>';
+            }
+          }
+
+          // ====== 工具栏事件绑定 ======
+          function bindToolbarEvents() {
+            var toolbar = document.querySelector('.deer-toolbar');
+            if (!toolbar || toolbar._eventsBound) return;
+            toolbar._eventsBound = true;
+            toolbar.addEventListener('click', function(e) {
+              var btn = e.target.closest('[data-action]');
+              if (!btn) return;
+              var action = btn.getAttribute('data-action');
+              switch (action) {
+                case 'back-to-top':
+                  scrollToTop();
+                  break;
+                case 'toggle-markmap':
+                  toggleMarkmap();
+                  break;
+              }
+            });
+          }
+
+          // ====== Hooks ======
+          hook.beforeEach(function(markdown) {
+            currentMarkdown = markdown;
+            return markdown;
+          });
+
+          hook.doneEach(function() {
+            setTimeout(function() {
+              var isCover = !!document.querySelector('.cover.show');
+              if (isCover) {
+                var tb = document.querySelector('.deer-toolbar');
+                if (tb) tb.style.display = 'none';
+                return;
+              }
+              injectToolbar();
+              injectOverlay();
+              var tb2 = document.querySelector('.deer-toolbar');
+              if (tb2) tb2.style.display = '';
+              bindToolbarEvents();
+            }, 100);
+
+            // 代码块行号
+            document.querySelectorAll('.markdown-section pre').forEach(function(pre) {
+              var code = pre.querySelector('code');
+              if (!code) return;
+              var langMatch = code.className.match(/language-(\w+)/) || code.className.match(/lang-(\w+)/);
+              var lang = langMatch ? langMatch[1] : '';
+              if (lang && lang !== 'mermaid') {
+                if (!pre.classList.contains('line-numbers')) {
+                  pre.classList.add('line-numbers');
+                }
+                pre.setAttribute('data-lang', lang);
+              } else {
+                pre.classList.remove('line-numbers');
+                pre.removeAttribute('data-lang');
+              }
+            });
+
+            // Mermaid 渲染 + 点击全屏
+            if (typeof mermaid !== 'undefined') {
+              document.querySelectorAll('pre code.lang-mermaid, pre code.language-mermaid').forEach(function(code, index) {
+                var pre = code.parentElement;
+                if (pre.previousElementSibling && pre.previousElementSibling.classList.contains('mermaid')) {
+                  return;
+                }
+                var source = code.textContent;
+                var id = 'mermaid-' + Date.now() + '-' + index;
+                mermaid.render(id, source).then(function(result) {
+                  var wrapper = document.createElement('div');
+                  wrapper.className = 'mermaid';
+                  wrapper.innerHTML = result.svg;
+                  pre.parentNode.insertBefore(wrapper, pre);
+                  pre.style.display = 'none';
+                  wrapper.style.cursor = 'pointer';
+                  wrapper.title = '点击查看大图 / 导出';
+                  var svgEl = wrapper.querySelector('svg');
+                  wrapper.addEventListener('click', function() {
+                    if (svgEl) openFullscreen(svgEl);
+                  });
+                }).catch(function(err) {
+                  console.error('Mermaid render error:', err);
+                });
+              });
+            }
+
+            // 路由切换时如果在导图模式则重新渲染
+            var newRoute = vm.route ? vm.route.path : '';
+            if (isMarkmapMode && newRoute !== currentRoute) {
+              currentRoute = newRoute;
+              setTimeout(function() {
+                renderMarkmap();
+              }, 300);
+            } else {
+              currentRoute = newRoute;
+            }
+          });
+
+          hook.init(function() {
+            setTimeout(function() {
+              injectToolbar();
+              injectOverlay();
+            }, 500);
+          });
+        }
+      ]
+    };
+  </script>
+
+  <!-- Mermaid 图表库（docsify 渲染前加载） -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      securityLevel: 'loose'
+    });
+  </script>
+
+  <!-- docsify 核心 -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+
+  <!-- ─── 插件 ─── -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-pagination@2/dist/docsify-pagination.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2/dist/docsify-copy-code.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-zoom-image@1/dist/docsify-zoom-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-count@0/dist/countable.min.js"></script>
+
+  <!-- Prism 核心 + 语言包 -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/line-numbers/prism-line-numbers.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-docker.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markdown.min.js"></script>
+
+  <!-- 主题 -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/theme-simple-dark.min.js"></script>
+
+  <!-- Markmap 思维导图依赖（autoloader 统一入口，含 Transformer + Markmap + d3） -->
+  <script>
+    window.markmap = { autoLoader: { manual: true, transformPlugins: [] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.17.0/dist/index.js"></script>
+</body>
+</html>

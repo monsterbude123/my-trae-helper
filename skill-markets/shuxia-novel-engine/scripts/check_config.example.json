@@ -1,0 +1,28 @@
+{
+  "_schema": "check.py 结构化配置 · 复制为 check_config.json 后修改生效",
+  "_note": "所有字段均可覆盖。删除字段则回退到内置默认值。",
+
+  "severity_weights": {
+    "废弃术语": 1,
+    "概念弃用": 2,
+    "宪法违规": 10,
+    "角色行为违规": 8
+  },
+
+  "exclude_dirs": ["归档", "__pycache__", ".git", "node_modules"],
+  "exclude_files": ["concept_graph.json", "concept_graph.md"],
+  "scan_extensions": [".md"],
+
+  "constitution_paths": [
+    "创作正文/世界观/亚文化建设宪法.md",
+    "AGENTS.md"
+  ],
+
+  "registry_paths": [
+    "创作正文/状态/S10_概念注册表.yaml",
+    "创作正文/状态/S11_概念注册表.md"
+  ],
+
+  "pass_threshold": 85,
+  "conditional_threshold": 60
+}

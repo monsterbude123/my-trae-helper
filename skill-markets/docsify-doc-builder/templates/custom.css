@@ -1,0 +1,679 @@
+/*
+  custom.css — 自定义样式覆盖
+  ==================================
+  覆盖 docsify 默认样式和 docsify-themeable 主题变量。
+  修改 :root 中的变量即可全局调整。
+
+  包含：
+    - 主题变量 / 字体 / 侧边栏 / 内容区
+    - 代码块增强 + 行号 + 复制按钮
+    - 表格 / 列表 / 图片 / 引用块
+    - 思维链 / 引导卡片 / 徽章 / 警告提示
+    - 固定工具栏（回到顶部 + 思维导图切换）
+    - Mermaid 全屏遮罩 + 导出
+    - Markmap 思维导图容器 + 深色适配
+    - 响应式 + 打印样式
+*/
+
+/* ═══════════════════════════════════════════
+   主题变量
+   ═══════════════════════════════════════════ */
+:root {
+  /* 主色调 */
+  --theme-color: #42b983;
+  --theme-color-dark: #359e6b;
+
+  /* 品牌色（工具栏/全屏遮罩使用） */
+  --brand: #7c5cfc;
+  --brand-light: #9b7efd;
+  --brand-dark: #5a3db8;
+
+  /* 深色主题背景变量 */
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-code: #f4f4f4;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --border: #e0e0e0;
+
+  /* 字体 */
+  --base-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --code-font-family: "Fira Code", "Source Code Pro", Consolas,
+    "Courier New", monospace;
+
+  /* 侧边栏 */
+  --sidebar-width: 20rem;
+  --sidebar-background: var(--bg-secondary);
+  --sidebar-name-color: var(--theme-color);
+
+  /* 内容区 */
+  --content-max-width: 55em;
+  --heading-h1-font-size: 2rem;
+  --heading-h2-font-size: 1.5rem;
+  --heading-h3-font-size: 1.25rem;
+
+  /* 代码块 */
+  --code-font-size: 0.9rem;
+  --code-block-padding: 1rem;
+  --code-block-border-radius: 6px;
+
+  /* 圆角 */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+/* ═══════════════════════════════════════════
+   全局基础
+   ═══════════════════════════════════════════ */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--base-font-family);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-dark);
+}
+
+/* ═══════════════════════════════════════════
+   侧边栏
+   ═══════════════════════════════════════════ */
+.sidebar {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.sidebar a {
+  color: var(--text-secondary);
+  transition: var(--transition);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  margin: 2px 8px;
+}
+.sidebar a:hover {
+  color: var(--brand-light);
+  background: rgba(124, 92, 252, 0.1);
+}
+.sidebar ul li a.active {
+  color: var(--brand);
+  border-left: 3px solid var(--brand);
+  background: rgba(124, 92, 252, 0.08);
+}
+
+/* ═══════════════════════════════════════════
+   链接样式
+   ═══════════════════════════════════════════ */
+.markdown-section a {
+  color: var(--brand-light);
+  text-decoration: none;
+  transition: var(--transition);
+  border-bottom: 1px solid transparent;
+}
+.markdown-section a:hover {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+}
+
+/* ═══════════════════════════════════════════
+   代码块增强
+   ═══════════════════════════════════════════ */
+.markdown-section pre {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px 24px;
+  overflow-x: auto;
+  position: relative;
+  margin: 20px 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: var(--transition);
+}
+.markdown-section pre:hover {
+  border-color: var(--brand);
+}
+.markdown-section code {
+  font-family: var(--code-font-family);
+  font-size: 0.88em;
+  background: rgba(124, 92, 252, 0.06);
+  color: var(--brand-dark);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.markdown-section pre code {
+  background: transparent;
+  color: var(--text-primary);
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.92em;
+  line-height: 1.65;
+}
+
+/* 代码块语言标签（右上角） */
+.markdown-section pre[data-lang]::before {
+  content: attr(data-lang);
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--brand-dark);
+  color: #fff;
+  padding: 3px 12px;
+  font-size: 0.7em;
+  border-radius: 0 var(--radius-sm) 0 var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  opacity: 0.85;
+  z-index: 2;
+}
+
+/* Prism 行号 */
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid var(--border) !important;
+  padding: 20px 0 !important;
+  top: 0;
+}
+.line-numbers .line-numbers-rows > span::before {
+  color: var(--text-muted) !important;
+  padding-right: 12px !important;
+}
+.markdown-section pre.line-numbers {
+  padding-left: 60px !important;
+}
+
+/* 复制按钮 */
+.docsify-copy-code-button {
+  background: var(--brand-dark) !important;
+  border: 1px solid var(--brand) !important;
+  border-radius: var(--radius-sm) !important;
+  color: #fff !important;
+  font-size: 0.75em !important;
+  padding: 4px 14px !important;
+  transition: var(--transition);
+  cursor: pointer;
+  z-index: 3;
+}
+.docsify-copy-code-button:hover {
+  background: var(--brand) !important;
+  border-color: var(--brand-light) !important;
+}
+.docsify-copy-code-button.success {
+  background: #2d7d46 !important;
+  border-color: #4ade80 !important;
+}
+
+/* ═══════════════════════════════════════════
+   表格
+   ═══════════════════════════════════════════ */
+.markdown-section table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 16px 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.markdown-section table thead {
+  background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+}
+.markdown-section table th {
+  color: #fff;
+  font-weight: 600;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.95em;
+}
+.markdown-section table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  background: var(--bg-card);
+}
+.markdown-section table tr:last-child td {
+  border-bottom: none;
+}
+.markdown-section table tr:hover td {
+  background: rgba(124, 92, 252, 0.05);
+}
+
+/* ═══════════════════════════════════════════
+   引用块 / 图片 / 水平线
+   ═══════════════════════════════════════════ */
+.markdown-section blockquote {
+  border-left: 4px solid var(--brand);
+  background: rgba(124, 92, 252, 0.06);
+  padding: 12px 20px;
+  margin: 16px 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text-secondary);
+}
+.markdown-section blockquote p {
+  margin: 4px 0;
+}
+
+.markdown-section img {
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  margin: 16px 0;
+}
+
+.markdown-section hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--brand), transparent);
+  margin: 32px 0;
+}
+
+/* ═══════════════════════════════════════════
+   提示块样式
+   ═══════════════════════════════════════════ */
+.markdown-section .tip,
+.markdown-section .warn,
+.markdown-section .danger {
+  padding: 12px 16px;
+  border-left: 4px solid;
+  margin: 16px 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.markdown-section .tip {
+  background: rgba(45, 125, 70, 0.1);
+  border-color: #2d7d46;
+}
+.markdown-section .warn {
+  background: rgba(217, 119, 6, 0.1);
+  border-color: #d97706;
+}
+.markdown-section .danger {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: #dc2626;
+}
+
+/* ═══════════════════════════════════════════
+   Mermaid 图表
+   ═══════════════════════════════════════════ */
+.markdown-section .mermaid {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin: 16px 0;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════
+   分页导航
+   ═══════════════════════════════════════════ */
+.docsify-pagination-container {
+  border-top: 1px solid var(--border) !important;
+  padding-top: 24px !important;
+  margin-top: 32px !important;
+}
+.pagination-item-label {
+  color: var(--text-muted) !important;
+  font-size: 0.85em !important;
+}
+.pagination-item-title {
+  color: var(--brand-light) !important;
+}
+
+/* ═══════════════════════════════════════════
+   字数统计
+   ═══════════════════════════════════════════ */
+.count {
+  color: var(--text-muted) !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding-bottom: 4px !important;
+  margin-bottom: 8px !important;
+}
+
+/* ============================================================
+   固定工具栏（回到顶部 + 思维导图切换）
+   ============================================================ */
+
+.deer-toolbar {
+  position: fixed;
+  top: 16px;
+  right: 24px;
+  z-index: 9998;
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 6px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+.deer-tb-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  border-radius: 22px;
+  padding: 8px 14px;
+  font-size: 0.82em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  outline: none;
+}
+.deer-tb-btn:hover {
+  background: rgba(124, 92, 252, 0.1);
+  color: var(--brand);
+  border-color: rgba(124, 92, 252, 0.3);
+}
+.deer-tb-btn svg {
+  flex-shrink: 0;
+}
+.deer-tb-btn.active {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+  box-shadow: 0 0 12px rgba(124, 92, 252, 0.4);
+}
+.deer-tb-btn.active:hover {
+  background: var(--brand-light);
+}
+
+/* ============================================================
+   Mermaid 全屏遮罩
+   ============================================================ */
+
+.deer-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.97);
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.deer-fs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-bottom: 1px solid rgba(124, 92, 252, 0.15);
+  background: rgba(248, 249, 250, 0.9);
+  flex-shrink: 0;
+}
+
+.deer-fs-title {
+  color: var(--text-primary);
+  font-size: 0.95em;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.deer-fs-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.deer-fs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(124, 92, 252, 0.08);
+  color: var(--text-secondary);
+  border: 1px solid rgba(124, 92, 252, 0.15);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  white-space: nowrap;
+}
+.deer-fs-btn:hover {
+  background: rgba(124, 92, 252, 0.2);
+  color: var(--brand);
+  border-color: var(--brand);
+}
+
+.deer-fs-export {
+  background: rgba(124, 92, 252, 0.15);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.deer-fs-export:hover {
+  background: var(--brand);
+  color: #fff;
+}
+
+.deer-fs-close {
+  margin-left: 4px;
+  font-size: 1.1em;
+  padding: 5px 12px;
+}
+.deer-fs-close:hover {
+  background: rgba(220, 38, 38, 0.15);
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.4);
+}
+
+.deer-fs-sep {
+  width: 1px;
+  height: 20px;
+  background: rgba(124, 92, 252, 0.15);
+  margin: 0 4px;
+}
+
+.deer-fs-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 32px;
+}
+.deer-fs-body svg {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================================
+   Markmap 思维导图容器
+   ============================================================ */
+
+.deer-markmap-container {
+  display: none;
+  width: 100%;
+  height: calc(100vh - 60px);
+  min-height: 500px;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+.deer-markmap-container svg {
+  cursor: grab;
+}
+.deer-markmap-container svg:active {
+  cursor: grabbing;
+}
+
+.deer-markmap-loading,
+.deer-markmap-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 0.95em;
+}
+
+.deer-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: deer-spin 0.8s linear infinite;
+}
+
+@keyframes deer-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* markmap 节点样式适配 */
+.deer-markmap-container .markmap-node .markmap-foreign {
+  color: var(--text-primary);
+}
+.deer-markmap-container .markmap-link {
+  stroke: rgba(124, 92, 252, 0.2);
+}
+
+/* ============================================================
+   封面页
+   ============================================================ */
+.cover {
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, #f4f4f8 100%) !important;
+}
+.cover-main h1 {
+  font-size: 3.5em;
+  background: linear-gradient(135deg, var(--brand), var(--brand-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+.cover-main .cover-button {
+  background: var(--brand) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 12px 32px !important;
+  font-size: 1.1em !important;
+  transition: var(--transition);
+}
+.cover-main .cover-button:hover {
+  background: var(--brand-light) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(124, 92, 252, 0.4);
+}
+
+/* ═══════════════════════════════════════════
+   响应式适配
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 260px;
+  }
+  .markdown-section {
+    padding: 16px 24px;
+  }
+  .markdown-section h1 {
+    font-size: 1.6em;
+  }
+  .deer-toolbar {
+    top: 8px;
+    right: 8px;
+    gap: 4px;
+    padding: 4px;
+  }
+  .deer-tb-btn {
+    padding: 7px 12px;
+    font-size: 0.75em;
+    gap: 4px;
+  }
+  .deer-tb-btn span {
+    display: none;
+  }
+  .deer-fs-header {
+    padding: 8px 14px;
+  }
+  .deer-fs-actions {
+    gap: 3px;
+  }
+  .deer-fs-btn {
+    padding: 5px 8px;
+    font-size: 0.72em;
+  }
+  .deer-fs-body {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .markdown-section {
+    padding: 12px 16px;
+  }
+  .markdown-section table {
+    font-size: 0.85em;
+  }
+  .markdown-section table th,
+  .markdown-section table td {
+    padding: 8px 10px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   打印样式
+   ═══════════════════════════════════════════ */
+@media print {
+  .sidebar,
+  .navbar,
+  .deer-toolbar,
+  .deer-fullscreen-overlay {
+    display: none !important;
+  }
+  .content {
+    left: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   过渡动画
+   ═══════════════════════════════════════════ */
+.sidebar {
+  transition: transform 0.25s ease;
+}
+.content {
+  transition: left 0.25s ease;
+}
+.sidebar a,
+.markdown-section a,
+.markdown-section pre,
+.markdown-section img {
+  transition: var(--transition);
+}

@@ -1,0 +1,606 @@
+# world_index.yaml.example — 世界观文档动态索引模板
+# ============================================
+# 用途：为 subculture-novel-engine Skill 提供机器可读的世界观文档索引。
+#       AI 通过此文件发现、定位、按需加载世界观文档。
+#       四层架构：底层(Foundation) → 协议(Protocol) → 表示(Representation) → 会话(Session)
+#
+# 使用方式：
+#   1. 复制此文件到项目根目录，命名为 world_index.yaml
+#   2. 运行 python skill-novel-engine/scripts/init_world_index.py 自动填充
+#   3. 手动编辑需同步的用户自定义字段（description/load_on.conditions）
+#   4. 新增文档后重新运行初始化脚本做增量更新
+#
+# Schema 字段说明：
+#   _note: 元数据注释字段，不被脚本解析
+#   id: 唯一标识符（kebab-case），用于 dependencies 引用
+#   path: 文档路径（相对于项目根目录）
+#   title: 文档标题（从文件第一个 # 行提取）
+#   category: 分类标签（公理体系/能量转换/物理底层/境界体系/战斗系统/装备系统/资源经济/地理/势力/技能树/角色/叙事素材/经济/映射参考）
+#   description: 一句话描述文档内容
+#   sections: 跨层文档的章节→层级映射（可选）
+#   load_on: 加载触发规则
+#     agents: 哪些 Agent 需要加载此文档
+#     phases: 哪些门禁阶段需要加载（P0-P4）
+#     conditions: 叙事条件触发（自然语言描述，AI 语义匹配）
+#   dependencies: 前置依赖文档的 id 列表（加载本文档前需先加载依赖）
+#   auto_classified: 是否由脚本自动推断层级（true=待人工审核）
+#   deprecated_aliases: 废弃别名列表
+#   meta: 附加元数据
+#     split_from: 拆分来源文档路径
+#     deprecates: 废弃的源文档路径
+#     is_meta: 是否为元文档（索引/集成类）
+#
+# 层级分配规则（供 init_world_index.py 关键词推断使用）：
+#   foundation:  灵子/自旋/Klein-Gordon/灵压/灵导率/BEC/公理/常数/宇宙/星球
+#   protocol:    转换/耦合/退相干/阻抗/压制公式/伤害公式/消耗率/信仰之力
+#   representation: 分类/品阶/矩阵/列表/境界/资质/势力/地图/古籍/对照表
+#   session:     应用/场景/操作/修炼/战斗/炼丹/炼器/声望/角色/叙事/创新/讽刺
+# ============================================
+
+meta:
+  _note: "索引元数据"
+  generated_at: "2026-06-18T00:00:00"
+  total_documents: 28
+  index_version: "1.0"
+  content_root: "创作正文/世界观/"
+  skill_version: "2.0"
+
+layers:
+  # ═══════════════════════════════════════════
+  # 底层 (Foundation) — "为什么存在"
+  # 物理公理。不可更改。任何上层设定与此冲突时以此层为准。
+  # ═══════════════════════════════════════════
+  foundation:
+    - id: constitution
+      path: "创作正文/世界观/亚文化建设宪法.md"
+      title: "亚文化建设宪法"
+      category: "公理体系"
+      description: "7条不可变公理：双重物理轨道/灵压单向衰退/灵子=L场量子/版本降级/绝灵之体/小真协处理器/创新范式"
+      load_on:
+        agents: [world_architect, consistency_auditor, creative_director]
+        phases: [P0, P4]
+        conditions: []
+      dependencies: []
+      deprecated_aliases: []
+
+    - id: physics-foundation
+      path: "创作正文/世界观/修真物理学.md"
+      title: "修真物理学"
+      category: "物理底层"
+      description: "灵子(spin-0, m~10⁻³eV)/Klein-Gordon方程/灵场Maxwell方程/灵导率σ_L/灵动力学/精神力学/灵魂理论/时空论/道论"
+      sections:
+        - range: "§1-§2"
+          layer: "foundation"
+        - range: "§3-§6"
+          layer: "protocol"
+      load_on:
+        agents: [world_architect, scene_composer, consistency_auditor]
+        phases: [P0, P3, P4]
+        conditions:
+          - "涉及灵场物理计算"
+          - "涉及灵魂/神识/时空描写"
+      dependencies: [constitution]
+
+    - id: world-design
+      path: "创作正文/世界观/底层设计.md"
+      title: "底层设计"
+      category: "物理底层"
+      description: "宇宙时间线(大爆炸→稀灵纪元→绝灵时代)/玄黄星参数(1000×地球)/九大灵枢/双重物理轨道/天地夺灵大阵三缺陷/元会历纪年/绝灵之地双重纪年/11000年历史空洞"
+      sections:
+        - range: "§1-§2"
+          layer: "foundation"
+        - range: "§8"
+          layer: "representation"
+      load_on:
+        agents: [world_architect, plot_orchestrator, scene_composer]
+        phases: [P0, P1, P3]
+        conditions:
+          - "涉及时间线/历史事件"
+          - "涉及绝灵之地物理环境"
+          - "涉及天地夺灵大阵机制"
+      dependencies: [constitution, physics-foundation]
+
+    - id: energy-system
+      path: "创作正文/世界观/能源形态体系.md"
+      title: "能源形态体系"
+      category: "能量转换"
+      description: "灵子基态(气)/物质基态(精)/信息基态(神)/Klein-Gordon/BEC/相干度ξ/退相干速率γ/27种能量形态全矩阵/L↔EM耦合/生物灵场耦合/集体意识耦合/灵压梯度驱动"
+      sections:
+        - range: "§0-§1"
+          layer: "foundation"
+        - range: "§2"
+          layer: "protocol"
+        - range: "§3"
+          layer: "representation"
+        - range: "§4"
+          layer: "session"
+      load_on:
+        agents: [world_architect, scene_composer]
+        phases: [P0, P3]
+        conditions:
+          - "涉及能量转换/战斗消耗描写"
+          - "涉及境界突破/灵力运转描写"
+      dependencies: [constitution, physics-foundation]
+
+  # ═══════════════════════════════════════════
+  # 协议层 (Protocol) — "怎么转换"
+  # 能量/信息/物质之间的转换规则。定义了什么是"可能的"。
+  # ═══════════════════════════════════════════
+  protocol:
+    - id: cultivation-biology
+      path: "创作正文/世界观/修真生物学与境界学.md"
+      title: "修真生物学与境界学"
+      category: "境界体系"
+      description: "八境寿元阶梯(凡人→合道归真)/人生阶段模型(%已耗寿元)/B0-B6肉体等级/W0-W7意识层次/资质七维(根骨/灵慧/灵根/神识/炼器/炼丹/特殊)/灵根谐振频率分布"
+      sections:
+        - range: "§1-§3"
+          layer: "protocol"
+        - range: "§4"
+          layer: "representation"
+      load_on:
+        agents: [world_architect, plot_orchestrator, scene_composer]
+        phases: [P0, P1, P3]
+        conditions:
+          - "涉及境界突破/寿元计算"
+          - "涉及资质/灵根判定"
+          - "涉及角色能力量化"
+      dependencies: [constitution, physics-foundation, energy-system]
+
+    - id: combat-quantification
+      path: "创作正文/世界观/战斗与突破量化.md"
+      title: "战斗与突破量化"
+      category: "战斗系统"
+      description: "战力指数公式/境界压制系数S(N)/伤害公式ATK×G_eff×S×(1+Crit)−DEF/战斗消耗率/陆之一绝灵近身机制/AI盲区/天劫量化/PVP-PVE"
+      sections:
+        - range: "§2-§4"
+          layer: "protocol"
+        - range: "§1,§5-§7"
+          layer: "session"
+      load_on:
+        agents: [scene_composer, plot_orchestrator, consistency_auditor]
+        phases: [P2, P3, P4]
+        conditions:
+          - "涉及战斗场景"
+          - "涉及越阶对抗"
+          - "涉及陆之一战斗策略"
+      dependencies: [cultivation-biology, energy-system]
+
+    - id: ling-energy-engineering
+      path: "创作正文/世界观/灵能化工程原理.md"
+      title: "灵能化工程原理"
+      category: "能量转换"
+      description: "经典物理能效天花板/L场耦合能效跃迁(10²-10³倍)/灵能化三要素(工艺精度/符箓优化/灵纹拓扑)/各功能域跃迁系数/迭代工艺逼近理论上限"
+      load_on:
+        agents: [world_architect, scene_composer]
+        phases: [P0, P3]
+        conditions:
+          - "涉及陆之一装备升级"
+          - "涉及灵能化元件性能对比"
+      dependencies: [physics-foundation, energy-system]
+
+    - id: hundred-arts-protocol
+      path: "创作正文/世界观/百艺系统.md"
+      title: "百艺系统"
+      category: "能量转换"
+      description: "炼丹(L场同位素提纯+灵子BEC封装)/炼器(灵场谐振腔+灵纹波导调制器)/阵法(分布式灵场路由协议)/符箓(灵场调制指令集)的L场物理本质"
+      sections:
+        - range: "§一-§四 物理本质"
+          layer: "protocol"
+        - range: "§品阶/分类"
+          layer: "representation"
+      load_on:
+        agents: [scene_composer, world_architect]
+        phases: [P0, P3]
+        conditions:
+          - "涉及炼丹/炼器/阵法/符箓的底层原理"
+          - "涉及传统技艺与陆之一创新的对比"
+      dependencies: [physics-foundation, energy-system]
+
+    - id: ancient-texts-protocol
+      path: "创作正文/世界观/古籍引用池.md"
+      title: "古籍引用池"
+      category: "映射参考"
+      description: "27部真实古籍，6类(内丹核心/道家根本/外丹符箓/术数/中医经络/哲学)/功法原理的古典出处/小说中用途映射"
+      sections:
+        - range: "§一-§二 内丹/道家"
+          layer: "protocol"
+        - range: "§三-§六 外丹/术数/经络/哲学"
+          layer: "representation"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及古籍引用/功法经典原文"
+          - "涉及角色对白中的修真术语典故"
+      dependencies: [cultivation-biology]
+
+  # ═══════════════════════════════════════════
+  # 表示层 (Representation) — "是什么"
+  # 具体形态、分类、参数。创作时查询"某物是什么"的层。
+  # ═══════════════════════════════════════════
+  representation:
+    - id: equipment-quantification
+      path: "创作正文/世界观/装备法器量化.md"
+      title: "装备法器量化"
+      category: "装备系统"
+      description: "法器物理原理(攻击力=η×σ_L×P_in)/12种材料σ_L/凡器→道器品阶参数/攻击-防御-耐久-消耗-境界限制/类型细分(攻击/防御/辅助/储物/特殊)"
+      sections:
+        - range: "§1-§3"
+          layer: "representation"
+        - range: "§4-§5"
+          layer: "session"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及法器/装备描写"
+          - "涉及材料选择/炼制过程"
+      dependencies: [physics-foundation, energy-system]
+
+    - id: pill-resource-quantification
+      path: "创作正文/世界观/丹药与资源量化.md"
+      title: "丹药与资源量化"
+      category: "资源经济"
+      description: "丹药物相(凡丹=多晶→天丹=全BEC)/品阶参数(成功率/神识门槛/适用境界)/类型细分(修炼/突破/疗伤/延寿/神识/特殊)/灵材1-5星分级/丹方版本降级/资源消耗Fibonacci模型"
+      sections:
+        - range: "§0-§4"
+          layer: "representation"
+        - range: "§5-§6"
+          layer: "session"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及丹药/灵材描写"
+          - "涉及资源获取/消耗计算"
+      dependencies: [physics-foundation, cultivation-biology]
+
+    - id: spirit-stone-economy
+      path: "创作正文/世界观/灵石经济与估价模型.md"
+      title: "灵石经济与估价模型"
+      category: "资源经济"
+      description: "灵石(天然灵子BEC晶格封装)/五品阶(下品→灵髓)/灵荷密度/兑换比/不可再生性/灵压衰退→灵石贬值曲线/装备估价公式/资源稀缺度矩阵"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及灵石交易/经济描写"
+          - "涉及装备估价/拍卖场景"
+      dependencies: [pill-resource-quantification, energy-system]
+
+    - id: map-positioning
+      path: "创作正文/世界观/地图定位.md"
+      title: "地图定位"
+      category: "地理"
+      description: "双层地图：绝灵之地(辛国/启明城/六国)→玄黄九洲(东胜/南赡/西牛/北俱/中天/苍梧/炎荒/云梦/幽冥)/各洲资源分布/传送阵路线/距离-时间换算"
+      load_on:
+        agents: [plot_orchestrator, scene_composer]
+        phases: [P1, P2, P3]
+        conditions:
+          - "涉及地理移动/跨洲旅行"
+          - "涉及区域资源分布"
+      dependencies: [world-design]
+
+    - id: faction-map
+      path: "创作正文/世界观/势力版图.md"
+      title: "势力版图"
+      category: "势力"
+      description: "7层势力(万象宗→五大正道→魔道/邪修→妖族→散修→凡人王朝→绝灵之地)+上古文明体系/5级对手梯度/灵压衰退驱动势力洗牌"
+      load_on:
+        agents: [world_architect, plot_orchestrator, scene_composer]
+        phases: [P0, P1, P3]
+        conditions:
+          - "涉及势力互动/宗门政治"
+          - "涉及新势力引入"
+      dependencies: [world-design, map-positioning]
+
+    - id: faction-super-sects
+      path: "创作正文/世界观/势力成员表_超级宗门.md"
+      title: "势力成员表·超级宗门"
+      category: "势力"
+      description: "九天剑阁/万象宗等超级宗门详细成员表(核心层姓名/职位/修为/性格/驱动力/对主角态度/大停电后命运)"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及超级宗门角色出场"
+          - "涉及宗门内部权力结构"
+      dependencies: [faction-map]
+
+    - id: faction-righteous-demonic
+      path: "创作正文/世界观/势力成员表_正道魔道.md"
+      title: "势力成员表·正道魔道"
+      category: "势力"
+      description: "丹鼎宗/血煞宗等正道魔道中级宗门成员表(核心层+社会讽刺映射+与主角关系路径)"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及正道/魔道宗门角色出场"
+      dependencies: [faction-map]
+
+    - id: faction-yao-clans
+      path: "创作正文/世界观/势力成员表_妖族家族商会.md"
+      title: "势力成员表·妖族家族商会"
+      category: "势力"
+      description: "万妖洲权力结构(妖帝/妖相/将军)/妖族内部纯血歧视链/四海商会网络/家族势力/社会讽刺映射(种族被物化为资源)"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及妖族/商会角色出场"
+          - "涉及种族/阶级主题"
+      dependencies: [faction-map]
+
+    - id: cyber-cultivation-mapping
+      path: "创作正文/世界观/赛博修真映射参考.md"
+      title: "赛博修真映射参考"
+      category: "映射参考"
+      description: "赛博科技↔修真全维度对照表(机动性/精神力/知识管理)/修真界不具备的赛博优势(可视化/大数据/工程方法论/算法优化/标准化生产)/具体映射列表"
+      load_on:
+        agents: [scene_composer, world_architect]
+        phases: [P0, P3]
+        conditions:
+          - "涉及陆之一用赛博手段解决修真问题"
+          - "涉及对比描写(传统vs创新)"
+      dependencies: [energy-system]
+
+    - id: character-schema
+      path: "创作正文/世界观/角色标准化Schema.md"
+      title: "角色标准化Schema"
+      category: "角色"
+      description: "本书独有角色字段(物理视角/灵压脆弱度/版本降级感知/灵导率特征)/12个独有标签(绝灵之体/信息污染源/清洗目标等)/角色关系量化(-100→+100)/检核表"
+      sections:
+        - range: "§1-§3"
+          layer: "representation"
+        - range: "§5"
+          layer: "session"
+      load_on:
+        agents: [plot_orchestrator, scene_composer, consistency_auditor]
+        phases: [P1, P3, P4]
+        conditions:
+          - "涉及新角色创建"
+          - "涉及角色行为一致性审查"
+      dependencies: [cultivation-biology]
+
+    - id: traditional-cultivation-system
+      path: "创作正文/世界观/玄黄界修真体系.md"
+      title: "玄黄界修真体系"
+      category: "技能树"
+      description: "传统修真体系：功法四要素(经脉路径/灵气转速/穴位驻留/火候时序)/符箓体系(6类21种基础符文+复合符箓)/阵法体系(8类阵法)/炼丹五步/炼器四层/万象宗功法篡改机制/主角功法替代路径"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及传统功法/符箓/阵法描写"
+          - "涉及万象宗功法篡改揭示"
+          - "涉及主角与修真者能力对比"
+      dependencies: [cultivation-biology, energy-system]
+      meta:
+        split_from: "创作正文/世界观/技能树架构.md"
+
+    - id: cyber-cultivation-tech-tree
+      path: "创作正文/世界观/赛博修真科技树.md"
+      title: "赛博修真科技树"
+      category: "技能树"
+      description: "陆之一五层创新架构：底层理论→基础元件(灵能电池/灵场传感器/激光微雕)→集成系统(石眼网络/灵纹核心/灵压可视化)→战术应用(消音屏障/潜蛟套件/时空裂隙)→战略系统(大阵破解/灵网)"
+      sections:
+        - range: "§零-§二"
+          layer: "representation"
+        - range: "§三-§五"
+          layer: "session"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及陆之一使用自制装备"
+          - "涉及科技树节点解锁剧情"
+          - "涉及小真协处理器功能展示"
+      dependencies: [energy-system, ling-energy-engineering, equipment-quantification]
+      meta:
+        split_from: "创作正文/世界观/技能树架构.md"
+
+    - id: skill-tree-legacy
+      path: "创作正文/世界观/技能树架构.md"
+      title: "技能树架构"
+      category: "技能树"
+      description: "【已废弃】原始技能树文件。上篇→玄黄界修真体系.md，下篇→赛博修真科技树.md。本文档仅作历史索引。"
+      load_on:
+        agents: []
+        phases: []
+        conditions: []
+      dependencies: []
+      deprecated_aliases: []
+      meta:
+        deprecates: "创作正文/世界观/技能树架构.md"
+        superseded_by: [traditional-cultivation-system, cyber-cultivation-tech-tree]
+
+  # ═══════════════════════════════════════════
+  # 会话层 (Session) — "怎么用"
+  # 叙事应用。角色行为、技能释放、社会互动。创作时查询"这件事怎么做"的层。
+  # ═══════════════════════════════════════════
+  session:
+    - id: faction-reputation
+      path: "创作正文/世界观/宗门声望体系.md"
+      title: "宗门声望体系"
+      category: "势力"
+      description: "双域声望(绝灵之地:学术+灰色+官方 vs 玄黄界:修为+贡献+势力)/声望提升方式/万象宗监控机制(声望=监控伪装)/贡献度消耗=暴露需求"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及角色在宗门/势力中的声望变化"
+          - "涉及万象宗监控机制"
+      dependencies: [faction-map, character-schema]
+
+    - id: character-design-principles
+      path: "创作正文/世界观/角色塑造原则.md"
+      title: "角色塑造原则"
+      category: "角色"
+      description: "层次光谱(表层→中层→深层→核心)/六阶段身份转变(怀疑者→编译者→逃亡者→伪装者→手艺人→逃亡领袖→理念播种者)/角色禁止事项表/弧线检查规则(Δ≤1级必须有触发事件)"
+      load_on:
+        agents: [plot_orchestrator, scene_composer, creative_director]
+        phases: [P1, P3]
+        conditions:
+          - "涉及角色弧线设计"
+          - "涉及新角色创建/现有角色发展方向调整"
+      dependencies: [character-schema]
+
+    - id: social-satire-scenes
+      path: "创作正文/世界观/社会讽刺场景库.md"
+      title: "社会讽刺场景库"
+      category: "叙事素材"
+      description: "现实社会黑暗面→修真界场景映射：灵脉庞氏骗局/散修炼丹血汗工厂/妖兽角斗场/灵根检测=科举+种姓制/灵石矿工灵毒症/功法版本降级=计划淘汰等"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及社会讽刺/修真界黑暗面描写"
+          - "涉及万象宗体系弊病揭示"
+      dependencies: [faction-map, social-class-matrix]
+
+    - id: social-class-matrix
+      path: "创作正文/世界观/社会阶层穿越矩阵.md"
+      title: "社会阶层穿越矩阵"
+      category: "叙事素材"
+      description: "6个缺失阶层(玄黄界凡人/修真底层劳工/修真中产/修真精英/修真统治层/跨界者)/每阶层含进入方式+社会讽刺映射+代表角色建议+对主角认知影响"
+      load_on:
+        agents: [scene_composer, plot_orchestrator]
+        phases: [P2, P3]
+        conditions:
+          - "涉及新阶层角色引入"
+          - "涉及社会结构/阶级矛盾描写"
+      dependencies: [faction-map, social-satire-scenes]
+
+  # ═══════════════════════════════════════════
+  # 元文档 (Meta) — 索引/集成类，不直接参与叙事
+  # ═══════════════════════════════════════════
+  meta_documents:
+    - id: four-layer-index
+      path: "创作正文/世界观/亚文化四层索引.md"
+      title: "亚文化四层索引"
+      category: "元文档"
+      description: "四层架构导航中枢。人类可读的四层文档映射视图。由 world_index.yaml 驱动更新。"
+      meta:
+        is_meta: true
+
+    - id: subculture-overview
+      path: "创作正文/世界观/亚文化定义全貌.md"
+      title: "亚文化定义全貌"
+      category: "元文档"
+      description: "集成百科。按四层组织20+份文档的完整摘要。与四层索引互补(索引=导航地图，本文档=集成百科)。"
+      meta:
+        is_meta: true
+
+# ═══════════════════════════════════════════
+# 跨层查询模板
+# 从亚文化四层索引提取的典型纵向追溯路径。
+# AI 遇到类似问题时，沿 chain 列表逐层查询。
+# ═══════════════════════════════════════════
+cross_layer_queries:
+  - name: "飞剑为什么越来越慢"
+    description: "从飞剑速度公式追溯到底层灵压衰退"
+    chain:
+      - "session.equipment-quantification"
+      - "representation.equipment-quantification"
+      - "protocol.energy-system"
+      - "foundation.physics-foundation"
+
+  - name: "严峰为什么在绝灵之地修为倒退"
+    description: "从角色行为追溯到底层负灵压区"
+    chain:
+      - "session.faction-reputation"
+      - "representation.cultivation-biology"
+      - "protocol.energy-system"
+      - "foundation.world-design"
+
+  - name: "真气vs灵力vs灵气的区别"
+    description: "同层横向对比——三者都是灵子流但相干度不同"
+    chain:
+      - "session.energy-system"
+      - "representation.energy-system"
+      - "protocol.energy-system"
+      - "foundation.energy-system"
+
+  - name: "万象宗功法篡改的物理机制"
+    description: "从叙事问题追溯到底层物理和版本降级公理"
+    chain:
+      - "session.traditional-cultivation-system"
+      - "representation.traditional-cultivation-system"
+      - "protocol.cultivation-biology"
+      - "foundation.constitution"
+
+  - name: "陆之一灵能电池的完整创新链"
+    description: "从战术装置追溯到底层理论和工程原理"
+    chain:
+      - "session.cyber-cultivation-tech-tree"
+      - "representation.cyber-cultivation-tech-tree"
+      - "protocol.ling-energy-engineering"
+      - "foundation.energy-system"
+
+  - name: "丹药为什么越来越难炼"
+    description: "从丹药品阶追溯到底层灵植灭绝和灵压衰退"
+    chain:
+      - "session.pill-resource-quantification"
+      - "representation.pill-resource-quantification"
+      - "protocol.hundred-arts-protocol"
+      - "foundation.world-design"
+
+# ═══════════════════════════════════════════════════════════════
+# 导出到 PlotPilot 亚文化包
+# ==============================================================
+# 使用 export_subculture_package.py 将此索引 + 文档导出为
+# PlotPilot 可消费的 .zip 亚文化包。
+#
+# PlotPilot 是独立的开源小说写作工具，支持上传自定义世界观包。
+# 我们作为内容生产者，对接其 "亚文化包格式" (manifest.yaml)。
+#
+# 导出命令:
+#   python skill-novel-engine/scripts/export_subculture_package.py \
+#     --name "万古余烬" \
+#     --version "1.0" \
+#     --author "作者名" \
+#     --description "硬核赛博修仙世界观" \
+#     --compatible-genres xianxia,xuanhuan \
+#     --output ./万古余烬_v1.0.zip
+#
+# ═══════════════════════════════════════════════════════════════
+# Category 映射表 (world_index → PlotPilot manifest)
+# ─────────────────────────────────────────────────
+#   skill-novel-engine        →  PlotPilot manifest key
+#   公理体系                    →  meta
+#   物理底层                    →  physics
+#   能量转换                    →  physics
+#   境界体系                    →  physics
+#   战斗系统                    →  technique
+#   装备系统                    →  technique
+#   资源经济                    →  economy
+#   地理                        →  geography
+#   势力                        →  faction
+#   技能树                      →  technique
+#   角色                        →  character
+#   叙事素材                    →  culture
+#   映射参考                    →  meta
+#   元文档 (is_meta: true)      →  不导出
+#
+# ═══════════════════════════════════════════════════════════════
+# load_triggers 设计指南
+# ─────────────────────
+# load_on.conditions 会被转换为 PlotPilot 的 load_triggers:
+#   "涉及战斗场景"           →  触发词: "战斗"
+#   "涉及境界突破/寿元计算"  →  触发词: "境界突破","寿元"
+#   "涉及丹药/灵材描写"      →  触发词: "丹药","灵材"
+#
+# 规则:
+#   - 公理体系、映射参考类的文档 → load_triggers: ["*"] (始终注入)
+#   - 其他文档 → 从 conditions 提取关键词
+#   - 已废弃文档 (meta.deprecates) → 不导出
+#   - 元文档 (meta.is_meta) → 不导出
+#
+# ═══════════════════════════════════════════════════════════════
+# 版本兼容性
+# ──────────
+# PlotPilot 亚文化包格式版本: 1.0
+# 数据契约: PlotPilot manifest.yaml Specification
+# 兼容范围: PlotPilot >= 当前版本
+# 升级策略: world_index.yaml Schema 变更时，export 脚本同步更新映射逻辑

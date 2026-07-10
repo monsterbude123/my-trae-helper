@@ -1,0 +1,102 @@
+# OpenAPI 文档分模块导出 - 前缀映射配置
+#
+# 字段说明：
+#   prefix: 路由前缀（最长匹配优先）
+#   module: 输出文件名（不含 .md 后缀，会自动加序号前缀）
+#   title:  章节标题
+#   order:  章节顺序（数字越小越靠前）
+#
+# 匹配规则：
+#   - 最长前缀匹配：/api/packages 优先于 /api
+#   - 大小写不敏感
+#   - 未匹配的 path 自动归到 99-unclassified.md
+#
+# 详细说明见 references/prefix-mapping.md
+
+# ── ShuXia 项目实际前缀（基于 docs/design/openapi.json 统计） ──
+# /api/health: 1 path
+# /api/packages: 20 paths
+# /api/settings: 7 paths
+# /api/stats: 1 path
+# /api/v1/settings: 8 paths
+# /api/v1/subculture: 5 paths
+# /api/v1/subculture-library: 3 paths
+# /api/v1/writing: 69 paths
+# /api/writing: 69 paths
+
+- prefix: /api/health
+  module: 01-health
+  title: 健康检查
+  order: 1
+
+- prefix: /api/stats
+  module: 02-stats
+  title: 统计 API
+  order: 2
+
+- prefix: /api/packages
+  module: 03-packages
+  title: 包管理 API
+  order: 3
+
+- prefix: /api/v1/subculture-library
+  module: 04-subculture-library-v1
+  title: 亚文化库 API v1
+  order: 4
+
+- prefix: /api/v1/subculture
+  module: 05-subculture-v1
+  title: 亚文化 API v1
+  order: 5
+
+- prefix: /api/v1/writing
+  module: 06-writing-v1
+  title: 写作引擎 API v1
+  order: 6
+
+- prefix: /api/writing
+  module: 07-writing
+  title: 写作引擎 API
+  order: 7
+
+- prefix: /api/v1/settings
+  module: 08-settings-v1
+  title: 设置 API v1
+  order: 8
+
+- prefix: /api/settings
+  module: 09-settings
+  title: 设置 API
+  order: 9
+
+# 兜底：匹配所有未归类的 /api/* 路径
+- prefix: /api
+  module: 99-misc
+  title: 其他 API
+  order: 99
+
+# ── 通用模板（其他项目可参考） ──
+# - prefix: /api/v1/users
+#   module: 01-users
+#   title: 用户管理 API
+#   order: 1
+#
+# - prefix: /api/v1/orders
+#   module: 02-orders
+#   title: 订单管理 API
+#   order: 2
+#
+# - prefix: /api/v1/products
+#   module: 03-products
+#   title: 商品管理 API
+#   order: 3
+#
+# - prefix: /api/v1
+#   module: 99-misc-v1
+#   title: 其他 v1 API
+#   order: 99
+#
+# - prefix: /api
+#   module: 99-misc
+#   title: 其他 API
+#   order: 99

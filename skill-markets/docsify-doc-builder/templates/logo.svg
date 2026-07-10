@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- 书本图标 — 通用文档 Logo -->
+  <rect x="20" y="15" width="60" height="70" rx="4" fill="#42b983" opacity="0.9"/>
+  <rect x="25" y="20" width="22" height="60" rx="2" fill="#fff" opacity="0.95"/>
+  <rect x="52" y="20" width="22" height="60" rx="2" fill="#fff" opacity="0.7"/>
+  <line x1="25" y1="30" x2="47" y2="30" stroke="#ddd" stroke-width="1.5"/>
+  <line x1="25" y1="38" x2="47" y2="38" stroke="#ddd" stroke-width="1.5"/>
+  <line x1="25" y1="46" x2="47" y2="46" stroke="#ddd" stroke-width="1.5"/>
+  <line x1="25" y1="54" x2="40" y2="54" stroke="#ddd" stroke-width="1.5"/>
+  <text x="50" y="95" text-anchor="middle" font-size="12" fill="#666" font-family="sans-serif">DOCS</text>
+</svg>

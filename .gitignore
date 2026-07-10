@@ -1,0 +1,48 @@
+# --- Trae IDE ---
+/.trae/
+.reasonix/
+
+# --- 文档 ---
+# docs/
+docs/references/
+docs/otherAgent/
+# --- 环境变量与密钥 ---
+.env
+.env.local
+.env.*.local
+
+# --- Python 编译 / 包 / 虚拟环境 ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- 测试输出产物 ---
+skill-markets/Voice-Acting-Script-Skill/output_bench/
+skill-markets/Voice-Acting-Script-Skill/output_test/
+
+# --- ComfyUI 示例的生成产物 ---
+example/comfyui-test/logs/
+example/comfyui-test/out/
+example/comfyui-test/matrix/
+example/comfyui-test/api-json/*.png
+
+# --- Node ---
+node_modules/
+
+# --- 日志 ---
+*.log
+
+# --- doc-map-manager ---
+.docmap/
+.docmap-zvec/
+
+# --- 操作系统文件 ---
+Thumbs.db
+Desktop.ini
+.DS_Store

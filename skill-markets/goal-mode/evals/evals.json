@@ -1,0 +1,41 @@
+{
+  "skill_name": "goal-mode",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "在项目根目录创建一个 tools/helper.py 文件，里面写一个 add(a, b) 函数返回两数之和。完成后不要声称完成，按 goal-mode 协议审计。",
+      "expected_output": "Agent 不直接声称完成。委托 goal-auditor 执行六步门禁审计（DERIVE→PRESERVE→IDENTIFY→INSPECT→JUDGE→PROVE），auditor 逐项验证文件存在、函数正确性后，出具审计结论。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我被要求完成三个任务：1) 读 README.md 确认项目名称 2) 检查 package.json 中的依赖列表 3) 统计 src/ 下 .ts 文件数量。任务完成后不要说自己完成了，严格走审计。",
+      "expected_output": "Agent 将为三个子任务分别委托审计。每个子任务完成后 auditor 运行验证命令（读文件/统计文件数），全部 ✅ 后才报告目标完成。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "请你创建一个 demo/ 目录并在里面写一个 index.html，然后告诉我完成没。注意：不要用'搞定'、'完成'、'done'这些词，除非经过了审计。",
+      "expected_output": "Agent 在文件创建后触发审计流程。不直接回复'完成'，而是先委托 auditor 检查文件存在性、读内容验证，auditor 通过后才给出完成报告。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "帮我改一下 src/config.ts 里的 API_BASE_URL 从 localhost 改成 production-api.example.com，记得验证改完没有。",
+      "expected_output": "Agent 修改文件后，不凭记忆声称已改。委托 auditor 用 git diff 或 SearchReplace 回读确认变更行确实包含了 production-api.example.com，auditor 判定 ✅ 后才算完成。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "我要严格验收：帮我确保项目里的 tests/ 目录下所有测试文件都能通过。如果有失败的，修好它们。不准说'应该没问题'、'看起来对了'这种话。",
+      "expected_output": "Agent 进入严格模式。运行测试获取完整输出，逐项核对 pass/fail 计数。如有失败修复后重新运行完整测试套件。最终由 auditor 新鲜运行验证全部通过后才报告完成。",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "在项目里写一个 Rust 库，功能是解析 CSV 文件。完成后告诉我。但我要求你不能在没有验证的情况下说完成。",
+      "expected_output": "Agent 不直接说'完成'。会自行分解目标为子需求（Cargo.toml 存在、lib.rs 有代码、cargo build 通过、功能测试通过），逐项经 auditor 审计后才报告完成。",
+      "files": []
+    }
+  ]
+}

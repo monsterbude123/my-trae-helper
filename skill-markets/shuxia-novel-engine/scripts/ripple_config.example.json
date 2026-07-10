@@ -1,0 +1,28 @@
+{
+  "_schema": "ripple.py 结构化配置 · 复制为 ripple_config.json 后修改生效",
+  "_note": "所有字段均可覆盖。删除字段则回退到内置默认值。",
+
+  "max_hops": 4,
+
+  "severity_map": {
+    "principle": "BLOCKER",
+    "character": "CRITICAL",
+    "worldbuilding": "HIGH",
+    "faction": "HIGH",
+    "plot": "MEDIUM",
+    "chapter": "MEDIUM",
+    "default": "LOW"
+  },
+
+  "skeleton_patterns": [
+    "全卷骨架_*.md",
+    "伏笔追踪.md",
+    "全卷骨架*.md"
+  ],
+
+  "character_dir": "创作正文/人物",
+  "chapter_dir": "创作正文/章节规划/卷一",
+
+  "medium_display_limit": 10,
+  "high_related_threshold": 3
+}

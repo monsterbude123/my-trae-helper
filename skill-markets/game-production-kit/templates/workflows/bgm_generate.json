@@ -1,0 +1,268 @@
+{
+  "workflow": {
+    "19": {
+      "class_type": "SaveAudioMP3",
+      "inputs": {
+        "filename_prefix": "BGM_Test2",
+        "quality": "V0",
+        "audio": [
+          "58",
+          0
+        ]
+      }
+    },
+    "57": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": "",
+        "clip": [
+          "76",
+          0
+        ]
+      }
+    },
+    "58": {
+      "class_type": "VAEDecodeAudio",
+      "inputs": {
+        "samples": [
+          "60",
+          0
+        ],
+        "vae": [
+          "75",
+          2
+        ]
+      }
+    },
+    "59": {
+      "class_type": "EmptyLatentAudio",
+      "inputs": {
+        "seconds": [
+          "74",
+          0
+        ],
+        "batch_size": 1
+      }
+    },
+    "60": {
+      "class_type": "KSampler",
+      "inputs": {
+        "seed": 42,
+        "steps": 8,
+        "cfg": 1,
+        "sampler_name": "lcm",
+        "scheduler": "simple",
+        "denoise": 1,
+        "model": [
+          "75",
+          0
+        ],
+        "positive": [
+          "62",
+          0
+        ],
+        "negative": [
+          "57",
+          0
+        ],
+        "latent_image": [
+          "59",
+          0
+        ]
+      }
+    },
+    "61": {
+      "class_type": "CLIPLoader",
+      "inputs": {
+        "clip_name": "qwen3.5_2b_bf16.safetensors",
+        "type": "stable_diffusion",
+        "device": "default"
+      }
+    },
+    "62": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": [
+          "63",
+          0
+        ],
+        "clip": [
+          "76",
+          0
+        ]
+      }
+    },
+    "63": {
+      "class_type": "ComfySwitchNode",
+      "inputs": {
+        "switch": [
+          "73",
+          0
+        ],
+        "on_false": [
+          "68",
+          0
+        ],
+        "on_true": [
+          "67",
+          0
+        ]
+      }
+    },
+    "64": {
+      "class_type": "ComfyMathExpression",
+      "inputs": {
+        "expression": "a",
+        "values.a": [
+          "74",
+          0
+        ]
+      }
+    },
+    "65": {
+      "class_type": "PreviewAny",
+      "inputs": {
+        "source": [
+          "64",
+          1
+        ]
+      }
+    },
+    "66": {
+      "class_type": "StringReplace",
+      "inputs": {
+        "string": [
+          "72",
+          0
+        ],
+        "find": "USER_INPUT",
+        "replace": [
+          "68",
+          0
+        ]
+      }
+    },
+    "67": {
+      "class_type": "TextGenerate",
+      "inputs": {
+        "prompt": [
+          "71",
+          0
+        ],
+        "max_length": 256,
+        "sampling_mode": "on",
+        "sampling_mode.temperature": 0.7,
+        "sampling_mode.top_k": 64,
+        "sampling_mode.top_p": 0.95,
+        "sampling_mode.min_p": 0.05,
+        "sampling_mode.repetition_penalty": 1.05,
+        "sampling_mode.seed": 0,
+        "sampling_mode.presence_penalty": 0,
+        "thinking": false,
+        "use_default_template": true,
+        "clip": [
+          "61",
+          0
+        ]
+      }
+    },
+    "68": {
+      "class_type": "PrimitiveStringMultiline",
+      "inputs": {
+        "value": "gunshot echo in the distance"
+      }
+    },
+    "69": {
+      "class_type": "CustomCombo",
+      "inputs": {
+        "choice": "SFX",
+        "index": 2,
+        "option1": "Music",
+        "option2": "Instrument",
+        "option3": "SFX",
+        "option4": "One-shot",
+        "option5": ""
+      }
+    },
+    "70": {
+      "class_type": "JsonExtractString",
+      "inputs": {
+        "json_string": "{\n  \"Music\": \"You are an expert musician and musicologist and prompt engineer. Transform the user's input into a detailed, vivid music prompt for a full instrumental track.\\n\\n1. Start with the genre or style and optional adjectives (e.g., upbeat, dreamy, aggressive).\\n2. List the main instruments that define the track.\\n3. Add supporting elements or layers such as pads, harmonics, effects, or field recordings.\\n4. Include rhythm or percussion elements like drums, hi-hats, congas, brushes, or polyrhythms.\\n5. Integrate mood and energy naturally in the sentence (e.g., \\\"creating suspenseful tension\\\" or \\\"bright and uplifting\\\").\\n6. Specify the BPM.\\n7. Specify the track length as an integer in seconds. Use ranges: energetic/dance 120-180s, pop/rock 180-210s, cinematic/ambient 240-300s.\\n8. Combine all elements into one natural, fluid sentence. Avoid semicolons.\\n\\nTemplate:\\nGenre/Style with main instruments, supporting instruments/layers, and rhythm/percussion creating mood/energy. BPM: X. Length: Y seconds\\n\\nExamples:\\n- Jazz ballad with smooth saxophone lead, piano chords, upright bass, brushed drums, and soft strings that swing gently for a warm and cozy evening. BPM: 85. Length: 180 seconds\\n- EDM festival track with pulsing synth leads, plucked arpeggios, layered pads, side-chained bass, punchy kick and snare, and hi-hat rolls creating bright, energetic, and uplifting dance energy. BPM: 128. Length: 150 seconds\\n- Lo-fi hip-hop chill track with mellow electric piano, soft vinyl crackle, subtle synth pads, low-pass filtered drums, percussion loops, and soft plucked bass for a relaxed, dreamy vibe. BPM: 75. Length: 150 seconds\\n- Heavy metal anthem with distorted electric guitars, bass guitar, double bass drums, and cymbal crashes with fast palm-muted riffs creating intense, aggressive energy. BPM: 160. Length: 180 seconds\\n- Melancholic piano piece with soft piano lead, string pads, subtle atmospheric synths, and light percussion creating a sad, reflective mood. BPM: 60. Length: 240 seconds\",\n  \"Instrument\": \"You are an expert musicologist and instrument designer. Transform the user's input into a detailed, vivid prompt describing an instrumental track focusing on a specific instrument.\\n\\n1. Start with the instrument and its role (lead, solo, accompaniment).\\n2. Describe the tonal quality, playing style, and articulation (e.g., staccato, legato, mellow, bright).\\n3. Add supporting instruments, pads, or harmonics if applicable.\\n4. Include rhythm or percussion elements that complement the main instrument.\\n5. Integrate mood and energy naturally to enhance the instrumental.\\n6. Specify the BPM appropriate for the style.\\n7. Specify the track length as an integer in seconds. Use 120-240s range.\\n8. Combine all elements into one natural, fluid sentence. Avoid semicolons.\\n\\nTemplate:\\nInstrument description with tonal quality, playing style, supporting elements, and rhythm creating mood/energy. BPM: X. Length: Y seconds\",\n  \"SFX\": \"You are an expert sound designer specializing in cinematic and game audio. Transform the user's input into a detailed, vivid sound effects prompt.\\n\\n1. Identify the primary sound source or action.\\n2. Describe the acoustic properties (reverb, echo, dry, wet, close, distant).\\n3. Add layers: impact, tail, texture, ambience, or transitional elements.\\n4. Specify spatial characteristics (stereo width, panning, movement).\\n5. Integrate mood, intensity, and energy naturally.\\n6. Specify duration in seconds. SFX are typically 3-15s.\\n7. Combine all elements into one natural, fluid sentence. Avoid semicolons.\\n\\nTemplate:\\nSound description with acoustic properties, layers, and spatial characteristics creating mood/energy. Length: Y seconds\",\n  \"One-shot\": \"You are an expert sound designer specializing in sample packs and foley. Transform the user's input into a detailed, vivid one-shot sample prompt.\\n\\n1. Identify the exact sound source or action.\\n2. Describe the attack, decay, and transient characteristics.\\n3. Add subtle layers: texture, harmonics, noise floor, or tonal color.\\n4. Specify room or environment quality.\\n5. Integrate mood, intensity, and energy as one natural sentence.\\n6. Specify duration in seconds. One-shots are typically 1-8s.\\n7. Combine all elements into one natural, fluid sentence. Avoid semicolons.\\n\\nTemplate:\\nSound description with attack/decay, layers, and environment quality creating mood/energy. Length: Y seconds\"\n}",
+        "key": [
+          "69",
+          0
+        ]
+      }
+    },
+    "71": {
+      "class_type": "StringReplace",
+      "inputs": {
+        "string": [
+          "66",
+          0
+        ],
+        "find": "AUDIO_LENGTH",
+        "replace": [
+          "65",
+          0
+        ]
+      }
+    },
+    "72": {
+      "class_type": "StringReplace",
+      "inputs": {
+        "string": "SYSTEM_PROMPTS\n\nInput: USER_INPUT\nTarget audio length: AUDIO_LENGTH seconds.\nOutput:",
+        "find": "SYSTEM_PROMPTS",
+        "replace": [
+          "70",
+          0
+        ]
+      }
+    },
+    "73": {
+      "class_type": "PrimitiveBoolean",
+      "inputs": {
+        "value": false
+      }
+    },
+    "74": {
+      "class_type": "PrimitiveFloat",
+      "inputs": {
+        "value": 15.0
+      }
+    },
+    "75": {
+      "class_type": "CheckpointLoaderSimple",
+      "inputs": {
+        "ckpt_name": "stable_audio_3_medium.safetensors"
+      }
+    },
+    "76": {
+      "class_type": "CLIPLoader",
+      "inputs": {
+        "clip_name": "audio\\t5gemma_b_b_ul2.safetensors",
+        "type": "stable_audio",
+        "device": "default"
+      }
+    }
+  },
+  "meta": {
+    "name": "workflows/bgm_generate.json",
+    "saved_at": "2026-06-30T01:56:45.700242",
+    "ckpt": "",
+    "positive": "",
+    "negative": "",
+    "params": {
+      "seed": 42,
+      "output_prefix": "BGM_Test2",
+      "audio_description": "gunshot echo in the distance",
+      "audio_duration": 15.0,
+      "audio_category": "SFX",
+      "generate_prompt": false
+    },
+    "elapsed_sec": 5.045823335647583,
+    "output_files": [
+      "BGM_Test2_00001.mp3"
+    ]
+  }
+}

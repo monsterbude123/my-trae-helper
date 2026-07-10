@@ -1,0 +1,26 @@
+[project]
+name = "voice-acting-skill"
+version = "0.2.0"
+description = "配音剧本注音工具 - 将剧本自动转换为三引擎TTS注音规则并执行配音"
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.0",
+    "gradio-client>=1.0",
+    "httpx>=0.27",
+    "pydantic>=2.0",
+]
+
+[project.scripts]
+vas = "vascli.main:cli"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["scripts"]
+include = ["vaslib.*", "vascli"]
+
+[tool.pytest.ini_options]
+testpaths = ["scripts/tests"]
+python_files = ["test_*.py"]

@@ -1,0 +1,19 @@
+{
+  "_source": "comfyui-api-skills/cache/workflows/workflows-txt2img_anima.json (复制并参数化)",
+  "_note": "原模板用 UNETLoader(JANIMA_v10)。替换 ckpt 时仅改 inputs.unet_name。params 见 knowledge/models/anima.yaml",
+  "workflow": {
+    "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "JANIMA_v10.safetensors", "weight_dtype": "default"}},
+    "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen_3_06b_base.safetensors", "type": "stable_diffusion"}},
+    "3": {"class_type": "VAELoader", "inputs": {"vae_name": "qwen_image_vae.safetensors"}},
+    "10": {"class_type": "CLIPTextEncode", "inputs": {"text": "{{POSITIVE}}", "clip": ["2", 0]}},
+    "11": {"class_type": "CLIPTextEncode", "inputs": {"text": "{{NEGATIVE}}", "clip": ["2", 0]}},
+    "20": {"class_type": "EmptyLatentImage", "inputs": {"width": 0, "height": 0, "batch_size": 1}},
+    "30": {"class_type": "KSampler", "inputs": {
+      "seed": 0, "steps": 24, "cfg": 4.0,
+      "sampler_name": "er_sde", "scheduler": "normal", "denoise": 1.0,
+      "model": ["1", 0], "positive": ["10", 0], "negative": ["11", 0], "latent_image": ["20", 0]
+    }},
+    "40": {"class_type": "VAEDecode", "inputs": {"samples": ["30", 0], "vae": ["3", 0]}},
+    "50": {"class_type": "SaveImage", "inputs": {"filename_prefix": "", "images": ["40", 0]}}
+  }
+}

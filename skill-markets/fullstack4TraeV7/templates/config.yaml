@@ -1,0 +1,45 @@
+schema: spec-driven
+
+# Project context — 项目上下文
+# AI 在创建任何工件（proposal/specs/design/tasks）时自动读取
+context: |
+  Tech stack: {填写技术栈，如 TypeScript + React + Node.js + PostgreSQL}
+  Domain: {业务领域，如 e-commerce / SaaS / internal-tool}
+  Conventions: {编码规范，如 conventional commits, ESLint + Prettier}
+  Architecture: {架构风格，如 microservices / monolith / modular-monolith}
+
+# Per-artifact rules — 按工件类型的自定义规则
+rules:
+  proposal:
+    - Keep proposals under 500 words
+    - Always include Non-Goals section
+    - Capabilities must map to specs/ subdirectories
+  design:
+    - Decisions must be numbered (D1, D2, ...)
+    - Each decision must include alternatives comparison table
+    - Always include migration plan
+  tasks:
+    - Break tasks into chunks of max 2 hours
+    - Mark external dependencies with **用户驱动**
+    - Use [x]/[ ] checkbox format
+  specs:
+    - Each capability gets its own spec.md under specs/{capability}/
+    - Use WHEN-THEN-AND scenario format
+    - Use SHALL / SHALL NOT for normative requirements
+
+# 文档路径约束
+# 所有 spec 工件存入 docs/specs/ 目录
+paths:
+  changes: docs/specs/changes/{NN}-{change-name}/
+  archive_out: docs/archive/out/{change-name}/   # V7 NEW
+  archive_done: docs/archive/done/{change-name}/  # V7 NEW
+  specs: docs/specs/changes/{NN}-{change-name}/specs/{capability}/
+  modules: docs/modules/{module}.md
+  prototypes: docs/prototypes/                     # V7 NEW 项目级原型
+  test_plan: docs/test-plan/                       # V7 NEW 测试方案
+
+# V7 NEW 圆桌会议配置
+roundtable:
+  enabled: false        # true = 启用多角色圆桌会议；false = 跳过
+  max_rounds: 3         # 最多轮次，超过后强制进入 contract
+  auto_converge: true   # 连续两轮无新实质性分歧自动收敛

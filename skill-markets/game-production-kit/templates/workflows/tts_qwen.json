@@ -1,0 +1,50 @@
+{
+  "workflow": {
+    "1": {
+      "class_type": "FB_Qwen3TTSVoiceDesign",
+      "inputs": {
+        "text": "今天天气真好，我们一起去公园散步吧。",
+        "instruct": "年轻女性，温柔甜美，标准普通话。语速适中，声音清晰自然。",
+        "model_choice": "1.7B",
+        "device": "auto",
+        "precision": "bf16",
+        "language": "Chinese",
+        "seed": 42,
+        "max_new_tokens": 2048,
+        "top_p": 0.8,
+        "top_k": 20,
+        "temperature": 1,
+        "repetition_penalty": 1.05,
+        "attention": "auto",
+        "unload_model_after_generate": false
+      }
+    },
+    "2": {
+      "class_type": "SaveAudio",
+      "inputs": {
+        "filename_prefix": "tts",
+        "audio": [
+          "1",
+          0
+        ]
+      }
+    }
+  },
+  "meta": {
+    "name": "D:\\workspace\\my-trae-helper\\example\\comfyui-test\\workflows\\tts_qwen.json",
+    "saved_at": "2026-06-30T04:43:53.357535",
+    "ckpt": "",
+    "positive": "",
+    "negative": "",
+    "params": {
+      "output_prefix": "tts",
+      "tts_text": "今天天气真好，我们一起去公园散步吧。",
+      "tts_instruct": "年轻女性，温柔甜美，标准普通话。语速适中，声音清晰自然。",
+      "tts_language": "Chinese"
+    },
+    "elapsed_sec": 20.083782196044922,
+    "output_files": [
+      "tts_00001.flac"
+    ]
+  }
+}

@@ -1,0 +1,348 @@
+{
+  "_schema": "evaluate.py 结构化配置 · 复制为 evaluate_config.json 后修改生效",
+  "_note": "所有字段均可覆盖。删除字段则回退到脚本内置默认值。",
+  "weights": {
+    "combat": {
+      "World": 0.4,
+      "Society": 0.05,
+      "Character": 0.1,
+      "Plot": 0.2,
+      "Theme": 0.05,
+      "Aesthetic": 0.2
+    },
+    "drama": {
+      "World": 0.05,
+      "Society": 0.1,
+      "Character": 0.3,
+      "Plot": 0.1,
+      "Theme": 0.15,
+      "Aesthetic": 0.3
+    },
+    "reveal": {
+      "World": 0.25,
+      "Society": 0.15,
+      "Character": 0.15,
+      "Plot": 0.2,
+      "Theme": 0.2,
+      "Aesthetic": 0.05
+    },
+    "transition": {
+      "World": 0.15,
+      "Society": 0.1,
+      "Character": 0.2,
+      "Plot": 0.25,
+      "Theme": 0.1,
+      "Aesthetic": 0.2
+    }
+  },
+  "forbidden_keywords": [
+    {
+      "role": "林岳",
+      "keywords": [
+        "调监控",
+        "逐帧看",
+        "查数据库",
+        "用算法",
+        "系统标记",
+        "算法扫描",
+        "非人格化清除",
+        "关键词扫描系统",
+        "算法判断",
+        "系统自动标记",
+        "污染面评估",
+        "高效杀毒软件",
+        "杀毒软件",
+        "逐帧筛查",
+        "一帧一帧",
+        "监控录像",
+        "监控画面",
+        "调取监控录像",
+        "调取监控"
+      ]
+    },
+    {
+      "role": "严峰",
+      "keywords": [
+        "调监控",
+        "逐帧看",
+        "查数据库",
+        "用算法",
+        "监控",
+        "摄像头",
+        "逐帧筛查",
+        "一帧一帧",
+        "监控录像",
+        "监控画面",
+        "调取监控录像",
+        "调取监控",
+        "屏幕查询"
+      ]
+    },
+    {
+      "role": "清洗司",
+      "keywords": [
+        "SOP",
+        "例行扫描",
+        "自动巡检",
+        "算法扫描",
+        "系统判定",
+        "算法判定",
+        "标记库",
+        "关键词扫描系统",
+        "系统自动标记"
+      ]
+    }
+  ],
+  "quant_regex": "\\d+\\.?\\d*\\s*(?:息|米|公里|千米|尺|丈|秒|分钟|小时|天|年|Hz|kHz|MHz|dB|kW|W|%|倍|息/秒|息/米|息/立方米)",
+  "scoring_keywords": {
+    "world_physics": [
+      "灵场",
+      "灵子",
+      "耦合",
+      "L场",
+      "Klein-Gordon",
+      "BEC",
+      "退相干",
+      "相干",
+      "灵压",
+      "灵导率",
+      "Maxwell",
+      "反相"
+    ],
+    "world_lingya_signal": [
+      "灵压",
+      "绝灵之地",
+      "P_L",
+      "息"
+    ],
+    "society_factions": [
+      "清洗司",
+      "万象宗",
+      "万象",
+      "辛国",
+      "宗门",
+      "商会",
+      "妖族"
+    ],
+    "society_class": [
+      "阶级",
+      "阶层",
+      "凡人",
+      "修真者",
+      "傲慢",
+      "蔑视",
+      "高贵",
+      "低贱",
+      "体制",
+      "不平等",
+      "压迫",
+      "特权"
+    ],
+    "plot_win": [
+      "赢面",
+      "认知差",
+      "信息差",
+      "敌人",
+      "傲慢",
+      "系统脆弱性",
+      "力量优势",
+      "因子",
+      "乘积"
+    ],
+    "theme_waiwu": [
+      "屏障",
+      "石眼",
+      "电池",
+      "装置",
+      "外物",
+      "工具",
+      "装备",
+      "法器",
+      "灵玉",
+      "监测器",
+      "套件",
+      "经典物理",
+      "频谱",
+      "罗盘"
+    ],
+    "theme_collision": [
+      "神识",
+      "灵场",
+      "修真",
+      "经典物理",
+      "科技",
+      "频谱",
+      "L场",
+      "凡人",
+      "修真者",
+      "两种",
+      "碰撞"
+    ],
+    "theme_template_blacklist": [
+      "飞升",
+      "天道意志",
+      "混沌珠",
+      "位面之子",
+      "气运",
+      "天命"
+    ],
+    "aesthetic_senses": {
+      "视觉": [
+        "看到",
+        "画面",
+        "红外",
+        "目视",
+        "暗处",
+        "光",
+        "颜色"
+      ],
+      "听觉": [
+        "听到",
+        "声音",
+        "沉默",
+        "脚步",
+        "通讯",
+        "噪音"
+      ],
+      "触觉": [
+        "压迫",
+        "距离",
+        "近身",
+        "擦肩",
+        "温度",
+        "冷",
+        "热"
+      ],
+      "灵场": [
+        "神识",
+        "灵波",
+        "灵压",
+        "灵场",
+        "罗盘",
+        "信号"
+      ]
+    },
+    "aesthetic_pov": {
+      "note": "POV character voice fingerprints",
+      "characters": {
+        "LZY": [
+          "计算",
+          "数据",
+          "信号",
+          "频谱",
+          "耦合",
+          "假设",
+          "验证",
+          "模型"
+        ],
+        "LinYue": [
+          "狩猎",
+          "逃逸",
+          "有意思",
+          "蚂蚁",
+          "完美"
+        ],
+        "YanFeng": [
+          "耻辱",
+          "凡人",
+          "区区",
+          "蔑视",
+          "不配"
+        ],
+        "SuWanqing": [
+          "犹豫",
+          "目光",
+          "沉默",
+          "手指",
+          "转身"
+        ],
+        "LaoMao": [
+          "货",
+          "价格",
+          "风险",
+          "渠道",
+          "规矩"
+        ],
+        "ChenYanqiu": [
+          "古",
+          "考据",
+          "碑文",
+          "记载",
+          "推测",
+          "真相"
+        ]
+      }
+    }
+  },
+  "society_base_scores": {
+    "combat": 40,
+    "drama": 55,
+    "reveal": 50,
+    "transition": 45
+  },
+  "subfactor_weights": {
+    "world": [
+      25,
+      25,
+      20,
+      15,
+      15
+    ],
+    "plot": [
+      30,
+      25,
+      20,
+      15,
+      10
+    ],
+    "theme": [
+      37,
+      31,
+      19,
+      13
+    ],
+    "aesthetic": [
+      28,
+      35,
+      19,
+      18
+    ]
+  },
+  "world_physics_threshold": 4,
+  "world_dep_refs_threshold": 5,
+  "theme_waiwu_threshold": 5,
+  "theme_collision_threshold": 5,
+  "plot_foreshadow_threshold": 3,
+  "plot_win_threshold": 3,
+  "plot_info_gap_threshold": 2,
+  "character_base_score": 95,
+  "character_penalty_per_hit": 12,
+  "character_min_score": 30,
+  "character_emotion_bonus_cap": 5,
+  "scene_type_rotation": {
+    "note": "Consecutive same-type penalty",
+    "max_consecutive": 3,
+    "penalty": 5
+  },
+  "reader_expectation": {
+    "note": "Reader-protagonist info gap",
+    "ahead_penalty": 8,
+    "behind_penalty": 5
+  },
+  "foreshadow_refresh": {
+    "note": "Stale foreshadow penalty",
+    "max_chapters": 5,
+    "penalty": 3
+  },
+  "language_style": {
+    "note": "Template phrase detection",
+    "patterns": [
+      "眼中闪过一丝",
+      "嘴角微微上扬",
+      "心中暗道",
+      "不由得",
+      "一股莫名的"
+    ],
+    "penalty": 2
+  }
+}
