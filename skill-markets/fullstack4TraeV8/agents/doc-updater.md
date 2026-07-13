@@ -102,6 +102,7 @@ DOC SYNC #2 (Phase 7.5): 读 modules/ + 代码状态 →
 ## DOC SYNC 完整性清单（步骤 0）
 
 > 每项 ✅ = 必须覆盖。质量阈值见 [doc-sync-protocol.md](../references/doc-sync-protocol.md)。
+> **步骤 0 前置检查**: 文档体积硬上限（见 [§十](../references/doc-sync-protocol.md#十文档体积硬上限)）。超出上限则先 prune。
 
 | # | 文档类型 | 必须 | 检查方式 |
 |---|---------|:---:|------|
@@ -115,6 +116,9 @@ DOC SYNC #2 (Phase 7.5): 读 modules/ + 代码状态 →
 | 7 | prototypes/（涉及 UI） | ✅ | `ls prototypes/` |
 | 8 | docs/reports/（Review 后） | ✅ | `ls docs/reports/` |
 | 9 | integration-manuals/（🔷 基石） | ✅ | `ls docs/integration-manuals/` |
+
+**写前自检**: 对照 [禁止写入清单 §九](../references/doc-sync-protocol.md#九doc-sync-禁止写入清单) 逐条检查。
+**涉及文档修剪/迁移时**: 强制走 [保真迁移协议 §十三](../references/doc-sync-protocol.md#十三保真迁移协议)——先编目事实，再执行，再验证。
 
 **铁律**: 任一 ✅ 未覆盖 → Completion Report status = INCOMPLETE。
 

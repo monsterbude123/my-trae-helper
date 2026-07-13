@@ -53,9 +53,10 @@ graph LR
 读 `docs/specs/.state-card.md` + `docs/specs/config.yaml`，输出简要快照（活跃 change/阻塞/Spec 堆积风险）。
 > 完整模板 + 新会话重入协议 → [references/cockpit.md](../references/cockpit.md)
 
-### 步骤 0.05: Bug 信号优先检查
+### 步骤 0.05: Bug 信号优先检查 + 文档健康快检
 
 Cockpit 🐛段有未解决 P0/P1 bug → 提示用户优先处理 → 确认后进入 bug-batch 链路恢复上下文。
+同时检查 Cockpit `文档健康` 字段：🟡 接近上限 / 🔴 超过上限 → 提示用户，按[治理决策树 (§十一)](../references/doc-sync-protocol.md#十一文档治理决策树)判定是否进治理链。
 > 完整决策树 → [references/cockpit.md](../references/cockpit.md#新会话重入协议v9-new) + [references/bug-batch.md](../references/bug-batch.md)
 
 ### 步骤 0.1: 项目就绪检查
@@ -64,7 +65,7 @@ Cockpit 🐛段有未解决 P0/P1 bug → 提示用户优先处理 → 确认后
 
 ### 步骤 1: 意图识别（2 秒）
 
-关键词映射：新功能/实现 → 完整链 | bug/报错 → bug-batch | 重构/优化 → 简化链 | 文档 → doc-updater | 小修改 → ponytail | 模糊 → AskUserQuestion。
+关键词映射：新功能/实现 → 完整链 | bug/报错 → bug-batch | 重构/优化 → 简化链 | 文档治理/文档膨胀/文档瘦身 → 治理链 | 文档更新/DOC SYNC → doc-updater | 小修改 → ponytail | 模糊 → AskUserQuestion。
 > 完整识别表格 + 澄清话术 → [references/intake.md](../references/intake.md#31-意图识别)
 
 ### 步骤 1.5: 30% 原子化去重
@@ -111,6 +112,7 @@ intake → 流程定位卡决定：
   fullstack 简化链 → 本 Agent 产出迷你 proposal.md(≤10行) → spec-writer
   bug-batch 链     → 主上下文：buglist.md + 状态卡 + Cockpit🐛段更新
   debugger 链      → debugger agent
+  治理链           → 主上下文：治理决策树判定([§十一](../references/doc-sync-protocol.md#十一文档治理决策树)) → ponytail直改 → [保真迁移 §十三](../references/doc-sync-protocol.md#十三保真迁移协议)
   doc-updater 链   → doc-updater agent
   ponytail 链      → 不加载 Agent，直接最简实现
 ```
@@ -119,8 +121,8 @@ intake → 流程定位卡决定：
 
 ## 检查清单
 
-- [ ] Cockpit 已读 + 快照已输出  |  [ ] Bug 信号已检查
-- [ ] 意图已识别  |  [ ] **30% 去重已执行** + 报告已输出
+- [ ] Cockpit 已读 + 快照已输出  |  [ ] Bug 信号已检查 + 文档健康已检查
+- [ ] 意图已识别（含文档治理任务检测）  |  [ ] **30% 去重已执行** + 报告已输出
 - [ ] 影响面已评估（工具，非猜）  |  [ ] 流程定位卡已输出
 - [ ] 项目级 Cockpit 已更新  |  [ ] per-change 状态卡已持久化
 - [ ] 工具调用并行执行  |  [ ] 模糊需求已 AskUserQuestion

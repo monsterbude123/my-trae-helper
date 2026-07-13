@@ -28,8 +28,8 @@ version: "8.0.0"
 11. NO SILENT DRIFT — 发现漂移立即报告，不静默迁就
 12. NO CODE WITHOUT GITNEXUS IMPACT — 编码前强制 live impact()
 13. FRONTEND TEST REQUIRED — .tsx/.ts 组件 → __tests__/ 非空
-14. INTEGRATION TEST REQUIRED — contract test skeleton → tests/ 非空
-15. NO HARDCODED CONFIG — 端口/地址/密钥从环境变量读取
+14. NO DOC MODIFICATION WITHOUT FIDELITY CHECK — 修改项目级文档（ARCHITECTURE/modules/）→ 先走 [保真迁移协议 §十三](../references/doc-sync-protocol.md#十三保真迁移协议)
+15. QUANTITATIVE REPORT MANDATORY — 完成必量化汇报
 ```
 
 ## 🔗 流水线位置

@@ -58,6 +58,41 @@ V8 围绕**去重、瘦身、脚本化**三大原则进行治理，不改变核�
 - Cockpit 模板精简（29 行）
 - 移除嵌套的 fullstack4TraeV7/ 子目录残留
 
+#### 8. 文档治理五补丁（基于 AIGCMediaDesktop 实战审计）
+
+> 来源：[docs/references/(1) 优化Agent文档检索.md](../../../docs/references/(1) 优化Agent文档检索.md)
+
+V8 上线后在 AIGCMediaDesktop 项目实战中发现文档臃肿（状态卡 446 行、ARCHITECTURE 85% 噪音、无 INDEX），暴露了 DOC SYNC 协议的 5 个系统性缺口。全部补入 [doc-sync-protocol.md](doc-sync-protocol.md)：
+
+| # | 补丁 | 落点 | 内容 |
+|---|------|------|------|
+| 1 | **禁止写入清单** | §九 | 7 项禁止（Review 评分/时间戳/Bug 过程/实现细节...）+ 7 项允许 + 自检清单 |
+| 2 | **文档体积硬上限** | §十 | 6 类文档硬上限表 + prune 优先级 + intake 健康快检 |
+| 3 | **.history.md Append-Only 协议** | §十二 | 6 节完整协议（职责/时机/方式/模板/索引/使用协议）— 一次 change 一生写一条 + 禁止全文读 |
+| 4 | **文档治理决策树** | §十一 | 3 步自主决策（严重度→范围+根因→用户确认阈值）+ 治理 change 简化链 |
+| 5 | **Cockpit 编辑安全协议** | cockpit-state-card.md | Section delimiter 标记 + 并发编辑禁止 + 文档健康字段 |
+
+**其他伴随变更**：
+- doc-updater Agent：步骤 0 前置体积检查 + 写前禁止清单自检
+- cockpit 模板：新增 `文档健康` 字段（🟡 N 个文件接近上限 / 🔴 状态卡 > 100 行）
+
+#### 9. 全链路排查补丁（保真 + 察觉 + 路径闭环）
+
+深入审计 SKILL.md 骨架流程，发现 13 个缺口（察觉机制缺失/保真机制缺失/协议覆盖缝隙/引用断裂），逐项补入：
+
+| # | 缺口 | 修复 |
+|---|------|------|
+| G1 | Phase 0 无文档健康快检 | Phase 0 +`文档健康快检（Cockpit + §十）` |
+| G2 | Intake 不识别"文档治理"任务 | 关键词映射 +`文档治理/膨胀/瘦身 → 治理链` |
+| G4+G13 | DOC SYNC 无事实保真校验 | 新增 [§十三 保真迁移协议](doc-sync-protocol.md#十三保真迁移协议) — Phase A 事实编目 → B 执行迁移 → C 验证（4 项硬性检查全 PASS） |
+| G6 | Implementer 无文档修改保真 | 新增铁律 14: `NO DOC MODIFICATION WITHOUT FIDELITY CHECK` |
+| G7+G8 | 异常路径缺文档膨胀类型 | 异常路径 +`文档膨胀→治理决策树` + 新增 `治理链` 定义 |
+| G9 | 铁律缺文档治理不失真 | 新增铁律 8: `文档治理不失真` |
+| G10 | §6 参考索引缺治理章 | +`文档治理（禁止写入+体积上限+决策树+保真协议）` |
+| G11 | Spec 缺治理专用不变量 | 跳过（spec-format 通用 Invariant 框架可覆盖） |
+
+**连锁更新**: Intake 步骤 0.05 合并 Bug+文档健康检查 / doc-updater 步骤 0 前置保真协议 / implementer 15→15 铁律重新编号
+
 ### 删除的文件
 - `references/prototype-rules.md`（并入 prototype.md）
 - `references/prototype-ascii-template.md`（并入 prototype.md）

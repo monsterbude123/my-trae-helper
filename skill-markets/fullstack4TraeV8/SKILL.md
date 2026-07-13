@@ -20,8 +20,8 @@ requires:
 > 术语定义先读[glossary.md](glossary.md) ,理解对应的概念。
 
 ```
-Phase 0: Cockpit    读驾驶舱定位 → 确定当前阶段 
-Phase 1: Intake     intake agent: 意图识别, 分析用户提出来需求 + 30%去重 + 选链 + 状态卡
+Phase 0: Cockpit    读驾驶舱定位 → 文档健康快检（Cockpit 文档健康字段 + §十体积硬上限） → 确定当前阶段
+Phase 1: Intake     intake agent: 意图识别 + 文档治理任务检测 + 30%去重 + 选链 + 状态卡
 Phase 2: Proposal   proposal-writer: Why + What + Capabilities + Non-Goals
 Phase 3: Spec       spec-writer: BDD + E2E + Test Skeleton + Out of Scope
                       ├─ 涉及 UI → 委派 prototype-writer (Phase 3.5)
@@ -41,9 +41,11 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
   Phase B.2: Fix         逐个 debugger: 复现→根因→🔴RED→🟢GREEN→回归
   Phase B.3: Retro-Spec  修复后评估: retro-spec.md + DOC SYNC + 回归全绿
 
-异常路径: Bug→[debugger] | Bug批量→[bug-batch] | 漂移→[feedback-loop]回流 | Review FAIL→按层级返工 | DOC SYNC FAIL→补全后继续
+异常路径: Bug→[debugger] | Bug批量→[bug-batch] | 漂移→[feedback-loop]回流 | Review FAIL→按层级返工 | DOC SYNC FAIL→补全后继续 | 文档膨胀→[治理决策树 §十一] 自主治理
 
 简化链: Intake 跳过 Proposal → 产出迷你 proposal.md（≤10行）→ 直接进 Spec
+
+治理链 (纯文档变更，无 src/): Intake 检测文档膨胀 → 治理决策树判定（[§十一](../references/doc-sync-protocol.md#十一文档治理决策树)）→ ponytail 直改 → 保真迁移（[§十三](../references/doc-sync-protocol.md#十三保真迁移协议)）→ DOC SYNC
 
 ---
 
@@ -66,7 +68,7 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 
 ---
 
-## §2 七条铁律
+## §2 八条铁律
 
 ```
 1. 相位不可跳过  Contract / Closure-Define / DOC SYNC 不可跳过，跳过=回退
@@ -76,6 +78,7 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 5. 漂移必回流  发现 spec/契约/文档/目标漂移 → 立即停止 → 回流上游修正
 6. DELTA ONLY  变更目录工件只写此变更的增量。项目级通用协议/架构/约定/领域模型/模块文档引用 docs/ 持久化文档路径，禁止复制全文到 changes/ 下。事实只能存在于一个地方，禁止同一事实出现在多个变更工件中。
 7. Buglist-Cockpit 联动  缺陷修复前必须从 Cockpit 驾驶舱定位当前状态 + 确认 buglist.md 与驾驶舱同步，修复后回流 Cockpit 更新健康度
+8. 文档治理不失真  修剪/迁移项目级文档禁止丢失架构事实。操作前事实编目→操作后逐项验证→缺失=回退（保真协议见 [§十三](references/doc-sync-protocol.md#十三保真迁移协议)）
 ```
 
 ---
@@ -143,6 +146,7 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 | 技能生长 + 异常处理 | [references/report-growth.md](references/report-growth.md) |
 | 原型设计规则 | [references/prototype.md](references/prototype.md) |
 | DOC SYNC 合并协议（写+验证） | [references/doc-sync-protocol.md](references/doc-sync-protocol.md) |
+| 文档治理（禁止写入+体积上限+决策树+保真协议） | [references/doc-sync-protocol.md](references/doc-sync-protocol.md) §九-十三 |
 | 版本变更 | [references/CHANGELOG.md](references/CHANGELOG.md) |
 | FAQ | [GUIDE.md](GUIDE.md) |
 | 快速命令 | `python render-cockpit.py` / `python env-init.py --fix` |

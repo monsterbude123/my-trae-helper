@@ -564,3 +564,360 @@ docs/prototypes/
 ## 外部依赖
 - package-name - 用途
 ```
+
+---
+
+## 九、DOC SYNC 禁止写入清单
+
+> 核心原则：**项目级文档 = 地图（WHAT），施工记录 = change artifacts（HOW）。DOC SYNC 只写地图，不写施工日志。**
+
+### 禁止写入项（写入前必须检查）
+
+| # | 禁止写入内容 | 应放哪里 | 原因 |
+|---|------------|---------|------|
+| 1 | Review 评分 / 测试覆盖数 / commit hash | 留在 change 的 completion report | 施工日志，对理解系统无帮助 |
+| 2 | DOC SYNC 时间戳 / 操作人 | 留在 change 的 .state-card.md | 流程元数据，不是架构知识 |
+| 3 | Bug 修复过程描述 | 留在 change 的 spec 或 buglist | 修复过程不是系统描述 |
+| 4 | 实现细节（算法选择、优化技巧、踩坑记录） | 留在 change 的设计文档 | 属于"怎么做的"，不是"是什么" |
+| 5 | 已废弃的接口/版本 | 删除，不保留在模块文档 | 模块文档只描述当前状态 |
+| 6 | per-change 的 task 列表 / 进度 | 留在 change 的 tasks.md | 施工进度不是架构 |
+| 7 | 中间版本的设计方案 | 留在 change archive | 只保留最终决定 |
+
+### 允许写入项（仅以下内容可写）
+
+| # | 允许写入 | 写入位置 | 粒度 |
+|---|---------|---------|------|
+| 1 | 模块新增/删除/重命名 | ARCHITECTURE.md / INDEX.md | 1-2 行 |
+| 2 | 接口契约变更（@published） | modules/{module}.md 接口契约表 | 每接口 1 行 |
+| 3 | 数据模型字段增删改 | modules/{module}.md 数据模型表 | 每字段 1 行 |
+| 4 | 架构层级关系变化 | ARCHITECTURE.md 架构全景图 | 1 段 ≤10 行 |
+| 5 | 新增关联模块依赖 | modules/{module}.md 关联模块表 | 每依赖 1 行 |
+| 6 | 状态标记更新 | modules/{module}.md header | 1 行（status/version/last_updated） |
+| 7 | 设计决策（仅最终决定） | ARCHITECTURE.md 或 ADR | ≤5 行摘要 + 指向 ADR |
+
+### 检查方式
+
+DOC SYNC 完成后，逐条自检：
+
+```
+[ ] 没有 Review 评分出现在项目级文档
+[ ] 没有 DOC SYNC 时间戳出现在项目级文档
+[ ] 没有 Bug 修复描述出现在项目级文档
+[ ] 没有实现细节出现在项目级文档
+[ ] 模块文档变更 ≤ 50 行（超出则说明写了实现细节）
+[ ] ARCHITECTURE.md 变更 ≤ 10 行（超出则说明写了施工日志）
+```
+
+---
+
+## 十、文档体积硬上限
+
+> 每类项目级文档有硬上限。DOC SYNC 写入前检查，超出时必须先 prune 再写。
+
+### 硬上限表
+
+| 文档 | 硬上限 | 超出时动作 | 检查频率 |
+|------|:---:|------|:---:|
+| `.state-card.md` | 100 行 | 迁移历史段到 `.history.md`，目标 ≤ 80 行 | 每次 DOC SYNC |
+| `ARCHITECTURE.md` | 500 行 | 拆分实施状态段 → 对应 change archive，目标 ≤ 350 行 | 每次 DOC SYNC |
+| `modules/*.md`（单个） | 300 行 | 拆分子文档或提取独立 spec，目标 ≤ 200 行 | 每次 DOC SYNC |
+| `.history.md` 索引表 | 20 行 | 归档旧条目到 `archive/history/` | 每次 Archive |
+| `INDEX.md` | 10KB / 150 行 | 拆分到二级索引文件 | 每次 DOC SYNC |
+| `completion report` | 30 天后 | 移至 `archive/reports/` 或删除 | 每次 intake 步骤 0 |
+
+### Prune 优先级
+
+```
+超出硬上限
+  │
+  ├── 1. 找重复内容 → 删除（同一信息出现在多处）
+  ├── 2. 找施工日志 → 迁移到 change archive
+  ├── 3. 找过期信息 → 删除（已废弃接口/模块/决策）
+  ├── 4. 找可压缩段 → 合并同类项
+  └── 5. 仍超出 → 🛑 汇报用户，附带「为什么超出」分析
+```
+
+### 体积警告
+
+Intake 步骤 0 健康快检时，如果文档接近硬上限的 80%，在 Cockpit 🐛 段写一条警告：
+
+```
+| B{n} | {文档名} 接近体积上限（{当前行数}/{上限}） | — | 🟡 | 建议下次 DOC SYNC 前 prune | {日期} |
+```
+
+---
+
+## 十一、文档治理决策树
+
+> Agent 发现文档问题时，按此树自主决策，只在最末层问用户。
+
+### 步骤 1: 严重度判定
+
+```
+发现文档问题
+  │
+  ├── 🔴 CRITICAL（任一）
+  │     ├── .state-card.md > 100 行
+  │     ├── 无 docs/INDEX.md
+  │     ├── ARCHITECTURE.md 噪音占比 > 70%
+  │     └── ARCHITECTURE.md > 500 行
+  │     → 必须治理，不可推迟。记录到 Cockpit 🐛 段。
+  │
+  ├── 🟡 HIGH（任一）
+  │     ├── ARCHITECTURE.md 噪音 > 50%
+  │     ├── 单个 modules/*.md > 300 行
+  │     ├── 模块文档 header 有实施标记（DOC SYNC 时间戳 / Review 评分）
+  │     └── completion report > 30 天未清理
+  │     → 治理变更最晚下一次 DOC SYNC 附带修复。
+  │
+  └── 🟢 LOW
+        ├── 模块文档 header 轻微污染（≤3 行）
+        └── 孤立文件 / 死链接
+        → 记入 Cockpit 🐛 段，下次顺手修。
+```
+
+### 步骤 2: 范围 + 根因判定
+
+```
+严重度已定
+  │
+  ├── 范围
+  │     ├── 1 个文件 → ponytail 直改（在当前上下文中直接修复）
+  │     ├── 2-4 个文件 → 附加到当前活跃 change 的治理增量
+  │     └── 5+ 个文件 → 建独立治理 change（mini proposal ≤10 行）
+  │
+  └── 根因
+        ├── 历史遗留（以前没约束）→ 一次性清理
+        ├── 流程缺失（协议没写禁止项）→ 清理 + 改协议文件
+        └── 协议写了但 Agent 没遵守 → 不改协议，修 Agent 行为
+```
+
+### 步骤 3: 用户确认阈值
+
+```
+治理范围 ≤ 10 个文件 + 不改引用/protocol 文件 → Agent 自主执行，Cockpit 记录
+治理范围 > 10 个文件 → 问用户确认范围
+涉及改 protocol/reference 文件 → 问用户确认（展示改什么、为什么改）
+涉及 archive/done/  → 不动（已归档视为已沉淀）
+```
+
+### 治理 change 简化链
+
+```
+纯文档治理（无 src/ 变更）→ ponytail 模式
+  ├── 跳过 Contract/Plan/Review 委派
+  ├── 主上下文直做变更
+  └── 仅产出 completion report + 更新 Cockpit
+```
+
+---
+
+## 十二、.history.md Append-Only 协议
+
+> `.history.md` = 已完工 change 的签名簿。不是施工日志，不是 DOC SYNC 存档。
+
+### §1 职责
+
+| 它是 | 它不是 |
+|------|--------|
+| 已完成 change 的编号 + 名称 + 归档日期 | 每个 DOC SYNC 的逐文件变更清单 |
+| 关键决策摘要（≤5 行） | Review 评分、测试数、commit hash |
+| 归档路径（方便 agent 按需深挖） | 代码实现细节 |
+| 对后续 agent 的意义/教训 | 完整验收报告 |
+
+### §2 写入时机
+
+**一个 change 一生只写一次**：Phase 9 Archive 归档时。
+
+```
+不是 Phase 5.5 DOC SYNC 写
+不是 Phase 7 Review 写
+不是每个中间事件写
+不是 DOC SYNC 完成时写
+只有 Archive 归档时写一条
+```
+
+### §3 写入方式
+
+**APPEND ONLY — 禁止 Read 全文**：
+
+```powershell
+# ✅ Add-Content 直接追加，不读取文件
+Add-Content -Path ".history.md" -Value "`n## NN-name (YYYY-MM-DD)"
+Add-Content -Path ".history.md" -Value "`n- **结果**: ACCEPT 4.27/5.0"
+Add-Content -Path ".history.md" -Value "`n- **关键决策**: ..."
+Add-Content -Path ".history.md" -Value "`n- **归档路径**: ..."
+Add-Content -Path ".history.md" -Value "`n- **对 agent 的意义**: ..."
+```
+
+```powershell
+# ❌ 禁止：Read 全文 → 修改 → 写回（随文件增大必然击穿）
+$content = Get-Content ".history.md"        # ← 31KB+ 击穿
+$content += "new entry"
+Set-Content ".history.md" $content
+```
+
+**索引表更新例外**：顶部索引表 ≤ 20 行，可以 Read 前 20 行后修改，但必须用 delimiter 包裹：
+
+```markdown
+<!-- HISTORY-INDEX-START -->
+| Change | 归档日期 | 结果 |
+|--------|---------|------|
+| 00-base-prepare | 2026-07-06 | DONE |
+<!-- HISTORY-INDEX-END -->
+<!-- HISTORY-ENTRIES-START -->
+## 00-base-prepare (2026-07-06)
+...
+<!-- HISTORY-ENTRIES-END -->
+```
+
+索引表 > 20 行时：归档最旧的 10 条到 `archive/history/`，索引表保持 ≤ 10 行。
+
+### §4 条目模板
+
+```markdown
+## {NN}-{name} ({YYYY-MM-DD})
+
+- **结果**: {ACCEPT 评分 \| DONE \| BLOCKED-XX} | {阻塞描述，无则省略}
+- **关键决策**: {≤ 3 个决策，每个 ≤ 1 句话}
+- **归档路径**: `archive/done/{NN}-{name}/`
+- **对 agent 的意义**: {≤ 3 句话，告诉后续 agent 这个 change 产出了什么可复用的东西}
+```
+
+**单条 ≤ 50 行。不写**：
+- ✗ Review 逐项评分
+- ✗ 测试通过数 / 覆盖率
+- ✗ DOC SYNC 文件变更清单
+- ✗ 中间阶段的文档路径
+
+### §5 Agent 使用协议
+
+| 场景 | 操作 | 禁止 |
+|------|------|------|
+| "这个 change 做完了吗？" | `grep "NN-name" .history.md` | 禁止通读全文 |
+| "16 的关键决定是什么？" | `grep -A 3 "16-" .history.md` | 禁止通读全文 |
+| "近期归档了哪些？" | `head -20 .history.md`（只读索引表） | 禁止通读全文 |
+| 写新条目 | `Add-Content`（不读） | 禁止先读后写 |
+| "我想看完整历史" | 读索引表 → 按需 `grep` 目标条目 | 禁止 `cat .history.md` |
+
+### §6 与 DOC SYNC 的边界
+
+```
+DOC SYNC 写的是: modules/*.md, ARCHITECTURE.md, .state-card.md
+                → 描述"系统现在是什么"
+
+.history.md 写的是: change 的完工签名
+                → 记录"系统怎么变成现在这样的"（但只记名字和决策，不记过程）
+
+两者互补，不是替代。DOC SYNC 不写 .history.md，Archive 不写 modules/。
+```
+
+---
+
+## 十三、保真迁移协议
+
+> 修剪/迁移项目级文档时，禁止丢失架构事实。三阶段机械验证：编目→执行→验证。任一阶段失败 = 回退，不继续。
+
+### 核心原则
+
+```
+文档修剪 = 外科手术，不是斧劈
+  └── 切掉的是噪音（Review 评分/实现细节/时间戳）
+  └── 保留的是事实（架构决策/接口定义/模块职责/数据模型/不变量）
+  └── 迁移的是历史（施工日志 → change archive / .history.md）
+```
+
+### Phase A: 迁移前事实编目
+
+**触发条件**：文档超过体积硬上限（§十），或噪音占比 > 50%。
+
+**步骤**：
+
+1. 读取目标文档全文
+2. 提取所有**事实性断言**——对理解系统有意义的陈述。不包括元信息（时间戳/评分/操作人）。
+3. 每一条事实标注分类：
+
+```
+[KEEP]   = 架构事实 → 留在原文档
+[MOVE]   = 实施历史 → 迁移到 change archive 或 .history.md
+[DELETE] = 死信息   → 删除（重复/过期/无意义）
+```
+
+4. 输出**事实编目表**（必须是可验证的编号列表）：
+
+```markdown
+| # | 事实摘要 | 来源行号 | 分类 | 目标 |
+|---|---------|:---:|:---:|------|
+| F01 | 系统采用 Event-Driven 架构，通过 MessageBus 解耦 | L12 | KEEP | ARCHITECTURE.md §1 |
+| F02 | C14 拖拽跟手通过 requestAnimationFrame + delta 补偿实现 | L503 | MOVE | archive/done/10-app-shell/ |
+| F03 | §V8 阶段编号映射表（V7→V8） | L9 | DELETE | —（已沉淀到 ADR-028） |
+| F04 | 模块 03-task-queue 提供 TaskEnqueue/TaskDequeue 接口 | L245 | KEEP | ARCHITECTURE.md §2 |
+```
+
+### Phase B: 执行迁移
+
+**B1. KEEP 事实 — 原地保留**
+
+```
+- 编辑目标文档，确保每个 [KEEP] 事实在新文档中可找到
+- 对每个 KEEP 事实 → 在编目表标记 "✅ 已保留 @ 新行号"
+- 如果某个 KEEP 事实无法在新的精简结构中自然呈现 → 🛑 回流 Phase A 重新分类
+```
+
+**B2. MOVE 事实 — 迁移+链接**
+
+```
+- 提取 [MOVE] 事实到目标位置（change archive / .history.md / ADR）
+- 在源文档原位置保留 1 行交叉引用：
+    > 实施详情见: archive/done/10-app-shell/specs/spec.md §C14
+- 在编目表标记 "✅ 已迁移 → {路径}"
+```
+
+**B3. DELETE 事实 — 删除**
+
+```
+- 从源文档删除死信息
+- 在编目表标记 "✅ 已删除"
+- 死信息不保留副本（git history 可追溯原始版本）
+```
+
+### Phase C: 迁移后验证
+
+**四项硬性检查，全部 PASS 才放行**：
+
+| # | 检查 | 通过标准 | 失败处理 |
+|---|------|---------|---------|
+| C1 | **计数守恒** | KEEP 事实数 + MOVE 事实数 = 编目表总数（不含 DELETE） | 🛑 回退，逐个查找丢失事实 |
+| C2 | **KEEP 审计** | 随机抽样 30%（至少 3 条）KEEP 事实，grep 验证在精简后文档中仍存在 | 🛑 回退，补全后重试 |
+| C3 | **MOVE 链接** | 所有 MOVE 事实的交叉引用链接路径存在且可读 | 🛑 回退，修正链接 |
+| C4 | **自洽性** | 新文档内部引用无断裂（`[modules/XX.md]` 指向文件存在） | 🟡 标记，继续（下次 DOC SYNC 修复） |
+
+### 最小化原则
+
+```
+1. 一次只修剪一类问题（先清 ▲ARCHITECTURE 再清 ▲modules）
+2. 一次修剪 ≤ 200 行变更（超出则分批）
+3. 每批修剪后完整验证（Phase C），不跨批攒着一起验
+4. 涉及 2 个以上文件的修剪 → 必须建独立治理 change
+```
+
+### 回退协议
+
+```
+Phase A FAIL（无法分类） → 缩小修剪范围，只处理明确可分类的行
+Phase B FAIL（KEEP 无法保留）→ 回退该条 → 降级为 MOVE
+Phase C FAIL（验证不通过）→ 回退整批修剪 → 用户决策: 修正重试 / 放弃
+连续 2 批失败 → 🛑 停止，汇报用户: "文档结构需要重新设计，当前 trim 逻辑无法保证不失真"
+```
+
+### 快速自检清单（执行前打印到对话）
+
+```
+[ ] Phase A: 事实编目表已输出（含分类+目标）
+[ ] Phase B: 每个 KEEP 已标记新行号 / 每个 MOVE 已标记目标路径
+[ ] Phase C1: 计数守恒 = 是
+[ ] Phase C2: KEEP 审计 ≥ 30% 通过
+[ ] Phase C3: MOVE 链接全部可读
+[ ] Phase C4: 内部引用无断裂
+[ ] 修剪变更 ≤ 200 行（超出则分批）
+```
