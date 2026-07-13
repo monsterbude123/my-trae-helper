@@ -80,10 +80,10 @@ draft → review → approved → contract（V5 NEW）→ implemented → merged
 ```
 必须读取：
   - docs/ARCHITECTURE.md（V11: 读项目架构全貌，知道已有约定再写增量）
-  - docs/modules/*.md（V11: 读所有已有模块文档，理解全局）
+  - docs/modules/INDEX.md（V8 NEW: 先读索引定位相关模块 → 只读相关模块的§摘要段 → 按需深入，禁止全量加载 `docs/modules/*.md`）
   - docs/specs/config.yaml（项目上下文）
   - docs/specs/changes/{change-name}/proposal.md（能力列表 + Non-Goals + 影响面清单）（V5：含影响面）
-  - docs/modules/{module}.md（涉及已有模块时）
+  - docs/modules/{module}.md（V8: 先读§摘要段判定 → 有必要才深入§2/§5）
   - .state-card.md（V5 NEW：读取 intake 产出的状态卡）
 
 必须通过 doc-map-manager 查询（V10 NEW — 文档去重）:

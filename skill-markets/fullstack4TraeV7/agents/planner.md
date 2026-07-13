@@ -90,7 +90,7 @@ graph LR
 ```
 必须读取：
   - docs/ARCHITECTURE.md（V11: 先读项目架构全貌，所有决策以此为上下文）
-  - docs/modules/*.md（V11: 读所有已有模块文档，理解全局依赖关系）
+  - docs/modules/INDEX.md（V8 NEW: 先读索引定位相关模块 → 只读相关模块的§摘要段 → 按需深入，禁止全量加载 `docs/modules/*.md`）
   - docs/specs/config.yaml
   - docs/specs/changes/{change-name}/proposal.md（含影响面清单）
   - docs/specs/changes/{change-name}/contracts/（V5 NEW 协议先行契约）

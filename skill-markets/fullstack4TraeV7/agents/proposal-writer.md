@@ -63,9 +63,9 @@ graph LR
 ```
 必读（V11: 先读公共文档，避免重复造轮子）:
   1. docs/ARCHITECTURE.md — 项目架构全貌，理解现有设计约定
-  2. docs/modules/*.md — 所有已有模块文档（非仅相关模块，理解全局）
+  2. docs/modules/INDEX.md — 模块索引（V8 NEW: 先读索引定位相关模块 → 只读相关模块的§摘要段 → 按需深入，禁止全量加载 `docs/modules/*.md`）
   3. docs/specs/config.yaml（项目上下文，如存在）
-  4. docs/modules/{module}.md（相关模块文档，了解当前状态）
+  4. docs/modules/{module}.md（相关模块文档，先读§摘要段判定 → 有必要才深入）
   5. fullstack-intake 输出（V5 NEW）:
      - 流程定位卡（来自 fullstack-intake，对话中）
      - 影响面清单（来自 fullstack-intake，对话中）

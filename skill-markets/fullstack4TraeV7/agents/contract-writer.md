@@ -53,10 +53,10 @@ graph LR
 
 读取以下输入：
 - `docs/ARCHITECTURE.md` — 项目架构全貌（V11: 先读公共文档，知道已有约定和类型再写增量）
-- `docs/modules/*.md` — 所有已有模块文档（V11: 理解全局，避免重复定义）
+- `docs/modules/INDEX.md` — 模块索引（V8 NEW: 先读索引定位相关模块 → 只读相关模块的§摘要段 → 按需深入，禁止全量加载 `docs/modules/*.md`）
 - `docs/specs/changes/{change}/proposal.md` — Why + What + Capabilities + Non-Goals
 - `docs/specs/changes/{change}/specs/{capability}/spec.md` — BDD 场景化行为契约
-- `docs/modules/{module}.md` — 现有模块文档（必须读取；缺失则触发迷雾消除后继续）
+- `docs/modules/{module}.md` — 相关模块文档（先读§摘要段判定 → 有必要才深入§2/§5；缺失则触发迷雾消除后继续）
 - 现有 `contracts/`（如存在）— 续写而非重写
 - `docs/specs/changes/*/contracts/` — 其他变更目录的契约（V5.2 NEW，检查命名冲突）
 

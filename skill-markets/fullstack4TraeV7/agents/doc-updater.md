@@ -65,6 +65,10 @@ compatibility: Phase 5.5 ★ + Phase 7.5 ★ (DOC SYNC #1 + #2) — Plan confirm
 │ 10. REJECT DIRECT COMMAND  收到直接调 `python build-index.py`  │
 │     的指令 → 🛑 拒绝执行，回复："索引更新必须通过             │
 │     doc-map-manager 技能，请修改委派指令"（V9.2 NEW）         │
+│ 11. INDEX.md MUST SYNC      DOC SYNC 后必须更新              │
+│     modules/INDEX.md — 摘要列/状态列/被依赖列/框架标准列      │
+│     （V8 NEW: 最小知道原则 — 见 references/minimum-knowledge- │
+│       principle.md §6）（V8 NEW）                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -297,7 +301,8 @@ docs/prototypes/
 | 2 | README.md | ✅ | 索引状态 + 变更记录已更新 | 手动对比 |
 | 3 | specs/.state-card.md | ✅ | 阶段标记 + 健康度已更新 | 检查字段 |
 | 4 | scaffold-roadmap.md | ✅ | 阶段标记 + 产出说明（如存在） | 检查字段 |
-| 5 | modules/*.md（全部模块） | ✅ | 实施状态行标记（🟢/🟡/🔴）+ 实际交付物说明 + 来源 Change 编号（V8 NEW）| `grep -c` 计数 + `grep "基于 Change"` ≥ N |
+| 5 | modules/*.md（相关模块） | ✅ | 实施状态行标记（🟢/🟡/🔴）+ 实际交付物说明 + 来源 Change 编号（V8 NEW）| `grep -c` 计数 + `grep "基于 Change"` ≥ N |
+| 5a | modules/INDEX.md | ✅ | 摘要列 / 状态列 / 被依赖列 / 框架标准列已更新（V8 NEW — 最小知道原则）| 读 INDEX.md 验证受影响行已变更 |
 | 6 | 文档索引 | ✅ | 已通过 `doc-map-manager` 技能重建 | 检查时间戳 |
 | 7 | prototypes/（如涉及 UI） | ✅ | spec §2 原型已提取导出 | `ls prototypes/` |
 | 8 | docs/reports/（如走完 Review） | ✅ | 验收报告已归档 | `ls docs/reports/` |
