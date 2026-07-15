@@ -1,7 +1,7 @@
 ---
 name: fullstack4traev8
 version: "8.0.0"
-description: "全栈文档驱动开发技能包 v8.0 — DOC FIRST + Contract-First + Spec-Driven + TDD + Cockpit 驾驶舱 + 圆桌会议 + 技能生长。DOC SYNC 合并（一次写入一次验证）+ 基石模块 + Buglist-Cockpit 联动。10 Agent 流水线（Cockpit→Intake→Proposal→Spec→[Prototype]→Contract→Plan→Closure-Define→Implement→Review→DOC SYNC→Accept）+ 双层状态卡 + 7 维度量化验收 + feedback-loop 漂移回流 + 30% 需求原子化去重。当 agent 进行新功能开发、系统重构、多模块协作、前后端分离、需要协议先行 / TDD / E2E / 量化验收时加载。适用于中大型项目、多人协作、高质量高稳定性要求场景。简单 bug 修复或快速原型不强制走完整流水线。"
+description: "全栈文档驱动开发技能包 v8.0 — DOC FIRST + Contract-First + Spec-Driven + TDD + Cockpit 驾驶舱 + 圆桌会议 + 技能生长。DOC SYNC 合并（一次写入一次验证）+ 基石模块 + Buglist-Cockpit 联动。11 阶段流水线（Cockpit→Intake→Proposal→Spec→[Prototype]→Contract→Plan→Closure-Define→Implement→Review→DOC SYNC→Accept）+ 双层状态卡 + 7 维度量化验收 + feedback-loop 漂移回流 + 30% 需求原子化去重 + 归档硬门禁。当 agent 进行新功能开发、系统重构、多模块协作、前后端分离、需要协议先行 / TDD / E2E / 量化验收时加载。适用于中大型项目、多人协作、高质量高稳定性要求场景。简单 bug 修复或快速原型不强制走完整流水线。"
 requires:
   skills: [acceptance-discipline]
   optional: [ponytail4Trae, gitnexus4Trae, doc-map-manager]
@@ -13,6 +13,46 @@ requires:
 
 ---
 
+
+## §-1 依赖自检（每次加载强制执行）
+
+> 🛑 **技能加载后第一件事**，在进入任何流水线步骤之前。
+
+```
+Step A — 解析 YAML requires:
+  requires.skills:    [acceptance-discipline]
+  requires.optional:  [ponytail4Trae, gitnexus4Trae, doc-map-manager]
+
+Step B — 硬依赖检查（缺失 → 🛑 阻断）:
+  检测 acceptance-discipline 是否可加载（在 builtin_skills/ 或 .trae/skills/）
+    ├── 存在 → 继续
+    └── 不存在 → 🛑 立即阻断:
+        "❌ fullstack4traev8 加载失败：缺少必需依赖 acceptance-discipline。
+         安装: Copy-Item -Recurse '...acceptance-discipline' '$env:USERPROFILE\.trae-cn\builtin_skills\acceptance-discipline'
+         此技能是验收门禁必需，不可跳过。安装后重试。"
+
+Step C — 软依赖检查（缺失 → ⚠️ 警告，不阻断）:
+  逐项检查 optional 技能:
+    ├── ponytail4Trae    缺失 → ⚠️ "懒人模式不可用，代码可能过度工程"
+    ├── gitnexus4Trae    缺失 → ⚠️ "影响面分析降级为 grep，存在盲区风险"
+    └── doc-map-manager  缺失 → ⚠️ "文档索引无法自动更新，DOC SYNC 不完整"
+  → 汇总警告输出给用户，不阻断加载。
+
+Step D — 注入降级标记:
+  若 optional 有缺失 → 后续所有 agent 委派时注入:
+  "⚠️ 降级模式: {缺失技能列表} 不可用。不可假装有此能力。"
+```
+
+### 检查结果速查
+
+| 依赖 | 类型 | 缺失时 |
+|------|------|--------|
+| acceptance-discipline | 硬依赖 | 🛑 阻断加载 |
+| ponytail4Trae | 软依赖 | ⚠️ 懒人模式关闭 |
+| gitnexus4Trae | 软依赖 | ⚠️ 影响分析降级 |
+| doc-map-manager | 软依赖 | ⚠️ DOC SYNC 不完整 |
+
+---
 
 ## §0 骨架流程（本技能存在的唯一意义）
 
@@ -28,24 +68,48 @@ Phase 3: Spec       spec-writer: BDD + E2E + Test Skeleton + Out of Scope
 Phase 3.5: Prototype  (仅 UI) ASCII 线框图 + 4 状态 + 移交清单
 Phase 4: Contract   ★ 不可跳过 contract-writer: 四件套 + Contract Test 骨架
 Phase 5: Plan       planner: design.md + tasks.md + 方案对比 ≥ 2
-Phase 5.5+7.5: DOC SYNC  ★ 硬触发 doc-updater: 🟡 write（知识回流持久化文档）→ verify（二次验证无 docs/changes/ 残留引用）→ 🟢 合并原 DOC SYNC #1 + #2
+Phase 5.5: DOC SYNC #1  ★ doc-updater: 🟡 provisional write（知识回流持久化文档）
+Phase 7.5: DOC SYNC Verify  ★ 主上下文轻量: 🟡→🟢 状态标记验证 + 残留引用检查（不委派 doc-updater，≤ 30s）
 Phase 5.6: Closure-Define  ★ 不可跳过 planner: 提取最小业务闭环链 → closure-checklist.md
 Phase 6: Implement  implementer: CLOSURE GATE → DOC SYNC GATE → CONTRACT GATE → 🔴RED → 🟢GREEN → 🔍DRIFT CHECK
-Phase 7: Review     reviewer: 7 维度量化打分 (总分≥4.0 + 维度≥3.0 + 安全≥4.0)
-Phase 8: Accept     acceptance-discipline: E2E + 性能 + 安全门禁 → 交付
+Phase 7: Review     ★ reviewer: 7 维度量化打分 (总分≥4.0 + 维度≥3.0 + 安全≥4.0) + Visual Gate（涉及UI时强制截图比对）
+                      ★ 归档硬门禁（Review 通过后执行，6 项机械验证，见 [archive-protocol.md](references/archive-protocol.md)）:
+                        [1] tasks.md 无未完成项（[ ] → 🛑 FAIL）
+                        [2] V2 REDESIGN 标记全解析（UNSOLVED → 🛑 FAIL）
+                        [3] git diff 含 src/ 变更（纯文档提交 → 🛑 FAIL）
+                        [4] DECISIONS.md 全 [x] 决议（[ ] → 🛑 FAIL）
+                        [5] Mock 占位检测（MOCK_ > 1 或 Stage 5 PENDING → 🛑 FAIL）
+                        [6] 用户显式确认归档（Agent 不自批）
+                      6 项全 ✅ → 📦 Archive: changes/{id} → archive/done/{id}
+Phase 7.6: User Check  ★ 主上下文: 展示 Review 结论（含 Visual Gate 截图比对）→ 用户人工确认 UI 与 prototype 一致
+Phase 8: Accept     acceptance-discipline: E2E + 性能 + 安全门禁
 
-🛑 不可跳过: Contract / Closure-Define / DOC SYNC
+🛑 不可跳过: Contract / Closure-Define / DOC SYNC / User Check（涉及UI时）
 
 Bug-Batch 轻量缺陷修复路径 (Phase B):
   Phase B.1: Buglist     intake: bug识别 → buglist.md + 影响面 + 状态卡
   Phase B.2: Fix         逐个 debugger: 复现→根因→🔴RED→🟢GREEN→回归
   Phase B.3: Retro-Spec  修复后评估: retro-spec.md + DOC SYNC + 回归全绿
 
-异常路径: Bug→[debugger] | Bug批量→[bug-batch] | 漂移→[feedback-loop]回流 | Review FAIL→按层级返工 | DOC SYNC FAIL→补全后继续 | 文档膨胀→[治理决策树 §十一] 自主治理
+异常路径: Bug→[debugger] | Bug批量→[bug-batch] | 漂移→[feedback-loop]回流 | Review FAIL→按层级返工 | Review 归档门禁 FAIL→列出FAIL项+阻塞 | DOC SYNC FAIL→补全后继续 | 文档膨胀→[治理决策树 §十一] 自主治理 | Archive后缺陷→[§归档后缺陷处理] 创建新change
 
 简化链: Intake 跳过 Proposal → 产出迷你 proposal.md（≤10行）→ 直接进 Spec
 
+单人快速通道 (V9.5 NEW — ≤7 capability + ≤50 task + 单人开发):
+  Intake 判定触发 → 压缩为 6 阶段:
+    Intake(合并迷你 proposal) → Spec(合并 prototypes + P0闭环) → Contract → Implement → Review(+Visual Gate + 归档门禁) → User Check → Accept
+  跳过: 完整 Proposal / Plan / Closure-Define(分离phase) / DOC SYNC(仅Review后一次性更新)
+  保留: Contract ★ / Review ★ / User Check ★（三门禁不可跳过）
+
 治理链 (纯文档变更，无 src/): Intake 检测文档膨胀 → 治理决策树判定（[§十一](../references/doc-sync-protocol.md#十一文档治理决策树)）→ ponytail 直改 → 保真迁移（[§十三](../references/doc-sync-protocol.md#十三保真迁移协议)）→ DOC SYNC
+
+归档后缺陷处理 (V9.5 NEW):
+  归档后（Phase 7 Review 归档门禁完成后）发现缺陷 → 禁止解封 archive/ → 创建新 change:
+    1. Intake: 识别缺陷影响面 + 根因归类（UI/逻辑/性能/数据）
+    2. 以缺陷发现为起点，创建新 change（编号递增）
+    3. 走标准流水线（或单人快速通道）修复
+    4. 新 change 的 spec 必须引用原 change 的 archive 路径（如 "修复 archive/done/09-xxx 中的缺陷"）
+    5. 修复完成后独立 Archive，不复写原 change
 
 ---
 
@@ -60,7 +124,10 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 | Plan | 方案对比 ≥ 2 + tasks 标注契约 + 用户确认 + 🔍Delta-Check | 不进 Closure-Define |
 | Closure-Define | closure-checklist.md 存在 + P0 闭环步骤非空 | 不进 implement |
 | Code | tests 100% + lint 0 + coverage > 80% + drift 无严重 + P0 闭环步骤全实现 | 不进 review |
-| Review | 总分 ≥ 4.0 + 单维度 ≥ 3.0 + 安全 ≥ 4.0 + DOC SYNC 验证 | 不 commit |
+| Review | 总分 ≥ 4.0 + 单维度 ≥ 3.0 + 安全 ≥ 4.0 + (UI→Visual Gate截图比对) + 归档 6 项门禁（tasks / V2标记 / src diff / DECISIONS / mock检测 / 用户确认）| 不进 DOC SYNC Verify |
+| DOC SYNC Verify | 🟡→🟢 状态标记验证 + 无 docs/changes/ 残留引用（主上下文轻量，不委派 doc-updater） | 不进 User Check |
+| User Check | 用户人工确认 UI 与 prototype 一致（纯后端变更自动跳过） | 不进 Accept |
+| Accept | E2E + 性能 + 安全门禁全通过 | 不交付 |
 | Buglist | buglist.md 非空 + 影响面清单 + 状态卡 | 不进 Fix |
 | Fix (per bug) | 根因证据清单 + 🔴RED + 🟢GREEN + 回归通过 | 不进下一 bug |
 | Retro-Spec | retro-spec.md 完整 + DOC SYNC + 全量回归绿 | 不提交 |
@@ -68,7 +135,7 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 
 ---
 
-## §2 八条铁律
+## §2 九条铁律
 
 ```
 1. 相位不可跳过  Contract / Closure-Define / DOC SYNC 不可跳过，跳过=回退
@@ -79,6 +146,8 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 6. DELTA ONLY  变更目录工件只写此变更的增量。项目级通用协议/架构/约定/领域模型/模块文档引用 docs/ 持久化文档路径，禁止复制全文到 changes/ 下。事实只能存在于一个地方，禁止同一事实出现在多个变更工件中。
 7. Buglist-Cockpit 联动  缺陷修复前必须从 Cockpit 驾驶舱定位当前状态 + 确认 buglist.md 与驾驶舱同步，修复后回流 Cockpit 更新健康度
 8. 文档治理不失真  修剪/迁移项目级文档禁止丢失架构事实。操作前事实编目→操作后逐项验证→缺失=回退（保真协议见 [§十三](references/doc-sync-protocol.md#十三保真迁移协议)）
+9. 归档不可变  archive/done/ + archive/out/ 文件已归档沉淀，禁止修改/修剪/治理。DOC SYNC 已将归档知识提炼到项目级文档（ARCHITECTURE/modules/），归档文件仅保留 git 历史追溯价值。唯一合法操作是归档新品（archive phase），不修剪旧品。
+10. 状态卡单源（V9.5 NEW）  Cockpit（docs/specs/.state-card.md）为唯一真源。per-change .state-card.md 只记录变更独有信息（phase/artifacts），全局状态（健康度/阻塞）只存在于 Cockpit。阶段切换时先更新 Cockpit，per-change 卡从 Cockpit 同步派生，禁止独立维护两份状态。
 ```
 
 ---
@@ -128,6 +197,7 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 | GitNexus 可用却用 grep 理解代码 | GitNexus query/context/impact |
 | 直接操作文档索引文件 | 通过 `doc-map-manager` 技能 |
 | 将项目级文档（架构/模块/领域模型/约定）全文复制到 changes/ 局部工件 | 引用 docs/ 路径 + 写增量，事实唯一 |
+| 修改/修剪/治理 `docs/archive/` 目录下任何文件 | 归档文件 = 只读（不读也行），DOC SYNC 已提炼到项目级文档。归档新品走 archive phase，不修剪旧品。 |
 
 ---
 
@@ -135,11 +205,13 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 
 | 想了解 | 读 |
 |--------|-----|
+| 上下文经济（读文件/委派/汇报/Completion Report 体积约束） | [references/context-economy.md](references/context-economy.md) |
 | 项目目录结构 + Cockpit 驾驶舱 | [references/project-structure.md](references/project-structure.md) |
 | 文档索引集成 (doc-map-manager) | [references/doc-map-integration.md](references/doc-map-integration.md) |
 | 30% 需求去重 | [references/spec-overlap-merge.md](references/spec-overlap-merge.md) |
 | 圆桌会议多角色评审 | [references/roundtable.md](references/roundtable.md) |
 | 量化验收 7 维度打分 | [references/quantitative-acceptance.md](references/quantitative-acceptance.md) |
+| 视觉验收（截图+vision-audit+prototype比对） | [references/visual-acceptance.md](references/visual-acceptance.md) |
 | 业务闭环定义模板 | [templates/closure-checklist.md](templates/closure-checklist.md) |
 | 协议先行 | [references/contract-first.md](references/contract-first.md) |
 | 漂移检测 + 回流 | [references/feedback-loop.md](references/feedback-loop.md) |
@@ -147,6 +219,7 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 | 原型设计规则 | [references/prototype.md](references/prototype.md) |
 | DOC SYNC 合并协议（写+验证） | [references/doc-sync-protocol.md](references/doc-sync-protocol.md) |
 | 文档治理（禁止写入+体积上限+决策树+保真协议） | [references/doc-sync-protocol.md](references/doc-sync-protocol.md) §九-十三 |
+| 归档协议（5 项硬门禁 + 预审 + 执行流程） | [references/archive-protocol.md](references/archive-protocol.md) |
 | 版本变更 | [references/CHANGELOG.md](references/CHANGELOG.md) |
 | FAQ | [GUIDE.md](GUIDE.md) |
 | 快速命令 | `python render-cockpit.py` / `python env-init.py --fix` |

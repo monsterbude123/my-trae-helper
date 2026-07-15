@@ -46,13 +46,16 @@ user-invocable: true
 2. Create Hotfix Record → hotfix-{date}-{编号}.md
 3. Create Branch → hotfix/{issue-id} (基于 release branch)
 4. Implement → 最小变更实施
-5. Collect Approvals → 三方并行
+5. 🔴RED: 写复现测试 → 确认 Bug 可复现
+6. 🟢GREEN: 实施修复 → 复现测试通过
+7. Collect Approvals → 三方并行
      ├── lead-programmer: fix review
      ├── qa-tester: regression test
      └── producer: deployment approval
-6. QA Re-Entry Gate → smoke / targeted / full 三级别
-7. Deploy → 部署 + 监控
-8. Post-Deploy Verification → 48h 内 incident review
+8. QA Re-Entry Gate → smoke / targeted / full 三级别
+9. Deploy → 部署 + 监控
+10. Post-Deploy Verification → 48h 内 incident review
+11. 产出 Hotfix 记录 hotfix-{date}-{id}.md；若修复过程中产生新异常 → 按 report-growth.md 格式写 report-{phase}{seq}.md，关联引用 Hotfix 编号
 ```
 
 ## Hotfix 记录格式

@@ -17,6 +17,15 @@ metadata: {"openclaw":{"emoji":"🎭","os":["darwin","linux","win32"]}}
 ```
 角色人设（Want/Fear + 性格 + 外形）
         ↓ Step 1: 提取五维声学特征（年龄/性别/共鸣/语速/音调）
+```
+
+> 🛑 硬引用约束（H8 修复）：Step 1 的 Want/Fear 必须机械派生自 story-design.md。
+> - 读取 game-story-design 产出的 story-design.md → 定位对应角色 → 提取 Want/Fear
+> - 禁止在 voice-card 中独立填写 Want/Fear
+> - 若 story-design.md 中的 Want/Fear 变更 → voice-card 中的声学特征需重新推导
+> - 在 voice-card 中标注 source: story-design.md@{version} {date}
+
+```
         ↓ Step 2: 选择音域区间（参考声带物理）
         ↓ Step 3: 决定 5 个数值参数（temperature/top_p/repetition_penalty/max_new_tokens/seed）
         ↓ Step 4: 写出 30-60 词的英文 instruct
@@ -57,18 +66,20 @@ metadata: {"openclaw":{"emoji":"🎭","os":["darwin","linux","win32"]}}
 ## 与其他 skill 的协作
 
 - **TTS 调用流程**：`comfyui-api-skills`（音频生成管线）
-- **角色设计 Want/Fear 推导**：`game-story-design`（角色宪法中的 Want/Fear/弧光直接作为音色设计的输入）
+- **角色设计 Want/Fear 推导**（硬引用）：`game-story-design` — Step 1 禁止独立填写 Want/Fear。必须从 story-design.md 机械读取角色宪法中的 Want/Fear/弧光。voice-card 中标注引用来源 story-design.md@v{N} {date}
 - **脚本集成**：`webgal-scripting` 或其他引擎脚本技能（将本 skill 产出的 `voices.json` 注入到场景脚本）
 
 ## 检查清单（生成一份角色音色配置后逐项验证）
 
 ```
+□ [HARD] Want/Fear 来自 story-design.md？不是独立填写的？标注了 source 版本号？
 □ 五维特征都明确写了（年龄/性别/共鸣/语速/音调）
 □ 数值参数有理由（不是瞎抄 0.7/0.85）
 □ 至少 30 词，禁用 2-5 词短 prompt
 □ 与同剧其他角色区分度 ≥ 3 个维度
 □ BGM 不抢戏（频段错开）
 □ 静音占比 < 20%（调整 max_new_tokens + 文本分句）
+□ TTS 引擎已在 voice-card 中记录（引擎/版本/种子）？换了引擎必须重新验收声音
 ```
 
 ## 来源与权威

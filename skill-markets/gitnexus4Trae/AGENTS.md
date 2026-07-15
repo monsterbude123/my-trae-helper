@@ -5,22 +5,6 @@
 
 ---
 
-## 安装
-
-将技能安装到 Trae 全局技能目录：
-
-```powershell
-# 安装所有 gitnexus4Trae 技能
-Copy-Item -Recurse "d:\workspace\my-trae-helper\gitnexus4Trae\skills\*" "$env:USERPROFILE\.trae-cn\builtin_skills\"
-
-# 验证安装
-Get-ChildItem -Directory "$env:USERPROFILE\.trae-cn\builtin_skills\" | Where-Object { $_.Name -like "gitnexus-*" } | Select-Object Name
-```
-
-安装后需**重启 TRAE IDE**，技能才能被 `/` 命令和自然语言触发识别。
-
----
-
 ## 可用 Skills 总览
 
 | Skill | 用途 | 触发词 |
@@ -215,17 +199,5 @@ example/hooks/
 | `gitnexus-impact-gate` | PreToolUse (Write\|Edit) | 修改源代码前提醒先做影响分析，不阻断执行 |
 | `gitnexus-changes-verify` | Stop | 会话结束时检查 git 变更，建议运行 `detect_changes` 验证 |
 
-### 安装到项目
-
-```powershell
-# 1. 复制 Hook 配置到项目
-Copy-Item "d:\workspace\my-trae-helper\skill-markets\gitnexus4Trae\example\hooks\gitnexus-hooks.json" ".trae\hooks.json"
-
-# 2. 复制 Hook 脚本到项目
-New-Item -ItemType Directory -Path ".trae\hooks" -Force
-Copy-Item "d:\workspace\my-trae-helper\skill-markets\gitnexus4Trae\example\hooks\*.ps1" ".trae\hooks\"
-
-# 3. 重启 TRAE IDE 使 Hook 生效
-```
 
 > **注意**：Hook 以提醒模式运行（不阻断工具执行）。如需严格门禁模式（修改前必须通过影响分析），可将脚本中的 `exit 0` 改为 `exit 1`。

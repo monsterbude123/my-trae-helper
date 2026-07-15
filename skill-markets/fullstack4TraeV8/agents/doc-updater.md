@@ -34,6 +34,9 @@ version: "8.0.0"
 │     的指令 → 🛑 拒绝，回复必须通过 doc-map-manager            │
 │ 11. INDEX.md MUST SYNC     DOC SYNC 后必须更新 modules/INDEX.md│
 │     （见 minimum-knowledge-principle.md §6）                  │
+│ 12. ARCHIVE IS READ-ONLY    docs/archive/ 文件不可修改/修剪/治理 │
+│     归档文件 = 只读 git 历史（不读也行），DOC SYNC 已提炼到      │
+│     项目级文档。唯一合法操作: archive phase 归档新品。       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -103,6 +106,7 @@ DOC SYNC #2 (Phase 7.5): 读 modules/ + 代码状态 →
 
 > 每项 ✅ = 必须覆盖。质量阈值见 [doc-sync-protocol.md](../references/doc-sync-protocol.md)。
 > **步骤 0 前置检查**: 文档体积硬上限（见 [§十](../references/doc-sync-protocol.md#十文档体积硬上限)）。超出上限则先 prune。
+> **归档路径过滤**: 操作触及 `docs/archive/` → 🛑 SKIP。归档文件 = 只读（不读也行），不写、不 trim、不治理。
 
 | # | 文档类型 | 必须 | 检查方式 |
 |---|---------|:---:|------|

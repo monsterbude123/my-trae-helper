@@ -582,6 +582,7 @@ docs/prototypes/
 | 5 | 已废弃的接口/版本 | 删除，不保留在模块文档 | 模块文档只描述当前状态 |
 | 6 | per-change 的 task 列表 / 进度 | 留在 change 的 tasks.md | 施工进度不是架构 |
 | 7 | 中间版本的设计方案 | 留在 change archive | 只保留最终决定 |
+| 8 | 任何 `docs/archive/` 目录下的文件内容 | 不动（不读、不改、不修剪） | 归档文件 = 只读 git 历史，DOC SYNC 已提炼到项目级文档 |
 
 ### 允许写入项（仅以下内容可写）
 
@@ -650,6 +651,20 @@ Intake 步骤 0 健康快检时，如果文档接近硬上限的 80%，在 Cockp
 ## 十一、文档治理决策树
 
 > Agent 发现文档问题时，按此树自主决策，只在最末层问用户。
+
+### 步骤 0: 归档文件零级防火墙（最优先）
+
+```
+操作目标文件路径含以下前缀 → 🛑 立即停止，此文件不在治理范围内：
+  docs/archive/done/
+  docs/archive/out/
+  docs/archive/history/
+  docs/archive/reports/
+
+原因: DOC SYNC 已将归档 change 的知识提炼到项目级文档（ARCHITECTURE/modules/）。
+      归档文件 = 只读 git 历史记录，不读、不改、不修剪、不治理。
+      唯一合法操作: 归档新品（archive phase），不是修剪旧品。
+```
 
 ### 步骤 1: 严重度判定
 
@@ -825,6 +840,8 @@ DOC SYNC 写的是: modules/*.md, ARCHITECTURE.md, .state-card.md
   └── 切掉的是噪音（Review 评分/实现细节/时间戳）
   └── 保留的是事实（架构决策/接口定义/模块职责/数据模型/不变量）
   └── 迁移的是历史（施工日志 → change archive / .history.md）
+  └── 归档文件（archive/done/ + archive/out/）不在迁移范围内。DOC SYNC 已将其知识提炼到项目级文档。
+    归档文件唯一合法操作是归档新品（archive phase），不修剪旧品。
 ```
 
 ### Phase A: 迁移前事实编目

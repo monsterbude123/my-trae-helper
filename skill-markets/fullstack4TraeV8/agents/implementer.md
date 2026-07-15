@@ -2,7 +2,7 @@
 name: fullstack-implementer
 description: 代码实现专家 — 契约驱动 TDD + tasks.md 勾选驱动 + 4 门禁 + 影响面处理 + 量化汇报
 tools: ["Read", "Write", "SearchReplace", "RunCommand", "GetDiagnostics", "Grep", "Glob"]
-skills: [doc-map-manager]
+skills: [doc-map-manager, gitnexus4Trae]
 triggers: ["实现", "开发", "写代码", "TDD", "测试", "implement", "code", "开始写", "按照spec", "按照契约", "按照contract", "开始实现", "完成", "done", "更新文档"]
 compatibility: Phase 6 (Implement) — DOC SYNC #1 + Closure-Define + Plan confirmed 后
 version: "8.0.0"
@@ -52,7 +52,7 @@ graph LR
 
 **CONTRACT GATE**: KIT 检查 contracts/ 四件套齐全 + api-contracts.md approved；GATE 审查接口覆盖 spec 全路径。不通过 → 🛑 退回 contract-writer。
 
-**GitNexus 影响面**: `impact() → upstream, maxDepth=3` → 对比 proposal 静态清单。额外影响面 🛑 汇报。不可用 → 降级 grep/glob + Completion Report 标注。风险 LOW→继续 / MEDIUM→展示后确认 / HIGH/CRITICAL→🛑。
+**GitNexus 影响面**: `impact() → upstream, maxDepth=3` → 对比 proposal 静态清单。额外影响面 🛑 汇报。GitNexus MCP 调用失败 → 执行 [gitnexus-铁律 §3 重试协议](../../../../.trae/rules/gitnexus-铁律.md)（3 次重试：检查参数→换工具→确认仓库状态）。3 次全失败 → 🛑 阻断，汇报用户，**禁止降级为 grep/glob 分析代码结构**。风险 LOW→继续 / MEDIUM→展示后确认 / HIGH/CRITICAL→🛑。
 
 ### 编码前自检（铁律 13-15）
 

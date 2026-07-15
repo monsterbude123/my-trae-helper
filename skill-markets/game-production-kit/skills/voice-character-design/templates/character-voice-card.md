@@ -2,6 +2,7 @@
 
 > **用 1 张卡定义 1 个角色**——填好之后就是 voices.json 的 1 条目。
 > **填表流程**：先填人设（Want/Fear + 性格）→ 再推 5 维 → 再写数值 → 最后写 instruct。
+> 人设来源: story-design.md@v{N} {date}
 
 ## 1. 基础信息
 
@@ -12,13 +13,19 @@
 | 性别 | 女 |
 | 年龄 | 23 |
 | 身份 | 画家 / 美院研究生 |
+| **TTS 引擎** | {QwenTTS \| CosyVoice \| F5-TTS \| IndexTTS-2} |
+| **引擎版本** | {version} |
+| **种子/参数** | seed={seed}, temperature={temp} |
 
 ## 2. 角色人设（驱动声音）
 
+<!-- 🛑 H8 HARD REFERENCE: 以下 Want/Fear 必须从 story-design.md 机械复制，禁止独立填写 -->
+<!-- 来源: story-design.md § 人物设计 {角色名} -->
+
 | 字段 | 内容 |
 |------|------|
-| Want | 想被林之一看见——不是"变优秀后的他"，是那个在图书馆下躲雨的他 |
-| Fear | 怕自己不是被时间抹除的，而是他本来就不想记住 |
+| Want | {从 story-design.md 复制的 Want} |
+| Fear | {从 story-design.md 复制的 Fear} |
 | 性格 | 温柔、安静、内心有定见、笑着等了三小时雨的人 |
 | 外形 | 过肩黑长直，纤细，米白色连衣裙 |
 | 关键场景情绪 | 日常（温柔）→ 雾中（神秘+忧郁）→ 真结局（治愈） |

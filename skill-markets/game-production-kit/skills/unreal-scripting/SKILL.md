@@ -25,6 +25,18 @@ user-invocable: true
 6. 文件扩展: .uproject / .uplugin / .Build.cs / .Target.cs
 ```
 
+> Phase 3 统一产出契约: references/cross-engine-contract.md（scene-manifest.json / asset-references.json 格式）
+
+## 代码质量（Phase 3 内建）
+
+> H2 修复：lint/format 内建到 Phase 3，不推到 Phase 4。
+
+- Lint: `clang-tidy`（C++ 静态分析）+ UE Marketplace Linter 插件 `-run=Linter`（Blueprint 规则检查）
+- Formatter: `clang-format --dry-run -Werror`（C++ 格式检查）; Blueprint 格式依赖编辑器内置格式化
+- 提交前运行: `clang-format --dry-run -Werror Source/**/*.cpp Source/**/*.h`
+- 禁止跳过: C++ lint 错误 → 不进 Phase 4
+- 注意: UHT 生成文件（*.generated.h/*.gen.cpp）需排除在 lint 范围外
+
 ## 项目骨架
 
 ```

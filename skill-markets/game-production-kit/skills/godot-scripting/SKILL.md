@@ -25,6 +25,17 @@ user-invocable: true
 6. 脚本文件 glob: "*.gd" 而非 type: "gdscript"（rg 将 .gd 注册为 gap 类型）
 ```
 
+> Phase 3 统一产出契约: references/cross-engine-contract.md（scene-manifest.json / asset-references.json 格式）
+
+## 代码质量（Phase 3 内建）
+
+> H2 修复：lint/format 内建到 Phase 3。本地安装: `pip install gdtoolkit`（非 CI-only，Phase 3 每场景编写后必须运行）
+
+- Lint: `gdlint .` — godot-gdscript-toolkit，GDScript 代码质量检查（语法/风格/命名/性能）
+- Formatter: `gdformat --check .` — godot-gdscript-toolkit，GDScript 代码格式化器（遵循官方风格指南）
+- 提交前运行: `gdformat --check . && gdlint .`
+- 禁止跳过: gdlint 错误 → 不进 Phase 4
+
 ## 项目骨架
 
 ```

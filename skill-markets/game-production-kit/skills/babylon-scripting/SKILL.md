@@ -26,6 +26,17 @@ user-invocable: true
 7. rg glob "*.ts" + "*.tsx"
 ```
 
+> Phase 3 统一产出契约: references/cross-engine-contract.md（scene-manifest.json / asset-references.json 格式）
+
+## 代码质量（Phase 3 内建）
+
+> H2 修复：lint/format 内建到 Phase 3，不推到 Phase 4。
+
+- Lint: `npx eslint .` — ESLint + @typescript-eslint，代码质量与逻辑错误检查
+- Formatter: `npx prettier --check .` — Prettier，统一代码风格（缩进/引号/分号）
+- 提交前运行: `npx eslint . && npx prettier --check .`
+- 禁止跳过: lint 错误 → 不进 Phase 4
+
 ## 项目骨架
 
 ```

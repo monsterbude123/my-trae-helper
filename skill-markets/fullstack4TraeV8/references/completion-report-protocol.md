@@ -19,38 +19,44 @@
 
 ## 二、Completion Report 结构
 
+### 二·0 体积硬上限（V9.5 NEW — 上下文经济）
+
+```
+🛑 Completion Report 总体积 ≤ 800 字符（不含 YAML 骨架字段名）。
+超过 → 🛑 REJECT，退回 agent 压缩后重新提交。
+
+压缩规则:
+  - artifacts_produced 每个 path 只保留 change_summary（≤40字符），删除 lines_added/lines_removed/quality_evidence
+  - artifacts_missing 每个 path reason ≤ 50 字符
+  - verification_hint 只保留 git diff --stat 命令，不附带说明
+  - 额外解释文字 → 放到产出文件内部（如量化汇报.md），不在 Completion Report 中重复
+
+反例: 单次 Completion Report 3KB → 🛑 REJECT（等于又写了一个 spec 的体积）
+正例: Completion Report ≤ 600 字符 + 产出文件路径引用
+```
+
+### 二·1 YAML 结构
+
 ```yaml
 completion:
-  # 必须字段
   status: COMPLETE | INCOMPLETE | FAILED
   agent: {agent-name}
-  task: {委派时的任务描述}
+  task: {委派时的任务描述（≤60字符）}
   timestamp: {ISO 8601}
 
-  # 需求清单（由委派方在任务分配时给定，Agent 不可修改）
-  required_artifacts:
+  required_artifacts:      # 委派方给定，agent 不修改
     - path: {文件路径}
-      requirement: {对该文件的变更要求（可验证的阈值描述）}
-      updated: true | false
-    - path: {文件路径}
-      requirement: {要求}
+      requirement: {要求（≤40字符）}
       updated: true | false
 
-  # 实际产出（Agent 必须列出所有实际变更的文件）
-  artifacts_produced:
+  artifacts_produced:      # 每个 ≤40字符 change_summary，禁止贴代码
     - path: {文件路径}
-      change_summary: {一句话描述做了什么}
-      lines_added: {N}
-      lines_removed: {N}
-      quality_evidence: {如何证明变更满足要求}
+      change_summary: {一句话}
 
-  # 遗漏项（如果 required_artifacts 中有未完成的）
   artifacts_missing:
     - path: {文件路径}
-      reason: {为什么没完成}
-      can_delegate: true | false   # 是否可委派其他人完成
+      reason: {≤50字符}
 
-  # 验证命令（主上下文可执行以验证产出的命令）
   verification_hint: "git diff --stat -- {paths}"
 ```
 

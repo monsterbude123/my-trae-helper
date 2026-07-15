@@ -84,6 +84,12 @@ triggers:
 增量: AI 犯一次错加一条规则，必须可验证
 ```
 
+> 规则编写完整工艺（7要素/无死引用/零概念重叠/决策树4路/异常表规范/自检清单/禁止行为）→ [references/rule-writing-craft.md](references/rule-writing-craft.md)
+
+### §3.1 技能脚本路径解析
+
+> 执行技能包内嵌脚本时的路径搜索链 → [references/skill-script-paths.md](references/skill-script-paths.md)
+
 ---
 
 ## §4 Skills 编写原则（专业手册）
@@ -94,6 +100,12 @@ triggers:
 结构: YAML frontmatter → Prerequisites → Core Workflow → Constraints → Quality Checklist
 可选增强: [Quick Start] [Examples] [Troubleshooting] — 按需添加，示例比描述管用 10 倍
   若加完后超 150 行 → 把 Troubleshooting 移到 references/errors.md
+
+### §4.1 技能依赖检查（硬性标准）
+
+> **MUST**: 任何有跨技能引用的 Skill 必须声明 `requires` 并在加载时执行依赖检查。
+> **禁止**: agent 发现依赖缺失后自行降级 — 必须阻断并提示用户。
+> 完整协议 → [references/skill-dependency-check.md](references/skill-dependency-check.md)
 目录:
   skill-name/
   ├── SKILL.md          # 核心骨架（必需）

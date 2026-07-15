@@ -117,7 +117,14 @@ triggers:
 
 ---
 
-## §4 进度可见性
+## §4 编辑经济性
+
+> 同一文件的所有改动必须合并为 1~2 次 Edit 完成，禁止碎片化编辑。
+> 完整决策树/异常处理/MUST/NEVER → [references/edit-economy.md](references/edit-economy.md)
+
+---
+
+## §5 进度可见性
 
 - 多步骤任务 → 使用 plan 展示步骤 + 状态
 - 单步骤任务 → 跳过 plan 开销

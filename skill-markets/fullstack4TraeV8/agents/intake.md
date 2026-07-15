@@ -57,6 +57,7 @@ graph LR
 
 Cockpit 🐛段有未解决 P0/P1 bug → 提示用户优先处理 → 确认后进入 bug-batch 链路恢复上下文。
 同时检查 Cockpit `文档健康` 字段：🟡 接近上限 / 🔴 超过上限 → 提示用户，按[治理决策树 (§十一)](../references/doc-sync-protocol.md#十一文档治理决策树)判定是否进治理链。
+**治理范围自动排除** `docs/archive/` 下所有文件（归档不可变，见铁律 9）。
 > 完整决策树 → [references/cockpit.md](../references/cockpit.md#新会话重入协议v9-new) + [references/bug-batch.md](../references/bug-batch.md)
 
 ### 步骤 0.1: 项目就绪检查

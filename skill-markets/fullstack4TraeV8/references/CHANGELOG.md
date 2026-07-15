@@ -93,6 +93,22 @@ V8 上线后在 AIGCMediaDesktop 项目实战中发现文档臃肿（状态卡 4
 
 **连锁更新**: Intake 步骤 0.05 合并 Bug+文档健康检查 / doc-updater 步骤 0 前置保真协议 / implementer 15→15 铁律重新编号
 
+#### 10. 归档不可变（archive/ 免打扰）
+
+> Agent 在治理时侵入 `docs/archive/` 修剪已归档文件，浪费上下文且违反 DOC FIRST 原则。
+
+DOC SYNC 已将归档 change 的知识提炼到项目级文档，归档文件唯一价值是 git 历史追溯。
+
+| 落点 | 改动 |
+|------|------|
+| SKILL.md §2 | 新增铁律 9: **归档不可变** — 禁止修改/修剪/治理 archive/ |
+| SKILL.md §5 | 新增禁止项: "修改/修剪/治理 archive/ 文件" |
+| doc-sync-protocol.md §十一 | 新增**步骤 0: 零级防火墙** — 路径含 `docs/archive/*` → 🛑 立即停止 |
+| doc-sync-protocol.md §九 | 新增禁止写入第 8 项: archive/ 文件不读不改不修剪 |
+| doc-sync-protocol.md §十三 | 保真迁移排除 archive/ — "不在迁移范围内" |
+| doc-updater Agent | 新增铁律 12 + 步骤 0 归档路径过滤 |
+| intake Agent | 步骤 0.05 治理范围自动排除 archive/ |
+
 ### 删除的文件
 - `references/prototype-rules.md`（并入 prototype.md）
 - `references/prototype-ascii-template.md`（并入 prototype.md）

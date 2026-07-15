@@ -39,7 +39,7 @@
 
 | 技能 | 类型 | 一句话 | 依赖 |
 |------|------|--------|------|
-| [fullstack4TraeV7](fullstack4TraeV7/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v7 — 10 Agent 流水线 + 驾驶舱 + 圆桌 + 漂移回流 | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager（V10 NEW） |
+| [fullstack4TraeV8](fullstack4TraeV8/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v8 — 10 Agent 流水线 + 驾驶舱 + 圆桌 + 漂移回流 + 依赖自检 | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager |
 | [game-production-kit](game-production-kit/SKILL.md) | 纯Skill | 游戏制作工具箱 — 7 阶段编排器（引擎确认→剧情→素材→脚本→门禁→构建→部署），引擎可替换架构。内含 7 子技能 | 子技能: game-story-design, game-asset-pipeline, game-quality-gate, voice-character-design, voice-acting-skill, webgal-scripting, webgal-engine-build |
 
 ### L3 配置模板（绑定 L0~L2）
@@ -166,7 +166,8 @@ L0 基座（独立可用，无外部依赖）
 
 1. 在「技能索引」对应层级添加一行
 2. 标注依赖关系（硬依赖 / 软引用 / 无）
-3. 如有脚本，确认未在「共享能力注册表」中重复
+3. **依赖检查：声明了 requires 的技能，加载时必须执行 §四 依赖完整性验证流程**
+4. 如有脚本，确认未在「共享能力注册表」中重复
 
 ### 新增脚本
 
@@ -183,7 +184,37 @@ L0 基座（独立可用，无外部依赖）
 
 1. 同时更新 SKILL.md 的 `requires` YAML 字段
 2. 同时更新「技能索引」和「依赖关系图」
+3. **同时更新「降级影响表」中的降级说明**
 
 ### 地图冲突仲裁
 
 地图与 SKILL.md 不一致时，**以地图为准**。发现不一致 → 修正 SKILL.md。
+
+---
+
+## 四、依赖完整性验证（V8 NEW）
+
+> **标准**: 任何声明了 `requires` 的技能，加载前必须执行本验证。缺失依赖不得静音降级。
+
+### 验证规则
+
+| 依赖类型 | 字段 | 缺失行为 |
+|---------|------|---------|
+| 硬依赖 | `requires.skills` | 🛑 阻断加载，提示用户安装该技能 |
+| 软依赖 | `requires.optional` | ⚠️ 警告用户降级影响，用户确认后继续 |
+
+### 降级影响表
+
+| 被依赖技能 | 依赖者 | 降级后果 |
+|-----------|--------|---------|
+| acceptance-discipline | fullstack4traev8 | 🛑 阻断 — 验收门禁不可跳过 |
+| ponytail4Trae | fullstack4traev8 | ⚠️ 代码可能过度工程，无懒人模式提示 |
+| gitnexus4Trae | fullstack4traev8 | ⚠️ 影响面分析降级为 grep，存在盲区风险 |
+| doc-map-manager | fullstack4traev8 | ⚠️ 文档索引无法自动更新，DOC SYNC 不完整 |
+| test-experience | acceptance-discipline | ⚠️ 测试编写质量降低，陷阱可能重复踩 |
+| e2e-module-audit | acceptance-discipline | ⚠️ E2E 验收降级为手动 |
+| test-partition-runner | acceptance-discipline | ⚠️ 测试阻塞时无法自动分区定位 |
+
+### 完整协议
+
+> 依赖检查完整流程 + 加载时机械验证 + 降级影响模板 → [vibe-coding-standards/references/skill-dependency-check.md](vibe-coding-standards/references/skill-dependency-check.md)

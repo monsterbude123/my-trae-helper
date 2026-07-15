@@ -26,6 +26,17 @@ user-invocable: true
 7. 新 Input System (.inputactions) 替代旧 Input Manager
 ```
 
+> Phase 3 统一产出契约: references/cross-engine-contract.md（scene-manifest.json / asset-references.json 格式）
+
+## 代码质量（Phase 3 内建）
+
+> H2 修复：lint/format 内建到 Phase 3，不推到 Phase 4。
+
+- Lint: `dotnet format --verify-no-changes` — .NET 内置 Roslyn 分析器 + .editorconfig 规则检查
+- Formatter: `dotnet format` — 同上工具，自动修复格式问题（缩进/命名/using排序）
+- 提交前运行: `dotnet format --verify-no-changes`
+- 禁止跳过: format 检查失败 → 不进 Phase 4
+
 ## 项目骨架
 
 ```

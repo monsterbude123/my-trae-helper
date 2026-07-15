@@ -276,6 +276,14 @@ uv run pytest --cov=. --cov-report=term-missing
 
 ---
 
+## §8.5 测试陷阱速查
+
+> 完整决策树与环境就绪/外部调用检测/Fixture选择/Marker决策/自检清单 → [references/pytest-traps.md](references/pytest-traps.md)
+>
+> 覆盖：环境就绪决策树、外部调用4类检测、import-time常量、Fixture选择决策树、Autouse纪律、Marker决策树、9项自检清单、异步超时规避
+
+---
+
 ## §9 ShuXia 项目专项避坑
 
 > 来源：多轮 agent 并行开发中反复踩坑的真实教训。已在 `.trae/rules/测试避坑.md` 中有要点版，此处为完整版。

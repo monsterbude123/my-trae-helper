@@ -26,6 +26,17 @@ user-invocable: true
 7. rg glob "*.rs" 而非 type: "rust"
 ```
 
+> Phase 3 统一产出契约: references/cross-engine-contract.md（scene-manifest.json / asset-references.json 格式）
+
+## 代码质量（Phase 3 内建）
+
+> H2 修复：lint/format 内建到 Phase 3，不推到 Phase 4。
+
+- Lint: `cargo clippy -- -D warnings` — Rust 官方静态分析工具，750+ 条检查规则
+- Formatter: `cargo fmt --check` — rustfmt，Rust 官方代码格式化器
+- 提交前运行: `cargo fmt --check && cargo clippy -- -D warnings`
+- 禁止跳过: clippy 警告 → 不进 Phase 4
+
 ## 项目骨架
 
 ```

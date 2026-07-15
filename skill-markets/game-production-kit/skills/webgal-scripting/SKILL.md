@@ -37,6 +37,22 @@ description: "WebGAL 脚本编写完整参考。当需要编写、修改、检�
 
 ---
 
+> Phase 3 统一产出契约: references/cross-engine-contract.md（scene-manifest.json / asset-references.json 格式）
+
+## 代码质量（Phase 3 内建）
+
+> H2 修复：lint/format 内建到 Phase 3，不推到 Phase 4。
+> 注意：WebGAL .txt 场景脚本为自定义 DSL，无社区标准 CLI lint/formatter 工具。
+> JS/TS 引擎代码（插件/配置脚本）使用 JS/TS 工具链。
+
+- Lint（JS/TS 引擎代码）: `npx eslint .` — ESLint + @typescript-eslint
+- Formatter（JS/TS 引擎代码）: `npx prettier --check .` — Prettier
+- Lint（.txt 场景脚本）: 使用 `reference/11-checklist.md`（16 项自检条目）作为手动检查清单
+- 提交前运行: `npx eslint . && npx prettier --check .`（JS/TS 部分）; 场景脚本走 checklist 自检
+- 禁止跳过: 场景脚本 checklist 全通过 → 不进 Phase 4
+
+---
+
 ## 子文档索引
 
 | 序号 | 文档 | 内容 |

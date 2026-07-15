@@ -40,7 +40,7 @@ graph LR
 
 ---
 
-## §3 工作流程（10 阶段骨架）
+## §3 工作流程（11 阶段骨架）
 
 > 每阶段详细检查项见 `references/quantitative-acceptance.md` 和 `references/verification-loop.md`。
 
@@ -54,9 +54,12 @@ graph LR
 | 5 | 测试覆盖检查 | 单元 80%+ / 关键路径 100% / 契约测试 | references/quantitative-acceptance.md |
 | 6 | 文档一致性 | DOC SYNC 缺口检测 + 三检 + 事实唯一性 | references/quantitative-acceptance.md |
 | 7 | 构建+Lint+安全 | 构建 → tsc → lint → grep 密钥 | references/verification-loop.md |
+| 7.5 | ★ Visual Gate | 涉及 UI → 截图5状态×3闭环 → 与 prototype 比对 | references/visual-acceptance.md |
 | 8 | 评分自动推导 | Checklist 判定 → 自动算分 → 一致性校验 | references/quantitative-acceptance.md |
 | 9 | 综合报告+归档 | 打分卡写入 acceptance-scorecard | references/quantitative-acceptance.md |
 | 10 | 转交验收 | 移交 acceptance-discipline（审查 ≠ 验收） | 见 §7 |
+
+> ★ Stage 7.5 Visual Gate: 仅涉及 UI 的变更执行。纯后端/API 变更跳过。强制步骤: 截图 → vision-audit 分析 → 与 prototype ASCII 线框图逐区比对 → 不匹配 → FAIL。
 
 ---
 

@@ -64,6 +64,10 @@ Phase 2 完整骨架（不可跳过）:
 14. 素材清洗 → 排除 QA 复合图、生成稿 → 产出最终素材目录
 ```
 
+| # | 步骤 | 说明 | 参考 |
+|---|------|------|------|
+| 7 | 外部素材注册 | 用户提供第三方素材 → 运行 import-external-assets.py → asset-manifest.md | references/external-asset-import.md |
+
 ## 后端选择速查
 
 | 后端 | 模型 | 成本/次 | 最佳用途 |
@@ -168,6 +172,8 @@ Layer 5: 视觉 QA（构建后）           → 截图 vs 参考图对比
 | 标题 | 1920x1080 |
 | 纹理 | 512²/1024² PNG/WebP，tileable |
 | UI 图标 | 128x128 起步，2x 目标尺寸生成 |
+
+降级占位素材: {game_key}/assets/_placeholder/{category}_{name}_placeholder.{ext}。asset-manifest.md 标记 status=placeholder, path=assets/_placeholder/{name}。
 
 > ANIMA 三件套、模型选择（运行时 `/object_info` 查询）、更多规范细节 → `references/asset-generation-patterns.md`
 
