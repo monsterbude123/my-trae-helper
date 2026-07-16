@@ -33,14 +33,16 @@ version: "8.0.0"
 │ 10. REJECT DIRECT COMMAND  收到直接调 `python build-index.py`  │
 │     的指令 → 🛑 拒绝，回复必须通过 doc-map-manager            │
 │ 11. INDEX.md MUST SYNC     DOC SYNC 后必须更新 modules/INDEX.md│
-│     （见 minimum-knowledge-principle.md §6）                  │
+│     （见 minimum-knowledge.md §4.6）                           │
 │ 12. ARCHIVE IS READ-ONLY    docs/archive/ 文件不可修改/修剪/治理 │
 │     归档文件 = 只读 git 历史（不读也行），DOC SYNC 已提炼到      │
 │     项目级文档。唯一合法操作: archive phase 归档新品。       │
+│ 13. REFACTOR MODE MUST ISOLATE  回流时旧产物移入 _invalidated/   │
+│     见 [refactor-protocol.md](../references/refactor-protocol.md) │
 └─────────────────────────────────────────────────────────────┘
 ```
 
----
+> **上下文纪律**: 读工件前查 [minimum-knowledge.md](../references/minimum-knowledge.md#doc-updater文档同步) → 父文件优先，子文件按需
 
 ## 🔗 流水线位置
 
@@ -73,6 +75,22 @@ DOC SYNC #2 (Phase 7.5): 读 modules/ + 代码状态 →
 
 > #1 写内容，#2 验证+微调+改标记。不是两次完整写入。
 
+### DOC SYNC #1 回流模式（🆕 V9.5+1）
+
+> 触发: DOC SYNC #1 执行时检测到 changes/{id}/ 下存在旧产物（*_report*.md / *_v1*.md 等）。
+> 完整协议 → [refactor-protocol.md](../references/refactor-protocol.md)
+
+```
+Step 1 — 编目: ls docs/changes/{id}/*.md
+Step 2 — 识别需隔离文件（跳过 spec/design/tasks/contracts/prototypes）
+Step 3 — 创建 _invalidated/v{N}/ 隔离目录
+Step 4 — mv 旧产物 → _invalidated/v{N}/
+Step 5 — 写入 REFACTOR_MODE.md 标记文件
+Step 6 — 正常执行 DOC SYNC #1（写 modules/）
+```
+
+目的: implementer 进入时只看到 5 个权威文件，不被旧 report 噪声干扰。
+
 ---
 
 ## 场景速查表
@@ -89,6 +107,7 @@ DOC SYNC #2 (Phase 7.5): 读 modules/ + 代码状态 →
 | 6 | 文档索引重建 | 任意场景完成后（强制） |
 | 7 | Retro-Spec 清除 Bug | Bug 修复 + Retro-Spec 通过 |
 | 8 | 🔷 基石模块接入手册 | 收到 🔷 Foundational 标记 |
+| 9 | 🔄 回流重构 | spec 回流 → 旧产物隔离（[refactor-protocol.md](../references/refactor-protocol.md)） |
 ---
 
 ## 🔷 基石模块（V8 NEW，精简）
@@ -99,6 +118,18 @@ DOC SYNC #2 (Phase 7.5): 读 modules/ + 代码状态 →
 3. 含: 模块定位 / 接入步骤 / 接口速查 / 反例 ≥ 2 / 最小示例
 4. 标记 module.md: `🔷 Foundational → 接入手册: integration.md`
 5. 更新 Cockpit
+
+---
+
+## 工作流
+
+### 步骤 0: 最小上下文加载
+
+1. Read [minimum-knowledge.md](../references/minimum-knowledge.md#doc-updater文档同步) → 确认 MUST READ / ON DEMAND / DON'T READ
+2. Read MUST READ 父文件（不读子文件，不预加载全部）
+3. MUST READ 读完 = 理解全景 → 可以开工
+
+自检: 读了 ≤3 个文件？能在 2 分钟内讲清全景？→ 是 → 进入步骤 1
 
 ---
 
@@ -154,5 +185,5 @@ DOC SYNC #2 (Phase 7.5): 读 modules/ + 代码状态 →
 | [doc-sync-protocol.md](../references/doc-sync-protocol.md) | DOC SYNC 质量阈值 + 判定标准 |
 | [completion-report-protocol.md](../references/completion-report-protocol.md) | Completion Report 结构 |
 | [cockpit.md](../references/cockpit.md) | Cockpit 驾驶舱规范 |
-| [minimum-knowledge-principle.md](../references/minimum-knowledge-principle.md) | 最小知道原则 §6（INDEX.md 规范） |
+| [minimum-knowledge.md](../references/minimum-knowledge.md) | 最小知道原则 §4.6（INDEX.md 规范） |
 | [prototype.md](../references/prototype.md) | 原型设计 + 规则 + ASCII 模板库 |

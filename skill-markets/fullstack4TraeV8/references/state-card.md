@@ -32,7 +32,13 @@
 | **漂移修复后** | feedback-loop 回流完成后 | 状态卡 + 漂移修复确认 |
 | **会话开始时** | SessionStart Hook 注入 | 状态卡 + 待办恢复 |
 
-**铁律**：状态卡 ≤ 30 行，不能写成长报告。状态卡是仪表盘，不是日志。
+**铁律**：状态卡上限参考 [thresholds.md §累积型工件硬上限](thresholds.md#累积型工件硬上限) per-change 状态卡默认值，不能写成长报告。状态卡是仪表盘，不是日志。
+
+> 阈值配置 → [thresholds.md](thresholds.md)
+
+**检测流程**（不依赖记忆）:
+  1. 先检测 REFACTOR_MODE → 存在则自动重置（[§6.4](#64-refactor_mode-自动检测)）
+  2. 再 `wc -l` → > 80 → 🛑 不追加，执行重置（[artifact-lifecycle.md §3](artifact-lifecycle.md#3-状态卡四态生命周期)）
 
 ---
 
@@ -138,6 +144,23 @@ Stop Hook 检查 `.state-card.md` 是否与最新工件状态一致；不一致�
 
 详见 [templates/hooks/session-start.ps1](../templates/hooks/session-start.ps1) 和 [templates/hooks/tasks-integrity.ps1](../templates/hooks/tasks-integrity.ps1)。
 
+### 6.4 REFACTOR_MODE 自动检测
+
+> 🛑 不依赖记忆 — 机械检测，自动触发。Agent 不需要"记得"回流时要重置状态卡。
+
+每次状态卡更新前（阶段切换 / SessionStart / Stop Hook），必须执行：
+
+```
+检测: docs/changes/{id}/REFACTOR_MODE.md 是否存在
+  ├── 存在 → 🛑 不追加，执行重置:
+  │     1. 旧卡 mv → _invalidated/v{N}/.state-card.md
+  │     2. 从模板生成新卡（阶段 = Intake，工件全 ❌）
+  │     3. 输出: "检测到 REFACTOR_MODE，状态卡已自动重置 (v{N+1})"
+  └── 不存在 → 正常追加
+```
+
+此检测在超限检测（`wc -l > 80`）之前执行。存在 REFACTOR_MODE 时不检查行数。
+
 ---
 
 ## 七、状态卡速查口诀
@@ -155,7 +178,7 @@ Stop Hook 检查 `.state-card.md` 是否与最新工件状态一致；不一致�
 
 Agent 输出状态卡前自检：
 
-- [ ] 状态卡 ≤ 30 行
+- [ ] 状态卡行数 ≤ thresholds.md 配置值
 - [ ] 基本信息：变更名 + 当前阶段（含阶段编号 /8）
 - [ ] 工件进度：6 个工件全部列出（无则 — ）
 - [ ] 健康度：4 项全部填写（无漂移则 ✅ 无）
@@ -170,12 +193,14 @@ Agent 输出状态卡前自检：
 | 反面（禁止） | 正确（必须） |
 |---|---|
 | Agent 激活直接干活不输出状态卡 | 先输出状态卡再干活 |
-| 状态卡写成长报告 | ≤ 30 行的仪表盘 |
+| 状态卡写成长报告 | thresholds.md 配置值内的仪表盘 |
 | 状态卡字段凭空写 | 所有字段可在工件中追溯 |
 | 阶段切换不更新状态卡 | 立即更新阶段编号 |
 | 用户问进度时重新推理阶段 | 直接读 `.state-card.md` 输出 |
 | 漂移修复后不更新健康度 | 立即更新漂移字段 |
 | 阻塞解除仍保留在状态卡 | 立即移除 |
+| 回流时不重置状态卡 | 旧卡归档 _invalidated/，新卡从模板重置 |
+| 状态卡超过 30 行继续追加 | 🛑 执行重置（artifact-lifecycle.md §3） |
 
 ---
 
@@ -188,3 +213,5 @@ Agent 输出状态卡前自检：
 | [contract-first.md](contract-first.md) | 契约阶段切换时更新状态卡 |
 | [quantitative-acceptance.md](quantitative-acceptance.md) | 验收打分卡作为状态卡的"验收扩展" |
 | [tdd-workflow.md](tdd-workflow.md) | TDD 进度作为状态卡的健康度字段 |
+| [artifact-lifecycle.md](artifact-lifecycle.md) | 状态卡四态生命周期 + 体积硬上限 + 回流重置 |
+| [refactor-protocol.md](refactor-protocol.md) | §3 L1 物理隔离中重置状态卡 |

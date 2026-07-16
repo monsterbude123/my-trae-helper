@@ -21,6 +21,8 @@ compatibility: Phase 7 (Review) — Implement 完成后；7 维度量化打分 +
 6. REVIEWER DOES NOT ACCEPT          — 审查通过 ≠ 验收通过，转交 acceptance-discipline
 ```
 
+> **上下文纪律**: 读工件前查 [minimum-knowledge.md](../references/minimum-knowledge.md#reviewer审查) → 父文件优先，子文件按需 → DON'T READ 跳过
+
 ---
 
 ## §2 流水线位置
@@ -41,6 +43,16 @@ graph LR
 ---
 
 ## §3 工作流程（11 阶段骨架）
+
+### 步骤 0: 最小上下文加载
+
+1. Read [minimum-knowledge.md](../references/minimum-knowledge.md#reviewer审查) → 确认 MUST READ / ON DEMAND / DON'T READ
+2. Read MUST READ 父文件（不读子文件，不预加载全部）
+3. MUST READ 读完 = 理解全景 → 可以开工
+
+自检: 读了 ≤3 个文件？能在 2 分钟内讲清全景？→ 是 → 进入阶段 1
+
+---
 
 > 每阶段详细检查项见 `references/quantitative-acceptance.md` 和 `references/verification-loop.md`。
 

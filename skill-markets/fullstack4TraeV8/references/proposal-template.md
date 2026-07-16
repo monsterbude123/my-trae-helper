@@ -184,16 +184,36 @@
 
 ---
 
-## 质量检查清单
+## 大规格 Proposal 拆分指南
 
-- [ ] Why 不空洞（有具体根因，不是"优化系统"）
-- [ ] What 列出具体模块名（不是"多处改动"）
-- [ ] Capabilities 每个可测试（不是"系统稳定性"）
-- [ ] Non-Goals 不为空（必须画边界）
-- [ ] Impact 技术影响面 + 业务影响面均已填写
-- [ ] 不超过 500 词（详细技术设计留给 design.md）
+> 详见 [progressive-disclosure.md](progressive-disclosure.md) §2 proposal.md
 
-### AOP 后置自检（典型 POST Q）
+当 Why+What+Capabilities+Non-Goals 总长度超过 150 行，或任一 section 可以独立阅读时，拆分为多文件：
+
+```
+proposal.md           ← 决策概要（What 摘要 + Capabilities 一览 + 结论）
+proposal/
+  why.md              ← 业务动机详细论证
+  capabilities.md     ← 每个 capability 2-3 段详细描述
+  non-goals.md        ← 边界说明（含排除理由）
+  impact.md           ← 影响面分析
+```
+
+**proposal.md（父文件）参考 thresholds.md proposal.md 父文件默认值**，包含：
+- What 一段摘要（3 句）
+- Capabilities 一览表（一行一行）
+- Non-Goals 摘要（一行一条）
+- 指向子文件的链接
+
+> 阈值配置 → [thresholds.md](thresholds.md)
+
+Agent 读 proposal.md → 2 分钟理解全景 → 按需深入子文件。
+
+---
+
+## AOP 后置自检
+
+> 删除所有版本/状态附注后，Why/What/Capabilities/Non-Goals 四段是否仍然完整可读？否 → 不合格。
 
 产出 proposal.md 后、移交 spec-writer 前，结构化自检：
 
@@ -203,6 +223,7 @@ Q: [POST][P-02][每个 Capability 是否可验证且有明确的完成标准][�
 Q: [POST][P-03][Non-Goals 是否排除了容易被误解为遗漏的内容][是/否/未声明]
 Q: [POST][P-04][影响面是否区分了技术影响和业务影响][已区分/仅技术/仅业务/未评估]
 Q: [POST][P-05][proposal 是否只写增量（无架构文档全文复制）][是/否]
+Q: [POST][P-06][删除版本附注后核心四段是否仍然完整可读][是/否—核心段被替代]
 ```
 
 > 全部通过 → 移交 spec-writer。有失败项 → 修正 → 重新自检 → 仍失败 → 写 report-{0X}.md。

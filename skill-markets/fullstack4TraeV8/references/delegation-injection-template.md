@@ -45,6 +45,7 @@ coding agent → general_purpose_task:
 [MUST] DELTA ONLY: 只写此变更的增量。项目级通用内容引用 docs/ 路径，禁止复制全文
 [MUST] 产出 Completion Report ≤ 800 字符（见 completion-report-protocol.md §二·0）
 [MUST] 禁止硬编码端口/地址/密钥 — 从环境变量读取
+[MUST] SELECTIVE READING: 读工件前查 minimum-knowledge.md §2（你自己的行）→ MUST READ 段先读 → ON DEMAND 段按需 Grep → DON'T READ 段跳过
 ```
 
 ---
@@ -88,6 +89,7 @@ coding agent → general_purpose_task:
 [MUST] 涉及 UI → 委派 prototype-writer 产出 prototypes/（不自行画原型）
 [MUST] 不涉及 UI → Out of Scope 声明 "无 UI，跳过原型"
 [MUST] 编写前: doc-map-manager --grab "{能力名}" 确认无重复，有则标注复用引用
+[MUST] 输出前判定拆分模式: 单文件 or 父文件+子文件 → progressive-disclosure.md §2 spec.md
 ```
 
 ---
@@ -125,8 +127,9 @@ coding agent → general_purpose_task:
 ## proposal-writer 特化注入
 
 ```
-[MUST] 词数上限: 简单 ≤300 / 中等 ≤500 / 复杂 ≤800
+[MUST] 核心四段完整优先（Why/What/Capabilities/Non-Goals），不限长度
 [MUST] Capabilities 每项可验证，Non-Goals 非空
+[MUST] 超过 150 行 → 按 progressive-disclosure.md §2 拆分为多文件
 ```
 
 ---

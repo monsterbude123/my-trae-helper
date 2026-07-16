@@ -617,14 +617,16 @@ DOC SYNC 完成后，逐条自检：
 
 ### 硬上限表
 
+> 阈值来源 → [thresholds.md](thresholds.md)
+
 | 文档 | 硬上限 | 超出时动作 | 检查频率 |
 |------|:---:|------|:---:|
-| `.state-card.md` | 100 行 | 迁移历史段到 `.history.md`，目标 ≤ 80 行 | 每次 DOC SYNC |
-| `ARCHITECTURE.md` | 500 行 | 拆分实施状态段 → 对应 change archive，目标 ≤ 350 行 | 每次 DOC SYNC |
-| `modules/*.md`（单个） | 300 行 | 拆分子文档或提取独立 spec，目标 ≤ 200 行 | 每次 DOC SYNC |
-| `.history.md` 索引表 | 20 行 | 归档旧条目到 `archive/history/` | 每次 Archive |
-| `INDEX.md` | 10KB / 150 行 | 拆分到二级索引文件 | 每次 DOC SYNC |
-| `completion report` | 30 天后 | 移至 `archive/reports/` 或删除 | 每次 intake 步骤 0 |
+| `.state-card.md` | 80 行 | 执行重置（见 artifact-lifecycle.md §3） | 每次 DOC SYNC |
+| `ARCHITECTURE.md` | 500 行 (doc-sync 特有) | 拆分实施状态段 → 对应 change archive，目标 ≤ 350 行 | 每次 DOC SYNC |
+| `modules/*.md`（单个） | 300 行 (doc-sync 特有，与变更记录表 100 行不同) | 拆分子文档或提取独立 spec，目标 ≤ 200 行 | 每次 DOC SYNC |
+| `.history.md` 索引表 | 20 行 (doc-sync 特有) | 归档旧条目到 `archive/history/` | 每次 Archive |
+| `INDEX.md` | 10KB / 150 行 (doc-sync 特有) | 拆分到二级索引文件 | 每次 DOC SYNC |
+| `completion report` | 30 天后 (doc-sync 特有) | 移至 `archive/reports/` 或删除 | 每次 intake 步骤 0 |
 
 ### Prune 优先级
 
@@ -672,7 +674,7 @@ Intake 步骤 0 健康快检时，如果文档接近硬上限的 80%，在 Cockp
 发现文档问题
   │
   ├── 🔴 CRITICAL（任一）
-  │     ├── .state-card.md > 100 行
+  │     ├── .state-card.md > 80 行
   │     ├── 无 docs/INDEX.md
   │     ├── ARCHITECTURE.md 噪音占比 > 70%
   │     └── ARCHITECTURE.md > 500 行

@@ -30,6 +30,8 @@ version: "8.0.0"
 10. DELTA ONLY — design.md 只写此变更增量决策，已有内容引用 docs/ 路径
 ```
 
+> **上下文纪律**: 读工件前查 [minimum-knowledge.md](../references/minimum-knowledge.md#planner技术设计--任务拆解) → contracts 必读 + ON DEMAND 用 Grep
+
 ---
 
 ## 🔗 流水线位置
@@ -71,35 +73,43 @@ graph LR
 
 ## 工作流骨架
 
-### 步骤 0: 读取前置工件
+### 步骤 0: 最小上下文加载
+
+1. Read [minimum-knowledge.md](../references/minimum-knowledge.md#planner技术设计--任务拆解) → 确认 MUST READ / ON DEMAND / DON'T READ
+2. Read MUST READ 父文件（不读子文件，不预加载全部）
+3. MUST READ 读完 = 理解全景 → 可以开工
+
+自检: 读了 ≤3 个文件？能在 2 分钟内讲清全景？→ 是 → 进入步骤 1
+
+### 步骤 1: 读取前置工件
 读取 contracts/、specs/、proposal.md、ARCHITECTURE.md、.state-card.md。
 通过 doc-map-manager 查询已有 ADR 和模块实施状态。详细清单见 [references/planner-pre-read.md](../references/planner-pre-read.md)。
 
-### 步骤 1: 文档影响清单（必须先做）
+### 步骤 2: 文档影响清单（必须先做）
 输出 design.md §1 表格：| 文档 | 动作 | 变更内容 | 优先级(P0/P1/P2) | 同步时机 |。P0 编码前同步。
 
-### 步骤 2: 模块文档草稿（新模块时）
+### 步骤 3: 模块文档草稿（新模块时）
 创建骨架：接口契约引用 contracts/，数据模型引用 contracts/domain-models.md。
 
-### 步骤 3: 架构决策（D1, D2...）
+### 步骤 4: 架构决策（D1, D2...）
 每个决策：背景 → 备选方案对比表（≥2，含"复用已有基础设施"）→ 决策 → 理由 → 契约一致性检查。模板见 [references/design-templates.md](../references/design-templates.md)。
 
-### 步骤 4: 整体方案对比（≥2 个）
+### 步骤 5: 整体方案对比（≥2 个）
 维度：改动范围/成本/风险/扩展性/契约一致。违反契约方案 ❌。
 
-### 步骤 5: 架构设计
+### 步骤 6: 架构设计
 §4.1 模块结构 / §4.2 数据流 / §4.3 接口引用 contracts/ / §4.4 领域模型引用 contracts/ / §4.5 不变量约束。§4.3+§4.4 只列清单引用，不重写内容。
 
-### 步骤 6-7: 迁移计划 + 风险矩阵
+### 步骤 7-8: 迁移计划 + 风险矩阵
 模板见 [references/design-templates.md](../references/design-templates.md)。
 
-### 步骤 8: 输出 tasks.md
+### 步骤 9: 输出 tasks.md
 勾选格式，30min-2h/任务，标注外部依赖和契约对应。模板见 [references/design-templates.md](../references/design-templates.md)。
 
-### 步骤 8.5: closure-checklist.md
+### 步骤 9.5: closure-checklist.md
 从 spec BDD Scenarios 提取最小业务闭环链（P0 阻断/P1 闭环外）。使用模板 [templates/closure-checklist.md](../templates/closure-checklist.md)，❌ 禁止保留占位符。
 
-### 步骤 9-10: 输出报告 + 更新状态卡
+### 步骤 10-11: 输出报告 + 更新状态卡
 报告含 §1-7 + `🛑 WAITING FOR CONFIRMATION`。更新 .state-card.md 阶段为 10-design。
 
 ---

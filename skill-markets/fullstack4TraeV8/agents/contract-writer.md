@@ -32,6 +32,8 @@ compatibility: Phase 4 (Contract ★ 不可跳过) — spec approved 后产出 c
 └─────────────────────────────────────────────────────────────┘
 ```
 
+> **上下文纪律**: 读工件前查 [minimum-knowledge.md](../references/minimum-knowledge.md#contract-writer写契约) → 父文件优先，子文件按需 → DON'T READ 跳过
+
 ## 🔗 流水线位置
 
 ```mermaid
@@ -46,7 +48,15 @@ graph LR
 
 ## 工作流
 
-### 步骤 0: 读取上游
+### 步骤 0: 最小上下文加载
+
+1. Read [minimum-knowledge.md](../references/minimum-knowledge.md#contract-writer写契约) → 确认 MUST READ / ON DEMAND / DON'T READ
+2. Read MUST READ 父文件（不读子文件，不预加载全部）
+3. MUST READ 读完 = 理解全景 → 可以开工
+
+自检: 读了 ≤3 个文件？能在 2 分钟内讲清全景？→ 是 → 进入步骤 1
+
+### 步骤 1: 读取上游
 读取 proposal.md、spec.md、ARCHITECTURE.md、modules/INDEX.md（先索引→摘要段→按需深入，禁止全量加载）、相关 module.md、现有 contracts/（续写非重写）、其他变更目录 contracts/（命名冲突检查）。
 
 **文档去重**（通过 doc-map-manager）：
@@ -54,22 +64,22 @@ graph LR
 - `query-index.py --lookup "domain-models"` → 发现已有领域模型
 - 已有同名 → 引用复用；冲突 → 回流 spec-writer
 
-### 步骤 1: 领域模型（domain-models.md，必填）
+### 步骤 2: 领域模型（domain-models.md，必填）
 公共类型 + 领域模型表 + 不变量。格式见 [contract-first.md §十一.A](../references/contract-first.md#十一-契约格式附录)。
 
-### 步骤 2: 接口契约（api-contracts.md，必填）
+### 步骤 3: 接口契约（api-contracts.md，必填）
 每个 API：请求/响应/错误码/示例/关联 spec。格式见 [contract-first.md §十一.B](../references/contract-first.md#十一-契约格式附录)。铁律：错误码显式定义、示例可执行。
 
-### 步骤 3: 事件契约（event-contracts.md，如适用）
+### 步骤 4: 事件契约（event-contracts.md，如适用）
 格式见 [contract-first.md §十一.C](../references/contract-first.md#十一-契约格式附录)。
 
-### 步骤 4: 验证规则（validation-rules.md，如适用）
+### 步骤 5: 验证规则（validation-rules.md，如适用）
 格式见 [contract-first.md §十一.D](../references/contract-first.md#十一-契约格式附录)。
 
-### 步骤 5: Contract Test 骨架
+### 步骤 6: Contract Test 骨架
 格式见 [contract-first.md §十一.E](../references/contract-first.md#十一-契约格式附录)。approved 后移交 implementer 作为 TDD 起点。
 
-### 步骤 6: 请求用户 approved
+### 步骤 7: 请求用户 approved
 产出四件套后请求审核。approved 后契约冻结（IMMUTABLE）。
 
 ---

@@ -91,7 +91,20 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
   Phase B.2: Fix         逐个 debugger: 复现→根因→🔴RED→🟢GREEN→回归
   Phase B.3: Retro-Spec  修复后评估: retro-spec.md + DOC SYNC + 回归全绿
 
-异常路径: Bug→[debugger] | Bug批量→[bug-batch] | 漂移→[feedback-loop]回流 | Review FAIL→按层级返工 | Review 归档门禁 FAIL→列出FAIL项+阻塞 | DOC SYNC FAIL→补全后继续 | 文档膨胀→[治理决策树 §十一] 自主治理 | Archive后缺陷→[§归档后缺陷处理] 创建新change
+异常路径:
+  Bug→[debugger] | Bug批量→[bug-batch]
+  Review FAIL→按层级返工 | Review 归档门禁 FAIL→列出FAIL项+阻塞
+  DOC SYNC FAIL→补全后继续 | 文档膨胀→[治理决策树 §十一] 自主治理
+  Archive后缺陷→[§归档后缺陷处理] 创建新change
+
+🔄 回流路径 (Refactor Path) — 触发入口:
+  任一条满足即触发回流，走 [refactor-protocol.md](references/refactor-protocol.md):
+    ├─ 触发A: mock 泛滥 — Review GATE 5 检测 mock 密度 > 3 或 Stage 5 PENDING
+    ├─ 触发B: 用户判定 — "全是 mock，重做" / "实现和 spec 差距太大"
+    ├─ 触发C: spec 漂移 — implement 阶段发现 spec 不可实现或严重偏离预期
+    └─ 触发D: 文档腐化 — 旧 report 误导 implementer (0 行实现代码产出)
+  回流 = L1 物理隔离(_invalidated/) + L2 委派注入 + L3 门禁
+  回流后: Plan→Closure-Define→Implement→Review 重走完整实现链
 
 简化链: Intake 跳过 Proposal → 产出迷你 proposal.md（≤10行）→ 直接进 Spec
 
@@ -147,7 +160,7 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 7. Buglist-Cockpit 联动  缺陷修复前必须从 Cockpit 驾驶舱定位当前状态 + 确认 buglist.md 与驾驶舱同步，修复后回流 Cockpit 更新健康度
 8. 文档治理不失真  修剪/迁移项目级文档禁止丢失架构事实。操作前事实编目→操作后逐项验证→缺失=回退（保真协议见 [§十三](references/doc-sync-protocol.md#十三保真迁移协议)）
 9. 归档不可变  archive/done/ + archive/out/ 文件已归档沉淀，禁止修改/修剪/治理。DOC SYNC 已将归档知识提炼到项目级文档（ARCHITECTURE/modules/），归档文件仅保留 git 历史追溯价值。唯一合法操作是归档新品（archive phase），不修剪旧品。
-10. 状态卡单源（V9.5 NEW）  Cockpit（docs/specs/.state-card.md）为唯一真源。per-change .state-card.md 只记录变更独有信息（phase/artifacts），全局状态（健康度/阻塞）只存在于 Cockpit。阶段切换时先更新 Cockpit，per-change 卡从 Cockpit 同步派生，禁止独立维护两份状态。
+10. 状态卡单源（V9.5 NEW）  Cockpit（docs/specs/.state-card.md）为唯一真源。per-change .state-card.md 只记录变更独有信息（phase/artifacts），全局状态（健康度/阻塞）只存在于 Cockpit。阶段切换时先更新 Cockpit，per-change 卡从 Cockpit 同步派生，禁止独立维护两份状态。回流时强制重置（见 artifact-lifecycle.md §3）。
 ```
 
 ---
@@ -190,7 +203,8 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 | 跳过 AOP 自检直接移交 | Schema QA 自检后移交 |
 | 静默失败 | 写 report，按 [report-growth.md](references/report-growth.md) L1-L4 分级（L1 自动恢复/L2 重试2次/L3 暂停通知/L4 立即通知） |
 | 编造不存在的文件 | 标记缺失，不猜测 |
-| 状态卡说谎 | state-card = 文件系统真相 |
+| 状态卡说谎 | state-card = 文件系统真相；> 80 行 = 执行重置 |
+| 回流不重置状态卡 | 旧卡归档 _invalidated/，新卡从模板生成（artifact-lifecycle.md §3） |
 | 单方面改 approved 契约 | 走 ADDITIVE/BREAKING 流程 |
 | 发现漂移后静默迁就 | 漂移 → report → 回流 |
 | 泛滥降级兼容 `\|\|`/`??` | 有就有，没有就 null/抛异常 |
@@ -219,7 +233,9 @@ Bug-Batch 轻量缺陷修复路径 (Phase B):
 | 原型设计规则 | [references/prototype.md](references/prototype.md) |
 | DOC SYNC 合并协议（写+验证） | [references/doc-sync-protocol.md](references/doc-sync-protocol.md) |
 | 文档治理（禁止写入+体积上限+决策树+保真协议） | [references/doc-sync-protocol.md](references/doc-sync-protocol.md) §九-十三 |
-| 归档协议（5 项硬门禁 + 预审 + 执行流程） | [references/archive-protocol.md](references/archive-protocol.md) |
+| 归档协议（6 项硬门禁 + 预审 + 执行流程） | [references/archive-protocol.md](references/archive-protocol.md) |
+| 回流重构协议（物理隔离 + 委派注入 + 门禁） | [references/refactor-protocol.md](references/refactor-protocol.md) |
+| 工件生命周期（体积上限 + 四态重置 + 超标修剪） | [references/artifact-lifecycle.md](references/artifact-lifecycle.md) |
 | 版本变更 | [references/CHANGELOG.md](references/CHANGELOG.md) |
 | FAQ | [GUIDE.md](GUIDE.md) |
 | 快速命令 | `python render-cockpit.py` / `python env-init.py --fix` |

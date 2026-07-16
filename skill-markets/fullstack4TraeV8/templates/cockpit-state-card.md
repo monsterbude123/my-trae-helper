@@ -20,7 +20,7 @@
 - **阻塞 change 数**: {N}
 - **Spec 堆积风险**: 🟢 低（< 3）/ 🟡 中（3-5）/ 🔴 高（> 5）
 - **最近完成**: {change-name}（{日期}）
-- **文档健康**: 🟢 正常 / 🟡 {N} 个文件接近体积上限 / 🔴 状态卡 > 100 行（见 [§十](../references/doc-sync-protocol.md#十文档体积硬上限)）
+- **文档健康**: 🟢 正常 / 🟡 {N} 个文件接近体积上限 / 🔴 状态卡 > 150 行（见 [artifact-lifecycle.md](../references/artifact-lifecycle.md) §4）
 <!-- /SECTION: health -->
 
 <!-- SECTION: artifacts -->

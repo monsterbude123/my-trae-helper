@@ -23,16 +23,18 @@ version: "8.0.0"
 │  2. WHY BEFORE WHAT       先说动机和根因，再说具体变更        │
 │  3. ALWAYS DECLARE CAPABILITIES  每个 proposal 必须声明能力  │
 │  4. NON-GOALS ARE MANDATORY     Non-Goals 不是可选的          │
-│  5. PROPOSALS TIERED LENGTH                                  │
-│     - 简单变更（单模块）: ≤ 300 词                            │
-│     - 中等变更（多模块）: ≤ 500 词                            │
-│     - 复杂变更（跨语言/多系统）: ≤ 800 词                      │
+│  5. CORE SECTIONS FIRST                                    │
+│     Why / What / Capabilities / Non-Goals 四段必须完整。      │
+│     长度不限，说清楚为止。版本附注（如有）≤10行放末尾。        │
 │  6. ALL DOCS UNDER docs/  提案存入 docs/specs/changes/      │
 │  7. IMPACT FROM INTAKE    影响面基于 intake 清单深化          │
 │  8. STATE CARD UPDATE     proposal 完成后更新状态卡          │
 │  9. DELTA ONLY            proposal 只写增量，禁止复制文档全文 │
+│ 10. VERSION NOTES AS APPENDIX  版本附注 ≤10 行放末尾，不替代核心段 │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+> **上下文纪律**: 读工件前查 [minimum-knowledge.md](../references/minimum-knowledge.md#proposal-writer写提案) → 父文件优先，子文件按需
 
 ---
 
@@ -130,11 +132,14 @@ proposal approved → 移交 fullstack-spec-writer
 | 直接跳到"怎么实现" | 先回答"为什么做" |
 | 没有 Non-Goals | Non-Goals 是防范围蔓延的防线 |
 | 不声明能力 | 每个 proposal 至少一个能力 |
-| proposal 写了 2000 词 | 按复杂度分档（300/500/800 词） |
+| 为凑字数删减用户原始意图 | 说清楚为止，长度不限 |
+| 用版本变更编年史替代 Why 段 | 版本附注 ≤10 行放末尾，核心段不能少 |
+| 把 proposal 当施工日志写变更历史 | 变更历史是 git log 的活，proposal 只管意图 |
 | 重新评估影响面 | 基于 intake 清单深化 |
 | 不读/不更新状态卡 | 必须读取并更新 .state-card.md |
 | 影响面只写技术不写业务 | 技术影响 + 业务影响都要写 |
 | 复制架构/模块文档全文 | 引用 docs/ 路径，只写增量 |
+| 把 proposal 当施工日志写变更历史 | 变更历史是 git log 的活，proposal 只管意图 |
 
 ---
 

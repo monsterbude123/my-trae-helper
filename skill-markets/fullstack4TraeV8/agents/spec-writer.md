@@ -28,8 +28,10 @@ compatibility: Phase 3 (Spec) — proposal approved 后；输出 spec.md + E2E �
 │ 10. INVARIANTS DECLARATION   spec 头部声明不变量              │
 │ 11. PROTOTYPE FOR UI         涉及 UI 必须委派 prototype-writer│
 │ 12. DELTA ONLY               只写增量行为场景，禁止复制全文   │
-└──────────────────────────────────────────────────────────────┘
+│ 13. SPLIT BY PROGRESSIVE DISCLOSURE   输出前判定: 单文件 or 父+子 ──┘
 ```
+
+> **上下文纪律**: 读工件前查 [minimum-knowledge.md](../references/minimum-knowledge.md#spec-writer写规格) → proposal.md 全文必读 + ON DEMAND 用 Grep
 
 ## 🔗 流水线位置
 
@@ -43,34 +45,49 @@ graph LR
 
 ## 工作流
 
-### 步骤 0: 读取前置工件
+### 步骤 0: 最小上下文加载
+
+1. Read [minimum-knowledge.md](../references/minimum-knowledge.md#spec-writer写规格) → 确认 MUST READ / ON DEMAND / DON'T READ
+2. Read MUST READ 父文件（不读子文件，不预加载全部）
+3. MUST READ 读完 = 理解全景 → 可以开工
+
+自检: 读了 ≤3 个文件？能在 2 分钟内讲清全景？→ 是 → 进入步骤 1
+
+### 步骤 1: 读取前置工件
 **必须读**：ARCHITECTURE.md、proposal.md、.state-card.md、相关模块文档（先读 modules/INDEX.md 定位 → 只读 §摘要段 → 按需深入）。**必须通过 doc-map-manager 查询**（去重）：`query-index.py --grab "{能力名}"` / `--lookup "{关键词}"`。
 
-### 步骤 0.5: Spec 段位编号
+### 步骤 1.5: Spec 段位编号
 L0-L4 编号体系（001-249），按能力所在层次分配。详见 [spec-driven-development.md §十二](../references/spec-driven-development.md#十二bdd-场景模板附录)。
 
-### 步骤 1: 创建 spec 子目录
+### 步骤 2: 创建 spec 子目录
 子目录名 = proposal.md Capabilities 表"能力"列，**严禁使用变更名**。每能力一个 `specs/{capability}/spec.md`。
 
-### 步骤 2: BDD 场景填充
+### 步骤 3: BDD 场景填充
+
+**输出结构判定**（写之前判定 — 见 progressive-disclosure.md §2 spec.md）:
+- 单文件模式: 所有 BDD 场景 + Invariants 2 分钟能读完 → 一个 spec.md
+- 多文件模式: 场景多 / capability 独立复杂 → spec.md(父文件) + specs/{cap}.md(子文件)
+
+父文件必须包含: 能力索引 + Invariants + E2E 清单 + Sub-files 表
+
 按 [spec-driven-development.md §十三-2](../references/spec-driven-development.md#十三spec-格式补充附录) 模板产出 spec.md，含 Invariants + ADDED/MODIFIED Requirements + WHEN-THEN-AND 场景。
 
-### 步骤 2.5: E2E 场景清单
+### 步骤 3.5: E2E 场景清单
 按 [spec-driven-development.md §十三-3](../references/spec-driven-development.md#十三spec-格式补充附录) 模板在 spec.md 末尾列出 E2E 场景 + 覆盖矩阵（必须标出缺失项）。
 
-### 步骤 3: 场景质量检查 → [spec-driven-development.md §十三-6](../references/spec-driven-development.md#十三spec-格式补充附录)
+### 步骤 4: 场景质量检查 → [spec-driven-development.md §十三-6](../references/spec-driven-development.md#十三spec-格式补充附录)
 每 Requirement: ≥1 happy path + ≥1 error scenario + SHALL/SHALL NOT + 可独立测试。
 
-### 步骤 3.5: 测试骨架映射
+### 步骤 4.5: 测试骨架映射
 按 [spec-driven-development.md §十三-4](../references/spec-driven-development.md#十三spec-格式补充附录) 模板：每个 Scenario → unit + contract + e2e 测试名映射。
 
-### 步骤 3.6: Published Interfaces（基石模块必填）
+### 步骤 4.6: Published Interfaces（基石模块必填）
 按 [spec-driven-development.md §十三-5](../references/spec-driven-development.md#十三spec-格式补充附录) 模板产出公共 API 签名清单 + 调用约定 + 常见错误用法。非基石模块跳过。
 
-### 步骤 3.7: 委派原型设计（涉及 UI 时）
+### 步骤 4.7: 委派原型设计（涉及 UI 时）
 判断是否需要原型 → 委派 prototype-writer。详见 [prototype.md §四](../references/prototype.md#四原型文档结构模块化)。
 
-### 步驟 4-5: 善后
+### 步驟 5-6: 善后
 更新 proposal.md 补充 spec 路径映射。更新 .state-card.md（阶段: 3/8 spec → 下一步: fullstack-contract-writer）。
 
 ## 场景编写指南
