@@ -70,6 +70,7 @@ coding agent → general_purpose_task:
   ├── 硬编码端口: grep "localhost:\d+" / "127.0.0.1:\d+"
   └── 任一缺失 → FAIL（无 N/A 或"非阻塞"）
 [MUST] Visual Gate（V9.5 NEW）: 审查时对涉及 UI 的变更执行视觉验收（见 visual-acceptance.md）→ 与 prototype 比对 → 截图归档
+[MUST] 涉及 UI 的变更 → Visual Gate 必须执行（见 visual-acceptance.md §6）→ SKIPPED → 自动 FAIL 不可交付
 ```
 
 ---

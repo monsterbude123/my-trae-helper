@@ -35,7 +35,7 @@
 **装到 `builtin_skills/`**，不要发明路径。安装命令：
 
 ```powershell
-Copy-Item -Recurse "d:\workspace\my-trae-helper\{package}\skills\{skill-name}" "$env:USERPROFILE\.trae-cn\builtin_skills\{skill-name}"
+Copy-Item -Recurse "${PWD}\{package}\skills\{skill-name}" "$env:USERPROFILE\.trae-cn\builtin_skills\{skill-name}"
 ```
 
 ### 技能格式
@@ -179,8 +179,8 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
 ## 快速命令
 
 ```powershell
-# 安装技能到全局
-Copy-Item -Recurse "d:\workspace\my-trae-helper\{pkg}\skills\{name}" "$env:USERPROFILE\.trae-cn\builtin_skills\{name}"
+# 安装技能到全局（从仓库根运行）
+Copy-Item -Recurse "${PWD}\{pkg}\skills\{name}" "$env:USERPROFILE\.trae-cn\builtin_skills\{name}"
 
 # 清理单个技能
 Remove-Item -Recurse -Force "$env:USERPROFILE\.trae-cn\builtin_skills\{name}"

@@ -54,7 +54,7 @@
 
 ```powershell
 # 复制整个包到 Trae 全局技能目录
-Copy-Item -Recurse "d:\workspace\my-trae-helper\skill-markets\comfyui-api-skills" "$env:USERPROFILE\.trae-cn\builtin_skills\comfyui-api-skills"
+Copy-Item -Recurse "{skill_root}" "$env:USERPROFILE\.trae-cn\builtin_skills\comfyui-api-skills"
 ```
 
 安装后**重启 Trae IDE** 加载技能。
@@ -278,7 +278,7 @@ comfyui-api-skills/
 
 ## 维护
 
-- 仓库：d:\workspace\my-trae-helper\skill-markets\comfyui-api-skills\
+- 仓库：{skill_root}/
 - 上游：ComfyUI-Expert（英文原版）
 - 维护人：comfyui-api-skills 编排器
 

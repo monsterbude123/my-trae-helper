@@ -71,7 +71,7 @@ SQLite 存储，支持增量更新与并行解析：
 {skill_root}/scripts/query-index.py
 ```
 
-实际路径为 `d:\workspace\my-trae-helper\skill-markets\doc-map-manager\scripts\{脚本名}.py`。
+调用前由 AI 运行时确定 `{skill_root}`，本机开发场景下指向 `skill-markets/doc-map-manager/`，全局安装场景下指向 `~/.trae-cn/builtin_skills/doc-map-manager/`。
 
 #### docs/ 路径自动解析
 
@@ -79,10 +79,10 @@ SQLite 存储，支持增量更新与并行解析：
 
 | 优先级 | 策略 | 适用场景 |
 |--------|------|---------|
-| P0 | `--docs-dir ./path` 显式指定 | 非 my-trae-helper 项目，推荐 |
-| P1 | 脚本路径 `../../docs` | 本仓库内 |
-| P2 | CWD 下的 `./docs` | 全局安装（`.codebuddy/skills/`） |
-| P3 | CWD 递归父级找 `docs/` | 子在子目录执行 |
+| P0 | `--docs-dir ./path` 显式指定 | 非本仓库项目，推荐 |
+| P1 | 脚本相对路径 `{skill_root}/../../docs` | 本仓库内 |
+| P2 | CWD 下的 `./docs` | 默认兜底 |
+| P3 | CWD 递归父级找 `docs/` | 在子目录执行 |
 | P4 | CWD 兜底 | 以上全失败 |
 
 **AI 推荐**：遇到非本仓库项目时，始终用 `--docs-dir` 显式指定。

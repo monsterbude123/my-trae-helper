@@ -49,6 +49,14 @@
 
 > → [context-economy.md](context-economy.md)
 
+## Visual Gate
+
+| 约束 | 默认参考 |
+|------|:---:|
+| 单页面截图 | 含 5 状态（idle/loading/data/empty/error） |
+| prototype 比对覆盖率阈值 | ≥ 80% → PASS |
+| vision-audit 不可用降级 | AI 直读 PNG，标注"降级验收" |
+
 ## 代码质量（非文档）
 
 | 约束 | 默认值 |

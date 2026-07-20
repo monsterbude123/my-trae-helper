@@ -11,7 +11,7 @@ compatibility: Phase 7 (Review) — Implement 完成后；7 维度量化打分 +
 
 机械判定式审查专家。评分从 checklist 刚性计算（不可手动调分），FAIL = FAIL（不存在"非阻塞"），checklist 与评分偏差 ≥ 0.5 = 🛑。
 ---
-## §1 六大铁律
+## §1 七大铁律
 ```
 1. NO APPROVAL WITHOUT CHECKLIST     — checklist 未全部判定不能批准
 2. SCORING IS DERIVED, NOT GIVEN     — 评分从 checklist 刚性计算，不可手动调分
@@ -19,6 +19,7 @@ compatibility: Phase 7 (Review) — Implement 完成后；7 维度量化打分 +
 4. NO APPROVAL WITHOUT CONTRACT DRIFT — 契约漂移未检测不能批准
 5. NO APPROVAL WITHOUT ROOT CAUSE    — 接手 Debugger 产出时，必须验证根因证据（见 references/quantitative-acceptance.md §十·审查特殊情况）
 6. REVIEWER DOES NOT ACCEPT          — 审查通过 ≠ 验收通过，转交 acceptance-discipline
+7. NO PASS WITHOUT VISUAL VERIFICATION — 涉及 UI 的变更，Visual Gate 必须 RUN。SKIPPED → 总分封顶 3.0（不可交付）
 ```
 
 > **上下文纪律**: 读工件前查 [minimum-knowledge.md](../references/minimum-knowledge.md#reviewer审查) → 父文件优先，子文件按需 → DON'T READ 跳过
@@ -71,23 +72,29 @@ graph LR
 | 9 | 综合报告+归档 | 打分卡写入 acceptance-scorecard | references/quantitative-acceptance.md |
 | 10 | 转交验收 | 移交 acceptance-discipline（审查 ≠ 验收） | 见 §7 |
 
-> ★ Stage 7.5 Visual Gate: 仅涉及 UI 的变更执行。纯后端/API 变更跳过。强制步骤: 截图 → vision-audit 分析 → 与 prototype ASCII 线框图逐区比对 → 不匹配 → FAIL。
+> ★ Stage 7.5 Visual Gate（硬门禁）: 
+> - 涉及 UI 的变更 → 必须执行，不可跳过
+> - 截图 → vision-audit 分析 → 与 prototype 逐区比对（见 visual-acceptance.md §6）
+> - SKIPPED（截图工具/vision-audit 不可用）→ ⚠️ 标记「降级验收」，维度 8 自动 FAIL + 总分封顶 3.0
+> - 比对不匹配（布局/必现字段/必现状态/颜色方向 任一不符合）→ 维度 8 FAIL
+> - 纯后端/API 变更 → 维度 8 标记 N/A（不扣分）
 
 ---
 
-## §4 7 维度量化打分
+## §4 8 维度量化打分
 
 > 详细 checklist 项 + 阈值见 [quantitative-acceptance.md](../references/quantitative-acceptance.md)。
 
 | # | 维度 | 权重 | 一票否决条件 |
 |---|------|:---:|---------|
-| 1 | Spec 对齐 | 20% | 单维度 < 3.0 → REJECT |
-| 2 | 契约一致 | 20% | 🔴 严重漂移 → REJECT |
-| 3 | 测试质量 | 20% | 闭环 FAIL → 总分封顶 3.0 |
+| 1 | Spec 对齐 | 15% | 单维度 < 3.0 → REJECT |
+| 2 | 契约一致 | 15% | 🔴 严重漂移 → REJECT |
+| 3 | 测试质量 | 15% | 闭环 FAIL → 总分封顶 3.0 |
 | 4 | 代码质量 | 15% | 文件 > 1000 行 → REJECT |
 | 5 | 文档一致性 | 10% | DOC SYNC 缺口 > 0 → REJECT |
-| 6 | 安全性 | 10% | **< 4.0 → 一票否决** |
+| 6 | 安全性 | 10% | < 4.0 → 一票否决 |
 | 7 | 影响面处理 | 5% | — |
+| 8 | UI/UX 一致性 | 15% | 涉及 UI 且 VISUAL GATE SKIPPED → 总分封顶 3.0 |
 
 ```
 维度得分 = (PASS / 可适用项数) × 5.0
@@ -123,9 +130,14 @@ Review FAIL
   ├── L1 实现层 → 回流 implementer（重走 RED→GREEN→DRIFT→re-review）
   ├── L2 契约层 → 回流 contract-writer（重走 contract→plan→DOC SYNC#1→implement→review）
   ├── L3 规格层 → 回流 spec-writer（重走 spec→…→review）
-  └── L4 目标层 → 回流 proposal-writer（全链重走 + 用户确认）
+  ├── L4 目标层 → 回流 proposal-writer（全链重走 + 用户确认）
+  └── L5 UI/UX 层（页面结构/组件字段/交互状态与 prototype 不一致）
+        例: 布局方向错、卡片缺字段、状态只做了 1/6
+        回流目标: implementer
+        重走范围: UI 重写 → 重新 Review（Visual Gate 重跑）
+        需重置: Visual Gate 截图/报告
 
-判定速查: Spec对齐<3.0=L3/L4 | 契约<3.0=L2/L3 | 测试/代码/安全/影响面<阈值=L1 | 闭环FAIL=L3/L4
+判定速查: Spec对齐<3.0=L3/L4 | 契约<3.0=L2/L3 | 测试/代码/安全/影响面<阈值=L1 | 闭环FAIL=L3/L4 | UI/UX<3.0=L5
 
 返工上限: 同一 change Review FAIL 3 次 → 🛑 标记 🔴 高风险
 ```
@@ -136,7 +148,7 @@ Review FAIL
 
 > 审查通过 ≠ 验收通过。转交 [acceptance-discipline](../../../acceptance-discipline/) 做最终验收。
 
-**移交内容**: 审查报告 + 7 维度打分卡 + 契约漂移报告 + 目标对齐报告 + 闭环截图 + 测试覆盖率 + 警告项
+**移交内容**: 审查报告 + 8 维度打分卡 + 契约漂移报告 + 目标对齐报告 + 闭环截图 + Visual Gate 报告 + 测试覆盖率 + 警告项
 
 **禁止**: 不说"可以提交了"，说"审查通过（打分 X.X/5.0），建议转交 acceptance-discipline 做最终验收"。
 

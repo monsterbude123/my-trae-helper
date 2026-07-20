@@ -20,9 +20,9 @@
 | 技术规划 | planning.md, design-templates.md | ~110, ~155 |
 | 编码实现 | tdd-workflow.md, doc-sync-protocol.md, coding-principles.md, debugging.md, bug-batch.md | ~356, ~712, ~205, ~188, ~193 |
 | 测试验证 | test-partition-runner.md, verification-loop.md | ~157, ~101 |
-| 量化审查 | quantitative-acceptance.md, rework-protocol.md | ~279, ~103 |
+| 量化审查 | quantitative-acceptance.md（8维度）, rework-protocol.md | ~279, ~103 |
 | 反馈回流 | feedback-loop.md, refactor-protocol.md | ~181, ~184 |
-| UI/原型 | prototype.md, visual-acceptance.md | ~338, ~99 |
+| UI/原型 | prototype.md, visual-acceptance.md | ~338, ~127 |
 | 工件管理 | artifact-responsibilities.md, artifact-lifecycle.md, archive-protocol.md | ~53, ~249, ~121 |
 | 流程治理 | change-workflow.md, state-card.md, cockpit.md, report-growth.md, aop-self-check.md | ~142, ~155, ~197, ~168, ~133 |
 | 委派协议 | completion-report-protocol.md, delegation-injection-template.md | ~150, ~103 |

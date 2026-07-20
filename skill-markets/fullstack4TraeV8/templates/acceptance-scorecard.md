@@ -1,6 +1,6 @@
 # 🎯 精密门禁计分卡
 
-> **V6.0**: Checklist 机械判定 + 评分自动推导 + 一致性校验。评分是算出来的，不是给的。
+> **V8.0**: 8 维度 Checklist 机械判定 + 评分自动推导 + 一致性校验。评分是算出来的，不是给的。
 
 ---
 
@@ -86,19 +86,31 @@
 
 | **维度得分** | **{N}/{M} PASS** | — | **{score}** | |
 
----
+### 维度 8: UI/UX 一致性（权重 10%）
 
+> 涉及 UI 的变更强制执行。不涉及 UI → 整维度 N/A，权重重新分配。
+
+| # | Checklist 项 | 质量阈值 | 结果 | 证据 |
+|---|-------------|---------|:---:|------|
+| 8.1 | prototype 比对覆盖率 | ≥ 80% 区域匹配 | PASS/FAIL/N/A | |
+| 8.2 | 5 状态截图齐全（idle/loading/data/empty/error） | 5/5 | PASS/FAIL/N/A | |
+| 8.3 | visual-acceptance 报告无 HIGH 风险 | 0 HIGH | PASS/FAIL/N/A | |
+| 8.4 | 截图已归档到 docs/reports/screenshots/ | 文件存在 + 非空 | PASS/FAIL/N/A | |
+| **维度得分** | **{N}/{M} PASS** | — | **{score}** | |
+
+---
 ## 自动计算总分
 
 | 维度 | PASS/适用 | 得分 | 权重 | 加权 |
 |------|:---:|------|------|------|
-| 1. Spec 对齐 | {N}/4 | {score} | 15% | {weighted} |
-| 2. 契约一致 | {N}/6 | {score} | 15% | {weighted} |
-| 3. 测试质量 | {N}/{M} | {score} | 15% | {weighted} |
-| 4. 代码质量 | {N}/4 | {score} | 15% | {weighted} |
+| 1. Spec 对齐 | {N}/4 | {score} | 12% | {weighted} |
+| 2. 契约一致 | {N}/6 | {score} | 12% | {weighted} |
+| 3. 测试质量 | {N}/{M} | {score} | 12% | {weighted} |
+| 4. 代码质量 | {N}/4 | {score} | 12% | {weighted} |
 | 5. 文档一致性 | {N}/{M} | {score} | 10% | {weighted} |
 | 6. 安全性 | {N}/4 | {score} | 15% | {weighted} |
-| 7. 业务闭环 | {N}/{M} | {score} | 15% | {weighted} |
+| 7. 业务闭环 | {N}/{M} | {score} | 12% | {weighted} |
+| 8. UI/UX 一致性 | {N}/{M} | {score} | 15% | {weighted} |
 | **总分** | **{total PASS}/{total 适用}** | — | 100% | **{total}** |
 
 ---

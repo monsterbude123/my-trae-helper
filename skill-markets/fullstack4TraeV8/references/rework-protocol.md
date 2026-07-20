@@ -19,7 +19,7 @@
 
 ---
 
-## 二、回流深度判定树（4 层）
+## 二、回流深度判定树（5 层）
 
 ```
 Review FAIL
@@ -44,11 +44,16 @@ Review FAIL
     │    重走范围: spec → contract → plan → DOC SYNC #1 → implement → review
     │    需重置: spec.md 版本、contracts/ 重新生成、DOC SYNC #1 重新执行
     │
-    └── L4 目标层（整个方向偏了，proposal 的 What/Why 有问题）
+    ├── L4 目标层（整个方向偏了，proposal 的 What/Why 有问题）
           例: Capabilities 列表遗漏核心功能、Non-Goals 排除了不该排除的
           回流目标: proposal-writer → 用户重新确认
           重走范围: proposal → spec → contract → plan → DOC SYNC #1 → implement → review
           需重置: 整个 change 目录的所有工件
+    └── L5 UI/UX 层（页面结构与 prototype 不一致）
+          例: 布局方向错、卡片字段缺失、状态只做了部分
+          回流目标: implementer
+          重走范围: UI 重写 → 重新 Review（Visual Gate 重跑）
+          需重置: Visual Gate 截图/报告、acceptance-scorecard UI/UX 维度
 ```
 
 ---
@@ -61,6 +66,7 @@ Review FAIL
 | L2 契约层 | ⚠️ 需重新回流 | modules/ 中的接口描述可能过时，DOC SYNC #1 重新执行 |
 | L3 规格层 | 🛑 需重新回流 | modules/ 中的能力/场景可能错误，DOC SYNC #1 重新执行 |
 | L4 目标层 | 🛑 全部作废 | 整个 change 可能方向错误，modules/ 中的相关条目标记为 ⚠️ 待确认 |
+| L5 UI/UX | 无需重置 | 代码修正即可，DOC SYNC 状态不变 |
 
 **DOC SYNC #2** 在 L2/L3/L4 返工后必须重新执行，因为代码重新实现了。
 

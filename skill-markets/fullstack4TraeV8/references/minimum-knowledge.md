@@ -101,6 +101,7 @@
 | MUST | git diff --stat + detect_changes() | 变更范围 |
 | ON DEMAND | contracts/ 父文件（spot-check 关键接口） | 契约一致性 |
 | ON DEMAND | specs/{cap}.md（spot-check 关键场景） | 行为一致性 |
+| ON DEMAND | visual-acceptance.md §6(prototype比对)、prototype.md | UI 变更的视觉验收 |
 | DON'T | design/ 子文件全文 | 只看父文件的决策索引表 |
 | DON'T | tasks.md 全文 | git diff 就够了 |
 
