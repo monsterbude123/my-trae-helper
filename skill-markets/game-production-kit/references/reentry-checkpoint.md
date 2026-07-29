@@ -1,6 +1,6 @@
 # 重入与 Checkpoint 机制
 
-> 来源：fullstack4TraeV8 cockpit 新会话自检协议
+> 来源：fullstack4TraeV9 cockpit 新会话自检协议
 > 解决游戏制作流水线的跨会话恢复（断连、IDE 重启、上下文丢失）
 
 ---

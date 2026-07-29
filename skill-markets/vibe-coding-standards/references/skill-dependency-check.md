@@ -8,9 +8,9 @@
 ## §1 问题场景
 
 ```
-用户触发 fullstack4traev8 流程
+用户触发 fullstack4TraeV9 流程
   │
-  ├── fullstack4traev8 requires: [acceptance-discipline]
+  ├── fullstack4TraeV9 requires: [acceptance-discipline]
   │     optional: [ponytail4Trae, gitnexus4Trae, doc-map-manager]
   │
   ├── agent 检测: acceptance-discipline 未安装
@@ -90,7 +90,7 @@ Step 4 — 加载技能内容，注入降级标记:
 # CAPABILITY-MAP.md 或 SKILL.md requires 段中记录:
 # 依赖技能名: 降级影响一句话
 
-示例 (fullstack4traev8):
+示例 (fullstack4TraeV9):
 requires:
   skills: [acceptance-discipline]    # 缺失 → 🛑 阻断（无此技能无法走验收门禁）
   optional:

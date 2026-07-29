@@ -1,6 +1,6 @@
 ---
 name: "test-experience"
-description: "测试开发与质量经验库 — 编写/修改测试代码时加载，覆盖 mock 策略、fixture 设计、异步陷阱、超时控制和 bad-test 反模式。适用 Python + pytest + asyncio 技术栈。"
+description: "测试开发与质量经验库 — 编写/修改测试代码时加载，覆盖 mock 策略、fixture 设计、异步陷阱、超时控制、bad-test 反模式、E2E 最小门禁、跳过 TDD 的真实代价。适用 Python + pytest + asyncio + Playwright E2E 技术栈。"
 triggers:
   - "写测试"
   - "加测试"
@@ -14,6 +14,12 @@ triggers:
   - "测试慢"
   - "新增测试"
   - "测试报错"
+  - "E2E 测试"
+  - "Playwright"
+  - "端到端测试"
+  - "伪 TDD"
+  - "无测试"
+  - "补 E2E"
 ---
 
 # Test Experience — 通用测试开发质量标准
@@ -276,14 +282,6 @@ uv run pytest --cov=. --cov-report=term-missing
 
 ---
 
-## §8.5 测试陷阱速查
-
-> 完整决策树与环境就绪/外部调用检测/Fixture选择/Marker决策/自检清单 → [references/pytest-traps.md](references/pytest-traps.md)
->
-> 覆盖：环境就绪决策树、外部调用4类检测、import-time常量、Fixture选择决策树、Autouse纪律、Marker决策树、9项自检清单、异步超时规避
-
----
-
 ## §9 ShuXia 项目专项避坑
 
 > 来源：多轮 agent 并行开发中反复踩坑的真实教训。已在 `.trae/rules/测试避坑.md` 中有要点版，此处为完整版。
@@ -326,3 +324,61 @@ monkeypatch.setattr(ctx_builder, "chroma_search", mock_search)
 - `temp_data_dir` 创建临时目录 + 初始化 SQLite（`asyncio.run(init_db())`）→ 仅 API 集成测试需要
 - autouse `_test_env`：仅关停外部服务（零耗时），不放 `init_db`（157 次调用 = 大量时间）
 - 新增 fixture 自问：依赖 temp_data_dir？需要 event loop？重建 > .5s → `scope="module"`
+
+---
+
+## §10 反模式：跳过 TDD/E2E 的真实代价（🩸 语言无关）
+
+> 来源：gomoku JS→TS 迁移 + P2P 重连，零测试覆盖下两个 bug 耗 3h+ 人工 debug。
+
+### 10.1 成本对比
+
+| 场景 | 有 E2E | 无 E2E |
+|------|--------|--------|
+| esbuild IIFE `window.Gomoku === undefined` | smoke test 3s 发现，修构建配置 5min | 浏览器手动检查 + Playwright 逐层隔离 1.5h |
+| Host 刷新调用 `joinRoom` 连接自己 | host-refresh E2E 15s 发现，改 1 行 2min | 逐段 debug + 读 PeerJS 源码 1h |
+| `reconnect_state` 缺棋盘数据 | 同一 E2E 会因棋盘恢复断言失败 | 刷新后发现棋盘空白，回到源码看漏了什么字段 30min |
+| **总计** | **3s + 15s + 0 = 约 1 分钟自动化** | **1.5h + 1h + 0.5h = 3h 人工** |
+
+### 10.2 为什么"浏览器的实际行为 > 静态分析"
+
+```
+同名 var IIFE 遮蔽 → 源码看着没问题，构建也不报错 → 浏览器里 undefined
+这就是为什么 E2E 不是可选的。
+```
+
+### 10.3 伪 TDD 的 3 种形态
+
+| 形态 | 表现 | 为什么危险 |
+|------|------|-----------|
+| **Review-First TDD** | 先写实现，后补测试凑覆盖率 | 测试沦为实现的"翻译"，不会发现设计问题 |
+| **Happy-Path-Only TDD** | 只测正常路径，不测刷新/断线/空状态 | 虚假信心，边界 bug 照样上线 |
+| **Manual-Test TDD** | "浏览器里点了一下，能跑"就算过 | 状态组合（刷新+重连+恢复）人工无法穷举 |
+
+### 10.4 E2E 最小门禁（P0，提 PR 前必须全绿）
+
+```
+[ ] smoke-build: window 命名空间可用 + 所有公共方法可调用
+[ ] refresh-reconnect: Host 刷新后恢复 + Client 自动重连
+[ ] full-flow: 完整对局（创建→加入→操作→结束→重开）
+```
+
+这三个场景覆盖了 P2P 游戏 90% 的致命 bug 模式。
+
+### 10.5 Playwright 已全局安装时的零摩擦启动
+
+```bash
+# 确认可执行
+npx playwright --version
+
+# 如果未安装浏览器
+npx playwright install chromium
+
+# 初始化测试目录
+mkdir test
+# 创建 {game}-e2e.spec.ts → 写 smoke-build test
+# 运行
+npx playwright test
+```
+
+**关键**：项目无需额外依赖。Playwright 全局安装 + 一个 `.spec.ts` 文件即可启动 E2E。

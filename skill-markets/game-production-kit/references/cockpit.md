@@ -1,6 +1,6 @@
 # Cockpit 驾驶舱
 
-> 来源：fullstack4TraeV8 cockpit 模式
+> 来源：fullstack4TraeV9 cockpit 模式
 > 解决游戏制作流水线中"Agent 假性完成 + 进度不可见 + 重入困难"三大痛点
 
 ## 设计动机

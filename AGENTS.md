@@ -176,6 +176,14 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
 
 ---
 
+## 已开发的技能包
+
+| 技能包 | 路径 | 说明 |
+|--------|------|------|
+| fullstack4TraeV10 | `skill-markets/fullstack4TraeV10/` | 全栈文档驱动开发 V10 — 满分硬门禁 + 五阶段流水线 + spec-purge 物理归档 |
+
+---
+
 ## 快速命令
 
 ```powershell

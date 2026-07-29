@@ -1,4 +1,4 @@
-> 来源：fullstack4TraeV8 cockpit 模式
+> 来源：fullstack4TraeV9 cockpit 模式
 # 🎮 {game_key} Cockpit
 
 ## 当前位置

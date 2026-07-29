@@ -1,6 +1,6 @@
 # Report Growth — 异常处理与技能生长
 
-> 来源：fullstack4TraeV8 report-growth 模式，适配游戏制作流水线
+> 来源：fullstack4TraeV9 report-growth 模式，适配游戏制作流水线
 > report 是 Game Production Kit 的 Try-Catch 机制
 
 ---

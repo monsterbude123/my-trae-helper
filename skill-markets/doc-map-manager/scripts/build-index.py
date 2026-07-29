@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """
-build-index.py — 文档索引构建器 (SQLite)
+build-index.py — 文档知识图谱构建器 (SQLite + 链接图谱 + 新鲜度)
 
 解析 docs/ 下所有 .md 文件，存储到 SQLite（.docmap/docmap.db）：
-  - 按文件 mtime+size 增量检测，只解析变更文件
+  - 标题索引（headings）
+  - 文档间链接图谱（links）— 对标 GitNexus context
+  - 标签索引（tags）— frontmatter + inline
+  - 元数据索引（metadata）— frontmatter key-value
+  - 新鲜度评分（freshness_score）— 反幻觉核心
   - ProcessPoolExecutor 并行解析
-  - 可选同步到 ChromaDB 向量数据库（--chroma）
 
 用法:
   python build-index.py                          # 全量构建
-  python build-index.py --incremental --chroma   # 增量 + ChromaDB
-  python build-index.py --diff                   # 显示变更
-  python build-index.py --files "ARCHITECTURE.md adr.md"  # 仅指定文件
-
-环境变量:
-  DOCMAP_EXTRA_DOCS_DIRS  额外文档目录（分号/逗号分隔）
+  python build-index.py --incremental --zvec     # 增量 + Zvec
+  python build-index.py --detect-changes         # 概念级变更检测
+  python build-index.py --impact=ARCHITECTURE.md # 影响面分析
 """
 
 import argparse
@@ -25,15 +25,15 @@ import multiprocessing as mp
 import os
 import re
 import sqlite3
+import subprocess
 import sys
 import time
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
-# Windows cmd 编码适配
 if sys.platform == "win32":
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS files (
     hash TEXT DEFAULT '',
     summary TEXT DEFAULT '',
     last_indexed TEXT NOT NULL DEFAULT (datetime('now')),
+    freshness_score REAL DEFAULT 1.0,
+    last_git_commit TEXT DEFAULT '',
     PRIMARY KEY (path, source_dir)
 );
 
@@ -70,17 +72,75 @@ CREATE TABLE IF NOT EXISTS headings (
     FOREIGN KEY (file_path, source_dir) REFERENCES files(path, source_dir)
 );
 
+CREATE TABLE IF NOT EXISTS links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    from_file TEXT NOT NULL,
+    from_source_dir TEXT NOT NULL DEFAULT '',
+    from_line INTEGER NOT NULL,
+    to_file TEXT NOT NULL,
+    to_anchor TEXT DEFAULT '',
+    link_type TEXT DEFAULT 'ref',
+    context TEXT DEFAULT '',
+    FOREIGN KEY (from_file, from_source_dir) REFERENCES files(path, source_dir)
+);
+
+CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_path TEXT NOT NULL,
+    source_dir TEXT NOT NULL DEFAULT '',
+    tag TEXT NOT NULL,
+    source TEXT DEFAULT 'frontmatter',
+    FOREIGN KEY (file_path, source_dir) REFERENCES files(path, source_dir)
+);
+
+CREATE TABLE IF NOT EXISTS metadata (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_path TEXT NOT NULL,
+    source_dir TEXT NOT NULL DEFAULT '',
+    key TEXT NOT NULL,
+    value TEXT NOT NULL,
+    value_type TEXT DEFAULT 'string',
+    FOREIGN KEY (file_path, source_dir) REFERENCES files(path, source_dir)
+);
+
 CREATE INDEX IF NOT EXISTS idx_headings_file ON headings(file_path, source_dir);
 CREATE INDEX IF NOT EXISTS idx_headings_source ON headings(source_dir);
 CREATE INDEX IF NOT EXISTS idx_headings_title ON headings(title);
+CREATE INDEX IF NOT EXISTS idx_links_from ON links(from_file, from_source_dir);
+CREATE INDEX IF NOT EXISTS idx_links_to ON links(to_file);
+CREATE INDEX IF NOT EXISTS idx_tags_file ON tags(file_path, source_dir);
+CREATE INDEX IF NOT EXISTS idx_tags_tag ON tags(tag);
+CREATE INDEX IF NOT EXISTS idx_metadata_file ON metadata(file_path, source_dir);
+CREATE INDEX IF NOT EXISTS idx_metadata_kv ON metadata(key, value);
 """
 
 DOCMAP_DIR = ".docmap"
 DB_NAME = "docmap.db"
 
 
+def _load_config(db_dir: Path) -> dict:
+    """加载 .docmap/config.json，不存在则创建默认配置"""
+    config_path = db_dir / DOCMAP_DIR / "config.json"
+    default_config = {"exclude_dirs": ["bak_v8doc", "references"]}
+    if config_path.exists():
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+            for k, v in default_config.items():
+                if k not in config:
+                    config[k] = v
+            return config
+        except Exception:
+            return default_config
+    else:
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(config_path, "w", encoding="utf-8") as f:
+            json.dump(default_config, f, indent=2, ensure_ascii=False)
+        print(f"[config] 创建默认配置: {config_path}")
+        return default_config
+
+
 def _connect_db(db_dir: Path) -> sqlite3.Connection:
-    """打开 SQLite 连接（WAL 模式），创建表。"""
     docmap_dir = db_dir / DOCMAP_DIR
     docmap_dir.mkdir(parents=True, exist_ok=True)
     db_path = docmap_dir / DB_NAME
@@ -89,13 +149,12 @@ def _connect_db(db_dir: Path) -> sqlite3.Connection:
     return conn
 
 
-# ── 标题提取（与旧版一致） ────────────────────────────────────
+# ── 标题提取 ──────────────────────────────────────────────────
 
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)")
 
 
 def _heading_tree(headings: list[dict], total_lines: int) -> list[dict]:
-    """构建标题树：end_line + breadcrumb。"""
     if not headings:
         return []
     result = []
@@ -123,7 +182,6 @@ def _heading_tree(headings: list[dict], total_lines: int) -> list[dict]:
 
 
 def _extract_summary(filepath: Path, max_chars: int = 120) -> str:
-    """提取文件首段摘要。"""
     try:
         with open(filepath, encoding="utf-8") as f:
             lines = f.readlines()
@@ -149,7 +207,7 @@ def _extract_summary(filepath: Path, max_chars: int = 120) -> str:
     return (text[:max_chars - 3] + "...") if len(text) > max_chars else (text or "(无摘要)")
 
 
-# ── .gitignore 解析（与旧版一致） ────────────────────────────
+# ── .gitignore 解析 ────────────────────────────────────────────
 
 def _load_gitignore(repo_root: Path) -> list[tuple[str, bool]]:
     gitignore = repo_root / ".gitignore"
@@ -198,17 +256,186 @@ def _is_ignored(path: Path, repo_root: Path, patterns: list[tuple[str, bool]]) -
     return ignored
 
 
-# ── 文件解析（可序列化，供 ProcessPoolExecutor 调用） ─────────
+# ── 链接 / Frontmatter 解析（v2 新增） ─────────────────────────
 
-_ParseResult = dict  # type alias: {"path","source_dir","mtime","size","hash","summary","headings"}
+_LINK_RE = re.compile(r'\[([^\]]*)\]\(([^)]+)\)')
+
+# 关系型链接的关键词映射
+_LINK_TYPE_KEYWORDS = {
+    "supersedes": "supersedes",
+    "替代": "supersedes", "取代": "supersedes", "替换": "supersedes",
+    "depends-on": "depends-on",
+    "依赖": "depends-on", "前置": "depends-on", "需要先读": "depends-on",
+    "see-also": "see-also",
+    "参见": "see-also", "参考": "see-also", "另见": "see-also", "详见": "see-also",
+}
+
+_FRONTMATTER_TAG_KEYS = {"tags", "tag", "categories", "category"}
+_FRONTMATTER_LIST_RE = re.compile(r'^\[(.*)\]$')
+
+
+def _parse_frontmatter(lines: list[str]) -> dict:
+    """解析 YAML frontmatter，返回 {key: value} 字典。"""
+    if not lines or lines[0].strip() != "---":
+        return {}
+    end = -1
+    for i in range(1, min(len(lines), 50)):
+        if lines[i].strip() == "---":
+            end = i
+            break
+    if end <= 1:
+        return {}
+
+    result: dict[str, Any] = {}
+    for line in lines[1:end]:
+        line = line.rstrip()
+        if not line or line.startswith("#"):
+            continue
+        # 简单 YAML: key: value 或 key: [list] 或 key:\n  - item
+        m = re.match(r'^(\w[\w_-]*)\s*:\s*(.*)', line)
+        if not m:
+            continue
+        key, value = m.group(1), m.group(2).strip()
+        if value.startswith("[") and value.endswith("]"):
+            # 行内列表: key: [a, b, c]
+            inner = value[1:-1]
+            result[key] = [v.strip().strip("\"'") for v in inner.split(",") if v.strip()]
+        elif value.startswith('"') and value.endswith('"'):
+            result[key] = value[1:-1]
+        elif value.startswith("'") and value.endswith("'"):
+            result[key] = value[1:-1]
+        elif value in ("true", "false"):
+            result[key] = value == "true"
+        elif value == "":
+            result[key] = ""
+        else:
+            result[key] = value
+    return result
+
+
+def _extract_links(content_lines: list[str], rel_path: str) -> list[dict]:
+    """提取文档中的 markdown 链接，解析为 link 记录。
+
+    返回: [{"to_file","to_anchor","from_line","link_type","context"}, ...]
+    """
+    links = []
+    # 收集 See also / 相关文档 等特殊段落
+    see_also_section = False
+    for lineno, raw in enumerate(content_lines, 1):
+        stripped = raw.strip()
+
+        # 检测 "## See Also" / "## 相关文档" 等特殊章节
+        if re.match(r'^#{1,3}\s+(See\s*Also|相关文档|References?|参考资料)\s*$', stripped, re.IGNORECASE):
+            see_also_section = True
+            continue
+        if stripped.startswith("#") and see_also_section:
+            see_also_section = False
+
+        for m in _LINK_RE.finditer(raw):
+            link_text = m.group(1).strip()
+            target = m.group(2).strip()
+
+            # 跳过外部 URL 和锚点
+            if target.startswith(("http://", "https://", "mailto:", "#")):
+                continue
+
+            # 解析路径和锚点
+            anchor = ""
+            if "#" in target:
+                target, anchor = target.split("#", 1)
+
+            # 规范化目标文件路径
+            to_file = target
+            # 跳过非 md 文件
+            if not to_file.lower().endswith(".md"):
+                continue
+            # 处理相对路径
+            if to_file.startswith("./"):
+                to_file = to_file[2:]
+            elif to_file.startswith("../"):
+                # 简单解析 ../ 回到上级目录
+                dir_parts = rel_path.split("/")
+                while to_file.startswith("../"):
+                    to_file = to_file[3:]
+                    if dir_parts:
+                        dir_parts.pop()
+                if dir_parts:
+                    to_file = "/".join(dir_parts) + "/" + to_file
+
+            # 判定链接类型
+            link_type = "ref"
+            context = ""
+            # 检查链接上下文（前一行的关键词 + 链接文本）
+            prev_line = content_lines[lineno - 2].strip() if lineno >= 2 else ""
+            prev_50 = (prev_line[-50:] if len(prev_line) > 50 else prev_line).lower()
+            for kw, lt in _LINK_TYPE_KEYWORDS.items():
+                if kw in link_text.lower() or kw in prev_50:
+                    link_type = lt
+                    break
+            if stripped.startswith(("- ", "* ", "+ ")):
+                # 列表项中的链接，取上下文
+                ctx = stripped.lstrip("- *+0123456789. ")
+                if len(ctx) > 120:
+                    ctx = ctx[:117] + "..."
+                context = ctx
+            if see_also_section:
+                link_type = "see-also"
+
+            links.append({
+                "to_file": to_file,
+                "to_anchor": anchor,
+                "from_line": lineno,
+                "link_type": link_type,
+                "context": context,
+            })
+    return links
+
+
+def _extract_tags_and_metadata(frontmatter: dict) -> tuple[list[str], list[dict]]:
+    """从 frontmatter 提取 tags 和 metadata。
+
+    返回: (tags_list, metadata_list)
+      tags_list: ["tag1", "tag2", ...]
+      metadata_list: [{"key","value","value_type"}, ...]
+    """
+    tags_list: list[str] = []
+    metadata_list: list[dict] = []
+
+    for key, value in frontmatter.items():
+        if key in _FRONTMATTER_TAG_KEYS:
+            if isinstance(value, list):
+                tags_list.extend(value)
+            elif isinstance(value, str):
+                # 可能是 "a, b, c" 或 "a"
+                if "," in value:
+                    tags_list.extend([t.strip() for t in value.split(",")])
+                else:
+                    tags_list.append(value)
+        elif key in ("name", "description", "requires", "version"):
+            # 技能元数据，忽略（噪音大）
+            continue
+        else:
+            vtype = "string"
+            if isinstance(value, bool):
+                vtype = "boolean"
+                value = str(value).lower()
+            elif isinstance(value, (int, float)):
+                vtype = "number"
+                value = str(value)
+            elif isinstance(value, list):
+                vtype = "list"
+                value = ", ".join(str(v) for v in value)
+            metadata_list.append({"key": key, "value": str(value), "value_type": vtype})
+
+    return tags_list, metadata_list
+
+
+# ── 文件解析（可序列化） ──────────────────────────────────────
+
+_ParseResult = dict
 
 
 def _parse_single_file(args: tuple) -> _ParseResult:
-    """解析单个 .md 文件，返回可序列化的 dict。
-
-    args: (filepath_str, source_dir_str)
-    子进程可序列化调用。
-    """
     filepath_str, source_dir_str = args
     filepath = Path(filepath_str)
     source_dir = Path(source_dir_str)
@@ -220,19 +447,21 @@ def _parse_single_file(args: tuple) -> _ParseResult:
         size = stat.st_size
     except Exception as e:
         print(f"[WARN] 无法访问 {filepath}: {e}")
-        return None  # caller 会跳过 None
+        return None
 
     raw_headings = []
     total_lines = 0
+    all_lines: list[str] = []
     h = hashlib.blake2b()
 
     try:
         with open(filepath, encoding="utf-8") as f:
             for line in f:
                 total_lines += 1
+                raw_line = line.rstrip("\n\r")
+                all_lines.append(raw_line)
                 h.update(line.encode("utf-8"))
-                stripped = line.rstrip("\n\r")
-                m = _HEADING_RE.match(stripped)
+                m = _HEADING_RE.match(raw_line)
                 if m:
                     title = m.group(2).strip()
                     if title:
@@ -246,12 +475,17 @@ def _parse_single_file(args: tuple) -> _ParseResult:
         return {
             "path": rel_path, "source_dir": source_dir_str,
             "mtime": mtime, "size": size, "hash": "", "summary": "(读取失败)",
-            "headings": [],
+            "headings": [], "links": [], "tags": [], "metadata": [],
         }
 
     content_hash = h.hexdigest()
     headings = _heading_tree(raw_headings, total_lines)
     summary = _extract_summary(filepath)
+
+    # v2 新增：链接 + frontmatter 解析
+    frontmatter = _parse_frontmatter(all_lines)
+    links = _extract_links(all_lines, rel_path)
+    tags, metadata = _extract_tags_and_metadata(frontmatter)
 
     return {
         "path": rel_path,
@@ -261,35 +495,113 @@ def _parse_single_file(args: tuple) -> _ParseResult:
         "hash": content_hash,
         "summary": summary,
         "headings": headings,
+        "links": links,
+        "tags": tags,
+        "metadata": metadata,
     }
+
+
+# ── 新鲜度计算（v2 新增）──────────────────────────────────────
+
+def _compute_freshness(
+    mtime: float,
+    source_dir: str,
+    rel_path: str,
+    repo_root: Path,
+) -> tuple[float, str]:
+    """计算文档新鲜度评分 (0.0~1.0) 和最近一次 git commit。
+
+    评分规则:
+      - 7 天内修改: 1.0
+      - 7~30 天: 1.0 → 0.7 线性衰减
+      - 30~90 天: 0.7 → 0.3 线性衰减
+      - 90~180 天: 0.3 → 0.1 线性衰减
+      - 180+ 天: 0.1
+
+    返回: (freshness_score, last_commit_date_str)
+    """
+    now = time.time()
+    age_days = (now - mtime) / 86400.0
+    last_commit = ""
+
+    # 尝试获取 git log
+    try:
+        file_path = Path(source_dir) / rel_path
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%ci", "--", str(file_path)],
+            cwd=str(repo_root),
+            capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            last_commit = result.stdout.strip()[:10]  # YYYY-MM-DD
+    except Exception:
+        pass
+
+    # 计算新鲜度
+    if age_days <= 7:
+        freshness = 1.0
+    elif age_days <= 30:
+        freshness = 1.0 - (age_days - 7) / 23 * 0.3  # 1.0 → 0.7
+    elif age_days <= 90:
+        freshness = 0.7 - (age_days - 30) / 60 * 0.4   # 0.7 → 0.3
+    elif age_days <= 180:
+        freshness = 0.3 - (age_days - 90) / 90 * 0.2   # 0.3 → 0.1
+    else:
+        freshness = 0.1
+
+    return round(freshness, 3), last_commit
+
+
+def _compute_all_freshness(conn: sqlite3.Connection, source_dir: str, repo_root: Path):
+    """为所有文件计算并更新新鲜度评分。"""
+    cur = conn.execute(
+        "SELECT path, mtime FROM files WHERE source_dir = ?",
+        (source_dir,),
+    )
+    updates = []
+    for row in cur.fetchall():
+        score, commit = _compute_freshness(row[1], source_dir, row[0], repo_root)
+        updates.append((score, commit, row[0], source_dir))
+
+    conn.execute("BEGIN")
+    try:
+        conn.executemany(
+            "UPDATE files SET freshness_score=?, last_git_commit=? WHERE path=? AND source_dir=?",
+            updates,
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+
+    # 统计输出
+    fresh = sum(1 for u in updates if u[0] >= 0.7)
+    stale = sum(1 for u in updates if u[0] < 0.3)
+    print(f"  [新鲜度] {len(updates)} 文件: 🟢新鲜({fresh}) 🟡一般({len(updates) - fresh - stale}) 🔴过时({stale})")
 
 
 # ── SQLite 读写 ───────────────────────────────────────────────
 
 
 def _get_changed_files(conn: sqlite3.Connection, md_files: list[Path], source_dir: str) -> list[Path]:
-    """对比 SQLite 中的 mtime+size，返回变更/新增的文件列表。"""
     changed = []
     cur = conn.execute("SELECT path, mtime, size FROM files WHERE source_dir = ?", (source_dir,))
     known = {(row[0], row[1], row[2]) for row in cur.fetchall()}
-
     for fp in md_files:
         rel = str(fp.relative_to(source_dir)).replace("\\", "/")
         try:
             stat = fp.stat()
         except OSError:
             print(f"[WARN] 无法访问（增量检测）: {fp}")
-            changed.append(fp)  # 纳入处理，_parse_single_file 会跳过
+            changed.append(fp)
             continue
         key = (rel, stat.st_mtime, stat.st_size)
         if key not in known:
             changed.append(fp)
-
     return changed
 
 
 def _write_batch(conn: sqlite3.Connection, parsed_results: list[_ParseResult]):
-    """批量写入解析结果到 SQLite（事务内完成）。"""
     conn.execute("BEGIN")
     try:
         for r in parsed_results:
@@ -301,14 +613,50 @@ def _write_batch(conn: sqlite3.Connection, parsed_results: list[_ParseResult]):
                        summary=excluded.summary, last_indexed=datetime('now')""",
                 (r["path"], r["source_dir"], r["mtime"], r["size"], r["hash"], r["summary"]),
             )
-            conn.execute("DELETE FROM headings WHERE file_path=? AND source_dir=?",
-                         (r["path"], r["source_dir"]))
+            # headings
+            conn.execute(
+                "DELETE FROM headings WHERE file_path=? AND source_dir=?",
+                (r["path"], r["source_dir"]),
+            )
             for h in r["headings"]:
                 conn.execute(
                     "INSERT INTO headings (file_path, source_dir, line, end_line, level, title, breadcrumb) "
                     "VALUES (?, ?, ?, ?, ?, ?, ?)",
                     (r["path"], r["source_dir"], h["line"], h["end_line"],
                      h["level"], h["title"], h.get("breadcrumb", h["title"])),
+                )
+            # v2: links
+            conn.execute(
+                "DELETE FROM links WHERE from_file=? AND from_source_dir=?",
+                (r["path"], r["source_dir"]),
+            )
+            for link in r.get("links", []):
+                conn.execute(
+                    "INSERT INTO links (from_file, from_source_dir, from_line, to_file, to_anchor, link_type, context) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (r["path"], r["source_dir"], link["from_line"],
+                     link["to_file"], link["to_anchor"], link["link_type"], link["context"]),
+                )
+            # v2: tags
+            conn.execute(
+                "DELETE FROM tags WHERE file_path=? AND source_dir=?",
+                (r["path"], r["source_dir"]),
+            )
+            for tag in r.get("tags", []):
+                conn.execute(
+                    "INSERT INTO tags (file_path, source_dir, tag, source) VALUES (?, ?, ?, ?)",
+                    (r["path"], r["source_dir"], tag, "frontmatter"),
+                )
+            # v2: metadata
+            conn.execute(
+                "DELETE FROM metadata WHERE file_path=? AND source_dir=?",
+                (r["path"], r["source_dir"]),
+            )
+            for meta in r.get("metadata", []):
+                conn.execute(
+                    "INSERT INTO metadata (file_path, source_dir, key, value, value_type) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (r["path"], r["source_dir"], meta["key"], meta["value"], meta["value_type"]),
                 )
         conn.commit()
     except Exception:
@@ -317,7 +665,6 @@ def _write_batch(conn: sqlite3.Connection, parsed_results: list[_ParseResult]):
 
 
 def _build_files_data_from_db(conn: sqlite3.Connection) -> OrderedDict:
-    """从 SQLite 构建 files_data dict（用于 ChromaDB 同步）。"""
     files_data: OrderedDict = OrderedDict()
     cur = conn.execute("SELECT path, source_dir, summary FROM files")
     for row in cur.fetchall():
@@ -330,17 +677,14 @@ def _build_files_data_from_db(conn: sqlite3.Connection) -> OrderedDict:
         headings = [{"line": r[0], "end_line": r[1], "level": r[2],
                       "title": r[3], "breadcrumb": r[4]} for r in hcur.fetchall()]
         key = rel_path
-        # 多目录时文件名可能冲突，用 [dir_tag] 前缀
         files_data[key] = {
             "summary": summary or "",
             "headings": headings,
             "source_dir": source_dir,
         }
-    # 重新计算多目录前缀
     sources = {v["source_dir"] for v in files_data.values() if v.get("source_dir")}
     if len(sources) > 1:
         new_fd: OrderedDict = OrderedDict()
-        seen_paths: dict[str, int] = {}
         for key, data in files_data.items():
             sd = data.get("source_dir", "")
             if sd:
@@ -353,7 +697,7 @@ def _build_files_data_from_db(conn: sqlite3.Connection) -> OrderedDict:
     return files_data
 
 
-# ── ChromaDB 集成（与旧版一致） ──────────────────────────────
+# ── ChromaDB 集成 ─────────────────────────────────────────────
 
 def _load_dotenv() -> dict:
     try:
@@ -396,7 +740,6 @@ def _create_embedding_function(config: dict):
 
 
 def sync_to_chromadb(files_data: dict, docs_dir: Path) -> bool:
-    """将标题索引同步到 ChromaDB 向量数据库。"""
     try:
         import chromadb
         from chromadb.config import Settings
@@ -504,11 +847,9 @@ def _sync_concurrent(collection, ef, ids, documents, metadatas, config):
         collection.add(ids=ids[i:b_end], embeddings=emb_slice, metadatas=metadatas[i:b_end])
 
 
-# ── Zvec 同步（动态队列 + 流式写入 + 多源嵌入） ─────────────────
+# ── Zvec 同步 ─────────────────────────────────────────────────
 
 def _compute_data_version(conn: sqlite3.Connection) -> str:
-    """计算 SQLite 中所有文件的数据版本哈希。"""
-    import hashlib
     cur = conn.execute("SELECT path, source_dir, mtime, size, hash FROM files ORDER BY path, source_dir")
     h = hashlib.blake2b()
     for row in cur:
@@ -517,10 +858,8 @@ def _compute_data_version(conn: sqlite3.Connection) -> str:
 
 
 def _load_zvec_state(path: Path) -> dict:
-    """加载 Zvec 状态：{data_version, file_paths}。缺失返回空 dict。"""
     try:
         if path.exists():
-            import json
             return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         pass
@@ -528,8 +867,6 @@ def _load_zvec_state(path: Path) -> dict:
 
 
 def _save_zvec_state(path: Path, version: str, file_paths: list[str]):
-    """持久化 Zvec 状态。"""
-    import json
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(
         {"data_version": version, "file_paths": sorted(set(file_paths))},
@@ -538,10 +875,7 @@ def _save_zvec_state(path: Path, version: str, file_paths: list[str]):
 
 
 def _parse_embedding_sources(config: dict) -> list[dict]:
-    """解析 .env 配置，返回所有 embedding 源（本地 CPU + N个 OpenAI）。"""
     sources = []
-
-    # 1) 本地 CPU（sentence_transformers）
     local_weight = int(config.get("DOCMAP_EMBEDDING_LOCAL_WEIGHT", "1"))
     if local_weight > 0:
         try:
@@ -563,20 +897,15 @@ def _parse_embedding_sources(config: dict) -> list[dict]:
             if model is not None:
                 dim = model.get_sentence_embedding_dimension()
                 sources.append({
-                    "type": "local",
-                    "weight": local_weight,
-                    "model": model,
-                    "model_name": model_name,
-                    "dim": dim,
-                    "label": f"CPU({model_name})",
+                    "type": "local", "weight": local_weight,
+                    "model": model, "model_name": model_name,
+                    "dim": dim, "label": f"CPU({model_name})",
                 })
                 print(f"[Zvec] CPU 源已加载: {model_name} (dim={dim}, weight={local_weight})")
         except Exception as e:
             print(f"[Zvec] CPU 源不可用: {e}")
 
     batch_size = int(config.get("DOCMAP_EMBEDDING_BATCH", "200"))
-
-    # 2) 兼容旧式单端点
     single_base = config.get("DOCMAP_EMBEDDING_API_BASE", "")
     if single_base:
         from openai import OpenAI
@@ -586,22 +915,16 @@ def _parse_embedding_sources(config: dict) -> list[dict]:
         probe = client.embeddings.create(input="probe", model=model_name)
         dim = len(probe.data[0].embedding)
         sources.append({
-            "type": "openai",
-            "weight": int(config.get("DOCMAP_EMBEDDING_API_WEIGHT", "3")),
-            "client": client,
-            "model_name": model_name,
-            "dim": dim,
-            "batch_size": batch_size,
-            "label": f"API({model_name})",
+            "type": "openai", "weight": int(config.get("DOCMAP_EMBEDDING_API_WEIGHT", "3")),
+            "client": client, "model_name": model_name, "dim": dim,
+            "batch_size": batch_size, "label": f"API({model_name})",
         })
         print(f"[Zvec] API 源: {single_base} / {model_name} (dim={dim})")
 
-    # 3) 多端点（JSON 数组）
     endpoints_raw = config.get("DOCMAP_EMBEDDING_ENDPOINTS", "")
     if endpoints_raw:
-        import json as _json
         try:
-            eps = _json.loads(endpoints_raw)
+            eps = json.loads(endpoints_raw)
             for i, ep in enumerate(eps):
                 from openai import OpenAI
                 client = OpenAI(api_key=ep.get("key", "local llm"), base_url=ep["base"], timeout=60)
@@ -609,30 +932,24 @@ def _parse_embedding_sources(config: dict) -> list[dict]:
                 probe = client.embeddings.create(input="probe", model=mn)
                 dim = len(probe.data[0].embedding)
                 sources.append({
-                    "type": "openai",
-                    "weight": int(ep.get("weight", 2)),
-                    "client": client,
-                    "model_name": mn,
-                    "dim": dim,
+                    "type": "openai", "weight": int(ep.get("weight", 2)),
+                    "client": client, "model_name": mn, "dim": dim,
                     "batch_size": int(ep.get("batch_size", batch_size)),
                     "label": f"EP{i+1}({mn})",
                 })
                 print(f"[Zvec] API 源 EP{i+1}: {ep['base']} / {mn} (dim={dim}, weight={ep.get('weight',2)})")
         except Exception as e:
             print(f"[Zvec] 多端点解析失败: {e}")
-
     return sources
 
 
 def _embed_chunk_local(source: dict, texts: list[str], start: int) -> tuple[int, list[list[float]]]:
-    """本地 CPU 执行一部分文本的 embedding。"""
     model = source["model"]
     vecs = model.encode(texts, show_progress_bar=False).tolist()
     return start, vecs
 
 
 def _embed_chunk_openai(source: dict, texts: list[str], start: int) -> tuple[int, list[list[float]]]:
-    """单个 OpenAI 端点执行一部分文本的 embedding（内部分批并发）。"""
     import concurrent.futures
     client = source["client"]
     mn = source["model_name"]
@@ -653,18 +970,12 @@ def _embed_chunk_openai(source: dict, texts: list[str], start: int) -> tuple[int
 
 
 def _openai_embed_batch(client, batch: list[str], model_name: str) -> list[list[float]]:
-    """单 batch 的 OpenAI embedding 调用。"""
     resp = client.embeddings.create(input=batch, model=model_name)
     sorted_data = sorted(resp.data, key=lambda x: x.index)
     return [d.embedding for d in sorted_data]
 
 
 def _sync_embedding(entries: list[dict], zvec_dir: Path, config: dict) -> bool:
-    """多源并发嵌入 → 流式写入 Zvec。
-
-    使用动态工作队列：所有 embedding 源从共享队列中取任务，
-    按实际消费速度分配。每个块向量化后立即写入 Zvec，不积攒内存。
-    """
     try:
         import zvec as _zv
     except ImportError:
@@ -681,8 +992,6 @@ def _sync_embedding(entries: list[dict], zvec_dir: Path, config: dict) -> bool:
         return False
 
     dim = sources[0]["dim"]
-
-    # 重建 Zvec collection
     if zvec_dir.exists():
         import shutil
         shutil.rmtree(str(zvec_dir), ignore_errors=True)
@@ -701,7 +1010,6 @@ def _sync_embedding(entries: list[dict], zvec_dir: Path, config: dict) -> bool:
     )
     collection = _zv.create_and_open(path=str(zvec_dir), schema=schema)
 
-    # 动态消费队列
     import concurrent.futures
     import queue
     import threading
@@ -716,7 +1024,6 @@ def _sync_embedding(entries: list[dict], zvec_dir: Path, config: dict) -> bool:
     insert_lock = threading.Lock()
 
     print(f"[Zvec] 动态队列: {len(texts)} 条, {total_chunks} 块, {len(sources)} 个源")
-
     from tqdm import tqdm
     pbar = tqdm(total=total_chunks, desc="Embedding", unit="chunk")
 
@@ -732,7 +1039,6 @@ def _sync_embedding(entries: list[dict], zvec_dir: Path, config: dict) -> bool:
                 else:
                     _, vecs = _embed_chunk_openai(source, chunk, start)
 
-                # 流式写入：每块向量化完立即写 Zvec
                 docs = []
                 for j, v in enumerate(vecs):
                     idx = start + j
@@ -741,18 +1047,14 @@ def _sync_embedding(entries: list[dict], zvec_dir: Path, config: dict) -> bool:
                         id=e["uid"],
                         vectors={"embedding": v},
                         fields={
-                            "file": e["file"],
-                            "line": e["line"],
-                            "end_line": e["end_line"],
-                            "level": e["level"],
-                            "title": e["title"],
-                            "breadcrumb": e["breadcrumb"],
+                            "file": e["file"], "line": e["line"],
+                            "end_line": e["end_line"], "level": e["level"],
+                            "title": e["title"], "breadcrumb": e["breadcrumb"],
                             "source_dir": e["source_dir"],
                         },
                     ))
                 with insert_lock:
                     collection.insert(docs)
-
                 pbar.update(1)
             except Exception as e:
                 print(f"\n  ❌ {source.get('label', '?')} 块失败 (start={start}): {e}")
@@ -772,11 +1074,9 @@ def _sync_embedding(entries: list[dict], zvec_dir: Path, config: dict) -> bool:
 
 
 def _sync_zvec_from_db(conn: sqlite3.Connection, db_dir: Path, config: dict) -> None:
-    """从 SQLite 读取数据，同步到 Zvec。"""
     zvec_dir = db_dir / DOCMAP_DIR / "zvec"
     zvec_state_path = zvec_dir / "zvec_state.json"
 
-    # 检查 SQLite 中是否有数据
     cur = conn.execute("SELECT COUNT(*) FROM files")
     row_count = cur.fetchone()[0]
     if row_count == 0:
@@ -785,8 +1085,6 @@ def _sync_zvec_from_db(conn: sqlite3.Connection, db_dir: Path, config: dict) -> 
 
     data_version = _compute_data_version(conn)
     old_state = _load_zvec_state(zvec_state_path)
-
-    # 检测是否需同步
     need_sync = not old_state or data_version != old_state.get("data_version", "")
     if not need_sync and old_state.get("file_paths"):
         cur = conn.execute("SELECT path FROM files")
@@ -808,10 +1106,8 @@ def _sync_zvec_from_db(conn: sqlite3.Connection, db_dir: Path, config: dict) -> 
                     entries.append({
                         "uid": hashlib.md5(f"{rel_path}:L{h['line']}".encode()).hexdigest(),
                         "text": h["title"],
-                        "file": rel_path,
-                        "line": h["line"],
-                        "end_line": h.get("end_line", 0),
-                        "level": h["level"],
+                        "file": rel_path, "line": h["line"],
+                        "end_line": h.get("end_line", 0), "level": h["level"],
                         "title": h["title"],
                         "breadcrumb": h.get("breadcrumb", h["title"]),
                         "source_dir": data.get("source_dir", ""),
@@ -824,10 +1120,9 @@ def _sync_zvec_from_db(conn: sqlite3.Connection, db_dir: Path, config: dict) -> 
         print(f"[Zvec] 数据无变更，跳过同步")
 
 
-# ── Git Diff 检测（与旧版一致） ──────────────────────────────
+# ── Git Diff 检测 ─────────────────────────────────────────────
 
 def _run_git_diff(repo_root: Path, git_ref: str | None) -> None:
-    import subprocess
     git_dir = repo_root / ".git"
     if not git_dir.exists():
         print("[GIT-DIFF] 当前目录不是 Git 仓库。使用 --diff 进行基于 mtime 的变更检测。")
@@ -895,7 +1190,6 @@ def _run_git_diff(repo_root: Path, git_ref: str | None) -> None:
 # ── diff 模式 ──────────────────────────────────────────────────
 
 def _diff_vs_sqlite(conn: sqlite3.Connection, md_files: list[Path], source_dir: str, docs_dir: Path):
-    """对比 SQLite 输出变更清单。"""
     cur = conn.execute("SELECT path, mtime, size FROM files WHERE source_dir = ?", (source_dir,))
     known = {(row[0], row[1], row[2]) for row in cur.fetchall()}
     current = {}
@@ -906,8 +1200,8 @@ def _diff_vs_sqlite(conn: sqlite3.Connection, md_files: list[Path], source_dir: 
 
     added = [k for k in current if k not in {r[0] for r in known}]
     deleted = [r[0] for r in known if r[0] not in current]
-    modified = [k for k in current if k in {r[0] for r in known}
-                and current[k] != (next(r[1] for r in known if r[0] == k), next(r[2] for r in known if r[0] == k))]
+    known_lookup = {r[0]: (r[1], r[2]) for r in known}
+    modified = [k for k in current if k in known_lookup and current[k] != known_lookup[k]]
 
     print(f"\n[DIFF] 与上次索引相比的变更：")
     if added:
@@ -927,6 +1221,184 @@ def _diff_vs_sqlite(conn: sqlite3.Connection, md_files: list[Path], source_dir: 
     print()
 
 
+# ── detect_changes / impact（v2 新增）─────────────��────────────
+
+def _run_detect_changes(conn: sqlite3.Connection):
+    """概念级变更检测：找出变更文件的关联文档。"""
+    import subprocess as sp
+    git_dir = Path.cwd() / ".git"
+    ref = "HEAD"
+
+    # 尝试获取变更文件
+    changed_files = set()
+    if git_dir.exists():
+        try:
+            result = sp.run(
+                ["git", "diff", "--name-only", ref, "--", "docs/"],
+                capture_output=True, text=True, timeout=10,
+            )
+            if result.returncode == 0:
+                for line in result.stdout.strip().split("\n"):
+                    line = line.strip()
+                    if line.endswith(".md"):
+                        # 去掉 docs/ 前缀
+                        fname = line[5:] if line.startswith("docs/") else line
+                        changed_files.add(fname)
+        except Exception:
+            pass
+
+    if not changed_files:
+        print("[DETECT-CHANGES] 无 git diff 变更。")
+        return
+
+    print(f"\n[DETECT-CHANGES] 变更文件: {len(changed_files)} 个")
+    print()
+
+    # 对每个变更文件，查找入站链接（谁引用了它）
+    for fname in sorted(changed_files):
+        print(f"  📄 {fname}")
+        # 入站链接
+        cur = conn.execute(
+            "SELECT DISTINCT from_file, from_line, link_type, context FROM links "
+            "WHERE to_file LIKE ?",
+            (f"%{fname}%",),
+        )
+        inbound = cur.fetchall()
+        if inbound:
+            print(f"     ⬅ 入站链接 ({len(inbound)} 篇文档引用了它):")
+            for row in inbound:
+                lt = row[2] or "ref"
+                print(f"       - {row[0]} L{row[1]} [{lt}]")
+                if row[3]:
+                    print(f"         \"{row[3][:80]}\"")
+        else:
+            print(f"     ⬅ 入站链接: (无)")
+        print()
+
+    total_affected = 0
+    for fname in sorted(changed_files):
+        cur = conn.execute(
+            "SELECT COUNT(DISTINCT from_file) FROM links WHERE to_file LIKE ?",
+            (f"%{fname}%",),
+        )
+        cnt = cur.fetchone()[0]
+        total_affected += cnt
+
+    print(f"  📊 汇总: {len(changed_files)} 个文件变更 → 影响 {total_affected} 个入站链接")
+    if total_affected > 0:
+        print(f"  ⚠️  建议同步更新以上引用文档以保持一致性。")
+    print()
+
+
+def _run_impact(conn: sqlite3.Connection, target_file: str):
+    """影响面分析：修改 target_file 会影响哪些文档。"""
+    print(f"\n[IMPACT] 影响面分析: {target_file}")
+    print()
+
+    # 入站链接（谁引用了这个文件）
+    cur = conn.execute(
+        "SELECT from_file, from_line, link_type, context FROM links "
+        "WHERE to_file LIKE ? OR to_file = ?",
+        (f"%{target_file}%", target_file),
+    )
+    inbound = cur.fetchall()
+
+    # 出站链接（这个文件引用了谁）
+    source_dir = ""
+    cur2 = conn.execute(
+        "SELECT source_dir FROM files WHERE path = ? LIMIT 1",
+        (target_file,),
+    )
+    row = cur2.fetchone()
+    if row:
+        source_dir = row[0]
+
+    cur3 = conn.execute(
+        "SELECT to_file, from_line, link_type FROM links "
+        "WHERE from_file = ? AND from_source_dir = ?",
+        (target_file, source_dir),
+    )
+    outbound = cur3.fetchall()
+
+    # 标签
+    cur4 = conn.execute(
+        "SELECT tag FROM tags WHERE file_path = ? AND source_dir = ?",
+        (target_file, source_dir),
+    )
+    file_tags = [row[0] for row in cur4.fetchall()]
+
+    # 同标签文档
+    related_by_tag = set()
+    for tag in file_tags:
+        cur5 = conn.execute(
+            "SELECT DISTINCT file_path FROM tags WHERE tag = ? AND file_path != ?",
+            (tag, target_file),
+        )
+        for row in cur5:
+            related_by_tag.add(row[0])
+
+    # 新鲜度
+    cur6 = conn.execute(
+        "SELECT freshness_score, last_git_commit FROM files WHERE path = ? AND source_dir = ?",
+        (target_file, source_dir),
+    )
+    fresh_row = cur6.fetchone()
+    freshness = fresh_row[0] if fresh_row else 1.0
+    last_commit = fresh_row[1] if fresh_row else ""
+
+    # 输出
+    fresh_icon = "🟢" if freshness >= 0.7 else ("🟡" if freshness >= 0.3 else "🔴")
+    print(f"  新鲜度: {fresh_icon} {freshness:.2f}", end="")
+    if last_commit:
+        print(f" (last commit: {last_commit})")
+    else:
+        print()
+
+    print(f"  标签: {', '.join(file_tags) if file_tags else '(无)'}")
+    print()
+
+    if inbound:
+        print(f"  ⬅ 入站链接 ({len(inbound)} 篇文档引用了它):")
+        for row in inbound:
+            lt = row[2] or "ref"
+            print(f"     - [{lt}] {row[0]} L{row[1]}")
+            if row[3]:
+                print(f"       \"{row[3][:80]}\"")
+        print()
+    else:
+        print(f"  ⬅ 入站链接: (无，可能是知识孤岛 ⚠️)")
+        print()
+
+    if outbound:
+        print(f"  ➡ 出站链接 ({len(outbound)} 篇):")
+        for row in outbound:
+            lt = row[2] or "ref"
+            print(f"     - [{lt}] {row[0]} L{row[1]}")
+        print()
+    else:
+        print(f"  ➡ 出站链接: (无)")
+        print()
+
+    if related_by_tag:
+        print(f"  🏷 同标签关联 ({len(related_by_tag)} 篇):")
+        for f in sorted(related_by_tag)[:10]:
+            print(f"     - {f}")
+        if len(related_by_tag) > 10:
+            print(f"     ... 还有 {len(related_by_tag) - 10} 篇")
+        print()
+
+    # 风险等级
+    risk_count = len(inbound) + len(outbound) + len(related_by_tag)
+    if risk_count >= 10:
+        risk = "HIGH 🔴"
+    elif risk_count >= 4:
+        risk = "MEDIUM 🟡"
+    else:
+        risk = "LOW 🟢"
+    print(f"  影响面总计: {risk_count} 个关联文档 → 风险等级: {risk}")
+    print()
+
+
 # ── 核心流程 ──────────────────────────────────────────────────
 
 
@@ -940,15 +1412,10 @@ def _process_single_dir(
     diff_mode: bool = False,
     db_dir: Path | None = None,
 ) -> int:
-    """处理单个文档目录，返回处理文件数。"""
-    # 集中式模式：所有目录数据写入同一个 db_dir；向后兼容：None 则用 docs_dir
     connect_dir = db_dir if db_dir is not None else docs_dir
     conn = _connect_db(connect_dir)
-
-    # 加载 .gitignore
     gitignore_patterns = _load_gitignore(repo_root) if use_gitignore else []
 
-    # 收集 .md 文件
     md_files: list[Path] = []
     if target_files:
         for f in target_files:
@@ -959,7 +1426,6 @@ def _process_single_dir(
                 print(f"[WARN] 文件不存在或非 .md: {f}")
     else:
         md_files = sorted(docs_dir.rglob("*.md"))
-        # 自我排除：忽略 .docmap/ 目录下的所有文件
         docmap_dir = docs_dir / DOCMAP_DIR
         if docmap_dir.exists():
             md_files = [f for f in md_files if not str(f.resolve()).startswith(str(docmap_dir.resolve()))]
@@ -969,6 +1435,17 @@ def _process_single_dir(
             skipped = before - len(md_files)
             if skipped:
                 print(f"[gitignore] 排除 {skipped} 个被忽略的文件")
+        # 从 .docmap/config.json 加载排除目录列表
+        config = _load_config(connect_dir)
+        exclude_dirs = config.get("exclude_dirs", [])
+        if exclude_dirs:
+            before = len(md_files)
+            md_files = [f for f in md_files if not any(
+                part in exclude_dirs for part in f.relative_to(docs_dir).parts[:-1]
+            )]
+            skipped = before - len(md_files)
+            if skipped:
+                print(f"[exclude] 排除 {skipped} 个来自 {exclude_dirs} 的文件（配置于 .docmap/config.json）")
 
     if not md_files:
         print("[ERROR] 未找到任何 .md 文件")
@@ -977,13 +1454,11 @@ def _process_single_dir(
 
     source_dir = str(docs_dir)
 
-    # diff 模式
     if diff_mode:
         _diff_vs_sqlite(conn, md_files, source_dir, docs_dir)
         conn.close()
         return 0
 
-    # 增量：找出变更文件
     if incremental and not target_files:
         changed = _get_changed_files(conn, md_files, source_dir)
         if not changed:
@@ -995,13 +1470,11 @@ def _process_single_dir(
     else:
         print(f"\n[全量] {docs_dir.name}: {len(md_files)} 个文件")
 
-    # 并行解析
     n_workers = min(mp.cpu_count(), len(md_files), 8)
     parse_args = [(str(fp), source_dir) for fp in md_files]
     results: list[_ParseResult] = []
 
     if n_workers <= 1:
-        # 单文件直接跑（避免进程启动开销）
         for i, args in enumerate(parse_args):
             print(f"  [{i + 1}/{len(parse_args)}] {Path(args[0]).name}", end="")
             r = _parse_single_file(args)
@@ -1009,7 +1482,10 @@ def _process_single_dir(
                 print(" (跳过-无法访问)")
                 continue
             results.append(r)
-            print(f" ({len(r['headings'])} headings)")
+            n_links = len(r.get("links", []))
+            n_tags = len(r.get("tags", []))
+            extra = f" +{n_links}L +{n_tags}T" if n_links or n_tags else ""
+            print(f" ({len(r['headings'])} headings{extra})")
     else:
         print(f"  并行解析 ({n_workers} workers)...")
         with ProcessPoolExecutor(max_workers=n_workers) as pool:
@@ -1020,23 +1496,30 @@ def _process_single_dir(
                     print(f"  [{i}/{len(parse_args)}] (跳过-无法访问)")
                     continue
                 results.append(r)
-                print(f"  [{i}/{len(parse_args)}] {r['path']} ({len(r['headings'])} headings)")
+                n_links = len(r.get("links", []))
+                n_tags = len(r.get("tags", []))
+                extra = f" +{n_links}L +{n_tags}T" if n_links or n_tags else ""
+                print(f"  [{i}/{len(parse_args)}] {r['path']} ({len(r['headings'])} headings{extra})")
 
-    # 批量写入 SQLite
     _write_batch(conn, results)
 
+    # v2: 计算新鲜度
+    _compute_all_freshness(conn, source_dir, repo_root)
+
+    # 统计
     total_h = sum(len(r["headings"]) for r in results)
-    print(f"  → 写入 SQLite: {len(results)} files, {total_h} headings")
+    total_links = sum(len(r.get("links", [])) for r in results)
+    total_tags = sum(len(r.get("tags", [])) for r in results)
+    print(f"  → 写入 SQLite: {len(results)} files, {total_h} headings, {total_links} links, {total_tags} tags")
     conn.close()
     return len(results)
 
 
 # ── Main ──────────────────────────────────────────────────────
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="构建文档索引 (SQLite + ChromaDB + Zvec)"
+        description="构建文档知识图谱 (SQLite + 链接图谱 + 新鲜度 + ChromaDB + Zvec)"
     )
     parser.add_argument("--files", type=str, nargs="*", default=None,
                         help="指定文件列表（相对于 docs/），默认扫描所有 .md")
@@ -1047,22 +1530,26 @@ def main() -> None:
     parser.add_argument("--no-chroma", action="store_true", default=False,
                         help="强制跳过 ChromaDB 同步")
     parser.add_argument("--zvec", action="store_true", default=False,
-                        help="同步到 Zvec 向量数据库（动态队列 + 流式写入 + 多源嵌入）")
+                        help="同步到 Zvec 向量数据库")
     parser.add_argument("--no-zvec", action="store_true", default=False,
                         help="强制跳过 Zvec 同步")
     parser.add_argument("--no-gitignore", action="store_true", default=False,
-                        help="不读取 .gitignore，扫描全部文件")
+                        help="不读取 .gitignore")
     parser.add_argument("--incremental", action="store_true", default=False,
-                        help="增量模式：只索引新增/修改的文件（基于 mtime+size）")
+                        help="增量模式：只索引新增/修改的文件")
     parser.add_argument("--diff", action="store_true", default=False,
                         help="显示自上次索引以来的变更清单")
     parser.add_argument("--git-diff", action="store_true", default=False,
                         help="使用 git diff 检测 docs/ 变更")
     parser.add_argument("--git-ref", type=str, default=None,
                         help="--git-diff 的对比基准")
+    parser.add_argument("--detect-changes", action="store_true", default=False,
+                        help="概念级变更检测：找出变更文件的关联文档")
+    parser.add_argument("--impact", type=str, default=None,
+                        help="影响面分析：指定文件，展示入站/出站链接 + 标签关联 + 风险等级")
     args = parser.parse_args()
 
-    # ── 解析 docs_dirs ────────────────────────────────────
+    # ── 解析 docs_dirs ──
     if args.docs_dir:
         docs_dirs = [Path(d).resolve() for d in args.docs_dir]
         repo_root = docs_dirs[0].parent
@@ -1095,22 +1582,34 @@ def main() -> None:
         _run_git_diff(repo_root, args.git_ref)
         return
 
-    # 从 .env 加载额外目录
-    config = _load_dotenv()
-    extra_raw = config.get("DOCMAP_EXTRA_DOCS_DIRS", "")
-    if extra_raw:
-        for d in re.split(r"[;,]", extra_raw):
-            d = d.strip()
-            if not d:
-                continue
-            p = Path(d).resolve()
-            if p.exists() and p.is_dir():
-                if p not in docs_dirs:
-                    docs_dirs.append(p)
-            else:
-                print(f"[WARN] DOCMAP_EXTRA_DOCS_DIRS 目录不存在: {p}")
+    # detect-changes / impact 模式（v2 新增）
+    db_dir = docs_dirs[0]
+    if args.detect_changes or args.impact:
+        conn = _connect_db(db_dir)
+        if args.detect_changes:
+            _run_detect_changes(conn)
+        if args.impact:
+            _run_impact(conn, args.impact)
+        conn.close()
+        return
 
-    # 验证
+    # 从 .env 加载额外目录（仅当未显式指定 --docs-dir 时）
+
+    config = _load_dotenv()
+    if not args.docs_dir:
+        extra_raw = config.get("DOCMAP_EXTRA_DOCS_DIRS", "")
+        if extra_raw:
+            for d in re.split(r"[;,]", extra_raw):
+                d = d.strip()
+                if not d:
+                    continue
+                p = Path(d).resolve()
+                if p.exists() and p.is_dir():
+                    if p not in docs_dirs:
+                        docs_dirs.append(p)
+                else:
+                    print(f"[WARN] DOCMAP_EXTRA_DOCS_DIRS 目录不存在: {p}")
+
     for d in docs_dirs:
         if not d.exists():
             print(f"[ERROR] 文档目录不存在: {d}")
@@ -1120,10 +1619,6 @@ def main() -> None:
     use_zvec = args.zvec and not args.no_zvec
     use_gitignore = not args.no_gitignore
 
-    # 集中式数据目录（SQLite + ChromaDB + Zvec）
-    db_dir = docs_dirs[0]
-
-    # 从 .env 读取额外配置（Zvec 多源等）
     zvec_config = _load_dotenv()
 
     mode = "mtime-diff" if args.diff else ("incremental" if args.incremental else "全量")
@@ -1131,7 +1626,6 @@ def main() -> None:
     print(f"Mode: {mode}, ChromaDB: {'启用' if use_chroma else '跳过'}, Zvec: {'启用' if use_zvec else '跳过'}, Gitignore: {'启用' if use_gitignore else '跳过'}")
     print()
 
-    # 逐个处理
     total_processed = 0
     for i, docs_dir in enumerate(docs_dirs):
         if len(docs_dirs) > 1:
@@ -1149,7 +1643,6 @@ def main() -> None:
         print(f"\n[OK] diff 完成。")
         return
 
-    # ChromaDB 同步
     if use_chroma and total_processed > 0:
         conn = _connect_db(db_dir)
         files_data = _build_files_data_from_db(conn)
@@ -1158,7 +1651,6 @@ def main() -> None:
             print(f"\n[ChromaDB] 从 SQLite 读取 {len(files_data)} 个文件数据...")
             sync_to_chromadb(files_data, db_dir)
 
-    # Zvec 同步
     if use_zvec:
         conn = _connect_db(db_dir)
         _sync_zvec_from_db(conn, db_dir, zvec_config)

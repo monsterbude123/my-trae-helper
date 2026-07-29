@@ -1,361 +1,233 @@
 ---
 name: doc-map-manager
 description: >
-  文档地图管理器 — 为 docs/ 目录构建结构化索引（.docmap/docmap.db SQLite），
-  支持精确匹配、模糊搜索、ChromaDB / Zvec 语义向量检索。当用户需要 "文档索引"、"搜索文档"、
-  "文档地图"、"docmap"、"查找某篇文档的章节"、"更新文档索引"、"build index"、
-  "查询文档"、"模糊搜索文档标题"、"语义搜索文档" 时自动加载。
-  也支持为文档提问直接定位到具体文件的精确行号。
+  文档知识图谱管理器 — 为 docs/ 目录构建结构化索引（.docmap/docmap.db SQLite + 链接图谱 + 新鲜度评分），
+  支持精确匹配、模糊搜索、ChromaDB / Zvec 语义向量检索、文档间链接查询（context）、影响面分析（impact）、
+  新鲜度反幻觉验证。当用户需要 "文档索引"、"搜索文档"、"文档地图"、"docmap"、"查找某篇文档的章节"、
+  "更新文档索引"、"build index"、"查询文档"、"模糊搜索文档标题"、"语义搜索文档"、"文档影响面"、
+  "文档关联查询"、"知识图谱" 时自动加载。
 ---
 
-# 文档地图管理器
+# 文档知识图谱管理器
 
 > ⚠️ **索引存储在 SQLite（.docmap/docmap.db），禁止直接 Read！**
 > 必须通过 `python query-index.py` 查询——这是唯一入口。
 
-## 概述
+## 五层架构
 
-SQLite 存储，支持增量更新与并行解析：
+```
+L5 验证层 — 新鲜度评分 + 反幻觉尾注
+L4 变更层 — detect-changes / impact（概念级变更检测）
+L3 查询层 — grab / lookup / fuzzy / semantic / context
+L2 关系层 — 链接图谱（入站/出站）+ 标签 + frontmatter 元数据
+L1 索引层 — 标题 / 章节行号 / 面包屑
+```
 
-| 存储 | 格式 | 说明 |
-|------|------|------|
-| `.docmap/docmap.db` | SQLite | 文件 mtime+size 追踪 + 标题行索引 |
-| `.docmap/chroma/` | ChromaDB | 语义搜索向量库（可选，`--chroma`） |
-| `.docmap/zvec/` | Zvec | 语义搜索向量库（可选，`--zvec`，CPU+API 多源动态队列） |
+## 知识生命周期协议（Agent 必读）
 
-查询工具 `query-index.py` 支持五种检索模式 + ChromaDB / Zvec 语义向量增强。
+> 这是确保文档检索不被 AI 幻觉污染的 4 步强制协议。
 
----
+```
+Agent 从文档知识库获取知识 →
+  Step 1: 检查新鲜度
+    🟢 ≥ 0.7 → 高置信，可直接引用
+    🟡 0.3~0.7 → 中置信，标注 "文档可能不是最新的"
+    🔴 < 0.3 → 低置信，必须交叉验证！
 
-## Agent 使用指南（必读）
+  Step 2: 涉及代码实现（API、函数名、配置）时
+    → 必须用 GitNexus context() 验证
+    → 文档说 Redis，代码是 Memcached → 🛑 报告不一致，不盲信文档
 
-> 当用户提到文档相关内容时，按以下决策树执行。**禁止跳过索引直接用 grep/glob/read_file 瞎找。**
+  Step 3: 返回结果时附带来源置信度
+    → "根据 docs/xxx.md（🟢 新鲜度 0.95）..."
+    → "根据 docs/yyy.md（🔴 新鲜度 0.12，可能过时）..."
 
-### 决策树：用户问文档问题 → 我该调哪个？
+  Step 4: 同一概念多点召回时
+    → 输出包含 "该概念在 N 篇文档中出现" 元信息
+    → Agent 应全部读完再归纳，不基于单篇下结论
+```
+
+## Agent 决策树（v2 增强版）
 
 ```
 用户问的是...
 │
 ├── "XXX怎么实现的？""XXX是什么？""XXX流程？"
-│   └── 🎯 query-index.py --grab "XXX"           ← P0 首选，一步到位
-│       ├── 有结果 → 直接输出给用户（正文+行号）
-│       └── 无结果 → 降级 --fuzzy "XXX"，拿到行号后 read_file
+│   └── 🎯 query-index.py --grab "XXX"           ← P0 首选
+│       ├── 有结果 → 检查新鲜度 → 涉及代码? → GitNexus 验证 → 回复
+│       └── 无结果 → 降级 --fuzzy，拿到行号后 read_file
 │
 ├── "哪些文档提到了gRPC/websocket/某个技术名词？"
-│   └── 🎯 query-index.py --lookup "技术名词"     ← SQLite LIKE 查找
+│   └── 🎯 query-index.py --lookup "技术名词"
 │
-├── "ARCHITECTURE.md 里有哪些章节？"
-│   └── 🎯 query-index.py --file ARCHITECTURE.md
+├── "ARCHITECTURE.md 引用了哪些文档？被哪些文档引用？"
+│   └── 🎯 query-index.py --context-mode ARCHITECTURE.md  ← v2 新增
+│
+├── "修改 ARCHITECTURE.md 会影响哪些文档？"
+│   └── 🎯 build-index.py --impact ARCHITECTURE.md       ← v2 新增
+│       或 query-index.py --impact ARCHITECTURE.md
+│
+├── "刚才改了文档，有哪些文档引用了它需要同步更新？"
+│   └── 🎯 build-index.py --detect-changes              ← v2 新增
 │
 ├── 会话刚开始 / 不确定文档有没有更新
-│   └── 🎯 build-index.py --diff                 ← 对比 SQLite 中的 mtime
+│   └── 🎯 build-index.py --diff
 │       ├── 无变化 → 直接用已有索引
-│       └── 有变化 → build-index.py --incremental --zvec 或 --chroma
+│       └── 有变化 → build-index.py --incremental
 │
 ├── "更新文档索引" / "build index"
-│   └── 🎯 build-index.py --incremental --zvec  ← 默认启用 Zvec 语义搜索
-│       或 build-index.py --incremental --chroma  ← ChromaDB 模式
-│       或 build-index.py --incremental --no-zvec --no-chroma  ← 跳过向量化
+│   └── 🎯 build-index.py --incremental --zvec
 │
 └── "搜索XX相关文档"（不知道关键词）
-    └── 🎯 query-index.py --semantic "自然语言描述"  ← Zvec → ChromaDB → TF-IDF 降级
-        或 query-index.py --fuzzy "近似词"           ← fallback
+    └── 🎯 query-index.py --semantic "自然语言描述"
 ```
 
-### 脚本路径
+## 优先级铁律（v2）
 
-两个脚本相对技能目录的路径，调用时使用绝对路径：
+| 优先级 | 工具 | 适用场景 | 耗时 | 置信度 |
+|--------|------|---------|------|-------|
+| **P0** | `--grab "问题"` | 用户问文档里某件事 | 0.3s | 含新鲜度 |
+| **P0.5** | `--context-mode FILE` | 查看文档关联关系 | 0.3s | 链接图谱 |
+| **P1** | `--lookup "关键词"` | 知道精确技术名词 | 0.2s | 含新鲜度 |
+| **P1.5** | `--impact FILE` | 修改前影响评估 | 0.3s | 链接+标签 |
+| **P2** | `--fuzzy "描述"` | grab 无结果降级 | 0.5s | 含新鲜度 |
+| **P3** | `--semantic "自然语言"` | 完全不知道关键词 | 3s | 依赖模型 |
+| **P4** | `--file xxx.md` | 浏览文件结构 | 0.3s | — |
+| **P5** | `read_file(...)` | 仅当上面都不可用 | 高token | — |
 
-```
-{skill_root}/scripts/build-index.py
-{skill_root}/scripts/query-index.py
-```
-
-调用前由 AI 运行时确定 `{skill_root}`，本机开发场景下指向 `skill-markets/doc-map-manager/`，全局安装场景下指向 `~/.trae-cn/builtin_skills/doc-map-manager/`。
-
-#### docs/ 路径自动解析
-
-脚本按以下优先级自动查找 `docs/` 目录：
-
-| 优先级 | 策略 | 适用场景 |
-|--------|------|---------|
-| P0 | `--docs-dir ./path` 显式指定 | 非本仓库项目，推荐 |
-| P1 | 脚本相对路径 `{skill_root}/../../docs` | 本仓库内 |
-| P2 | CWD 下的 `./docs` | 默认兜底 |
-| P3 | CWD 递归父级找 `docs/` | 在子目录执行 |
-| P4 | CWD 兜底 | 以上全失败 |
-
-**AI 推荐**：遇到非本仓库项目时，始终用 `--docs-dir` 显式指定。
-
-### 优先级铁律
-
-| 优先级 | 工具 | 适用场景 | 预期耗时 |
-|--------|------|---------|---------|
-| **P0** | `query-index.py --grab "问题"` | 用户问文档里某件事怎么做的 | **0.3s** |
-| **P1** | `query-index.py --lookup "关键词"` | 知道精确技术名词 | **0.2s** |
-| **P2** | `query-index.py --fuzzy "近似描述"` | grab 无结果时的降级 | **0.5s** |
-| **P3** | `query-index.py --semantic "自然语言"` | 完全不知道关键词 | **3s（慢）** |
-| **P4** | `query-index.py --file xxx.md` | 浏览某文件结构 | **0.3s** |
-| **P5** | `read_file(...)` 手动读文件 | 仅当上面都不可用 | 高 token 消耗 |
-
-### ⚠️ 语义搜索查询原则
-
-语义搜索（`--semantic`）在 Zvec 或 ChromaDB 同步后可用，适合用自然语言描述模糊意图时使用。
-**仍优先用 `--grab` / `--lookup`**（速度快、精度高），语义搜索在关键词不确定时作为补充。
-使用精确的领域术语作为查询词，避免短泛词。
-
-### 反模式（禁止行为）
+## 反模式（禁止行为）
 
 | 禁止 | 原因 | 正确做法 |
 |------|------|---------|
 | ❌ 用户问文档问题，直接用 `grep` 搜 | 不知道章节结构，盲搜低效 | ✅ 先 `--grab` |
-| ❌ 先 `read_file` 手动翻找 | token 黑洞 | ✅ 用 `--grab` 精确定位 |
-| ❌ 拿到 `--fuzzy` 行号后用 `read_file` 读整个文件 | 浪费 token | ✅ 用 `read_file(offset=line, limit=range)` |
-| ❌ 每次都 `build-index.py` 全量重建 | 慢，token 多 | ✅ `--incremental` 或先 `--diff` 看是否需要 |
-| ❌ 有 `--grab` 却仍用 `--fuzzy` + 手动 `read_file` | 多一步 | ✅ `--grab` 一步到位 |
+| ❌ 先 `read_file` 手动翻找 | token 黑洞 | ✅ `--grab` 精确定位 |
+| ❌ 拿到结果不理新鲜度直接引用 | 🔴 文档可能过时 | ✅ 检查新鲜度，🟡🔴标注 |
+| ❌ 文档提到 API/配置/类名不验证代码 | 文档可能落后代码 | ✅ GitNexus context() 验证 |
+| ❌ 每次都全量重建 | 慢 | ✅ `--incremental` 或先 `--diff` |
+| ❌ 修改文档前不跑 `--impact` | 不知道会影响哪些关联文档 | ✅ `build-index.py --impact FILE` |
+| ❌ 拿到 `--fuzzy` 行号后读整个文件 | 浪费 token | ✅ `read_file(offset=line, limit=range)` |
 
-### 典型对话处理模板
+## 典型对话模板
 
 **用户**: "Agent 通信怎么设计的？"
 
 ```
 1. RunCommand: python ...scripts/query-index.py --grab "Agent 通信"
-2. 拿到 → 原文 + 行号
-3. 回复用户（用 grab 的正文内容直接回答）
+2. 拿到 → 原文 + 新鲜度（🟢/🟡/🔴）
+3. 涉及代码实现 → GitNexus context("agent_communicate") 验证
+4. 回复用户（标注新鲜度 + 交叉验证结果）
 ```
 
-**用户**: "这个项目文档里有没有提到 Redis？"
+**用户**: "修改架构文档前，帮我看看影响面"
 
 ```
-1. RunCommand: python ...scripts/query-index.py --lookup "Redis"
-2. 拿到 → 匹配的标题列表
-3. 告诉用户哪些文件提到 Redis，让用户选具体哪个
-4. 用户选了 → --grab "那个章节"
+1. RunCommand: python ...scripts/query-index.py --impact ARCHITECTURE.md
+2. 输出：入站链接 5 篇 + 出站链接 3 篇 + 风险等级
+3. 告知用户影响范围，再动手修改
 ```
 
----
+**用户**: "刚才改了 adr-007.md，哪些文档需要同步？"
+
+```
+1. RunCommand: python ...scripts/build-index.py --detect-changes
+2. 输出：变更文件列表 + 入站链接文档（需要同步更新）
+```
 
 ## 使用方式
 
 ### 构建索引
 
 ```bash
-# 全量构建（自动同步 Zvec 语义搜索）
-python build-index.py --zvec
-
-# 全量构建（自动同步 ChromaDB 语义搜索）
-python build-index.py --chroma
-
-# 指定文档目录
-python build-index.py --docs-dir ./docs --zvec
-
-# 跳过向量同步（加速，仅用关键词搜索）
-python build-index.py --no-zvec --no-chroma
-
-# 增量构建（只处理变更文件，基于 mtime+size）
-python build-index.py --incremental --zvec
-
-# 变更检测（对比 SQLite 中的 mtime）
-python build-index.py --diff
+python build-index.py                          # 全量（自动计算新鲜度 + 链接图谱）
+python build-index.py --incremental            # 增量（基于 mtime+size）
+python build-index.py --detect-changes          # 概念级变更检测
+python build-index.py --impact ARCHITECTURE.md # 影响面分析
+python build-index.py --zvec                   # 全量 + Zvec 语义搜索
 ```
 
 ### 查询索引
 
 ```bash
-# 浏览某个文件的所有章节
-python query-index.py --file ARCHITECTURE.md
-
-# 精确匹配标题
-python query-index.py "Agent 层"
-
-# 模糊匹配（容忍错字、近似词）
-python query-index.py --fuzzy "agent通信"
-
-# ⭐ GRAB 模式：搜索后直接输出正文（省去一次 read_file）
+# 搜索 + 正文输出
 python query-index.py --grab "Agent 通信"
-python query-index.py --grab "gRPC" --context 5
 
-# ⭐ 关键词查询（SQLite LIKE）
+# 文档上下文（v2）：入站/出站链接 + 新鲜度 + 标签
+python query-index.py --context-mode ARCHITECTURE.md
+
+# 影响面分析（v2）：修改影响 + 风险等级
+python query-index.py --impact adr-007.md
+
+# 精确/模糊/语义搜索
 python query-index.py --lookup "gRPC"
-python query-index.py --lookup "websocket" --json
-
-# 语义搜索（需先 build --zvec 或 --chroma）
+python query-index.py --fuzzy "agent通信"
 python query-index.py --semantic "多Agent之间怎么发消息"
 
-# 限制返回条数
-python query-index.py --semantic "资源上传" --top 5
+# 文件浏览
+python query-index.py --file ARCHITECTURE.md
 ```
 
-### 增量维护
+## 脚本路径
 
+> **脚本位于本 Skill 目录的 `scripts/` 子目录下，不要凭空猜测路径。**
+
+| 环境 | 脚本路径 |
+|------|---------|
+| Windows 安装 | `C:\Users\<用户名>\.trae-cn\skills\doc-map-manager\scripts\` |
+| 开发源 | `{workspace}\skill-markets\doc-map-manager\scripts\` |
+
+调用示例（Windows）：
 ```bash
-# 变更检测 — Git diff
-python build-index.py --git-diff                    # 与 HEAD 对比
-python build-index.py --git-diff --git-ref HEAD~3   # 与 N 个提交前对比
-
-# 变更检测 — SQLite mtime 对比
-python build-index.py --diff
-
-# 增量构建（自动同步 Zvec）
-python build-index.py --incremental --zvec
-python build-index.py --incremental --chroma        # 或 ChromaDB
-python build-index.py --incremental --no-zvec --no-chroma  # 仅 SQLite
+python "C:\Users\septe\.trae-cn\skills\doc-map-manager\scripts\build-index.py" --incremental
+python "C:\Users\septe\.trae-cn\skills\doc-map-manager\scripts\query-index.py" --grab "搜索关键词"
 ```
 
----
+> **注意**: 如果上述路径不存在，用 `Get-ChildItem "$env:USERPROFILE\.trae-cn\skills\doc-map-manager\scripts\"` 确认安装位置。
 
-## 脚本依赖
+## 排除目录配置
 
-| 依赖 | 何时需要 | 安装方式 |
-|------|---------|---------|
-| Python 3.9+ | 必需 | 系统自带 |
-| `sqlite3` | 必需 | Python 标准库，零安装 |
-| `rapidfuzz` | `--fuzzy` | `pip install rapidfuzz` |
-| `chromadb` | `--chroma` / `--semantic`（ChromaDB） | `pip install chromadb` |
-| `zvec` | `--zvec` / `--semantic`（Zvec） | `pip install zvec` |
-| `sentence_transformers` | `--zvec` 本地 Embedding | `pip install sentence_transformers` |
-| `tqdm` | 进度条（推荐） | `pip install tqdm` |
-| `jieba` | `--fuzzy` 中文增强 | `pip install jieba` |
+构建索引时默认排除的目录通过 `.docmap/config.json` 配置（按项目独立配置）：
 
-**零外部依赖核心路径**：`sqlite3`（stdlib）即可运行基本的索引构建和精确/模糊/LOOKUP 查询。
+```json
+{
+  "exclude_dirs": ["bak_v8doc", "references"]
+}
+```
 
-向量数据位置：
-- ChromaDB：`.docmap/chroma/`
-- Zvec：`.docmap/zvec/`
+- 文件位置：`{项目docs目录}/.docmap/config.json`
+- 首次运行 `build-index.py` 时自动创建（含默认值）
+- 修改后下次构建自动生效，无需改脚本代码
 
-建议加入 `.gitignore`。
+## 新鲜度评分规则
 
----
+| 距离上次修改 | 评分 | 图标 | 含义 |
+|------------|------|------|------|
+| 0~7 天 | 1.0 → 0.7 | 🟢 | 新，可信任 |
+| 7~30 天 | 0.7 → 0.3 | 🟡 | 注意检查 |
+| 30~90 天 | 0.3 → 0.1 | 🔴 | 可能过时 |
+| 90+ 天 | ≤ 0.1 | 🔴 | 过时，必须验证 |
 
 ## 降级策略
 
 ```
-query 请求
-  │
-  ├── --semantic
-  │     ├── Zvec 可用 → 向量检索（最佳）
-  │     ├── ChromaDB 可用 → 次选
-  │     ├── SQLite 存在 → TF-IDF 降级
-  │     └── 都没有 → 报错，提示先 build
-  │
-  ├── --fuzzy
-  │     ├── rapidfuzz 可用 → rapidfuzz partial_ratio
-  │     └── rapidfuzz 不可用 → difflib.SequenceMatcher（标准库降级）
-  │
-  └── 精确匹配 / LOOKUP
-        └── SQLite SELECT + LIKE（索引查询，瞬间返回）
+--semantic: Zvec → ChromaDB → TF-IDF 降级
+--fuzzy: rapidfuzz → difflib 降级
+精确/LOOKUP: SQLite SELECT + LIKE（毫秒级）
 ```
 
----
+## 脚本依赖
 
-## 输出格式说明
-
-### 人类可读输出
-
-```
-  docs/ARCHITECTURE.md                               L164-L205             95%  ## 2.3 Agent 通信层设计
-  docs/ARCHITECTURE.md                               L525-L538             82%  ## 4.5 跨模块通信方式
-  docs/adr.md                                        L121-L137             76%  ## ADR-007: 通信协议选型
-```
-
-列：文件 | 行范围 | 匹配度 | 标题（面包屑）
-
-### JSON 输出
-
-```json
-[
-  {
-    "file": "ARCHITECTURE.md",
-    "line": 164,
-    "end_line": 205,
-    "score": 0.95,
-    "title": "2.3 Agent 通信层设计",
-    "breadcrumb": "2. Agent 层 > 2.3 Agent 通信层设计",
-    "level": 3
-  }
-]
-```
-
----
+| 依赖 | 用途 | 安装 |
+|------|------|------|
+| `sqlite3` | 必需 | Python 标准库 |
+| `rapidfuzz` | --fuzzy | `pip install rapidfuzz` |
+| `chromadb` | --chroma / --semantic(ChromaDB) | `pip install chromadb` |
+| `zvec` | --zvec / --semantic(Zvec) | `pip install zvec` |
+| `sentence_transformers` | 本地 Embedding | `pip install sentence_transformers` |
 
 ## 维护约定
 
-1. `.docmap/docmap.db` 是 SQLite 数据库，**禁止手动编辑**
-2. `.docindex.json` / `.docmap.json` / `DOCSMAP.md` 已废弃，由 SQLite 替代
-3. 新增文档后运行 `build-index.py --incremental --zvec` 更新索引
-4. `.docmap/chroma/` 和 `.docmap/zvec/` 建议加入 `.gitignore`（二进制向量数据不宜进仓库）
-5. `.docmap/docmap.db` 建议 git track（便携，无需向量库即可使用）
-
----
-
-## Embedding 配置（.env）
-
-项目根目录 `.env` 文件可配置向量化后端和额外文档目录：
-
-```bash
-# ── Embedding 后端 ──
-
-# 方案 1：本地 CPU 模型（默认，中文优化，需 pip install sentence_transformers）
-DOCMAP_EMBEDDING_PROVIDER=sentence_transformers
-DOCMAP_EMBEDDING_MODEL=BAAI/bge-small-zh-v1.5
-
-# 方案 2：OpenAI 兼容端点（local llm / vllm / openai，需 pip install openai）
-# DOCMAP_EMBEDDING_PROVIDER=openai
-# DOCMAP_EMBEDDING_API_BASE=http://localhost:11434/v1
-# DOCMAP_EMBEDDING_API_KEY=local llm
-# DOCMAP_EMBEDDING_MODEL=nomic-embed-text
-
-# 方案 3：Chromadb 自带轻量模型（仅 --chroma）
-# DOCMAP_EMBEDDING_PROVIDER=chroma_default
-
-# ── Zvec 多源嵌入（CPU + 多个 OpenAI 端点负载均衡）──
-
-# 本地 CPU 权重（0=关闭，默认 1）
-# DOCMAP_EMBEDDING_LOCAL_WEIGHT=1
-
-# API 端点权重（默认 3，仅用于单端点旧式配置）
-# DOCMAP_EMBEDDING_API_WEIGHT=3
-
-# 多端点 JSON 数组（同时连接多个 API 做负载均衡）
-# DOCMAP_EMBEDDING_ENDPOINTS=[
-#   {"base":"http://172.18.0.1:1234/v1","key":"sk-xxx","model":"bge-small-zh-v1.5","weight":3,"batch_size":200},
-#   {"base":"http://192.168.1.100:8080/v1","key":"sk-yyy","model":"bge-small-zh-v1.5","weight":2,"batch_size":200}
-# ]
-
-# 每个 batch 的文本数量（默认 200）
-# DOCMAP_EMBEDDING_BATCH=200
-
-# ── 额外文档目录 ──
-
-# 分号或逗号分隔的路径列表，用于引入外部技能市场、参考文档等作为文档检索源
-# DOCMAP_EXTRA_DOCS_DIRS=./skill-markets/other-pkg/docs;D:\shared-docs
-```
-
-> `DOCMAP_EXTRA_DOCS_DIRS` 影响 build-index.py 的扫描范围和 query-index.py 的搜索范围。
-> 所有列出的目录会被统一建索引，query 时跨所有目录检索。
-
-不配置 `.env` 时默认使用 `BAAI/bge-small-zh-v1.5`（100MB，中文优化）。
-
-### Zvec 性能调优
-
-| 环境变量 | 默认值 | 说明 |
-|---------|-------|------|
-| `DOCMAP_EMBEDDING_LOCAL_WEIGHT` | `1` | CPU 源权重，设为 `0` 关闭 CPU 嵌入 |
-| `DOCMAP_EMBEDDING_API_WEIGHT` | `3` | API 源权重 |
-| `DOCMAP_EMBEDDING_BATCH` | `200` | OpenAI 每批次文本数 |
-
-Zvec 模式自动支持 CPU + API 混合嵌入，按权重分配文本块，动态队列消费（谁快谁多拿）。
-
----
-
-## 自排除规则（AI 必须遵守）
-
-doc-map-manager 自动排除自身运行产物，AI 不得重新索引或修改：
-
-| 排除对象 | 原因 | 操作规则 |
-|---------|------|---------|
-| `.docmap/docmap.db` | SQLite 索引数据库 | 禁止直接 SQL 修改，用脚本查询 |
-| `.docmap/chroma/` | ChromaDB 向量库 | 不进入检索范围，不 git track |
-| `.docmap/zvec/` | Zvec 向量库 | 不进入检索范围，不 git track |
-
-`build-index.py` 在扫描阶段已静默排除上述文件。
+1. `.docmap/docmap.db` 是 SQLite，禁止手动编辑
+2. `.docmap/chroma/` 和 `.docmap/zvec/` 加入 `.gitignore`
+3. `.docmap/docmap.db` 建议 git track（便携）
+4. 新增文档后运行 `build-index.py --incremental` 更新
+5. 构建会自动计算新鲜度 + 提取链接图谱 + 标签

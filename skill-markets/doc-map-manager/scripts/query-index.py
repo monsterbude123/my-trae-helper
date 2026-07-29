@@ -492,8 +492,49 @@ def format_results(results: list[dict], top_n: int, as_json: bool) -> None:
         line_range = f"L{entry['line']}-L{entry.get('end_line', '?')}"
         print(f"  {entry['file']:<50}  {line_range:<16}  {pct:>3}%  {indent}{entry['title']}")
 
+    # v2: 反幻觉提示
+    _print_anti_hallucination_footer()
+
 
 # ── GRAB 模式 ─────────────────────────────────────────────────
+
+def _print_anti_hallucination_footer() -> None:
+    """v2: 反幻觉尾注 — 每次检索后提示 AI 验证文档新鲜度。"""
+    print(f"\n{'─' * 60}")
+    print("⚠️  文档知识库检索结果 — 反幻觉提示:")
+    print("  1. 以上内容来自 docs/ 文档索引，非代码事实。")
+    print("  2. 涉及具体实现（API、类名、配置）时，必须用 GitNexus context() 交叉验证。")
+    print("  3. 可用 --context-mode 或 --impact 查看文档新鲜度和关联关系。")
+    print(f"{'─' * 60}")
+
+
+def _print_grab_freshness_header(filepath: str, source_dir: str, docs_dir: Path) -> None:
+    """在 grab 输出前显示新鲜度信息。"""
+    db_path = docs_dir / DOCMAP_DIR / DB_NAME
+    if not db_path.exists():
+        return
+    try:
+        conn = sqlite3.connect(str(db_path))
+        conn.row_factory = sqlite3.Row
+        cur = conn.execute(
+            "SELECT freshness_score, last_git_commit FROM files WHERE path = ? AND source_dir = ?",
+            (filepath, source_dir),
+        )
+        row = cur.fetchone()
+        conn.close()
+        if row:
+            freshness = row["freshness_score"] or 1.0
+            last_commit = row["last_git_commit"] or ""
+            icon = "🟢" if freshness >= 0.7 else ("🟡" if freshness >= 0.3 else "🔴")
+            print(f"  {icon} 新鲜度: {freshness:.2f}", end="")
+            if last_commit:
+                print(f" | last commit: {last_commit}", end="")
+            if freshness < 0.5:
+                print(f"\n  ⚠️ 文档可能过时，建议用 GitNexus 验证代码实现。")
+            else:
+                print()
+    except Exception:
+        pass
 
 def grab_results(results: list[dict], top_n: int, docs_dir: Path, context_lines: int = 3) -> None:
     if not results:
@@ -523,6 +564,8 @@ def grab_results(results: list[dict], top_n: int, docs_dir: Path, context_lines:
         line_end = min(len(lines), entry.get("end_line", entry["line"]) + context_lines)
 
         print(f"\n{'=' * 60}")
+        # v2: 新鲜度指示器
+        _print_grab_freshness_header(entry["file"], entry.get("source_dir", ""), docs_dir)
         print(f"  ## {entry['file']} L{entry['line']}-L{entry.get('end_line', '?')} (score: {r['score']:.2f})")
         print()
 
@@ -532,6 +575,7 @@ def grab_results(results: list[dict], top_n: int, docs_dir: Path, context_lines:
             print(f"  L{line_no:<5}{prefix} {lines[i].rstrip()}")
 
     print(f"\n{'=' * 60}")
+    _print_anti_hallucination_footer()
 
 
 # ── LOOKUP 模式 ───────────────────────────────────────────────
@@ -569,6 +613,227 @@ def search_lookup_from_db(keyword: str, docs_dir: Path, top_n: int, as_json: boo
         print(f"  [sqlite] {m['file']:<50} L{m['line']:<8} {m['title']}")
 
 
+# ── Context 模式（v2 新增）───────────────────────────────────
+
+def show_context(docs_dir: Path, filename: str) -> None:
+    """展示文件的上下文：入站/出站链接 + 标签 + 新鲜度。"""
+    db_path = docs_dir / DOCMAP_DIR / DB_NAME
+    if not db_path.exists():
+        print("[ERROR] 索引数据库不存在，请先运行 build-index.py")
+        return
+
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+
+    # 模糊匹配文件名
+    cur = conn.execute(
+        "SELECT path, source_dir FROM files WHERE path LIKE ?",
+        (f"%{filename}%",),
+    )
+    rows = cur.fetchall()
+    if not rows:
+        cur = conn.execute("SELECT path, source_dir FROM files WHERE path = ?", (filename,))
+        rows = cur.fetchall()
+
+    if not rows:
+        print(f"[WARN] 未找到匹配文件: {filename}")
+        conn.close()
+        return
+
+    for row in rows:
+        rel_path = row["path"]
+        source_dir = row["source_dir"]
+
+        # 新鲜度
+        fcur = conn.execute(
+            "SELECT freshness_score, last_git_commit, mtime FROM files WHERE path = ? AND source_dir = ?",
+            (rel_path, source_dir),
+        )
+        fr = fcur.fetchone()
+        freshness = fr["freshness_score"] if fr else 1.0
+        last_commit = fr["last_git_commit"] if fr else ""
+        fresh_icon = "🟢" if freshness >= 0.7 else ("🟡" if freshness >= 0.3 else "🔴")
+
+        print(f"\n{'=' * 60}")
+        print(f"  📄 {rel_path}")
+        print(f"  新鲜度: {fresh_icon} {freshness:.2f}", end="")
+        if last_commit:
+            print(f" (last commit: {last_commit})", end="")
+        print()
+        print(f"{'=' * 60}")
+
+        # 入站链接
+        lcur = conn.execute(
+            "SELECT from_file, from_line, link_type, context FROM links "
+            "WHERE to_file LIKE ? OR to_file = ?",
+            (f"%{rel_path}%", rel_path),
+        )
+        inbound = lcur.fetchall()
+        if inbound:
+            print(f"\n  ⬅ 入站链接 ({len(inbound)} 篇文档引用了它):")
+            for lr in inbound:
+                lt = lr["link_type"] or "ref"
+                print(f"     - [{lt}] {lr['from_file']} L{lr['from_line']}")
+                if lr["context"]:
+                    print(f"       \"{lr['context'][:80]}\"")
+        else:
+            print(f"\n  ⬅ 入站链接: (无，可能是知识孤岛 ⚠️)")
+
+        # 出站链接
+        lcur2 = conn.execute(
+            "SELECT to_file, from_line, link_type FROM links "
+            "WHERE from_file = ? AND from_source_dir = ?",
+            (rel_path, source_dir),
+        )
+        outbound = lcur2.fetchall()
+        if outbound:
+            print(f"\n  ➡ 出站链接 ({len(outbound)} 篇):")
+            for lr in outbound:
+                lt = lr["link_type"] or "ref"
+                print(f"     - [{lt}] {lr['to_file']} L{lr['from_line']}")
+        else:
+            print(f"\n  ➡ 出站链接: (无)")
+
+        # 标签
+        tcur = conn.execute(
+            "SELECT tag FROM tags WHERE file_path = ? AND source_dir = ?",
+            (rel_path, source_dir),
+        )
+        file_tags = [r["tag"] for r in tcur.fetchall()]
+        if file_tags:
+            print(f"\n  🏷 标签: {', '.join(file_tags)}")
+
+    conn.close()
+
+
+# ── Impact 模式（v2 新增）─────────────────────────────────────
+
+def show_impact(docs_dir: Path, filename: str, repo_root: Path | None = None) -> None:
+    """影响面分析：展示修改目标文件会影响哪些文档。"""
+    db_path = docs_dir / DOCMAP_DIR / DB_NAME
+    if not db_path.exists():
+        print("[ERROR] 索引数据库不存在，请先运行 build-index.py")
+        return
+
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+
+    print(f"\n[IMPACT] 影响面分析: {filename}")
+    print()
+
+    # 模糊匹配
+    cur = conn.execute(
+        "SELECT path, source_dir FROM files WHERE path LIKE ?",
+        (f"%{filename}%",),
+    )
+    rows = cur.fetchall()
+    if not rows:
+        cur = conn.execute("SELECT path, source_dir FROM files WHERE path = ?", (filename,))
+        rows = cur.fetchall()
+
+    if not rows:
+        print(f"[WARN] 未找到匹配文件: {filename}")
+        conn.close()
+        return
+
+    row = rows[0]
+    rel_path = row["path"]
+    source_dir = row["source_dir"]
+
+    # 新鲜度
+    fcur = conn.execute(
+        "SELECT freshness_score, last_git_commit FROM files WHERE path = ? AND source_dir = ?",
+        (rel_path, source_dir),
+    )
+    fr = fcur.fetchone()
+    freshness = fr["freshness_score"] if fr else 1.0
+    last_commit = fr["last_git_commit"] if fr else ""
+    fresh_icon = "🟢" if freshness >= 0.7 else ("🟡" if freshness >= 0.3 else "🔴")
+
+    print(f"  新鲜度: {fresh_icon} {freshness:.2f}", end="")
+    if last_commit:
+        print(f" (last commit: {last_commit})")
+    else:
+        print()
+
+    # 标签
+    tcur = conn.execute(
+        "SELECT tag FROM tags WHERE file_path = ? AND source_dir = ?",
+        (rel_path, source_dir),
+    )
+    file_tags = [r["tag"] for r in tcur.fetchall()]
+    print(f"  标签: {', '.join(file_tags) if file_tags else '(无)'}")
+    print()
+
+    # 入站链接
+    lcur = conn.execute(
+        "SELECT from_file, from_line, link_type, context FROM links "
+        "WHERE to_file LIKE ? OR to_file = ?",
+        (f"%{rel_path}%", rel_path),
+    )
+    inbound = lcur.fetchall()
+    # 出站链接
+    lcur2 = conn.execute(
+        "SELECT to_file, from_line, link_type FROM links "
+        "WHERE from_file = ? AND from_source_dir = ?",
+        (rel_path, source_dir),
+    )
+    outbound = lcur2.fetchall()
+    # 同标签
+    related_by_tag = set()
+    for tag in file_tags:
+        tcur2 = conn.execute(
+            "SELECT DISTINCT file_path FROM tags WHERE tag = ? AND file_path != ?",
+            (tag, rel_path),
+        )
+        for r in tcur2:
+            related_by_tag.add(r[0])
+
+    if inbound:
+        print(f"  ⬅ 入站链接 ({len(inbound)} 篇文档引用了它):")
+        for lr in inbound:
+            lt = lr["link_type"] or "ref"
+            print(f"     - [{lt}] {lr['from_file']} L{lr['from_line']}")
+            if lr["context"]:
+                print(f"       \"{lr['context'][:80]}\"")
+        print()
+    else:
+        print(f"  ⬅ 入站链接: (无，可能是知识孤岛 ⚠️)")
+        print()
+
+    if outbound:
+        print(f"  ➡ 出站链接 ({len(outbound)} 篇):")
+        for lr in outbound:
+            lt = lr["link_type"] or "ref"
+            print(f"     - [{lt}] {lr['to_file']} L{lr['from_line']}")
+        print()
+
+    if related_by_tag:
+        print(f"  🏷 同标签关联 ({len(related_by_tag)} 篇):")
+        for f in sorted(related_by_tag)[:10]:
+            print(f"     - {f}")
+        if len(related_by_tag) > 10:
+            print(f"     ... 还有 {len(related_by_tag) - 10} 篇")
+        print()
+
+    # 风险等级
+    risk_count = len(inbound) + len(outbound) + len(related_by_tag)
+    if risk_count >= 10:
+        risk = "HIGH 🔴"
+    elif risk_count >= 4:
+        risk = "MEDIUM 🟡"
+    else:
+        risk = "LOW 🟢"
+    print(f"  影响面总计: {risk_count} 个关联文档 → 风险等级: {risk}")
+
+    # 交叉验证提示
+    if freshness < 0.5:
+        print(f"\n  ⚠️ 文档新鲜度 {freshness:.2f} (< 0.5)，建议在引用前用 GitNexus 验证代码一致性。")
+    print()
+
+    conn.close()
+
+
 # ── 主流程 ────────────────────────────────────────────────────
 
 def main() -> None:
@@ -585,6 +850,10 @@ def main() -> None:
     parser.add_argument("--top", type=int, default=15, help="最多返回 N 条结果")
     parser.add_argument("--json", action="store_true", default=False, help="JSON 输出")
     parser.add_argument("--context", type=int, default=3, help="--grab 模式上下文行数")
+    parser.add_argument("--context-mode", type=str, default=None, dest="context_file",
+                        help="文档上下文查询：展示入站/出站链接 + 标签 + 新鲜度")
+    parser.add_argument("--impact", type=str, default=None,
+                        help="影响面分析：展示修改目标文件会影响哪些文档 + 风险等级")
     parser.add_argument("--docs-dir", type=str, default=None, help="文档目录路径")
     args = parser.parse_args()
 
@@ -628,6 +897,16 @@ def main() -> None:
     # 文件浏览模式
     if args.file:
         browse_file_from_db(docs_dir, args.file)
+        return
+
+    # Context 模式（v2 新增）
+    if args.context_file:
+        show_context(docs_dir, args.context_file)
+        return
+
+    # Impact 模式（v2 新增）
+    if args.impact:
+        show_impact(docs_dir, args.impact)
         return
 
     # LOOKUP 模式

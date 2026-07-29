@@ -39,7 +39,9 @@
 
 | 技能 | 类型 | 一句话 | 依赖 |
 |------|------|--------|------|
-| [fullstack4TraeV8](fullstack4TraeV8/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v8 — 10 Agent 流水线 + 驾驶舱 + 圆桌 + 漂移回流 + 依赖自检 | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager |
+| [fullstack4TraeV9](fullstack4TraeV9/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v8 — 10 Agent 流水线 + 驾驶舱 + 圆桌 + 漂移回流 + 依赖自检 | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager |
+| [fullstack4TraeV9](fullstack4TraeV9/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v9 — OpenSpec 驱动 + 7 阶段流水线 + Contract-First + TDD + 漂移检测（⚠ V10 已替代） | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager |
+| [fullstack4TraeV10](fullstack4TraeV10/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v10 — 复用 Trae 内置 Plan/Spec + 5 阶段 + 四维验收 + 铁律分层 | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager |
 | [game-production-kit](game-production-kit/SKILL.md) | 纯Skill | 游戏制作工具箱 — 7 阶段编排器（引擎确认→剧情→素材→脚本→门禁→构建→部署），引擎可替换架构。内含 7 子技能 | 子技能: game-story-design, game-asset-pipeline, game-quality-gate, voice-character-design, voice-acting-skill, webgal-scripting, webgal-engine-build |
 
 ### L3 配置模板（绑定 L0~L2）
@@ -113,6 +115,12 @@ L0 基座（独立可用，无外部依赖）
 │ fullstack4TraeV7 → 软引用 ponytail, gitnexus                  │
 │   agents: intake, proposal, spec, contract, planner,          │
 │           implementer, reviewer, debugger, doc-updater        │
+│ fullstack4TraeV9 → 软引用 ponytail, gitnexus                  │
+│   agents: intake, definer, spec-writer, contract-writer,       │
+│           implementer, reviewer, debugger                      │
+│ fullstack4TraeV10 → 软引用 ponytail, gitnexus                  │
+│   agents: planner, spec-enhancer, contract-writer,             │
+│           implementer, reviewer, debugger                      │
 └──────────────────────────────────────────────────────────────┘
         │
         │ 配置绑定
@@ -207,10 +215,18 @@ L0 基座（独立可用，无外部依赖）
 
 | 被依赖技能 | 依赖者 | 降级后果 |
 |-----------|--------|---------|
-| acceptance-discipline | fullstack4traev8 | 🛑 阻断 — 验收门禁不可跳过 |
-| ponytail4Trae | fullstack4traev8 | ⚠️ 代码可能过度工程，无懒人模式提示 |
-| gitnexus4Trae | fullstack4traev8 | ⚠️ 影响面分析降级为 grep，存在盲区风险 |
-| doc-map-manager | fullstack4traev8 | ⚠️ 文档索引无法自动更新，DOC SYNC 不完整 |
+| acceptance-discipline | fullstack4TraeV9 | 🛑 阻断 — 验收门禁不可跳过 |
+| acceptance-discipline | fullstack4TraeV10 | 🛑 阻断 — 四维验收门禁不可跳过 |
+| ponytail4Trae | fullstack4TraeV9 | ⚠️ 代码可能过度工程，无懒人模式提示 |
+| ponytail4Trae | fullstack4TraeV10 | ⚠️ 代码可能过度工程，无懒人模式提示 |
+| gitnexus4Trae | fullstack4TraeV9 | ⚠️ 影响面分析降级为 grep，存在盲区风险 |
+| gitnexus4Trae | fullstack4TraeV10 | ⚠️ 影响面分析降级为 grep，存在盲区风险 |
+| doc-map-manager | fullstack4TraeV9 | ⚠️ 文档索引无法自动更新，DOC SYNC 不完整 |
+| doc-map-manager | fullstack4TraeV10 | ⚠️ 文档索引无法自动更新，DOC SYNC 不完整 |
+| acceptance-discipline | fullstack4traev9 | 🛑 阻断 — 验收门禁不可跳过 |
+| ponytail4Trae | fullstack4traev9 | ⚠️ 代码可能过度工程，无懒人模式提示 |
+| gitnexus4Trae | fullstack4traev9 | ⚠️ 影响面分析降级为 grep，存在盲区风险 |
+| doc-map-manager | fullstack4traev9 | ⚠️ 文档索引无法自动更新，DOC SYNC 不完整 |
 | test-experience | acceptance-discipline | ⚠️ 测试编写质量降低，陷阱可能重复踩 |
 | e2e-module-audit | acceptance-discipline | ⚠️ E2E 验收降级为手动 |
 | test-partition-runner | acceptance-discipline | ⚠️ 测试阻塞时无法自动分区定位 |

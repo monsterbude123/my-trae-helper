@@ -41,7 +41,7 @@
 | test-experience | 1 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档 |
 | test-partition-runner | 1 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档 |
 | e2e-module-audit | 1 md + 5 ref | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档 |
-| doc-map-manager | 1 md + 2 py | 0 | 0 | 0 | **5.0** | 🟢 | 2 个 Python 脚本：build-index.py（git diff 子进程，本地操作）+ query-index.py（ChromaDB 本地持久化，无外部 HTTP） |
+| doc-map-manager | 1 md + 2 py | 0 | 3 | 1 | **4.3** | 🟢 | v2 升级：新增 links/tags/metadata 表 + 新鲜度评分 + context/impact 查询。SHELL_EXEC(子进程 git log，参数化安全) + HTTP(用户配置的 Ollama/OpenAI 端点，非全量外联)。脚本规模未膨胀(仍 2 py)，核心路径无新增风险。 |
 | vibe-coding-standards | 2 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档，无脚本，无风险 |
 
 ### L1 集成层
@@ -55,6 +55,7 @@
 | 技能包 | 文件数 | HIGH | MED | LOW | 评分 | 判定 | 点评 |
 |--------|--------|------|-----|-----|------|------|------|
 | fullstack4TraeV7 | 1 md + 9 agent + 30 ref + 1 py + 12 tpl | 0 | 0 | 0 | **5.0** | 🟢 | 大量文档和模板，无执行风险。V10: 软引用 doc-map-manager（安全评分 5.0） |
+| fullstack4TraeV9 | 1 md + 6 agent + 9 ref + 6 tpl | 0 | 0 | 0 | **5.0** | 🟢 | 精简版，无执行脚本，纯文档和模板。软引用 doc-map-manager（安全评分 5.0） |
 
 ### L3 配置模板
 
@@ -67,6 +68,7 @@
 | 技能包 | 文件数 | HIGH | MED | LOW | 评分 | 判定 | 点评 |
 |--------|--------|------|-----|-----|------|------|------|
 | comfyui-api-skills | 1 md + 15 skill + 10 py + 4 ref | 0 | 12 | 0 | **2.6** | 🔴 | 12 个 MEDIUM：大量 HTTP 引用（ComfyUI API 调用本身需要 HTTP）；部分脚本含 Shell 执行。**需关注：网络调用面大** |
+| **fullstack4TraeV10** (10.3.4) | 1 md + 6 agent + 19 ref + 12 py + 8 hook | 0 | 6 | 5 | **2.4** | 🔴 | 6 MEDIUM：SHELL_EXEC ×5（acceptance-audit/code-hygiene/phase-gate/auto-test/contract-check 跑 cargo/npm/curl/grep），HTTP_INSECURE ×1（acceptance-audit 本地 curl localhost:18080）。**10.3.3 新增 integration-contract 硬门禁（直 fetch / 直 keydown / 缺 ModuleDef / 缺 Rust trait / 事件命名违规）；10.3.4 腐烂点清理 — Trae Plan/Spec 引用跟随 spec-kit（11 处文档 + 1 处函数重命名）**。设计意图：acceptance-audit 真实验收必需，按 AGENTS.md 量化评分规则严格扣分落到 🔴 档。处理：本地工具且无外网通信，保留 SHELL_EXEC 不修；HTTP_INSECURE 仅限 localhost，加白名单豁免 |
 | **trae-security-review** | 1 md + 2 agent + 3 ref + 1 py | 2 | 3 | 2 | **3.9** | 🟡 | 2 个 HIGH 和 3 个 MEDIUM 均为 risk-patterns.md 和 skill-scanner.md 中的风险模式文档引用（非可执行） |
 | **skills-security**（外部） | 1 md + 1 py + 1 json | 0 | 1 | 0 | **4.8** | 🟢 | 1 个 MEDIUM：main.py 中的 HTTP 引用 |
 

@@ -1,5 +1,5 @@
 # render-cockpit.ps1 — 读取 cockpit state-card，渲染驾驶舱快照
-# > 来源：fullstack4TraeV8 cockpit 模式
+# > 来源：fullstack4TraeV9 cockpit 模式
 # 用法: .\render-cockpit.ps1 -GameKey <game-dir>
 # 输出: Markdown cockpit snapshot to stdout
 
