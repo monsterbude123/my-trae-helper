@@ -1,6 +1,48 @@
 # CHANGELOG
 
+## v10.3.8 (2026-07-28)
+
+**实战驱动更新 — 主上下文重置与真实验收协议**
+
+- **新增** `references/reset-and-verify-protocol.md` — Stage 0-3 主上下文自证协议（防虚假验收）
+- **文档** SKILL.md §1.6 主上下文保护意识（引用 reset-and-verify-protocol）
+- **案例** 实战记录 3 个腐烂点（虚假 audit / binary 过期 / mod.rs 缺失）
+- **变更** 版本 10.3.7 → 10.3.8
+
+## v10.3.7 (2026-07-28)
+
+**实战驱动更新 — 6 维度审计 + 零残留验证 + drift 检测**
+
+- **新增** `acceptance-audit.py` 第 6 维度 `drift_detect`（contracts/ vs 实际 import/export 漂移扫描，捕获契约/代码命名不一致）
+- **新增** `code-hygiene.py --check-bak` 子命令（Article III §3.2 零残留验证，rglob *.bak.* + 非零退出）
+- **修复** drift_detect 误匹配 Markdown 表格内 `interface`/`type` 关键词（改为仅扫描 ```typescript 代码块）
+- **修复** drift_detect rglob 模式 `*.{ts,tsx}` 改为分别 rglob（Python rglob 不支持 brace expansion）
+- **修复** 00-01-foundation 真实漂移 HealthInfo → HealthCheckResponse（contracts 改名匹配后端实现）
+- **变更** 验收维度 5 → 6（新增 drift_detect）
+- **变更** 版本 10.3.6 → 10.3.7
+
+## v10.3.6 (2026-07-28)
+
+**实战驱动更新 — 00-02 app-shell 推进暴露的腐烂点**
+
+- **新增** `phase-gate.py` V10_STRICT_REVIEW 环境变量开关（默认=1，禁止 fallback，必须 review-latest.md）
+- **修复** acceptance-audit artifact_schema 与 API 维度对 api-contracts.md 处理矛盾（纯前端也需创建占位文件）
+- **修复** V10 简化 spec.md YAML `v10_drop: tasks.md` 与 artifact-schema.md 强制要求矛盾（记录为待统一）
+- **变更** 版本 10.3.5 → 10.3.6
+
+## v10.3.5 (2026-07-28)
+
+**实战驱动 hotfix — 归档 00-01 暴露的 5 P0 腐烂点**
+
+- **修复** `acceptance-audit.py` TODO_PATTERN 移除 XXX（避免 `xxx-0/1/2` 占位符误伤，V10 实战暴露）
+- **修复** `SKILL.md` description 矛盾（spec-kit + Trae Work 输入输出明确）
+- **修复** `phase-gate.py` review 阶段强制 docs/reports/{feature}/review-latest.md 存在
+- **新增** `acceptance-gates-v10.md` §3.2 零残留规则（Article III 禁止 .bak 副本）
+- **新增** `SKILL.md` §1.5 reviewer 行加 [MUST] acceptance-audit 注入项
+- **变更** 版本 10.3.4 → 10.3.5
+
 ## v10.3.4 (2026-07-28)
+
 
 **腐烂点清理 — Trae Plan/Spec 引用跟随迁移**
 

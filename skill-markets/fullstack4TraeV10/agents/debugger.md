@@ -61,3 +61,15 @@ version: "9.0.0"
 - [ ] 修复按 TDD：🔴RED 重现 → 🟢GREEN 修复 → 回归全绿
 - [ ] 异常已记录到 `.trae/logs/report-growth.jsonl`
 任一项 ❌ → 修正后重新移交。
+
+## 注入协议（主上下文委派时必须注入）
+
+> 来源: SKILL.md §1.5
+
+主上下文委派 debugger 时，必须在 prompt 末尾注入：
+
+```
+[MUST] 根因证据 + 复现步骤；修复后回归全绿
+```
+
+详见: [SKILL.md §1.5](../SKILL.md#§15-委派注入)

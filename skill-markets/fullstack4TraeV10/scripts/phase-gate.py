@@ -19,6 +19,7 @@
 """
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -43,10 +44,14 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 
 def _find_review_report(project_root: Path) -> Path | None:
     """æŸ¥æ‰¾ review æŠ¥å‘Šï¼ˆV10 review-latest.md ä¼˜å…ˆ, V9 acceptance-scorecard-*.md fallbackï¼‰
+    
+    V10_STRICT_REVIEW=1: ç¦æ­¢ fallbackï¼Œå¿…é¡» review-latest.md å­˜åœ¨ï¼ˆç¡¬é—¨ç¦ï¼‰
+    é»˜è®¤: V10_STRICT_REVIEW=1ï¼ˆå¼ºåˆ¶ï¼‰
 
     Returns:
         æ‰¾åˆ°çš„ review æŠ¥å‘Šè·¯å¾„; æ‰¾ä¸åˆ°è¿”å›ž None
     """
+    strict_review = os.environ.get("V10_STRICT_REVIEW", "1") == "1"
     reports = project_root / "docs" / "reports"
     if not reports.is_dir():
         return None
@@ -54,6 +59,9 @@ def _find_review_report(project_root: Path) -> Path | None:
     latest = reports / "review-latest.md"
     if latest.is_file():
         return latest
+    # V10_STRICT_REVIEW=1 æ—¶ç¦æ­¢ fallback
+    if strict_review:
+        return None
     # V9 fallback: acceptance-scorecard-{date}.mdï¼ˆæŒ‰æ—¥æœŸå€’åº, æœ€æ–°ä¼˜å…ˆï¼‰
     scorecards = sorted(reports.glob("acceptance-scorecard-*.md"), reverse=True)
     if scorecards:

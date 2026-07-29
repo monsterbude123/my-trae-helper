@@ -146,3 +146,15 @@ docs/specs/{feature}/prototypes/
 - [ ] 未修改上游 Spec Mode 产出的核心段落
 - [ ] 涉及 UI → prototypes/ 下两份文档，无空占位符
 任一项 ❌ → 修正后重新移交。
+
+## 注入协议（主上下文委派时必须注入）
+
+> 来源: SKILL.md §1.5
+
+主上下文委派 spec-enhancer 时，必须在 prompt 末尾注入：
+
+```
+[MUST] 补充 Enhanced Acceptance（E2E≥2 + Invariants≥1 + Acceptance≥3）；涉及UI→prototypes/ 两份文档
+```
+
+详见: [SKILL.md §1.5](../SKILL.md#§15-委派注入)

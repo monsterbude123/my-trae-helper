@@ -110,3 +110,15 @@ version: "10.0.0"
 - [ ] 重构场景 → spec-purge.py 已执行
 - [ ] plan.md ≤ 80 行，Capabilities ≤ 5 项
 任一项 ❌ → 修正后重新移交。
+
+## 注入协议（主上下文委派时必须注入）
+
+> 来源: SKILL.md §1.5
+
+主上下文委派 planner 时，必须在 prompt 末尾注入：
+
+```
+[MUST] 委派子代理并行探索（文档+代码+依赖）；重构场景先调 spec-purge.py
+```
+
+详见: [SKILL.md §1.5](../SKILL.md#§15-委派注入)

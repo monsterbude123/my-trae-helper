@@ -460,6 +460,7 @@ async def main():
     parser.add_argument('--prompt', help='自定义分析 prompt')
     parser.add_argument('--resize', type=int, default=0, help='缩放最长边（像素），0=不缩放')
     parser.add_argument('--concurrency', type=int, default=None, help='覆盖并发的最大数量')
+    parser.add_argument('--agent-has-vision', action='store_true', help='Agent 声明自己有视觉能力，跳过本地 VL 模型直接用自己的能力')
     args = parser.parse_args()
 
     if not args.dir and not args.single and not args.describe:

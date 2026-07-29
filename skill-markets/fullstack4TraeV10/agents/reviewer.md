@@ -200,3 +200,15 @@ Review FAIL → 判定根因:
 - [ ] implementer "理解确认"已抽查 2 项
 - [ ] DOC SYNC + 知识提取 + 归档门禁全部通过
 任一项 ❌ → 修正后重新移交。
+
+## 注入协议（主上下文委派时必须注入）
+
+> 来源: SKILL.md §1.5
+
+主上下文委派 reviewer 时，必须在 prompt 末尾注入：
+
+```
+[MUST] 四维验收（代码/API/UIUX/边际）；FAIL IS FAIL；对接 acceptance-discipline gate-keeper checklist；DOC SYNC 自动执行
+```
+
+详见: [SKILL.md §1.5](../SKILL.md#§15-委派注入)

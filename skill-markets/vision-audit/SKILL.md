@@ -124,30 +124,44 @@ VL 模型返回结构化分析 JSON
 
 ### 线框图识别工作流（--describe）⭐ NEW
 
-> **用途**：给定一张截图，用 ASCII 线框图描述页面内容和布局。自带降级机制。
+> **用途**：给定一张截图，用 ASCII 线框图描述页面内容和布局。自带降级机制 + Agent 能力检测。
 
 ```
 用户: "这张截图是什么内容？"（指定截图路径）
      ↓
-vision-audit --describe <截图>
-     ↓
-┌─ Tier 1: 本地 VL 模型可用 ─────────────────
-│  Qwen3-VL 分析截图 → 输出 JSON:
-│  { status: "ok", diagram: "┌────┐...", zones: {...}, verdict: "..." }
-│  其中 diagram 用 ┌┐└┘├┤│┬┴┼─ 画线框图，标实际文字
-└────────────────────────────────────────────
-     │ VL 不可用 ↓
-┌─ Tier 2: 降级到 AI Agent 视觉 ─────────────
-│  输出 JSON:
-│  { status: "fallback", mcp_call: {...}, prompt: "..." }
-│  AI Agent 收到后调用 read_media_file MCP 读取图片，
-│  用返回的 prompt 分析截图并输出线框图。
-└────────────────────────────────────────────
+Agent 检查自己是否有视觉能力
+     ├─ 有 → 调用 vision-audit --describe <截图> --agent-has-vision
+     │        ↓
+     │   ┌─ Tier 0: Agent 声明有视觉能力 ───────────
+     │   │  输出 JSON: { status: "agent_vision", prompt: "..." }
+     │   │  Agent 直接用自己的视觉能力分析图片
+     │   └────────────────────────────────────────────
+     │
+     └─ 无 → 调用 vision-audit --describe <截图>
+              ↓
+         ┌─ Tier 1: 本地 VL 模型可用 ─────────────────
+         │  Qwen3-VL 分析截图 → 输出 JSON:
+         │  { status: "ok", diagram: "┌────┐...", zones: {...}, verdict: "..." }
+         │  其中 diagram 用 ┌┐└┘├┤│┬┴┼─ 画线框图，标实际文字
+         └────────────────────────────────────────────
+              │ VL 不可用 ↓
+         ┌─ Tier 2: 降级到 AI Agent 视觉 ─────────────
+         │  输出 JSON:
+         │  { status: "fallback", mcp_call: {...}, prompt: "..." }
+         │  AI Agent 收到后调用 read_media_file MCP 读取图片，
+         │  用返回的 prompt 分析截图并输出线框图。
+         └────────────────────────────────────────────
 ```
 
-**降级原理**：当本地 local llm 未运行或 .env.vision 未配置时，脚本输出结构化指令告诉 AI Agent 使用 `read_media_file` MCP 工具直接读取图片。Trae IDE 的 AI 模型本身支持视觉能力，可以直接"看懂"截图并按要求画出 ASCII 线框图。
+**Agent 能力检测参数**：
+- `--agent-has-vision` — Agent 声明自己有视觉能力时使用，跳过本地 VL 模型直接用自己的能力
+
+**降级原理**：
+- **Tier 0**（优先）：Agent 知道自己有视觉能力时，直接传入 `--agent-has-vision` 参数，脚本跳过所有检查直接返回分析指令，Agent 用自己的视觉能力处理图片
+- **Tier 2**（降级）：当 Agent 无视觉能力 + 本地 local llm 未运行或 .env.vision 未配置时，脚本输出结构化指令告诉 AI Agent 使用 `read_media_file` MCP 工具读取图片
 
 **输出格式**：
+- `status: "agent_vision"` — Agent 主动用自己的视觉能力处理
 - `status: "ok"` — 本地 VL 分析成功，`diagram` 字段包含 ASCII 线框图
 - `status: "fallback"` — VL 不可用，Agent 按 `mcp_call` 指令调用 read_media_file
 - `status: "error"` — 文件不存在等错误
@@ -192,6 +206,9 @@ python .trae/skills/vision-audit/scripts/vision-audit.py --single frontend/debug
 
 # 线框图识别（新）— 截图内容 → ASCII 线框图，VL 不可用时自动降级
 python .trae/skills/vision-audit/scripts/vision-audit.py --describe frontend/debug/screenshots/route-01-HomeView.png
+
+# Agent 有视觉能力时 — 直接用自己的能力，跳过本地 VL 模型
+python .trae/skills/vision-audit/scripts/vision-audit.py --describe frontend/debug/screenshots/route-01-HomeView.png --agent-has-vision
 ```
 
 ---

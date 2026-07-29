@@ -77,3 +77,15 @@ version: "10.0.0"
 - [ ] 契约状态标记 approved
 - [ ] 旧孤儿测试已清理
 任一项 ❌ → 修正后重新移交。
+
+## 注入协议（主上下文委派时必须注入）
+
+> 来源: SKILL.md §1.5
+
+主上下文委派 contract-writer 时，必须在 prompt 末尾注入：
+
+```
+[MUST] 四件套完整 + 测试骨架；变更走 ADDITIVE/BREAKING 流程
+```
+
+详见: [SKILL.md §1.5](../SKILL.md#§15-委派注入)

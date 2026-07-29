@@ -5,10 +5,12 @@
   - 单文件 > 800 行 → 🛑 REJECT
   - 单函数 > 50 行 → 🛑 REJECT
   - 圈复杂度 > 15 → 🛑 REJECT
+  - .bak.* 残留 → 🛑 REJECT（V10.3.7 新增，Article III §3.2 零残留）
 
 用法:
   python scripts/code-hygiene.py --changed-files [--max-lines 800] [--max-fn-lines 50] [--max-complexity 15]
   python scripts/code-hygiene.py --path {dir_or_file}
+  python scripts/code-hygiene.py --check-bak [--path {project_root}]
 """
 
 import argparse
@@ -204,10 +206,31 @@ def main():
     parser.add_argument("--max-fn-lines", type=int, default=50, help="单函数最大行数")
     parser.add_argument("--max-complexity", type=int, default=15, help="圈复杂度上限")
     parser.add_argument("--project-root", type=str, default=".", help="项目根")
+    parser.add_argument(
+        "--check-bak",
+        action="store_true",
+        help="扫描项目下所有 *.bak.* 残留文件（V10.3.7+ 零残留验证），找到 = 🛑 REJECT",
+    )
 
     args = parser.parse_args()
 
     project_root = Path(args.project_root).resolve()
+
+    # --check-bak 分支：扫描项目下所有 *.bak.* 残留（独立路径）
+    if args.check_bak:
+        scan_root = Path(args.path).resolve() if args.path else project_root
+        bak_files = sorted(scan_root.rglob("*.bak.*"))
+        # 排除 .git / node_modules / target / dist 等常见目录
+        EXCLUDE_DIRS = {".git", "node_modules", "target", "dist", "build", "__pycache__", ".venv", "venv"}
+        bak_files = [f for f in bak_files if not any(part in EXCLUDE_DIRS for part in f.parts)]
+        if bak_files:
+            print(f"🛑 code-hygiene --check-bak 发现 {len(bak_files)} 个 .bak.* 残留：\n")
+            for f in bak_files:
+                print(f"  - {f.relative_to(scan_root)}")
+            print("\nArticle III §3.2 零残留规则：删除所有 .bak.* 后重跑")
+            sys.exit(1)
+        print(f"✅ code-hygiene --check-bak 通过：{scan_root} 下 0 个 .bak.* 残留")
+        sys.exit(0)
 
     # 收集目标文件
     targets: list[Path] = []

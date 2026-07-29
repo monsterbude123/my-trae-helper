@@ -145,3 +145,14 @@ Phase B — 交互逻辑:
 - 代码卫生：`scripts/code-hygiene.py`
 - 阶段转换：`scripts/phase-gate.py`
 - 评分制度强化：`rules/agent-机械验证.md` §V10 评分制度
+
+### §3.2 零残留规则 (V10.3.5 NEW)
+
+**Article III 零残留** — install 脚本禁止产生 .bak 副本/旧版本残留:
+
+```
+- install-v10.py 禁止 shutil.move 到 .bak.{pid}
+- builtin_skills/ 下不应有 *.bak.* 文件
+- 升级前必跑: Get-ChildItem *.bak.* | Should Be NullOrEmpty
+- 违反 → 🛑 REJECT install
+```
