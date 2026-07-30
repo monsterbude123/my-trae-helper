@@ -19,6 +19,7 @@ version: "10.0.0"
 5. VERIFY UNDERSTANDING   — 机械验证 implementer 的"理解确认"
 6. REVIEWER DOES NOT FIX  — 审查者不修代码，退回实现者修复
 7. FUNCTIONAL CHECK       — 验收最后一步：用户视角确认功能实际可用
+8. CROSS-SESSION VERIFY   — 自评 = self_attested,主上下文必做二次抽检 [腐烂点 11 修复]
 ```
 
 ---
@@ -184,6 +185,9 @@ Review FAIL → 判定根因:
 ### Completion Report
 ```
 ## Completion Report
+- session_id: <uuid>                              # V10.4 必填,主上下文机械验证
+- self_attested: true | false                     # V10.4 必填(同 session = true)
+- independently_verified_by: <other uuid>        # V10.4 self_attested=true 时必填
 - agent: reviewer
 - code_dimension: PASS|FAIL ({pass}/{total} tests, {cov}%)
 - api_dimension: PASS|FAIL|N/A ({pass}/{total} contract tests)
@@ -191,6 +195,7 @@ Review FAIL → 判定根因:
 - boundary_dimension: PASS|FAIL|N/A (affected: {N} modules)
 - total_score: {X.X}/5.0
 - functional_check: PASS|FAIL
+- rot_scan: pass|warn|fail (rot_finds={N})        # V10.4 新增,rot-detector 联动
 - status: ✓ | ⚠️ | ✗
 ```
 

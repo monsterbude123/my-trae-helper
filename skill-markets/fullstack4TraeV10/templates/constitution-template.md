@@ -168,4 +168,52 @@ Constitution 任何 Article 的修改必须：
 
 ---
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-27 | **Last Amended**: 2026-07-27
+## Article IX — TDD 即时（Test-Update-Atomic, NON-NEGOTIABLE）
+
+> **V10.4 新增（2026-07-30，腐烂点 12 修复）**
+
+**Rationale**: 改实现不立即同步改测试 = 死测试复活。V10.4 强制改/删组件 → 立即改/删测试,同 PR atomic,禁止"先合实现后续 cleanup"。实战教训: 00-04-system-settings 替代了 SettingsPage,但 SettingsPage.test.tsx + SettingsPage.tsx 都没即时清除,9 failed 测试持续 1 周。
+
+**Enforcement**:
+- Implementer 改实现 / 删组件 / 改接口 → 必须在同一 commit 修改对应测试
+- Implementer 删除组件文件 → 必须删除对应测试文件(物理删除,非注释)
+- Contract-Writer 改契约 → 必须更新 contract test 骨架
+- `scripts/orphan-detector.py` 在 Phase 2/3/4.5 必跑,发现孤儿 = 🛑 REJECT
+
+**禁止例外**: 无。"先合实现后续 cleanup" = 禁止模式。
+
+---
+
+## Article X — 异会话验证（Cross-Session Verification, NON-NEGOTIABLE）
+
+> **V10.4 新增（2026-07-30，腐烂点 11 修复）**
+
+**Rationale**: 同 session 自评自签 = 自我背书,无独立验证 = 无意义。V10.4 强制异 session 验证或主上下文二次抽检。实战教训: 主上下文自己当 reviewer,自己写 review-latest.md,自己 PASS,无任何独立验证。
+
+**Enforcement**:
+- Reviewer Completion Report 必须含 `session_id` + `self_attested` 字段
+- `self_attested: true` 时必须填 `independently_verified_by`(其他 session uuid)
+- 主上下文对 self_attested=true 必做二次抽检(独立命令验证至少 1 个核心断言)
+- 抽检失败 = 🛑 REJECT
+
+**禁止例外**: 无。异 session 验证是质量底线。
+
+---
+
+## Article XI — 视觉真实验证（Real Visual Verification, NON-NEGOTIABLE）
+
+> **V10.4 新增（2026-07-30，腐烂点 9 修复）**
+
+**Rationale**: PNG magic + 文件大小 = 弱校验,布局错乱也 PASS。V10.4 强制视觉证据 PIL 解码 + 颜色直方图 + 关键区域采样。实战教训: V10.3.9 三层校验全过但实际布局错乱(双齿轮 + TabBar 出现系统设置 + 三层标题)。
+
+**Enforcement**:
+- 视觉证据必须 PIL 完整解码(无 truncated)
+- 颜色直方图唯一色数 ≥ 50(避免单色破图)
+- 关键区域非空采样(避免整页同色/全黑,4 象限亮度极差 ≥ 5)
+- 任一不通过 = 🛑 REJECT,不允许 `--no-visual` 绕过
+
+**禁止例外**: 仅当 Plan 阶段显式锁定 uiux 维度为 N/A 时可跳过。
+
+---
+
+**Version**: 1.1.0 | **Ratified**: 2026-07-27 | **Last Amended**: 2026-07-30 (V10.4: +Articles IX/X/XI)

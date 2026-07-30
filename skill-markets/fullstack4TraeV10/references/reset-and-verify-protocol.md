@@ -195,6 +195,52 @@ elif avg_lum > 240:
 - 降级条件必须写入 plan.md "不适用维度锁定" 段
 - 无锁定记录 → review 阶段拒绝接收降级
 
+### 案例 9: 中文正则字面量在 PowerShell 脚本中乱码（2026-07-29）
+
+**现象**：编写 audit 脚本扫描 spec.md 中的中文模糊词（可能/大概/似乎/适当/等等），用字面量写正则：
+
+```powershell
+$content = Get-Content $spec -Raw
+$vagueCount = ([regex]::Matches($content, "可能|大概|似乎|适当|等等")).Count
+```
+
+→ 运行后计数全为 0（误判通过），或控制台输出乱码。
+
+**根因**：
+1. PowerShell 5.x 默认 ANSI 编码，UTF-8 中文字面量被破坏为 mojibake
+2. 脚本文件即使以 UTF-8 保存，运行时也按 ANSI 解析（除非带 BOM）
+3. `[regex]::Matches` 对损坏的字节序列返回 0 匹配
+
+**正确做法**：用 unicode code point 拼接，绕开编码问题：
+
+```powershell
+$vaguePatterns = @(
+    ([char]0x53EF + [char]0x80FD),    # 可能
+    ([char]0x5927 + [char]0x6982),    # 大概
+    ([char]0x4F3C + [char]0x4E4E),    # 似乎
+    ([char]0x9002 + [char]0x5F53),    # 适当
+    ([char]0x7B49 + [char]0x7B49)     # 等等
+)
+$vagueCount = 0
+foreach ($p in $vaguePatterns) {
+    $c = ([regex]::Matches($content, [regex]::Escape($p))).Count
+    if ($c -gt 0) { $vagueCount += $c }
+}
+```
+
+**替代方案**：脚本顶部强制 UTF-8：
+```powershell
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+```
+但这个只能保证控制台输出正确，**字面量正则解析仍会失败**。
+
+**教训**：
+- PowerShell 审计脚本中**禁止**使用中文正则字面量
+- 优先用 code point 拼接（最稳）
+- 或在 audit 脚本顶部加 `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8`（部分有效）
+- Python 脚本无此问题（默认 UTF-8），如可能优先用 Python 写 audit
+
 ## 反虚假完成清单
 
 ```

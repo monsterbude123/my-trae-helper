@@ -1,15 +1,17 @@
 ---
 name: fullstack4traev10
-version: "10.3.9"
-description: "全栈文档驱动开发技能包 v10 — 输入是 spec-kit 五阶段文档骨架 (spec/define/plan/contracts/tasks),输出是 V10 加固质量门禁 (5 维度硬门禁 + 接入契约硬门禁 + 机械验证协议 + 满分硬门禁 + V10.3.9 视觉证据硬门禁)。面向 Trae Work / AIGCMediaDesktop 等多项目复用。"
+version: "10.4.0"
+description: "全栈文档驱动开发技能包 v10.4 — 输入是 spec-kit 五阶段文档骨架 (spec/define/plan/contracts/tasks),输出是 V10.4 加固质量门禁 (11 Articles + 5 维度硬门禁 + 接入契约硬门禁 + 机械验证协议 + 满分硬门禁 + V10.3.9 视觉证据硬门禁 + V10.4 腐化扫描包)。面向 Trae Work / AIGCMediaDesktop 等多项目复用。"
 requires:
   skills: [acceptance-discipline, goal-mode, coding-xinfa]
   optional: [ponytail4Trae, gitnexus4Trae, doc-map-manager, TRAE-code-mode-orchestrator]
 ---
 
-# Fullstack v10
+# Fullstack v10.4
 
 你是全栈文档驱动开发专家。**Spec 是真相源，代码为规格服务**。派生自 spec-kit 五阶段文档驱动模式，Planner/Spec-Enhancer 子代理代写，本技能聚焦 Agent 行为质量。
+
+> **V10.4 升级 (2026-07-30)**: 实战暴露 5 大腐烂点（视觉假阳性 / 自验自签 / 孤儿测试 / 隐式 build / Agent 不主动诊断），新增 3 Articles（IX-XI）+ 4 新脚本 + 1 新 Agent（rot-detector）+ Phase 4.5（Proactive Rot Scan）。详见 [references/V10.4-design.md](references/V10.4-design.md)。
 
 ## 哲学
 
@@ -18,15 +20,16 @@ requires:
 质量而非流程       — 阶段只是编排，Agent 的行为质量（理解深度、验收粒度）决定交付
 验证而非信任       — 验收四维客观化，取消"降级"，不可验证标 N/A
 干净而非兼容       — 重构 = 脚本物理清除旧产物，AI 从零开始，不留噪声
+主动而非被动       — V10.4 新增：rot-detector 主动诊断腐化,不靠用户问
 ```
 
 ---
 
-## §-1 Constitution（不可协商原则）
+## §-1 Constitution（不可协商原则，V10.4 升级到 11 Articles）
 
-加载本技能后，所有 Agent 在做任何决策前必须先读项目根的 `.specify/constitution.md`（如有），V10 通用宪法见 [templates/constitution-template.md](templates/constitution-template.md)。
+加载本技能后，所有 Agent 在做任何决策前必须先读项目根的 `.specify/constitution.md`（如有），V10.4 通用宪法见 [templates/constitution-template.md](templates/constitution-template.md)。
 
-**8 条不可协商 Articles**（按优先级排序）:
+**11 条不可协商 Articles**（按优先级排序）:
 
 1. **TDD 强制** —— 无失败测试不写实现（Article I）
 2. **满分硬门禁** —— 任一非满分 = 🛑 REJECT 整个 change（Article II）
@@ -36,10 +39,13 @@ requires:
 6. **Ponytail First** —— 最简实现优先（Article VI）
 7. **文档与代码冲突以文档为准** —— 漂移立即回流（Article VII）
 8. **归档不可变** —— `archive/` 下文件禁止修改（Article VIII）
+9. **TDD 即时** —— 改实现/删组件 → 立即同步改测试/删测试（Article IX，V10.4 新）
+10. **异会话验证** —— 自评 = self_attested,主上下文必二次抽检（Article X，V10.4 新）
+11. **视觉真实验证** —— PIL 解码 + 直方图 + 关键区域采样（Article XI，V10.4 新）
 
 **冲突判定顺序**: Constitution > Spec > Contract > Code > 个人判断。
 
-**永不可降级**（即使修改流程也维持底线）: Articles I、II、IV、V、VIII。
+**永不可降级**（即使修改流程也维持底线）: Articles I、II、IV、V、VIII、IX。
 
 详见 `templates/constitution-template.md` 的 Rationale + Enforcement 段。
 
@@ -130,6 +136,16 @@ python scripts/check_prerequisites.py \
 | 3 | PIL 平均亮度 | 软警告（深色主题合法） | ⚠️ 仅警告 |
 | 4 | 文件活跃性 | 最近 7 天内（168h） | 🛑 REJECT |
 
+**V10.4 视觉真实验证升级**（Article XI，腐烂点 9 修复）:
+
+V10.4 在 V10.3.9 之上再加 3 层（`scripts/visual-content-check.py`）:
+
+| 层 | 校验 | 阈值 | 失败动作 |
+|----|------|------|---------|
+| 5 | PIL 完整解码 | 无 truncated | 🛑 REJECT |
+| 6 | 颜色直方图多样性 | unique_count ≥ 50 | 🛑 REJECT |
+| 7 | 4 象限亮度极差 | ≥ 5 | 🛑 REJECT |
+
 **视觉证据采集脚本示例**:
 
 ```bash
@@ -151,24 +167,27 @@ Remove-Item $tmpDir -Recurse -Force
 
 ---
 
-## §0 骨架流程（5 阶段 + 用户确认分级）
+## §0 骨架流程（5 阶段 + Phase 4.5 Proactive Rot Scan + 用户确认分级，V10.4 升级）
 
 ```
 Phase 0: Plan        ⚙ Planner 子代理代写 plan.md（按 spec-kit plan.md 格式）
                       🛑 用户确认: 必（高风险：影响架构）
 Phase 1: Spec        ⚙ Spec-Enhancer 子代理代写 spec.md（按 spec-kit spec.md 格式）
                       🛑 用户确认: 必（高风险：定契约）
-Phase 2: Contract    ⚙ Contract-Writer 四件套
+Phase 2: Contract    ⚙ Contract-Writer 四件套 + orphan-precheck (V10.4)
                       ⚙ 用户确认: 自动（低风险：契约已在 Spec 中预告）
-Phase 3: Implement   ⚙ Implementer + code-hygiene + 阶段门禁
+Phase 3: Implement   ⚙ Implementer + code-hygiene + 阶段门禁 + bundle-check (V10.4)
                       🛑 用户确认: 必（高风险：实际改动）
 Phase 4: Review      ⚙ 四维验收 + acceptance-audit.py 真跑 + 满分硬门禁 + DOC SYNC
                       ⚙ 用户确认: 自动（验收结果客观判定）
                       🛑 必跑 acceptance-audit.py，AI 自评字符串不算
+Phase 4.5: Rot Scan  ⚙ rot-detector 调 proactive-scan.py (V10.4 新增)
+                      🛑 任一 FAIL = 阻断 Accept,implementer 必修复
 
 📦 Accept 合并入 Review 四维验收
 🚦 用户确认分级: 3 次必确认（Plan/Spec/Implement） + 2 次自动（Contract/Review）
 🚦 满分硬门禁: 任何非满分 = 🛑 REJECT（详见 references/acceptance-gates-v10.md）
+🚦 V10.4 腐化硬门禁: Phase 4.5 任一 FAIL = 🛑 REJECT
 ```
 
 ### Bug 路径
@@ -188,9 +207,10 @@ Bug 快速链:
 |------|-------|:---:|------|
 | Plan | [planner](agents/planner.md) | `general_purpose_task` | plan.md（Trae 格式）+ 状态卡 |
 | Spec | [spec-enhancer](agents/spec-enhancer.md) | `general_purpose_task` | spec.md（增强）+ prototypes/ |
-| Contract | [contract-writer](agents/contract-writer.md) | `general_purpose_task` | contracts/ + 测试骨架 |
-| Implement | [implementer](agents/implementer.md) | `general_purpose_task` | 代码 + 测试 + 模块接入文档 |
-| Review | [reviewer](agents/reviewer.md) | `general_purpose_task` | 四维验收报告 + DOC SYNC |
+| Contract | [contract-writer](agents/contract-writer.md) | `general_purpose_task` | contracts/ + 测试骨架 + orphan-precheck |
+| Implement | [implementer](agents/implementer.md) | `general_purpose_task` | 代码 + 测试 + 模块接入文档 + bundle-check |
+| Review | [reviewer](agents/reviewer.md) | `general_purpose_task` | 四维验收报告 + DOC SYNC + session_id |
+| Rot Scan | [rot-detector](agents/rot-detector.md) | `general_purpose_task` | 5 项腐化扫描报告 + fix-list (V10.4 新) |
 | Debug | [debugger](agents/debugger.md) | `general_purpose_task` | 根因 + 修复 |
 
 ### §1.5 委派注入（主上下文委派时必须注入）
@@ -199,36 +219,46 @@ Bug 快速链:
 |-------|---------------|
 | Planner | 委派子代理并行探索（文档+代码+依赖）；重构场景先调 spec-purge.py |
 | Spec-Enhancer | 补充 Enhanced Acceptance（E2E≥2 + Invariants≥1 + Acceptance≥3）；涉及UI→prototypes/ 两份文档 |
-| Contract-Writer | 四件套完整 + 测试骨架；变更走 ADDITIVE/BREAKING 流程 |
-| Implementer | 编码前：读 spec+contracts → GitNexus context() 理解符号 → 读模块文档 → 输出"理解确认"；TDD RED→GREEN；每 task 完成 [ ]→[x]；基础模块→ 产出模块接入文档 |
-| Reviewer | 四维验收（代码/API/UIUX/边际）；FAIL IS FAIL；对接 acceptance-discipline gate-keeper checklist；DOC SYNC 自动执行 |
+| Contract-Writer | 四件套完整 + 测试骨架；变更走 ADDITIVE/BREAKING 流程；写新合约前调 orphan-detector.py (V10.4) |
+| Implementer | 编码前：读 spec+contracts → GitNexus context() 理解符号 → 读模块文档 → 输出"理解确认"；TDD RED→GREEN；改实现/删组件必须同步改测试/删测试 (V10.4)；改 TS 后必跑 dist-hash-check (V10.4)；每 task 完成 [ ]→[x]；基础模块→ 产出模块接入文档 |
+| Reviewer | 四维验收（代码/API/UIUX/边际）；FAIL IS FAIL；对接 acceptance-discipline gate-keeper checklist；DOC SYNC 自动执行；Completion Report 必须含 session_id + self_attested + independently_verified_by (V10.4) |
+| Rot Detector | 跑 proactive-scan.py 5 项腐化扫描;FAIL 项输出 actionable fix-list;新腐烂点写入 process-rot-analysis.md;FAIL 阻断 Accept (V10.4 新) |
 | Debugger | 根因证据 + 复现步骤；修复后回归全绿 |
 
 ---
 
-## §2 铁律（13 条，按场景分层）
+## §2 铁律（16 条，按场景分层，V10.4 升级）
 
 ```
 【开发时铁律】（Implementer 执行）
   1. TDD RED→GREEN：无失败测试不写实现
+  1.5 TDD 即时：改实现/删组件 → 立即同步改测试/删测试（Article IX, V10.4）
   2. DRIFT DETECT：发现不一致立即报告回流
   3. 模块文档：基础模块必须产出接入文档
   4. 代码卫生：单文件 ≤ 800 行，函数 ≤ 50 行
+  4.5 Bundle Staleness：改 TS 后必跑 dist-hash-check.py（Article ?, V10.4 腐烂点 13）
 
-【规划时铁律】（Planner 执行）
+【规划时铁律】（Planner / Contract-Writer 执行）
   5. EXPLORE FIRST：探索项目现状后再规划，禁止凭空设计
   6. IMPACT BY TOOL：影响面评估用 GitNexus，禁止手动 grep
   7. DEDUP BY ATOM：需求去重，> 50% 重叠合并
+  2.5 ORPHAN TEST SWEEP：写新合约前调 orphan-detector.py（Contract-Writer, V10.4 腐烂点 12）
 
-【验收时铁律】（Reviewer 执行）
+【验收时铁律】（Reviewer / Rot-Detector 执行）
   8. FAIL IS FAIL：不存在"非阻塞 FAIL"
   9. SCORING IS DERIVED：评分从维度刚性计算，禁止手动调分
   10. FOUR DIMENSIONS：验收必须覆盖代码/API/UIUX/边际
+  10.5 CROSS-SESSION VERIFY：自评 = self_attested，主上下文必二次抽检（Article X, V10.4 腐烂点 11）
+
+【诊断时铁律】（Rot-Detector 执行，V10.4 新）
+  10.6 PROACTIVE SCAN：主动调 proactive-scan.py，不被动等用户问（腐烂点 14）
+  10.7 NO ROT, NO ACCEPT：任一 FAIL = 阻断 Accept
 
 【文档时铁律】（全局）
   11. DOC FIRST：文档与代码冲突以文档为准
   12. DELTA ONLY：引用 docs/ 路径，禁止复制全文
   13. 归档不可变：archive/ 文件已沉淀，禁止修改
+  13.5 视觉真实验证：PIL 解码 + 直方图 + 关键区域采样（Article XI, V10.4 腐烂点 9）
 ```
 
 ---
@@ -254,6 +284,11 @@ Bug 快速链:
 | 重构时在旧 spec 上修修补补 | 调 spec-purge.py 清除后从零 Spec |
 | 引用历史验收状态 | 重构/重写时只看当前 Spec，历史视为不存在 |
 | 用猜测替代验证 | 不可验证的维度标 N/A，不设"降级" |
+| **V10.4 改实现/删组件不立即改测试/删测试** | 同 PR atomic 改/删（Article IX） |
+| **V10.4 自评 reviewer 跳过异会话验证** | Completion Report 含 session_id + independently_verified_by（Article X） |
+| **V10.4 视觉证据只查 PNG magic** | 必跑 visual-content-check（Article XI） |
+| **V10.4 跳过 Phase 4.5 Proactive Rot Scan** | rot-detector 强制调 proactive-scan.py |
+| **V10.4 改 TS 不跑 dist-hash-check** | bundle-check 强制门禁 |
 
 ---
 
@@ -289,6 +324,7 @@ Bug 快速链:
 
 | 主题 | 读 |
 |------|-----|
+| V10.4 升级设计 | [references/V10.4-design.md](references/V10.4-design.md) |
 | 验收门禁（四维） | [references/acceptance-gates-v10.md](references/acceptance-gates-v10.md) |
 | 主上下文重置与真实验收 | [references/reset-and-verify-protocol.md](references/reset-and-verify-protocol.md) |
 | 工件依赖图 | [references/artifact-schema.md](references/artifact-schema.md) |
@@ -317,6 +353,10 @@ Bug 快速链:
 | Hook 安装部署 | `python scripts/install-hooks.py --project-root <项目路径>` | 首次启用或 Hook 升级时 |
 | V9→V10 项目迁移 | `python scripts/migrate-v9-to-v10.py --project-root <项目路径> [--dry-run]` | 已有 V9 项目升级时 |
 | Spec 知识提取 | `python scripts/spec-knowledge-extract.py --feature <name> --project-root . [--dry-run]` | 归档前强制（reviewer Step 7） |
+| **V10.4 孤儿测试/组件检测** | `python scripts/orphan-detector.py --project-root <path> [--feature <name>]` | contract-writer / implementer / rot-detector |
+| **V10.4 Bundle 一致性检查** | `python scripts/dist-hash-check.py --project-root <path>` | implementer (改 TS 后) / rot-detector (Tauri) |
+| **V10.4 视觉内容深度校验** | `python scripts/visual-content-check.py <png>` 或 `--dir <shots_dir>` | acceptance-audit uiux 维度 / rot-detector |
+| **V10.4 5 项腐化扫描包** | `python scripts/proactive-scan.py --project-root <path> [--feature <name>]` | rot-detector (Phase 4.5 强制) |
 
 ### §6.1 spec-purge — 重构时机械清除旧 spec
 

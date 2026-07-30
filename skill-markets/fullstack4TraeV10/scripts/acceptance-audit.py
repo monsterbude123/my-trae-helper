@@ -234,10 +234,10 @@ def _audit_api(project_root: Path, feature: str, skip_curl: bool) -> Tuple[str, 
     if not api_md.is_file():
         return ("N/A", f"无 {api_md.relative_to(project_root)}（纯前端/内部模块）")
 
-    # 提取端点: ### N.M `METHOD /path`
+    # 提取端点: ### N.M `METHOD /path` 或 ## §N `METHOD /path` (V10/V9 双名兼容)
     endpoints: list[Tuple[str, str]] = []
     text = api_md.read_text(encoding="utf-8")
-    for m in re.finditer(r"###\s+[\d.]+\s+`(GET|POST|PUT|DELETE|PATCH)\s+([^`]+)`", text):
+    for m in re.finditer(r"#{2,3}\s+[\d§.IVX]+\s+`(GET|POST|PUT|DELETE|PATCH)\s+([^`]+)`", text):
         endpoints.append((m.group(1), m.group(2).strip()))
 
     # 合并 events.md / event-contracts.md（SSE 端点, V10/V9 双名兼容）
@@ -248,7 +248,7 @@ def _audit_api(project_root: Path, feature: str, skip_curl: bool) -> Tuple[str, 
             evt_md = candidate
             break
     if evt_md is not None:
-        for m in re.finditer(r"###\s+[\d.]+\s+`?(GET|POST)\s+([^`\n]+)`?", evt_md.read_text(encoding="utf-8")):
+        for m in re.finditer(r"#{2,3}\s+[\d§.IVX]+\s+`?(GET|POST)\s+([^`\n]+)`?", evt_md.read_text(encoding="utf-8")):
             endpoints.append((m.group(1), m.group(2).strip()))
 
     if not endpoints:
@@ -370,7 +370,77 @@ def _audit_uiux(project_root: Path, no_visual: bool = False) -> Tuple[str, str]:
     age_hours = (time.time() - newest.stat().st_mtime) / 3600
     size = newest.stat().st_size
 
-    # V10.3.9 升级 (2026-07-29): 三层视觉证据校验 (PNG magic + bytes + PIL 亮度)
+    # V10.4 升级 (2026-07-30): 在 _audit_visual_evidence 之前先调 visual-content-check
+
+
+    # 腐烂点 9 修复: 解决 PNG magic OK 但内容是空白/布局错乱的假阳性
+
+
+    try:
+
+
+        vcc_script = Path(__file__).parent / "visual-content-check.py"
+
+
+        if vcc_script.exists():
+
+
+            vcc = subprocess.run(
+
+
+                ["python", str(vcc_script), str(newest), "--json"],
+
+
+                cwd=project_root, capture_output=True, text=True, timeout=15,
+
+
+            )
+
+
+            if vcc.returncode != 0:
+
+
+                try:
+
+
+                    vcc_data = json.loads(vcc.stdout)
+
+
+                    results_list = vcc_data.get("results", [{}])
+
+
+                    first = results_list[0] if results_list else {}
+
+
+                    fail_msg = first.get("detail", "unknown")
+
+
+                except json.JSONDecodeError:
+
+
+                    fail_msg = vcc.stdout[:200] or vcc.stderr[:200] or "visual-content-check failed"
+
+
+                return (
+
+
+                    "FAIL",
+
+
+                    test_part + " + V10.4 visual-content-check FAIL: " + fail_msg,
+
+
+                )
+
+
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+
+
+        pass  # visual-content-check 不可用时,降级到原有 _audit_visual_evidence
+
+
+    
+# V10.3.9 升级 (2026-07-29): 三层视觉证据校验 (PNG magic + bytes + PIL 亮度)
     visual_ok, visual_msg = _audit_visual_evidence(newest)
     if not visual_ok:
         return ("FAIL", f"{test_part} + ❌ {visual_msg}")
@@ -478,7 +548,11 @@ def _audit_drift_detect(project_root: Path, feature: str) -> Tuple[str, str]:
                     for src_file in list(src_dir.rglob("*.ts")) + list(src_dir.rglob("*.tsx")) + list(src_dir.rglob("*.rs")):
                         try:
                             content = src_file.read_text(encoding="utf-8", errors="ignore")
+                            # TS: interface/type Name, Rust: pub struct Name / struct Name
                             if re.search(rf"(?:interface|type)\s+{re.escape(name)}\b", content):
+                                found = True
+                                break
+                            if re.search(rf"\bstruct\s+{re.escape(name)}\b", content):
                                 found = True
                                 break
                         except Exception:

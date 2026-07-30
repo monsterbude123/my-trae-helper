@@ -69,7 +69,7 @@ except ImportError:  # pragma: no cover
 
 # V10 扩展 phase: acceptance-precheck（腐烂点 #B 修复）
 # 不入 V10_PHASES 避免影响原有流程，但需在 choices 中可见
-EXTENDED_PHASES: List[str] = V10_PHASES + ["acceptance-precheck"]
+EXTENDED_PHASES: List[str] = V10_PHASES + ["acceptance-precheck", "orphan-precheck"]
 
 
 HELP_TEXT = f"""用法: check_prerequisites.py [OPTIONS]
@@ -215,6 +215,25 @@ def _check_prereqs(paths: FeaturePaths, phase: str) -> List[str]:
     # acceptance-precheck 是独立校验（基于 E2E 段，非标准前置表）
     if phase == "acceptance-precheck":
         return _check_acceptance_precheck(paths)
+
+    # V10.4 orphan-precheck: 委托给 orphan-detector.py (腐烂点 12 修复)
+    if phase == "orphan-precheck":
+        import subprocess
+        script = Path(__file__).parent / "orphan-detector.py"
+        if not script.exists():
+            return [f"missing script: {script}"]
+        cmd = ["python", str(script), "--project-root", str(project_root)]
+        if feature:
+            cmd += ["--feature", feature]
+        result = subprocess.run(cmd, cwd=project_root, capture_output=True, text=True)
+        if result.stdout:
+            print(result.stdout, end='')
+        if result.returncode == 1:
+            return ["orphan tests found (see output above)"]
+        if result.returncode != 0:
+            return [f"orphan-detector abnormal exit ({result.returncode}): {result.stderr.strip()}"]
+        return []
+
 
     prereqs = V10_PHASE_PREREQS.get(phase, [])
 

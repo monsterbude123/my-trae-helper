@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
-"""phase-gate.py â€” é˜¶æ®µè½¬æ¢ç¡¬é—¨ç¦
+"""phase-gate.py — 阶段转换硬门禁 (V10.4 升级: +3 phases)
 
-ç”¨æ³•:
-  # V9 å…¼å®¹ï¼ˆé¡¹ç›®çº§å•æ–‡ä»¶å¸ƒå±€ï¼‰
+V10.4 新增 (2026-07-30):
+  python scripts/phase-gate.py --phase orphan-precheck --feature 00-04-system-settings
+  python scripts/phase-gate.py --phase bundle-check --project-root <path>
+  python scripts/phase-gate.py --phase proactive-scan --project-root <path> [--feature <name>]
+
+用法:
+  # V9 兼容（项目级单文件布局）
   python scripts/phase-gate.py --phase plan-to-spec
   python scripts/phase-gate.py --phase spec-to-contract
 
-  # V10 feature-scopedï¼ˆå¤š feature åµŒå¥—å¸ƒå±€ï¼‰
+  # V10 feature-scoped（多 feature 嵌套布局）
   python scripts/phase-gate.py --phase plan-to-spec --feature 00-05-task-queue
 
-  # JSON è¾“å‡ºï¼ˆæœºæ¢°éªŒè¯å‹å¥½ï¼‰
+  # JSON 输出（机械验证友好）
   python scripts/phase-gate.py --phase spec-to-contract --feature 00-05-task-queue --json
 
-  # æŽ¥å…¥å¥‘çº¦é—¨ç¦ï¼ˆV10 æ–°å¢ž 2026-07-28ï¼‰
+  # 接入契约门禁（V10 新增 2026-07-28）
   python scripts/phase-gate.py --phase integration-contract --project-root /path/to/AIGCMediaDesktop
 
-ä»»ä¸€æ£€æŸ¥å¤±è´¥ = exit 1 + å…·ä½“ç¼ºå¤±é¡¹
+任意检查失败 = exit 1 + 具体缺失项
 """
 
 import argparse
@@ -221,8 +226,11 @@ def check_review_to_accept(project_root: Path, feature: str | None = None) -> tu
         return False, errors
 
     content = review_report.read_text(encoding="utf-8")
+    # ponytail: 兼容 markdown bold 格式 `- **code_dimension**: PASS` 与 raw `code_dimension: PASS` 双名 (2026-07-29)
     for dim in ["code_dimension", "api_dimension", "uiux_dimension", "boundary_dimension"]:
-        if dim not in content or not re.search(rf"{dim}:\s*PASS", content):
+        if dim not in content or not re.search(
+            rf"(?:\*\*{dim}\*\*|{dim}):\s*PASS", content
+        ):
             errors.append(f"{dim} éž PASS")
 
     if "total_score: 5.0" not in content:
@@ -256,6 +264,76 @@ def check_integration_contract(project_root: Path, feature: str | None = None) -
         return False, [result.stderr.strip() or "integration-contract å¤±è´¥"]
     return True, []
 
+def check_orphan_precheck(project_root: Path, feature: str | None = None) -> tuple[bool, list[str]]:
+    """V10.4 孤儿测试预检 (腐烂点 12 修复)
+
+    在 Contract/Implement 阶段开始前扫历史孤儿测试。
+    委托给 orphan-detector.py。
+    """
+    import subprocess
+    script = Path(__file__).parent / "orphan-detector.py"
+    if not script.exists():
+        return False, [f"missing check script: {script}"]
+    cmd = ["python", str(script), "--project-root", str(project_root)]
+    if feature:
+        cmd += ["--feature", feature]
+    result = subprocess.run(cmd, cwd=project_root, capture_output=True, text=True)
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.returncode == 1:
+        return False, ["orphan tests found, must clean up before next phase (see output above)"]
+    if result.returncode != 0:
+        return False, [f"orphan-detector abnormal exit ({result.returncode}): {result.stderr.strip()}"]
+    return True, []
+
+
+def check_bundle_check(project_root: Path, feature: str | None = None) -> tuple[bool, list[str]]:
+    """V10.4 Bundle 一致性检查 (腐烂点 13 修复)
+
+    验证 binary 嵌入的 JS chunk hash vs dist/assets 当前 hash。
+    委托给 dist-hash-check.py (仅 Tauri 项目启用)。
+    """
+    import subprocess
+    script = Path(__file__).parent / "dist-hash-check.py"
+    if not script.exists():
+        return False, [f"missing check script: {script}"]
+    result = subprocess.run(
+        ["python", str(script), "--project-root", str(project_root)],
+        cwd=project_root, capture_output=True, text=True,
+    )
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.returncode == 1:
+        return False, ["binary references stale chunks, rebuild needed (see output above)"]
+    if result.returncode != 0:
+        return False, [f"dist-hash-check abnormal exit ({result.returncode}): {result.stderr.strip()}"]
+    return True, []
+
+
+def check_proactive_scan(project_root: Path, feature: str | None = None) -> tuple[bool, list[str]]:
+    """V10.4 5 项腐化扫描 (腐烂点 14 修复)
+
+    在 Review 末尾 + Accept 之前由 rot-detector 强制调用。
+    委托给 proactive-scan.py。
+    """
+    import subprocess
+    script = Path(__file__).parent / "proactive-scan.py"
+    if not script.exists():
+        return False, [f"missing check script: {script}"]
+    cmd = ["python", str(script), "--project-root", str(project_root)]
+    if feature:
+        cmd += ["--feature", feature]
+    result = subprocess.run(cmd, cwd=project_root, capture_output=True, text=True)
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.returncode == 1:
+        return False, ["rot FAIL found, must fix before Accept (see report above)"]
+    if result.returncode != 0:
+        return False, [f"proactive-scan abnormal exit ({result.returncode}): {result.stderr.strip()}"]
+    return True, []
+
+
+
 
 GATES = {
     "plan-to-spec": check_plan_to_spec,
@@ -264,6 +342,10 @@ GATES = {
     "implement-to-review": check_implement_to_review,
     "review-to-accept": check_review_to_accept,
     "integration-contract": check_integration_contract,
+    # V10.4 新增 (2026-07-30)
+    "orphan-precheck": check_orphan_precheck,
+    "bundle-check": check_bundle_check,
+    "proactive-scan": check_proactive_scan,
 }
 
 

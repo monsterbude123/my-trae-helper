@@ -1,7 +1,9 @@
 ---
 name: fullstack-spec-enhancer
-description: Spec 质量增强 — 在 spec.md 产出基础上补充 E2E + Invariants + Acceptance + 原型触发（双源兼容：spec-kit / Trae Spec Mode）
-triggers: ["spec", "规格", "需求", "BDD", "enhance"]
+description: Spec 质量增强 — 在 spec.md 产出基础上补充 E2E + Invariants + Acceptance + 原型触发（双源兼容：spec-kit / Trae Spec Mode）；如需从 prototype 反推契约，委派 spec-prototype-enhancer
+triggers:
+  - ["spec", "规格", "需求", "BDD", "enhance"]
+  - ["prototype", "原型反推", "reverse engineer", "HTML 反推"]
 version: "10.0.0"
 ---
 
@@ -30,6 +32,22 @@ version: "10.0.0"
 | **A. Trae 已跑过 /spec** | spec.md 含 `## Requirements` + `## Scenarios` 段 | 正常模式：追加 Enhanced Acceptance |
 | **B. V10 迁移过** | spec.md 顶部含 `v10_simplified: true` | 正常模式：保留 Why/What Changes，追加 Enhanced Acceptance |
 | **C. 空白/Stub** | spec.md 不存在或仅 define.md | 🛑 **降级为 spec-writer**：全权代写 spec.md，在 Completion Report 标 `fallback_reason: v10_no_upstream` |
+
+### Step 0.3: 委派分流决策树（V10.3.9 NEW）
+
+```
+待增强的 spec.md 来源？
+  ├── 上游 Trae Spec Mode / V10 迁移（已含 Requirements + Scenarios）
+  │     → 走 Step 1-4 正常 Enhanced Acceptance
+  │
+  └── 上游已含原型 HTML（aigc-desktop-ui.design/pages/*.html）
+        → 委派 [spec-prototype-enhancer.md](spec-prototype-enhancer.md) 反推 ADDED Requirements
+        → 主上下文并行运行 prototype-spec-enhancer，不阻塞 spec-enhancer 主体
+        → Completion Report 追加 `prototype_requirements: {N}` 字段
+```
+
+spec-prototype-enhancer 输出的 §ADDED Requirements 与 Enhanced Acceptance 并存，
+互不冲突（一个补验收维度，一个补契约反推维度）。
 
 ### Step 0.5: Clarify（借鉴 spec-kit /speckit.clarify）
 
@@ -134,10 +152,12 @@ docs/specs/{feature}/prototypes/
 ## Completion Report
 - agent: spec-enhancer
 - artifacts: [docs/specs/{feature}/spec.md, (prototypes/design-prompt.md, prototypes/ui-ux-logic.md)]
+- prototype_requirements: {N}（来自 spec-prototype-enhancer, ≥ 5）
 - e2e_scenarios: {N}（≥ 2）
 - invariants: {N}（≥ 1）
 - acceptance_criteria: {N}（≥ 3）
 - proto_included: yes|n/a
+- proto_reverse: yes|n/a
 - status: ✓ | ⚠️ | ✗
 ```
 

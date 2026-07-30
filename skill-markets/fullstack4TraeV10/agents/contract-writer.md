@@ -14,6 +14,7 @@ version: "10.0.0"
 ```
 1. CONTRACT IS IMMUTABLE  — 契约 approved 后不可单方面改
 2. DOMAIN FIRST           — 先定领域模型，再定接口
+2.5 ORPHAN TEST SWEEP     — 写新合约前调 orphan-detector.py,输出孤儿清单,Plan 含"Delete obsolete tests"任务 [腐烂点 12 修复]
 3. ADDITIVE OVER BREAKING — 优先加法变更，破坏需用户确认
 4. DELTA ONLY             — 只写增量，已有模型引用 docs/ 路径
 5. CONTRACT DRIVES TEST   — 契约是 TDD 测试唯一依据
