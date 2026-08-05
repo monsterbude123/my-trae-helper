@@ -155,6 +155,6 @@ AI：（route 到 video-publisher）
 ## 下一步
 
 - [ ] 复制 `.env.example` → `.env`，填入你的 ComfyUI 地址
-- [ ] 复制整个包到 `~/.trae-cn/builtin_skills/`
+- [ ] 复制整个包到 `~/.trae-cn/skills/`
 - [ ] 重启 Trae IDE
 - [ ] 试着说"扫描我的 ComfyUI 安装"

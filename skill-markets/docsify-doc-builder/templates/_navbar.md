@@ -1,11 +1,4 @@
-<!-- _navbar.md — 顶部导航栏
-  用法:
-    - [显示名称](链接)
-    - 子菜单: 缩进 2 个空格
+<!-- _navbar.md — 顶部导航（顶栏主导航已在 custom topbar 注入；此处作为 docsify 内置 navbar 备份）
+  注意: 真正的顶栏（含版本下拉 + GitHub）由 index.html 中的 deer-topbar 注入。
+  此文件留空避免与自定义顶栏重复显示。
 -->
-
-- [首页](README.md)
-- [GitHub](https://github.com/)
-- 关于
-  - [项目介绍](附录/项目介绍.md)
-  - [更新日志](附录/更新日志.md)

@@ -54,13 +54,13 @@ Skill 被触发加载
 Step 1 — 解析 YAML frontmatter 中的 requires 字段
   ↓
 Step 2 — 逐项检查 requires.skills（硬依赖）:
-  检查目标技能是否在 builtin_skills/ 或 .trae/skills/ 中存在
+  检查目标技能是否在 skills/ 或 .trae/skills/ 中存在
   ├── 全部存在 → 继续 Step 3
   └── 任一缺失 → 🛑 BLOCKED
         输出:
         ❌ 技能 "{当前技能}" 加载失败：缺少必需依赖
         缺失技能: {skill-name-1}, {skill-name-2}
-        安装命令: Copy-Item -Recurse ".../{skill-name}" "$env:USERPROFILE\.trae-cn\builtin_skills\{skill-name}"
+        安装命令: Copy-Item -Recurse ".../{skill-name}" "$env:USERPROFILE\.trae-cn\skills\{skill-name}"
         提示: 这些技能是核心功能必需，不可跳过。安装后重试。
         停止加载，不继续。
   ↓

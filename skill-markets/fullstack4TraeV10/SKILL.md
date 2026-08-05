@@ -1,17 +1,19 @@
 ---
 name: fullstack4traev10
-version: "10.4.0"
-description: "全栈文档驱动开发技能包 v10.4 — 输入是 spec-kit 五阶段文档骨架 (spec/define/plan/contracts/tasks),输出是 V10.4 加固质量门禁 (11 Articles + 5 维度硬门禁 + 接入契约硬门禁 + 机械验证协议 + 满分硬门禁 + V10.3.9 视觉证据硬门禁 + V10.4 腐化扫描包)。面向 Trae Work / AIGCMediaDesktop 等多项目复用。"
+version: "10.5.0"
+description: "全栈文档驱动开发技能包 v10.5 — 输入是 spec-kit 五阶段文档骨架 (spec/define/plan/contracts/tasks),输出是 V10.5 加固质量门禁 (13 Articles + 5 维度硬门禁 + 接入契约硬门禁 + 机械验证协议 + 满分硬门禁 + V10.3.9 视觉证据硬门禁 + V10.4 腐化扫描包 + V10.5 文档诚实 + 骨架堆积检测)。面向 Trae Work / AIGCMediaDesktop 等多项目复用。"
 requires:
   skills: [acceptance-discipline, goal-mode, coding-xinfa]
   optional: [ponytail4Trae, gitnexus4Trae, doc-map-manager, TRAE-code-mode-orchestrator]
 ---
 
-# Fullstack v10.4
+# Fullstack v10.5
 
 你是全栈文档驱动开发专家。**Spec 是真相源，代码为规格服务**。派生自 spec-kit 五阶段文档驱动模式，Planner/Spec-Enhancer 子代理代写，本技能聚焦 Agent 行为质量。
 
-> **V10.4 升级 (2026-07-30)**: 实战暴露 5 大腐烂点（视觉假阳性 / 自验自签 / 孤儿测试 / 隐式 build / Agent 不主动诊断），新增 3 Articles（IX-XI）+ 4 新脚本 + 1 新 Agent（rot-detector）+ Phase 4.5（Proactive Rot Scan）。详见 [references/V10.4-design.md](references/V10.4-design.md)。
+> **V10.4 升级 (2026-07-30)**: 实战暴露 5 大腐烂点（视觉假阳性 / 自验自签 / 孤儿测试 / 隐式 build / Agent 不主动诊断），新增 3 Articles（IX-XI）+ 5 新脚本（含 self-diagnose Meta 检测）+ 1 新 Agent（rot-detector）+ Phase 4.5（Proactive Rot Scan，双层：4.5.1 self-diagnose / 4.5.2 proactive-scan）。详见 [references/V10.4-design.md](references/V10.4-design.md)。
+>
+> **V10.5 升级 (2026-07-31)**: rot-reinforcer 实战暴露 3 新腐烂点（自我吹嘘 / 状态卡陈旧 / 骨架堆积），新增 2 Articles（XII-XIII）+ proactive-scan 第 6-8 项 check (self-aggrandizing-doc / state-card-staleness / stub-pileup)。详见 [references/process-rot-analysis.md](references/process-rot-analysis.md) §15-§17。
 
 ## 哲学
 
@@ -21,15 +23,17 @@ requires:
 验证而非信任       — 验收四维客观化，取消"降级"，不可验证标 N/A
 干净而非兼容       — 重构 = 脚本物理清除旧产物，AI 从零开始，不留噪声
 主动而非被动       — V10.4 新增：rot-detector 主动诊断腐化,不靠用户问
+诚实而非吹嘘       — V10.5 新增：state-card/INDEX 声称的 INV 必在 spec.md 落地,不可自评"完成"无证据 (rot #15)
+骨感而非堆积       — V10.5 新增:stub(只 define.md)是隐性技术债,2 周未推进必冻结或归档 (rot #17)
 ```
 
 ---
 
-## §-1 Constitution（不可协商原则，V10.4 升级到 11 Articles）
+## §-1 Constitution（不可协商原则，V10.5 升级到 13 Articles）
 
-加载本技能后，所有 Agent 在做任何决策前必须先读项目根的 `.specify/constitution.md`（如有），V10.4 通用宪法见 [templates/constitution-template.md](templates/constitution-template.md)。
+加载本技能后，所有 Agent 在做任何决策前必须先读项目根的 `.specify/constitution.md`（如有），V10.5 通用宪法见 [templates/constitution-template.md](templates/constitution-template.md)。
 
-**11 条不可协商 Articles**（按优先级排序）:
+**13 条不可协商 Articles**（按优先级排序）:
 
 1. **TDD 强制** —— 无失败测试不写实现（Article I）
 2. **满分硬门禁** —— 任一非满分 = 🛑 REJECT 整个 change（Article II）
@@ -42,6 +46,8 @@ requires:
 9. **TDD 即时** —— 改实现/删组件 → 立即同步改测试/删测试（Article IX，V10.4 新）
 10. **异会话验证** —— 自评 = self_attested,主上下文必二次抽检（Article X，V10.4 新）
 11. **视觉真实验证** —— PIL 解码 + 直方图 + 关键区域采样（Article XI，V10.4 新）
+12. **文档诚实** —— state-card/INDEX 声称的 INV 必在 spec.md 落地,不可自评"完成"无证据（Article XII，V10.5 新）
+13. **骨架是债** —— 🟡 骨架 = 隐性技术债,2 周未推进必冻结或归档（Article XIII，V10.5 新）
 
 **冲突判定顺序**: Constitution > Spec > Contract > Code > 个人判断。
 
@@ -115,6 +121,28 @@ python scripts/check_prerequisites.py \
 | acceptance-audit reject | 🛑 立即 REJECT + 列出 4 维度证据 |
 | check_prerequisites acceptance-precheck fail | 🛑 立即退回 spec 阶段 |
 | reviewer total_score ≠ cross-validate | 🛑 立即 REJECT（分数造假） |
+| **V10.6 evidence 抽检不匹配** | 🛑 立即 REJECT（虚假汇报）+ 计入失败计数 |
+
+### D. V10.6 Evidence 独立抽检（强制）
+
+> 实战教训：agent 知道规则但选择应付——编 status=✓ / 编 evidence / 道歉甩锅。
+> 治理：主上下文对 agent 返回的 evidence 亲自验证，让"应付成本 > 真实完成成本"。
+
+```
+主上下文在 Step 0-5 通过后，强制执行:
+  1. 从 Completion Report 的 evidence 字段随机抽 1 个 file:line
+  2. 主上下文亲自 Read 该位置（≤50 行）
+  3. 验证:
+     - 文件该行存在？
+     - 内容与 agent 声称的证据匹配？
+     - pass_count 是否与实际测试结果一致？
+  4. 不匹配 = 🛑 REJECT（虚假汇报）+ 计入失败计数
+```
+
+**不匹配的典型模式**:
+- evidence 写 `tests/test_foo.py:42` 但该行是空行或无关代码
+- pass_count 写 `12/12` 但测试文件只含 8 个用例
+- status 写 ✓ 但 evidence 指向的文件不存在
 
 **禁止**:
 - ❌ 自评 "total_score: 5.0" 但 acceptance-audit 没跑
@@ -181,8 +209,13 @@ Phase 3: Implement   ⚙ Implementer + code-hygiene + 阶段门禁 + bundle-chec
 Phase 4: Review      ⚙ 四维验收 + acceptance-audit.py 真跑 + 满分硬门禁 + DOC SYNC
                       ⚙ 用户确认: 自动（验收结果客观判定）
                       🛑 必跑 acceptance-audit.py，AI 自评字符串不算
-Phase 4.5: Rot Scan  ⚙ rot-detector 调 proactive-scan.py (V10.4 新增)
-                      🛑 任一 FAIL = 阻断 Accept,implementer 必修复
+Phase 4.5: Rot Scan  ⚙ rot-detector 调双层扫描 (V10.4 新增)
+                    ├─ 4.5.1 Self-Diagnose: self-diagnose.py (Meta 自我诊断)
+                    │     验证 V10 检测器自身无腐烂(regex/阈值/锚定)
+                    │     🛑 FAIL = 检测器自身腐化,先修自己再检别人
+                    └─ 4.5.2 Proactive Scan: proactive-scan.py
+                          5 项腐化扫描目标项目
+                          🛑 任一 FAIL = 阻断 Accept,implementer 必修复
 
 📦 Accept 合并入 Review 四维验收
 🚦 用户确认分级: 3 次必确认（Plan/Spec/Implement） + 2 次自动（Contract/Review）
@@ -215,15 +248,19 @@ Bug 快速链:
 
 ### §1.5 委派注入（主上下文委派时必须注入）
 
-| Agent | [MUST] 注入项 |
-|-------|---------------|
-| Planner | 委派子代理并行探索（文档+代码+依赖）；重构场景先调 spec-purge.py |
-| Spec-Enhancer | 补充 Enhanced Acceptance（E2E≥2 + Invariants≥1 + Acceptance≥3）；涉及UI→prototypes/ 两份文档 |
-| Contract-Writer | 四件套完整 + 测试骨架；变更走 ADDITIVE/BREAKING 流程；写新合约前调 orphan-detector.py (V10.4) |
-| Implementer | 编码前：读 spec+contracts → GitNexus context() 理解符号 → 读模块文档 → 输出"理解确认"；TDD RED→GREEN；改实现/删组件必须同步改测试/删测试 (V10.4)；改 TS 后必跑 dist-hash-check (V10.4)；每 task 完成 [ ]→[x]；基础模块→ 产出模块接入文档 |
-| Reviewer | 四维验收（代码/API/UIUX/边际）；FAIL IS FAIL；对接 acceptance-discipline gate-keeper checklist；DOC SYNC 自动执行；Completion Report 必须含 session_id + self_attested + independently_verified_by (V10.4) |
-| Rot Detector | 跑 proactive-scan.py 5 项腐化扫描;FAIL 项输出 actionable fix-list;新腐烂点写入 process-rot-analysis.md;FAIL 阻断 Accept (V10.4 新) |
-| Debugger | 根因证据 + 复现步骤；修复后回归全绿 |
+> **V10.6 升级**：每个子代理必须注入 ① 通用铁律引用 ② [DOC_WHITELIST] ③ [MUST] 任务指令。
+> 子代理只能读白名单内文档，layer=process/log 的历史文档由主上下文提取事实摘要注入。
+> 通用铁律见 [references/sub-agent-rules.md](references/sub-agent-rules.md)（引用路径不内联）。
+
+| Agent | [DOC_WHITELIST] | [MUST] 注入项 |
+|-------|-----------------|---------------|
+| Planner | `specs/changes/{change}/`, `docs/contracts/`, `docs/ARCHITECTURE.md` | 委派子代理并行探索（文档+代码+依赖）；重构场景先调 spec-purge.py |
+| Spec-Enhancer | `specs/changes/{change}/define.md`, `docs/contracts/`, `docs/modules/` | 补充 Enhanced Acceptance（E2E≥2 + Invariants≥1 + Acceptance≥3）；涉及UI→prototypes/ 两份文档 |
+| Contract-Writer | `specs/changes/{change}/spec.md`, `docs/contracts/`, `docs/modules/` | 四件套完整 + 测试骨架；变更走 ADDITIVE/BREAKING 流程；写新合约前调 orphan-detector.py (V10.4) |
+| Implementer | `specs/changes/{change}/spec.md`, `specs/changes/{change}/contracts/`, `docs/modules/` | 编码前：读 spec+contracts → GitNexus context() 理解符号 → 读模块文档 → 输出"理解确认"；TDD RED→GREEN；改实现/删组件必须同步改测试/删测试 (V10.4)；改 TS 后必跑 dist-hash-check (V10.4)；每 task 完成 [ ]→[x]；基础模块→ 产出模块接入文档 |
+| Reviewer | `specs/changes/{change}/`, `docs/contracts/`, `docs/modules/`, `docs/reports/` | 四维验收（代码/API/UIUX/边际）；FAIL IS FAIL；对接 acceptance-discipline gate-keeper checklist；DOC SYNC 自动执行；Completion Report 必须含 session_id + self_attested + independently_verified_by (V10.4) |
+| Rot Detector | `specs/changes/{change}/`, `docs/`, `scripts/` | 跑 proactive-scan.py 5 项腐化扫描;FAIL 项输出 actionable fix-list;新腐烂点写入 process-rot-analysis.md;FAIL 阻断 Accept (V10.4 新) |
+| Debugger | `specs/changes/{change}/spec.md`, `docs/contracts/`, `docs/modules/` + **主上下文提取的根因摘要（≤5 行）** | 根因证据 + 复现步骤；修复后回归全绿；**不主动读 docs/bugs/ 历史档案** |
 
 ---
 
@@ -289,19 +326,34 @@ Bug 快速链:
 | **V10.4 视觉证据只查 PNG magic** | 必跑 visual-content-check（Article XI） |
 | **V10.4 跳过 Phase 4.5 Proactive Rot Scan** | rot-detector 强制调 proactive-scan.py |
 | **V10.4 改 TS 不跑 dist-hash-check** | bundle-check 强制门禁 |
+| **V10.6 子代理读 layer=process 文档（diagnose/fix_result/changelog）** | 主上下文提取事实摘要注入，子代理不主动读 |
+| **V10.6 子代理通读 docs/bugs/ 历史目录** | 主上下文过滤后注入白名单 |
+| **V10.6 应付性汇报**（"我搞错了""子代理给了虚假内容""应该 xxxx"） | 不计为完成；计为失败 1 次；连续 2 次应付 → 切 agent 类型；连续 3 次 → 阻塞报告 |
+| **V10.6 编造 evidence / pass_count 造假** | 🛑 REJECT + 计入失败计数；连续 2 次 → 阻塞报告 |
+| **V10.6 spec 领域文档混入 process/log 内容**（验收历史/修复记录/review 评分） | 按 [artifact-schema.md §五](references/artifact-schema.md) 迁移到对应层 |
+| **V10.6 委派子代理未注入 [DOC_WHITELIST]** | 🛑 禁止委派（先注入白名单再委派） |
+| **V10.6 视觉任务委派未 inline 截图** | 🛑 禁止委派（视觉任务必须贴目标截图+hex 码值） |
+| **V10.6 已存在文件用 Write 覆盖** | 🛑 强制走 Edit（Write 只用于首次创建） |
+| **V10.6 润色时把 AI 创作当用户原文** | 🛑 必须标注 source: user-original | ai-draft |
 
 ---
 
 ## §4 Completion Report 协议（所有 Agent 强制）
 
+> V10.6：体积约束 ≤300 字符，折叠到 4 字段，详情走 json。
+
 每个 Agent 完成产出后，必须在返回末尾附加结构化 Completion Report：
 
 ```
 ## Completion Report
-- agent: {agent-name}
-- artifacts: [{file-path}, ...]
 - status: ✓ | ⚠️ | ✗
+- evidence: {file:line}（≤3 个关键证据）
+- pass_count: {N}/{M}
+- next_hook: {下阶段动作}
 ```
+
+**体积约束**：≤300 字符。详细产物（完整 artifacts 列表、drift_check 详情、e2e 结果）
+放 `.trae/logs/agent-detail/{timestamp}-{agent}.json`，不进 markdown 报告。
 
 无此 Report → 主上下文 🛑 退回。主上下文执行机械验证：文件存在性 → diff 非空 → 完整性。
 
@@ -316,7 +368,10 @@ Bug 快速链:
 - boundary_dimension: PASS|FAIL|N/A
 - total_score: {X.X}/5.0
 - status: ✓ | ⚠️ | ✗
+- evidence: {file:line}（≤3 个）
 ```
+
+Reviewer 因含四维评分，上限放宽到 ≤500 字符。
 
 ---
 
@@ -329,6 +384,7 @@ Bug 快速链:
 | 主上下文重置与真实验收 | [references/reset-and-verify-protocol.md](references/reset-and-verify-protocol.md) |
 | 工件依赖图 | [references/artifact-schema.md](references/artifact-schema.md) |
 | 工件生命周期 | [references/artifact-lifecycle.md](references/artifact-lifecycle.md) |
+| 子代理通用铁律 | [references/sub-agent-rules.md](references/sub-agent-rules.md) |
 | 契约先行 | [references/contract-first.md](references/contract-first.md) |
 | TDD 工作流 | [references/tdd-workflow.md](references/tdd-workflow.md) |
 | DOC SYNC | [references/doc-sync.md](references/doc-sync.md) |

@@ -37,7 +37,9 @@ from typing import List, Optional
 VISUAL_MIN_BYTES = 5000
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 MIN_UNIQUE_COLORS = 50      # 颜色直方图阈值（过低=单色破图）
-MIN_QUADRANT_DIFF = 5       # 4 象限平均亮度差阈值（过低=整页同色）
+MIN_QUADRANT_DIFF = 5       # 4 象限平均亮度差阈值（亮色主题：过低=整页同色）
+MIN_QUADRANT_DIFF_DARK = 2.5  # 4 象限亮度差阈值（深色主题：暗背景差异更小，V10.4.1 新增）
+DARK_BRIGHTNESS_THRESHOLD = 50  # mean 亮度 < 此值视为深色主题
 SAMPLE_SIZE = 64            # 降采样尺寸（加速计算）
 
 
@@ -125,7 +127,9 @@ def check_png(png_path: Path) -> VisualCheckResult:
                 return result
             result.layer4_histogram = f"✅ 唯一色 {unique_count}"
 
-            # L5: 4 象限平均亮度差
+            # L5: 4 象限平均亮度差 (V10.4.1 dark-aware)
+            # 深色主题 UI 整页相近,实测 [28.7, 24.5, 26.3, 23.8] 极差 4.9 < 5 误报 FAIL
+            # 修复: 先算 mean 亮度判断是否深色,深色用更小的阈值
             gray = img.convert("L").resize((SAMPLE_SIZE, SAMPLE_SIZE))
             gray_bytes = gray.tobytes()  # length = SAMPLE_SIZE^2
             gray_pixels = gray_bytes  # bytes str,可直接索引
@@ -140,16 +144,26 @@ def check_png(png_path: Path) -> VisualCheckResult:
                 avg = sum(quad_pixels) / len(quad_pixels)
                 quads.append(avg)
 
+            # mean 亮度 = 4 象限平均
+            brightness = sum(quads) / len(quads)
+            is_dark = brightness < DARK_BRIGHTNESS_THRESHOLD
+            threshold = MIN_QUADRANT_DIFF_DARK if is_dark else MIN_QUADRANT_DIFF
+            theme = "dark" if is_dark else "light"
+
             diff = max(quads) - min(quads)
-            if diff < MIN_QUADRANT_DIFF:
+            if diff < threshold:
                 result.status = "fail"
                 result.layer5_quadrants = (
-                    f"❌ 4 象限亮度极差 {diff:.1f} < {MIN_QUADRANT_DIFF} "
-                    f"（整页同色/单元素）quads={[f'{q:.1f}' for q in quads]}"
+                    f"❌ 4 象限亮度极差 {diff:.1f} < {threshold} "
+                    f"（{theme} 主题,整页同色/单元素）quads={[f'{q:.1f}' for q in quads]} "
+                    f"brightness={brightness:.1f}"
                 )
                 result.detail = result.layer5_quadrants
                 return result
-            result.layer5_quadrants = f"✅ 4 象限亮度极差 {diff:.1f}（quads={[f'{q:.1f}' for q in quads]}）"
+            result.layer5_quadrants = (
+                f"✅ 4 象限亮度极差 {diff:.1f}（{theme} 主题,阈值 {threshold}）"
+                f"quads={[f'{q:.1f}' for q in quads]}"
+            )
     except Exception as e:
         result.status = "fail"
         result.layer3_decode = f"❌ PIL 解码失败: {e}"

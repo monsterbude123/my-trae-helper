@@ -16,7 +16,7 @@
 ### Q2：AI Agent 真的会按 AI 协议执行吗？
 
 **A**：会，但需要：
-1. skill 文件放在 agent 可加载的位置（如 `~/.trae-cn/builtin_skills/` 或项目内）
+1. skill 文件放在 agent 可加载的位置（如 `~/.trae-cn/skills/` 或项目内）
 2. 触发词匹配正确
 3. 主 agent 监督子 agent 的执行，违反协议必须修正
 4. worklog 记录每次验收任务，可追溯

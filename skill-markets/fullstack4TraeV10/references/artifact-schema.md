@@ -93,3 +93,45 @@
 | 不可跳过 | "必须执行，不能优化掉" | Contract-First、Review、Accept |
 
 工件依赖是软的（可以跳过 design 如果不需要），质量门禁和不可跳过阶段是硬的。
+
+---
+
+## 五、禁止写入 spec 领域文档的内容（V10.6）
+
+> 腐烂根因：spec.md / define.md / tasks.md / contracts/ 被当"垃圾桶"——
+> 验收状态、修复记录、review 报告、commit log 全往里塞。
+> 治理：每类文件只含 fact 层内容，process/log 层内容去该去的地方。
+
+### spec.md（layer: fact — 行为规格）
+
+| 禁止写入 | 去哪里 |
+|---------|--------|
+| 验收状态历史（"v1 PASS→v2 FAIL"） | commit message / review 报告（layer: log） |
+| Bug 修复记录 / diagnose 结论 | docs/bugs/ 或 commit message（layer: process） |
+| Review 评分 / 审查报告 | docs/reports/（layer: log） |
+| 实现细节（代码片段、函数签名） | 代码注释 / contracts/ |
+| 历史版本 diff（"v1→v2 改了什么"） | changelog / commit log（layer: log） |
+
+### define.md（layer: fact — 意向边界）
+
+| 禁止写入 | 去哪里 |
+|---------|--------|
+| 实现细节 | spec.md 或 design.md |
+| Bug 修复过程 | commit message（layer: process） |
+| 验收清单 | spec.md §Acceptance |
+
+### tasks.md（layer: fact — 实现清单）
+
+| 禁止写入 | 去哪里 |
+|---------|--------|
+| 历史任务状态（"v1 做了→v2 回退→v3 重做"） | commit log（layer: log） |
+| Bug 修复步骤 | commit message（layer: process） |
+| 审查备注 | review 报告（layer: log） |
+
+### contracts/（layer: fact — 接口契约）
+
+| 禁止写入 | 去哪里 |
+|---------|--------|
+| Bug 修复过程 / diagnose 结论 | docs/bugs/（layer: process） |
+| 反模式说明（"不要把 X 切到 Y"） | ≤1 行注释，不展开；详细说明放 docs/bugs/ |
+| 验收状态 | review 报告（layer: log） |

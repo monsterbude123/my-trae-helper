@@ -8,7 +8,7 @@
 使用技能自带的安装脚本：
 
 ```bash
-python ~/.trae-cn/builtin_skills/fullstack4TraeV10/scripts/install-hooks.py --project-root .
+python ~/.trae-cn/skills/fullstack4TraeV10/scripts/install-hooks.py --project-root .
 ```
 
 或在 TRAE IDE「设置 → Hooks」中手动配置 `hooks.json`。

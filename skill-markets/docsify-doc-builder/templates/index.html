@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>{{PROJECT_NAME}} — 文档</title>
 
-  <!-- docsify-themeable 现代化主题 -->
+  <!-- docsify-themeable 深色主题（虚幻引擎风格：深紫 + 深灰） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
 
   <!-- zoom-image -->
@@ -15,6 +15,9 @@
   <!-- Prism 代码高亮 + 行号 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/line-numbers/prism-line-numbers.css">
+
+  <!-- Markmap 思维导图样式（深色适配） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markmap-toolbar@0.17.0/dist/style.min.css">
 
   <!-- 自定义样式 (覆盖主题) -->
   <link rel="stylesheet" href="custom.css">
@@ -28,21 +31,25 @@
       basePath: '/',
       relativePath: false,
       name: '{{PROJECT_NAME}}',
+      nameLink: '#/',
       repo: '',
       loadSidebar: '_sidebar.md',
       loadNavbar: '_navbar.md',
-      coverpage: '_coverpage.md',
-      logo: '',
+      coverpage: false,
       auto2top: true,
-      topMargin: 0,
-      subMaxLevel: 3,
-      sidebarSubLevel: 2,
+      topMargin: 70,
+      subMaxLevel: 4,
+      sidebarSubLevel: 4,
+      maxLevel: 5,
+      alias: {
+        '/.*/_sidebar.md': '_sidebar.md'
+      },
       search: {
         maxAge: 86400000,
         paths: 'auto',
-        placeholder: '搜索文档...',
+        placeholder: '按标题筛选...',
         noData: '没有结果',
-        depth: 4,
+        depth: 6,
         hideOtherSidebarContent: false,
         namespace: '{{PROJECT_NAME_NAMESPACE}}'
       },
@@ -54,8 +61,13 @@
       count: {
         countable: true,
         fontsize: '0.8em',
-        color: '#7c5cfc',
+        color: '#9b7efd',
         language: 'chinese'
+      },
+      copyCode: {
+        buttonText: '复制',
+        errorText: '错误',
+        successText: '已复制'
       },
       plugins: [
         function(hook, vm) {
@@ -66,27 +78,206 @@
           var currentRoute = '';
           var toolbarInjected = false;
           var overlayInjected = false;
+          var rightTocInjected = false;
+          var topbarInjected = false;
+          var breadcrumbInjected = false;
 
-          // ====== 注入工具栏 HTML（只注入一次） ======
+          // ====== 工具：HTML 转义 ======
+          function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, function (c) {
+              return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+          }
+
+          function slugify(text) {
+            return String(text)
+              .toLowerCase()
+              .trim()
+              .replace(/[\s\W-]+/g, '-')
+              .replace(/^-+|-+$/g, '');
+          }
+
+          // ====== 注入顶栏（Logo + 顶导 + 版本下拉） ======
+          function injectTopbar() {
+            if (topbarInjected) return;
+            var topbar = document.createElement('div');
+            topbar.className = 'deer-topbar';
+            topbar.innerHTML = '' +
+              '<div class="deer-topbar-inner">' +
+                '<a class="deer-topbar-logo" href="#/">' +
+                  '<img src="logo.svg" alt="{{PROJECT_NAME}}">' +
+                  '<span class="deer-topbar-title">{{PROJECT_NAME}}</span>' +
+                '</a>' +
+                '<nav class="deer-topbar-nav">' +
+                  '<a href="#/">首页</a>' +
+                  '<a href="#/README">文档</a>' +
+                  '<a href="#/基础篇/快速开始">入门</a>' +
+                  '<a href="#/进阶篇/配置详解">进阶</a>' +
+                  '<a href="#/附录/常见问题">FAQ</a>' +
+                '</nav>' +
+                '<div class="deer-topbar-right">' +
+                  '<label class="deer-topbar-version">' +
+                    '版本' +
+                    '<select id="deerVersionSelect">' +
+                      '<option value="v2.0" selected>v2.0（最新）</option>' +
+                      '<option value="v1.9">v1.9</option>' +
+                      '<option value="v1.8">v1.8</option>' +
+                      '<option value="v1.7">v1.7 LTS</option>' +
+                    '</select>' +
+                  '</label>' +
+                  '<a class="deer-topbar-github" href="https://github.com/" target="_blank" title="GitHub">' +
+                    '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">' +
+                      '<path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.17c-3.34.72-4.04-1.42-4.04-1.42-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12.01 12.01 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>' +
+                    '</svg>' +
+                  '</a>' +
+                '</div>' +
+              '</div>';
+            document.body.insertBefore(topbar, document.body.firstChild);
+            topbarInjected = true;
+
+            // 版本切换事件
+            var sel = document.getElementById('deerVersionSelect');
+            if (sel) {
+              sel.addEventListener('change', function (e) {
+                var v = e.target.value;
+                if (window.$docsify && typeof window.$docsify.version === 'function') {
+                  // docsify 内置版本切换
+                }
+                console.log('[docsify-doc-builder] version switch →', v);
+              });
+            }
+          }
+
+          // ====== 注入面包屑（基于当前页面 H1 / sidebar 路径） ======
+          function injectBreadcrumb() {
+            if (breadcrumbInjected) return;
+            var content = document.querySelector('.content');
+            if (!content) return;
+            var crumb = document.createElement('div');
+            crumb.className = 'deer-breadcrumb';
+            crumb.id = 'deerBreadcrumb';
+            content.insertBefore(crumb, content.firstChild);
+            breadcrumbInjected = true;
+          }
+
+          function updateBreadcrumb() {
+            var crumb = document.getElementById('deerBreadcrumb');
+            if (!crumb) return;
+
+            var path = vm.route ? vm.route.path : '';
+            var parts = path.split('/').filter(Boolean);
+
+            // 末段：用 H1 或文件名
+            var h1 = document.querySelector('.markdown-section h1');
+            var lastName = h1 ? h1.textContent.replace(/^#\s*/, '').trim() : (parts[parts.length - 1] || '首页');
+
+            var html = '<a href="#/">首页</a>';
+            var acc = '#/';
+            for (var i = 0; i < parts.length; i++) {
+              acc += parts[i] + '/';
+              var name = parts[i].replace(/^\d+[-_]/, '');
+              if (i === parts.length - 1) {
+                html += '<span class="deer-crumb-sep">/</span><span class="deer-crumb-current">' + escapeHtml(lastName) + '</span>';
+              } else {
+                html += '<span class="deer-crumb-sep">/</span><a href="' + acc + '">' + escapeHtml(name) + '</a>';
+              }
+            }
+            crumb.innerHTML = html;
+          }
+
+          // ====== 注入右侧页内目录（"在这个页面上"） ======
+          function injectRightToc() {
+            if (rightTocInjected) return;
+            var content = document.querySelector('.content');
+            if (!content) return;
+            var toc = document.createElement('aside');
+            toc.className = 'deer-right-toc';
+            toc.id = 'deerRightToc';
+            toc.innerHTML = '' +
+              '<div class="deer-right-toc-title">在这个页面上</div>' +
+              '<ul class="deer-right-toc-list" id="deerRightTocList"></ul>';
+            content.appendChild(toc);
+            rightTocInjected = true;
+          }
+
+          function updateRightToc() {
+            var list = document.getElementById('deerRightTocList');
+            if (!list) return;
+            var headings = document.querySelectorAll('.markdown-section h2, .markdown-section h3');
+            if (headings.length === 0) {
+              list.innerHTML = '<li class="deer-toc-empty">本页无小节</li>';
+              return;
+            }
+            var html = '';
+            headings.forEach(function (h, idx) {
+              // 给标题加 id
+              if (!h.id) {
+                h.id = slugify(h.textContent) + '-' + idx;
+              }
+              var level = h.tagName === 'H2' ? 2 : 3;
+              html += '<li class="deer-toc-l' + level + '" data-target="' + h.id + '">' +
+                '<a href="#' + h.id + '">' + escapeHtml(h.textContent) + '</a>' +
+                '</li>';
+            });
+            list.innerHTML = html;
+
+            // 滚动监听高亮
+            setTimeout(function () { bindTocScrollSpy(); }, 100);
+          }
+
+          function bindTocScrollSpy() {
+            var headings = document.querySelectorAll('.markdown-section h2, .markdown-section h3');
+            if (!headings.length) return;
+            var listItems = document.querySelectorAll('.deer-right-toc-list li');
+
+            function setActive(id) {
+              listItems.forEach(function (li) {
+                if (li.getAttribute('data-target') === id) {
+                  li.classList.add('active');
+                } else {
+                  li.classList.remove('active');
+                }
+              });
+            }
+
+            // 简单 IntersectionObserver 滚动监听
+            if (typeof IntersectionObserver === 'undefined') return;
+            if (window._deerTocObserver) window._deerTocObserver.disconnect();
+
+            window._deerTocObserver = new IntersectionObserver(function (entries) {
+              // 找到最近进入视口的标题
+              var visible = entries.filter(function (e) { return e.isIntersecting; });
+              if (visible.length > 0) {
+                var top = visible[0].target;
+                setActive(top.id);
+              }
+            }, {
+              rootMargin: '-80px 0px -70% 0px',
+              threshold: 0
+            });
+
+            headings.forEach(function (h) { window._deerTocObserver.observe(h); });
+          }
+
+          // ====== 注入工具栏（顶部 + 思维导图切换） ======
           function injectToolbar() {
             if (toolbarInjected) return;
-            if (!document.querySelector('.content')) return;
             var toolbar = document.createElement('div');
             toolbar.className = 'deer-toolbar';
             toolbar.innerHTML = '' +
               '<button class="deer-tb-btn" data-action="back-to-top" title="回到顶部">' +
-                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>' +
                 '<span>顶部</span>' +
               '</button>' +
               '<button class="deer-tb-btn deer-tb-markmap" data-action="toggle-markmap" title="思维导图模式">' +
-                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v7m0 6v7m-4.95-6.95l-4.95-4.95m16.9 4.95l4.95-4.95m-4.95 9.9l-4.95 4.95m16.9-4.95l4.95 4.95"/></svg>' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v7m0 6v7m-4.95-6.95l-4.95-4.95m16.9 4.95l4.95-4.95"/></svg>' +
                 '<span>导图</span>' +
               '</button>';
             document.body.appendChild(toolbar);
             toolbarInjected = true;
           }
 
-          // ====== 注入全屏遮罩 HTML（只注入一次） ======
+          // ====== 注入全屏遮罩（Mermaid 大图） ======
           function injectOverlay() {
             if (overlayInjected) return;
             var overlay = document.createElement('div');
@@ -98,10 +289,10 @@
                 '<span class="deer-fs-title">Mermaid 图表</span>' +
                 '<div class="deer-fs-actions">' +
                   '<button class="deer-fs-btn" data-action="zoom-in" title="放大">' +
-                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>' +
+                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>' +
                   '</button>' +
                   '<button class="deer-fs-btn" data-action="zoom-out" title="缩小">' +
-                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M8 11h6"/></svg>' +
+                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M8 11h6"/></svg>' +
                   '</button>' +
                   '<button class="deer-fs-btn" data-action="zoom-reset" title="重置">1:1</button>' +
                   '<span class="deer-fs-sep"></span>' +
@@ -115,26 +306,19 @@
             document.body.appendChild(overlay);
             overlayInjected = true;
 
-            // 全屏操作事件委托
-            overlay.addEventListener('click', function(e) {
+            overlay.addEventListener('click', function (e) {
               var action = e.target.closest('[data-action]');
               if (!action) return;
-              var act = action.getAttribute('data-action');
-              handleOverlayAction(act);
+              handleOverlayAction(action.getAttribute('data-action'));
             });
-
-            // Esc 关闭
-            document.addEventListener('keydown', function(e) {
-              if (e.key === 'Escape' && overlay.style.display !== 'none') {
-                closeFullscreen();
-              }
+            document.addEventListener('keydown', function (e) {
+              if (e.key === 'Escape' && overlay.style.display !== 'none') closeFullscreen();
             });
           }
 
           // ====== 全屏操作处理 ======
           var fsScale = 1;
           var fsSvgClone = null;
-
           function openFullscreen(svgEl) {
             var overlay = document.getElementById('deerFullscreenOverlay');
             if (!overlay) return;
@@ -153,7 +337,6 @@
             overlay.style.display = 'flex';
             document.body.style.overflow = 'hidden';
           }
-
           function closeFullscreen() {
             var overlay = document.getElementById('deerFullscreenOverlay');
             if (!overlay) return;
@@ -162,12 +345,9 @@
             fsSvgClone = null;
             fsScale = 1;
           }
-
           function handleOverlayAction(action) {
             switch (action) {
-              case 'close':
-                closeFullscreen();
-                break;
+              case 'close': closeFullscreen(); break;
               case 'zoom-in':
                 fsScale = Math.min(fsScale + 0.25, 5);
                 if (fsSvgClone) fsSvgClone.style.transform = 'scale(' + fsScale + ')';
@@ -180,59 +360,44 @@
                 fsScale = 1;
                 if (fsSvgClone) fsSvgClone.style.transform = 'scale(1)';
                 break;
-              case 'export-svg':
-                exportDiagram('svg');
-                break;
-              case 'export-png':
-                exportDiagram('png');
-                break;
+              case 'export-svg': exportDiagram('svg'); break;
+              case 'export-png': exportDiagram('png'); break;
             }
           }
-
           function exportDiagram(format) {
             var body = document.getElementById('deerFsBody');
             var svg = body ? body.querySelector('svg') : null;
             if (!svg) return;
-
             var bbox = svg.getBBox ? svg.getBBox() : null;
-            var w = (bbox && bbox.width) || svg.viewBox?.baseVal?.width || svg.getAttribute('width') || 800;
-            var h = (bbox && bbox.height) || svg.viewBox?.baseVal?.height || svg.getAttribute('height') || 600;
-
+            var w = (bbox && bbox.width) || svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width || svg.getAttribute('width') || 800;
+            var h = (bbox && bbox.height) || svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.height || svg.getAttribute('height') || 600;
             var clone = svg.cloneNode(true);
             clone.setAttribute('width', w);
             clone.setAttribute('height', h);
             var svgData = new XMLSerializer().serializeToString(clone);
             var svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-
             if (format === 'svg') {
               var url = URL.createObjectURL(svgBlob);
               var a = document.createElement('a');
-              a.href = url;
-              a.download = 'mermaid-' + Date.now() + '.svg';
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
+              a.href = url; a.download = 'mermaid-' + Date.now() + '.svg';
+              document.body.appendChild(a); a.click(); document.body.removeChild(a);
               URL.revokeObjectURL(url);
             } else if (format === 'png') {
               var img = new Image();
               var url = URL.createObjectURL(svgBlob);
-              img.onload = function() {
+              img.onload = function () {
                 var canvas = document.createElement('canvas');
                 var scale = 2;
-                canvas.width = w * scale;
-                canvas.height = h * scale;
+                canvas.width = w * scale; canvas.height = h * scale;
                 var ctx = canvas.getContext('2d');
                 ctx.scale(scale, scale);
-                ctx.fillStyle = '#1a1a2e';
-                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, w, h);
                 ctx.drawImage(img, 0, 0);
-                canvas.toBlob(function(blob) {
+                canvas.toBlob(function (blob) {
                   var a = document.createElement('a');
                   a.href = URL.createObjectURL(blob);
                   a.download = 'mermaid-' + Date.now() + '.png';
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
+                  document.body.appendChild(a); a.click(); document.body.removeChild(a);
                 }, 'image/png');
                 URL.revokeObjectURL(url);
               };
@@ -243,13 +408,11 @@
           // ====== 回到顶部 ======
           function scrollToTop() {
             var content = document.querySelector('.content');
-            if (content) {
-              content.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            if (content) content.scrollTo({ top: 0, behavior: 'smooth' });
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }
 
-          // ====== Markmap 思维导图 ======
+          // ====== Markmap 思维导图（默认全部展开） ======
           function getMarkmapContainer() {
             var container = document.getElementById('deerMarkmapContainer');
             if (!container) {
@@ -258,9 +421,7 @@
               container.className = 'deer-markmap-container';
               container.innerHTML = '<div class="deer-markmap-loading"><div class="deer-spinner"></div><p>正在生成思维导图…</p></div>';
               var content = document.querySelector('.content');
-              if (content) {
-                content.appendChild(container);
-              }
+              if (content) content.appendChild(container);
             }
             return container;
           }
@@ -274,16 +435,17 @@
             if (!isMarkmapMode) {
               isMarkmapMode = true;
               if (markdownSection) markdownSection.style.display = 'none';
+              var rightToc = document.querySelector('.deer-right-toc');
+              if (rightToc) rightToc.style.display = 'none';
               container.style.display = 'flex';
               if (mapBtn) mapBtn.classList.add('active');
               renderMarkmap(container);
             } else {
               isMarkmapMode = false;
               if (markdownSection) markdownSection.style.display = '';
+              if (rightToc) rightToc.style.display = '';
               container.style.display = 'none';
-              if (markmapInstance) {
-                markmapInstance = null;
-              }
+              if (markmapInstance) { try { markmapInstance.destroy(); } catch (e) {} markmapInstance = null; }
               container.innerHTML = '<div class="deer-markmap-loading"><div class="deer-spinner"></div><p>正在生成思维导图…</p></div>';
               if (mapBtn) mapBtn.classList.remove('active');
             }
@@ -296,13 +458,21 @@
               return;
             }
 
+            // 去掉 YAML front matter
             var md = currentMarkdown.replace(/^---[\s\S]*?---\n*/, '');
 
-            if (typeof window.markmap === 'undefined') {
-              container.innerHTML = '<div class="deer-markmap-empty"><p>Markmap 库正在加载中，请稍候…</p></div>';
-              setTimeout(function() {
-                if (isMarkmapMode) renderMarkmap();
-              }, 1000);
+            // 检查 markmap 是否加载完成
+            if (typeof window.markmap === 'undefined' ||
+                typeof window.markmap.Transformer === 'undefined' ||
+                typeof window.markmap.Markmap === 'undefined') {
+              container.innerHTML = '<div class="deer-markmap-empty"><div class="deer-spinner"></div><p>Markmap 库正在加载中，请稍候…</p></div>';
+              // 一次性等待 ESM 就绪事件
+              if (!window._deerMarkmapListener) {
+                window._deerMarkmapListener = true;
+                window.addEventListener('deer-markmap-ready', function () {
+                  if (isMarkmapMode) renderMarkmap();
+                }, { once: false });
+              }
               return;
             }
 
@@ -312,25 +482,45 @@
               var Transformer = window.markmap.Transformer;
               var Markmap = window.markmap.Markmap;
               var transformer = new Transformer();
+              // 启用 markmap-lib 内置插件（链接/代码高亮/数学公式）
+              if (typeof transformer.use === 'function' && window.markmapPluginDefault) {
+                try { transformer.use(window.markmapPluginDefault); } catch (e) { console.warn('markmap plugins:', e); }
+              }
               var result = transformer.transform(md);
+              if (!result || !result.root) {
+                throw new Error('文档无内容可渲染');
+              }
 
               var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
               svg.setAttribute('style', 'width:100%;height:100%;display:block;');
               container.appendChild(svg);
 
+              // initialExpandLevel: -1 = 全部展开（markmap v0.17 协议）
               markmapInstance = Markmap.create(svg, {
                 autoFit: true,
-                fitRatio: 0.85,
-                colorFreezeLevel: 2,
-                duration: 400,
-                maxWidth: 360,
-                initialExpandLevel: 2
+                fitRatio: 0.92,
+                colorFreezeLevel: 3,
+                duration: 500,
+                maxWidth: 420,
+                initialExpandLevel: -1,
+                paddingX: 16,
+                spacingHorizontal: 80,
+                spacingVertical: 8,
+                zoom: true,
+                pan: true
               }, result.root);
 
-              svg.style.background = 'var(--bg-primary, #f8f9fa)';
+              svg.style.background = 'var(--bg-primary, #1a1a2e)';
+
+              // 自动 fit 一次确保全部展开可见
+              setTimeout(function () {
+                if (markmapInstance && typeof markmapInstance.fit === 'function') {
+                  try { markmapInstance.fit(); } catch (e) {}
+                }
+              }, 300);
             } catch (err) {
               console.error('Markmap render error:', err);
-              container.innerHTML = '<div class="deer-markmap-empty"><p>思维导图渲染失败: ' + err.message + '</p></div>';
+              container.innerHTML = '<div class="deer-markmap-empty"><p>思维导图渲染失败: ' + escapeHtml(err.message) + '</p></div>';
             }
           }
 
@@ -339,30 +529,29 @@
             var toolbar = document.querySelector('.deer-toolbar');
             if (!toolbar || toolbar._eventsBound) return;
             toolbar._eventsBound = true;
-            toolbar.addEventListener('click', function(e) {
+            toolbar.addEventListener('click', function (e) {
               var btn = e.target.closest('[data-action]');
               if (!btn) return;
               var action = btn.getAttribute('data-action');
-              switch (action) {
-                case 'back-to-top':
-                  scrollToTop();
-                  break;
-                case 'toggle-markmap':
-                  toggleMarkmap();
-                  break;
-              }
+              if (action === 'back-to-top') scrollToTop();
+              if (action === 'toggle-markmap') toggleMarkmap();
             });
           }
 
           // ====== Hooks ======
-          hook.beforeEach(function(markdown) {
+          hook.beforeEach(function (markdown) {
             currentMarkdown = markdown;
             return markdown;
           });
 
-          hook.doneEach(function() {
-            setTimeout(function() {
+          hook.doneEach(function () {
+            setTimeout(function () {
               var isCover = !!document.querySelector('.cover.show');
+              injectTopbar();
+              injectBreadcrumb();
+              injectRightToc();
+              updateBreadcrumb();
+              updateRightToc();
               if (isCover) {
                 var tb = document.querySelector('.deer-toolbar');
                 if (tb) tb.style.display = 'none';
@@ -373,18 +562,16 @@
               var tb2 = document.querySelector('.deer-toolbar');
               if (tb2) tb2.style.display = '';
               bindToolbarEvents();
-            }, 100);
+            }, 80);
 
             // 代码块行号
-            document.querySelectorAll('.markdown-section pre').forEach(function(pre) {
+            document.querySelectorAll('.markdown-section pre').forEach(function (pre) {
               var code = pre.querySelector('code');
               if (!code) return;
               var langMatch = code.className.match(/language-(\w+)/) || code.className.match(/lang-(\w+)/);
               var lang = langMatch ? langMatch[1] : '';
               if (lang && lang !== 'mermaid') {
-                if (!pre.classList.contains('line-numbers')) {
-                  pre.classList.add('line-numbers');
-                }
+                if (!pre.classList.contains('line-numbers')) pre.classList.add('line-numbers');
                 pre.setAttribute('data-lang', lang);
               } else {
                 pre.classList.remove('line-numbers');
@@ -393,49 +580,75 @@
             });
 
             // Mermaid 渲染 + 点击全屏
+            // 修复: mermaid.initialize({ startOnLoad: false }) 后必须手动调用 mermaid.run()
+            // docsify 渲染阶段不触发 startOnLoad,需要在 hook.doneEach 内手动转 div + run
             if (typeof mermaid !== 'undefined') {
-              document.querySelectorAll('pre code.lang-mermaid, pre code.language-mermaid').forEach(function(code, index) {
-                var pre = code.parentElement;
-                if (pre.previousElementSibling && pre.previousElementSibling.classList.contains('mermaid')) {
+              // docsify 解析 ```mermaid 代码块后产出的 class 是 lang-markup (Prism markup 高亮),
+              // 而非 language-mermaid / lang-mermaid (mermaid 不在 Prism 支持列表).
+              // 因此用文本特征检测: mermaid 图表关键字开头
+              document.querySelectorAll('.markdown-section pre code').forEach(function (codeBlock) {
+                var codeText = codeBlock.textContent.trim();
+                // 先看 class 是否明示 mermaid
+                var cls = codeBlock.className || '';
+                var langMatch = cls.match(/(?:^|\s)(?:lang|language)-(\w+)/);
+                var lang = langMatch ? langMatch[1].toLowerCase() : '';
+                var isMermaid = (lang === 'mermaid') ||
+                  /^(graph|flowchart|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey)\b/.test(codeText);
+                if (!isMermaid) return;
+
+                var pre = codeBlock.parentElement;
+                if (!pre || pre.dataset.mermaidRendered === 'true') return;
+                // 已存在同源 mermaid 容器,跳过
+                if (pre.previousElementSibling && pre.previousElementSibling.classList && pre.previousElementSibling.classList.contains('mermaid') &&
+                    pre.previousElementSibling.dataset && pre.previousElementSibling.dataset.source === codeText) {
+                  pre.dataset.mermaidRendered = 'true';
                   return;
                 }
-                var source = code.textContent;
-                var id = 'mermaid-' + Date.now() + '-' + index;
-                mermaid.render(id, source).then(function(result) {
-                  var wrapper = document.createElement('div');
-                  wrapper.className = 'mermaid';
-                  wrapper.innerHTML = result.svg;
-                  pre.parentNode.insertBefore(wrapper, pre);
-                  pre.style.display = 'none';
-                  wrapper.style.cursor = 'pointer';
-                  wrapper.title = '点击查看大图 / 导出';
-                  var svgEl = wrapper.querySelector('svg');
-                  wrapper.addEventListener('click', function() {
-                    if (svgEl) openFullscreen(svgEl);
-                  });
-                }).catch(function(err) {
-                  console.error('Mermaid render error:', err);
-                });
+                var div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = codeText;
+                div.dataset.source = codeText;
+                div.style.cursor = 'pointer';
+                div.title = '点击查看大图 / 导出';
+                pre.parentNode.insertBefore(div, pre);
+                pre.style.display = 'none';
+                pre.dataset.mermaidRendered = 'true';
               });
+              if (window.mermaid && typeof window.mermaid.run === 'function') {
+                try {
+                  window.mermaid.run();
+                } catch (e) {
+                  console.error('Mermaid run error:', e);
+                }
+              }
+
+              // 渲染完成后绑定点击全屏(事件委托)
+              setTimeout(function () {
+                document.querySelectorAll('.markdown-section div.mermaid').forEach(function (wrapper) {
+                  if (wrapper._fullscreenBound) return;
+                  wrapper._fullscreenBound = true;
+                  var svgEl = wrapper.querySelector('svg');
+                  wrapper.addEventListener('click', function () { if (svgEl) openFullscreen(svgEl); });
+                });
+              }, 50);
             }
 
             // 路由切换时如果在导图模式则重新渲染
             var newRoute = vm.route ? vm.route.path : '';
             if (isMarkmapMode && newRoute !== currentRoute) {
               currentRoute = newRoute;
-              setTimeout(function() {
-                renderMarkmap();
-              }, 300);
+              setTimeout(function () { renderMarkmap(); }, 300);
             } else {
               currentRoute = newRoute;
             }
           });
 
-          hook.init(function() {
-            setTimeout(function() {
+          hook.init(function () {
+            setTimeout(function () {
+              injectTopbar();
               injectToolbar();
               injectOverlay();
-            }, 500);
+            }, 300);
           });
         }
       ]
@@ -474,14 +687,36 @@
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-docker.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markdown.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-rust.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-csharp.min.js"></script>
 
   <!-- 主题 -->
   <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/theme-simple-dark.min.js"></script>
 
-  <!-- Markmap 思维导图依赖（autoloader 统一入口，含 Transformer + Markmap + d3） -->
-  <script>
-    window.markmap = { autoLoader: { manual: true, transformPlugins: [] } };
+  <!--
+    Markmap 思维导图依赖（按官方推荐方式分模块加载，确保全功能）：
+      d3                  — 树形布局
+      markmap-lib         — Markdown → 树形 AST（含 defaultPlugins: link/code/katex）
+      markmap-view        — 树形 AST → 交互式 SVG
+      markmap-toolbar     — 浮窗工具栏（缩放/全屏/下载）
+
+    0.17.x 默认 ESM，使用 esm.sh + ?bundle 打包，并通过 ?deps 显式钉死
+    markmap-common@0.18.0 (该版本保留 childSelector 导出, 0.18.9+ 已移除):
+      window.markmap 暴露 { Transformer, Markmap, defaultPlugins }
+  -->
+  <script type="module">
+    import * as d3ns from 'https://esm.sh/d3@7';
+    import { Transformer, builtInPlugins } from 'https://esm.sh/markmap-lib@0.17.0?bundle&deps=markmap-common@0.18.0';
+    import { Markmap } from 'https://esm.sh/markmap-view@0.17.0?bundle&deps=markmap-common@0.18.0';
+    const defaultPlugins = builtInPlugins;
+    window.d3 = d3ns;
+    window.markmap = { Transformer: Transformer, Markmap: Markmap, defaultPlugins: defaultPlugins };
+    window.markmapPluginDefault = defaultPlugins;
+    // 标记 markmap 已就绪
+    window.dispatchEvent(new Event('deer-markmap-ready'));
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.17.0/dist/index.js"></script>
 </body>
 </html>

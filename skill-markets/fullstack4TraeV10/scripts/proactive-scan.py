@@ -1,32 +1,36 @@
 #!/usr/bin/env python3
-"""proactive-scan.py — V10.4 5 项腐化扫描包（腐烂点 14 修复）
+"""proactive-scan.py — V10.5 腐化扫描包（腐烂点 14 + 15-17 修复）
 
-实战教训: V10.3.9 Agent 不主动发现问题,用户问才查。本脚本把 5 项腐化扫描打包,供 rot-detector
+实战教训: V10.3.9 Agent 不主动发现问题,用户问才查。本脚本把腐化扫描打包,供 rot-detector
 agent 在 Phase 4.5 强制调用。
 
 用法:
   python scripts/proactive-scan.py --project-root <path> [--feature <name>] [--json]
   python scripts/proactive-scan.py --only <check_name> --project-root <path> [--json]
 
-5 项检查:
-  1. orphan-tests       — 孤儿测试/组件 (腐烂点 12)
-  2. deprecated-code    — @deprecated 标记的代码 (腐烂点 12 变体)
-  3. archive-drift      — archive/ 下文件被修改 (腐烂点 10)
-  4. bundle-staleness   — binary chunk vs dist chunk (腐烂点 13, 仅 Tauri)
-  5. visual-freshness   — 视觉证据新鲜度 + 内容 (腐烂点 9)
+8 项检查 (V10.5):
+  1. orphan-tests            — 孤儿测试/组件 (腐烂点 12)
+  2. deprecated-code         — @deprecated 标记的代码 (腐烂点 12 变体)
+  3. archive-drift           — archive/ 下文件被修改 (腐烂点 10)
+  4. bundle-staleness        — binary chunk vs dist chunk (腐烂点 13, 仅 Tauri)
+  5. visual-freshness        — 视觉证据新鲜度 + 内容 (腐烂点 9)
+  6. self-aggrandizing-doc   — state-card 声称的 INV vs spec.md 实际 INV (腐烂点 15, V10.5 新)
+  7. state-card-staleness    — .state-card.md mtime + change 数量一致性 (腐烂点 16, V10.5 新)
+  8. stub-pileup             — define.md-only 骨架堆积比例 (腐烂点 17, V10.5 新)
 
 退出码:
   0 = pass (全部 PASS/WARN/SKIP,无 FAIL)
   1 = fail (任一 FAIL)
   2 = script error
 
-V10.4 引入 (2026-07-30)
+V10.4 引入 (2026-07-30) | V10.5 扩展 (2026-07-31)
 """
 from __future__ import annotations
 
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -258,6 +262,186 @@ def run_visual_freshness(project_root: Path, feature: Optional[str] = None) -> C
     )
 
 
+# === V10.5 新增 check 函数（腐烂点 15-17） ===
+
+INV_RE = re.compile(r"INV-[A-Z0-9-]+")
+
+
+def _extract_invs(text: str) -> set[str]:
+    """从文本中抽取所有 INV-XXX 标识符"""
+    return set(INV_RE.findall(text))
+
+
+def run_self_aggrandizing_doc(project_root: Path, feature: Optional[str] = None) -> CheckResult:
+    """检查 6: 自我吹嘘腐烂 (腐烂点 15)
+
+    算法: 抽取 state-card.md/INDEX.md 等元文档中声称的 INV → 抽取所有 spec.md 实际 INV
+          → doc_claims - code_actual = 自我吹嘘清单
+    """
+    t0 = time.time()
+    # 候选"自我吹嘘"源: state-card.md + INDEX.md + 主要报告
+    claim_sources = [
+        project_root / "docs" / "specs" / ".state-card.md",
+        project_root / "docs" / "specs" / "INDEX.md",
+    ]
+    doc_claims: set[str] = set()
+    for src in claim_sources:
+        if src.is_file():
+            doc_claims |= _extract_invs(src.read_text(encoding="utf-8", errors="ignore"))
+    if not doc_claims:
+        return CheckResult(
+            "self-aggrandizing-doc", "skip", "PASS",
+            "无元文档含 INV- 声明（非 V10 项目或元文档缺失）",
+            0, int((time.time() - t0) * 1000),
+        )
+    # 抽取所有 spec.md 实际 INV
+    changes_dir = project_root / "docs" / "specs" / "changes"
+    code_actual: set[str] = set()
+    if changes_dir.is_dir():
+        for spec in changes_dir.rglob("spec.md"):
+            code_actual |= _extract_invs(spec.read_text(encoding="utf-8", errors="ignore"))
+    # 比对
+    bragging = doc_claims - code_actual
+    duration = int((time.time() - t0) * 1000)
+    brag_rate = len(bragging) / len(doc_claims) if doc_claims else 0
+    if brag_rate > 0.3:
+        sample_list = sorted(bragging)[:5]
+        sample_str = ", ".join(sample_list) + ("..." if len(bragging) > 5 else "")
+        return CheckResult(
+            "self-aggrandizing-doc", "fail", "FAIL",
+            f"{len(bragging)}/{len(doc_claims)} 声称的 INV 在 spec.md 不存在 (rate={brag_rate:.0%}): {sample_str}",
+            len(bragging), duration,
+        )
+    if bragging:
+        return CheckResult(
+            "self-aggrandizing-doc", "warn", "WARN",
+            f"{len(bragging)}/{len(doc_claims)} 声称的 INV 在 spec.md 不存在 (rate={brag_rate:.0%})，建议核对",
+            len(bragging), duration,
+        )
+    return CheckResult(
+        "self-aggrandizing-doc", "pass", "PASS",
+        f"所有 {len(doc_claims)} 个声称的 INV 都在 spec.md 落地",
+        0, duration,
+    )
+
+
+def run_state_card_staleness(project_root: Path, feature: Optional[str] = None) -> CheckResult:
+    """检查 7: 状态卡陈旧腐烂 (腐烂点 16)
+
+    算法: 比对 state-card.md mtime (vs 当前时间) + 列出的 change 数 (vs 实际)
+    """
+    t0 = time.time()
+    sc = project_root / "docs" / "specs" / ".state-card.md"
+    if not sc.is_file():
+        return CheckResult(
+            "state-card-staleness", "skip", "PASS",
+            "无 .state-card.md（未走 V10 流程）",
+            0, int((time.time() - t0) * 1000),
+        )
+    age_hours = (time.time() - sc.stat().st_mtime) / 3600
+    # 抽取 state-card.md 中实际列出的 change 数（粗略: 匹配 `| \d+ |` 表格行）
+    text = sc.read_text(encoding="utf-8", errors="ignore")
+    claimed = set(re.findall(r"changes/([\w-]+)/?", text))
+    # 实际 changes 目录
+    changes_dir = project_root / "docs" / "specs" / "changes"
+    actual: set[str] = set()
+    if changes_dir.is_dir():
+        actual = {d.name for d in changes_dir.iterdir() if d.is_dir()}
+    missing_in_doc = actual - claimed
+    duration = int((time.time() - t0) * 1000)
+    issues = []
+    if age_hours > 72:
+        issues.append(f"state-card 已有 {age_hours/24:.1f} 天未更新 (>3d)")
+    elif age_hours > 24:
+        issues.append(f"state-card 已有 {age_hours:.0f}h 未更新 (>24h)")
+    if missing_in_doc:
+        sample_list = sorted(missing_in_doc)[:3]
+        sample_str = ", ".join(sample_list) + ("..." if len(missing_in_doc) > 3 else "")
+        issues.append(f"{len(missing_in_doc)} 个 change 在 state-card 未列出: {sample_str}")
+    if issues and (age_hours > 72 or len(missing_in_doc) > 0):
+        return CheckResult(
+            "state-card-staleness", "fail", "FAIL",
+            "; ".join(issues),
+            len(issues), duration,
+        )
+    if issues:
+        return CheckResult(
+            "state-card-staleness", "warn", "WARN",
+            "; ".join(issues),
+            len(issues), duration,
+        )
+    return CheckResult(
+        "state-card-staleness", "pass", "PASS",
+        f"state-card 健康 ({age_hours:.1f}h, {len(actual)} changes 完整列出)",
+        0, duration,
+    )
+
+
+def run_stub_pileup(project_root: Path, feature: Optional[str] = None) -> CheckResult:
+    """检查 8: 骨架堆积腐烂 (腐烂点 17)
+
+    算法: 扫 docs/specs/changes/*/ 各文件存在性
+          → 分类 archived / full-plan / stub (only define.md) / controller
+          → stub_rate = stub / total
+    """
+    t0 = time.time()
+    changes_dir = project_root / "docs" / "specs" / "changes"
+    if not changes_dir.is_dir():
+        return CheckResult(
+            "stub-pileup", "skip", "PASS",
+            "无 docs/specs/changes/ 目录（非 V10 项目）",
+            0, int((time.time() - t0) * 1000),
+        )
+    buckets = {"archived": [], "full": [], "stub": [], "controller": [], "other": []}
+    for d in sorted(changes_dir.iterdir()):
+        if not d.is_dir():
+            continue
+        # 控制器: 有 plan.md/spec.md 但无 tasks.md
+        names = {f.name for f in d.iterdir() if f.is_file()}
+        # 归档标志: 在 state-card.md 标 Archived 或 tasks.md 全 [x] 或有 archive/ 子目录
+        has_archived_marker = (
+            "acceptance-scorecard" in " ".join(names)  # 存在计分卡 = 验收过
+            or bool(list((d / "archive").iterdir())) if (d / "archive").is_dir() else False
+        )
+        has_tasks = "tasks.md" in names
+        has_spec = "spec.md" in names
+        has_plan = "plan.md" in names
+        has_define = "define.md" in names
+        # controller: 名称含 refactor / controller / hub
+        is_controller = "refactor" in d.name.lower() or "controller" in d.name.lower() or "hub" in d.name.lower()
+        if is_controller and not has_tasks:
+            buckets["controller"].append(d.name)
+        elif has_archived_marker and has_tasks:
+            buckets["archived"].append(d.name)
+        elif has_define and has_spec and has_tasks:
+            buckets["full"].append(d.name)
+        elif has_define and not (has_spec and has_tasks):
+            buckets["stub"].append(d.name)
+        else:
+            buckets["other"].append(d.name)
+    total = sum(len(v) for v in buckets.values())
+    stub_count = len(buckets["stub"])
+    stub_rate = stub_count / total if total else 0
+    duration = int((time.time() - t0) * 1000)
+    if stub_rate > 0.6:
+        return CheckResult(
+            "stub-pileup", "fail", "FAIL",
+            f"骨架堆积 {stub_count}/{total} = {stub_rate:.0%} (>{0.6:.0%} 破窗临界): {', '.join(buckets['stub'][:5])}{'...' if stub_count > 5 else ''}",
+            stub_count, duration,
+        )
+    if stub_rate > 0.4:
+        return CheckResult(
+            "stub-pileup", "warn", "WARN",
+            f"骨架比例 {stub_count}/{total} = {stub_rate:.0%} (>{0.4:.0%} 需警惕): {', '.join(buckets['stub'][:5])}{'...' if stub_count > 5 else ''}",
+            stub_count, duration,
+        )
+    return CheckResult(
+        "stub-pileup", "pass", "PASS",
+        f"骨架 {stub_count}/{total} = {stub_rate:.0%} (健康)",
+        0, duration,
+    )
+
+
 # === 注册所有 check ===
 
 CHECKS: list[tuple[str, Callable]] = [
@@ -266,6 +450,9 @@ CHECKS: list[tuple[str, Callable]] = [
     ("archive-drift", run_archive_drift),
     ("bundle-staleness", run_bundle_staleness),
     ("visual-freshness", run_visual_freshness),
+    ("self-aggrandizing-doc", run_self_aggrandizing_doc),
+    ("state-card-staleness", run_state_card_staleness),
+    ("stub-pileup", run_stub_pileup),
 ]
 
 
@@ -285,7 +472,7 @@ def run_all(project_root: Path, feature: Optional[str] = None,
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="V10.4 5 项腐化扫描包（腐烂点 14 修复）",
+        description="V10.5 8 项腐化扫描包（腐烂点 14+15+16+17 修复）",
     )
     parser.add_argument("--project-root", type=str, default=".", help="项目根")
     parser.add_argument("--feature", type=str, help="feature 名（限定扫描范围）")
@@ -315,7 +502,7 @@ def main() -> int:
         print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     else:
         # Markdown 报告
-        print(f"# V10.4 Proactive Rot Scan\n")
+        print(f"# V10.5 Proactive Rot Scan\n")
         print(f"- project: {project_root.name}")
         print(f"- feature: {args.feature or '(all)'}")
         print(f"- total: {len(results)}, fail: {fail_count}\n")

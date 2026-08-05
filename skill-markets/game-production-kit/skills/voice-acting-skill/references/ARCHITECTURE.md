@@ -136,4 +136,4 @@ SynthesisResult / BatchSynthesisResult / ProjectTimeline
 - **开发**：`pip install -e .`
 - **运行**：`vas analyze 剧本.md -o output` + `vas synthesize -o output`
 - **测试**：`python -m pytest scripts/tests/`
-- **分发**：作为 Trae IDE 技能包，复制到 `~/.trae-cn/builtin_skills/`
+- **分发**：作为 Trae IDE 技能包，复制到 `~/.trae-cn/skills/`

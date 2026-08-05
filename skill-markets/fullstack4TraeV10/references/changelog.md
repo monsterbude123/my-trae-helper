@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## v10.5.0 (2026-07-31)
+
+**rot-reinforcer Cycle 1 实战驱动更新 — 3 新腐烂点修复**
+
+- **新增** `proactive-scan.py` 3 项新 check (5→8 项):
+  - `self-aggrandizing-doc` (腐烂点 15) — 抽 state-card/INDEX 中 `INV-XXX` vs spec.md 实际 INV,`doc_claims - spec_actual` 比例 > 30% → 🛑 FAIL
+  - `state-card-staleness` (腐烂点 16) — `.state-card.md` mtime (>24h WARN, >72h FAIL) + change 数量一致性
+  - `stub-pileup` (腐烂点 17) — `docs/specs/changes/*/` 中只 define.md 的 stub 比例,>40% WARN, >60% FAIL
+- **新增** `self-diagnose.py` 第 4 项 check `proactive-v105-coverage` — 验 proactive-scan.py 含 3 新函数 + INV_RE 锚定 + 阈值常量
+- **新增** 2 条不可协商 Articles (总数 11→13):
+  - **Article XII — 文档诚实 (Document Honesty)** — state-card/INDEX 声称的 INV 必在 spec.md 落地,不可自评"完成"无证据
+  - **Article XIII — 骨架是债 (Stub is Debt)** — 🟡 骨架 = 隐性技术债,14 天未推进必冻结或归档
+- **新增** 3 个 V10.5 self-test fixture (`scripts/__self_tests__/V10.5-{fixture,staleness-fixture,stub-fixture}/`) + `test_v10_5_fixtures.py` 验证 3 check 均正确报 FAIL
+- **新增** `docs/rot-discoveries/.state-card.md` (rot-reinforcer 状态卡) + `2026-07-31-AIGCMediaDesktop.md` (腐烂点发现报告)
+- **变更** SKILL.md 10.4 → 10.5 + 哲学段补"诚实而非吹嘘" / "骨感而非堆积" + Constitution 11→13 Articles
+- **变更** constitution-template.md 1.1.0 → 1.2.0 + +Articles XII/XIII
+- **变更** rot-detector.md 腐烂点参考表 +3 项 (rot #15-#17) + V10.5 升级说明
+- **变更** proactive-scan.py: 5 → 8 项 check + 标题 V10.4 → V10.5
+- **修复** AIGCMediaDesktop rot #15 (state-card 9→2 跨模块不变量自我吹嘘, 78% 失效) + rot #16 (state-card 47h 未更新 + 2 change 缺失) + rot #17 (骨架 11/19 = 58% 破窗警戒)
+- **战绩**: rot-reinforcer Cycle 1 完成,rot-detector 腐烂点覆盖 1-14 → 1-17 (3/17 实战暴露新腐烂点)
+
 ## v10.3.8 (2026-07-28)
 
 **实战驱动更新 — 主上下文重置与真实验收协议**

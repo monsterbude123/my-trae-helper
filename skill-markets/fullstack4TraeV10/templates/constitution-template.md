@@ -216,4 +216,38 @@ Constitution 任何 Article 的修改必须：
 
 ---
 
-**Version**: 1.1.0 | **Ratified**: 2026-07-27 | **Last Amended**: 2026-07-30 (V10.4: +Articles IX/X/XI)
+## Article XII — 文档诚实（Document Honesty, NON-NEGOTIABLE）
+
+> **V10.5 新增（2026-07-31，腐烂点 15 修复）**
+
+**Rationale**: state-card/INDEX 声称的 INV 必在 spec.md 落地。文档自我吹嘘 = 假质量信号。V10.5 强制所有"已完成"声明必含证据锚定。实战教训: AIGCMediaDesktop state-card 声称 9 跨模块不变量,实际只有 2 (INV-STORE-02 + INV-EV-04) 真正在 spec.md 落地,7 个 (78%) 自我吹嘘。
+
+**Enforcement**:
+- state-card.md / INDEX.md / SPEC-ENHANCEMENT 报告中声称的 `INV-XXX` 必须在对应 `spec.md` 中实际出现
+- "X 个不变量 / Y 个约束 / Z 个跨模块契约" 必含至少 1 个证据锚定
+- `scripts/proactive-scan.py --only self-aggrandizing-doc` 在 Phase 4.5 必跑
+- self_aggrandizing_rate = |doc_claims - spec_actual| / |doc_claims| > 0.3 → 🛑 REJECT
+- 主上下文禁止"复制粘贴式自评" (从批次报告直接粘到 state-card)
+
+**禁止例外**: 仅当 change 完全无 spec.md (e.g. 纯配置项) 时可跳过。
+
+---
+
+## Article XIII — 骨架是债（Stub is Debt, NON-NEGOTIABLE）
+
+> **V10.5 新增（2026-07-31，腐烂点 17 修复）**
+
+**Rationale**: 🟡 骨架 (只 define.md,无 spec/tasks) 不是"中性"状态,而是隐性技术债。骨架堆积是破窗效应——一个 stub 出现后,新模块也开始只起 define。V10.5 强制骨架必须在 2 周内推进到 spec/tasks,或显式冻结/归档。实战教训: AIGCMediaDesktop 19 个 change 中 12 个 (63%) 是 stub,实际 0% 推进,破窗临界。
+
+**Enforcement**:
+- 新建 define.md 后,14 天内必须出现 spec.md (否则自动冻结,不再列入"活跃变更")
+- state-card.md "🟡 骨架" 标签必须显示具体天数,>14 天必带 🔴 警示
+- `scripts/proactive-scan.py --only stub-pileup` 在 Phase 4.5 必跑
+- stub_rate = stub_count / total_changes > 0.4 → ⚠️ WARN, > 0.6 → 🛑 FAIL
+- Spec-Writer 接新需求时,先确认同模块 7 天内有进展,否则建议合并或冻结
+
+**禁止例外**: 仅当 change 明确标注 `[FROZEN]` 或 `[DEPRECATED]` 前缀时可豁免。
+
+---
+
+**Version**: 1.2.0 | **Ratified**: 2026-07-27 | **Last Amended**: 2026-07-31 (V10.5: +Articles XII/XIII)

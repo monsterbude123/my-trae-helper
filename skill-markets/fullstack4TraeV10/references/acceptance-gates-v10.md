@@ -152,7 +152,7 @@ Phase B — 交互逻辑:
 
 ```
 - install-v10.py 禁止 shutil.move 到 .bak.{pid}
-- builtin_skills/ 下不应有 *.bak.* 文件
+- skills/ 下不应有 *.bak.* 文件
 - 升级前必跑: Get-ChildItem *.bak.* | Should Be NullOrEmpty
 - 违反 → 🛑 REJECT install
 ```

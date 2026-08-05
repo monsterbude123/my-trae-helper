@@ -39,9 +39,18 @@ except ImportError:  # pragma: no cover
     from common import get_project_root
 
 
-# Vite/Webpack 默认 chunk 命名: {name}-{8charhash}.{ext}
+# Vite/Webpack 默认 chunk 命名: {Name}-{8charhash}.{ext}
+# V10.4.1 修复: 加 PascalCase 守卫(首字母大写 + 至少 1 个小写字符在后),避免 1 字符前缀误报
+#   V10.4.1 升级 (regex 收紧):
+#     旧 regex `[A-Z][A-Za-z0-9_]*` 会匹配 1 字符前缀如 `C-5YGVCf.js`(误报: Vite 不会生成
+#     这么短的 chunk 名,这是 CSS background-image hash 之类)
+#     新 regex 要求 PascalCase chunk 前缀 ≥ 2 字符且必须含小写
+#     拒绝: C-5YGVCf.js / A-DOcbj12u.js (单字符 chunk 前缀)
+#     保留: ActivityBar-DOcbj12u.js (PascalCase) / useBaseUiId-BnDuWhvb.js (camelCase)
+#   camelCase 分支也加 `+` 要求至少 1 字符的小写前缀(原 `*` 允许 0 字符,与 PascalCase
+#   分支冲突时会让 1 字符情况漏过 → 升级为 `+`)
 CHUNK_PATTERN = re.compile(
-    r"\b([A-Za-z][A-Za-z0-9_]*)-([A-Za-z0-9_-]{6,12})\.(js|mjs)\b"
+    r"\b([A-Z][a-z][A-Za-z0-9_]*|[a-z][a-z0-9]*[A-Z][A-Za-z0-9_]+)-([A-Za-z0-9_-]{6,12})\.(js|mjs)\b"
 )
 
 # Vite asset 命名: assets/Page-{hash}.js 或 assets/index-{hash}.js
@@ -51,6 +60,20 @@ ASSET_PATTERN = re.compile(
 
 BIN_SIZE_THRESHOLD = 1024 * 1024  # 1MB
 
+# V10.4.1 修复 (self-diagnose generic-heuristics WARN): 把硬编码 10 提到模块顶部常量
+#   原代码直接用 `r.stale[:10]` 和 `len(r.stale) > 10` 触发 self-diagnose 启发式 2 误报
+#   实际语义: 报告展示用截断上限(超过的标 "+N more"),不影响 stale 判定本身
+#   V10.4.1 起改用常量,后续要调整截断长度只改一处
+STALE_DISPLAY_LIMIT = 10  # stale 列表展示上限(超出标 "+N more")
+
+# Tauri Rust 内嵌的 JS 桥文件 (不是 Vite 产物,永远不应在 dist/ 中)
+# V10.4.1 新增: 避免 "ipc-message-fn.js" 等 Tauri 内部 chunk 触发 stale 误报
+TAURI_INTERNAL_JS: set[str] = {
+    "ipc-message-fn.js",       # Tauri IPC 桥(被 Rust 内嵌)
+    "tauri-plugin-api.js",     # Tauri 插件 API (如有)
+    "tauri-runtime.js",        # Tauri 运行时
+}
+
 
 @dataclass
 class StaleReport:
@@ -59,6 +82,7 @@ class StaleReport:
     dist_chunks: List[str] = field(default_factory=list)
     stale: List[str] = field(default_factory=list)  # binary 引用但 dist 不存在
     new: List[str] = field(default_factory=list)    # dist 有但 binary 没引用
+    filtered_internal: int = 0  # V10.4.1: 被 TAURI_INTERNAL_JS 白名单过滤的数量
 
     def to_dict(self):
         return {
@@ -69,6 +93,7 @@ class StaleReport:
             "new": self.new,
             "stale_count": len(self.stale),
             "new_count": len(self.new),
+            "filtered_internal": self.filtered_internal,
         }
 
 
@@ -126,7 +151,10 @@ def check_one_binary(binary: Path, dist_chunks: List[str]) -> StaleReport:
     binary_chunks = extract_chunks_from_binary(binary)
     dist_set = set(dist_chunks)
     binary_set = set(binary_chunks)
-    stale = sorted(binary_set - dist_set)
+    # V10.4.1: 过滤 Tauri 内部 JS(白名单),它们永远不应在 dist/ 中
+    raw_stale = sorted(binary_set - dist_set)
+    stale = [c for c in raw_stale if c not in TAURI_INTERNAL_JS]
+    filtered_count = len(raw_stale) - len(stale)
     new = sorted(dist_set - binary_set)
     return StaleReport(
         binary=str(binary.name),
@@ -134,6 +162,7 @@ def check_one_binary(binary: Path, dist_chunks: List[str]) -> StaleReport:
         dist_chunks=dist_chunks,
         stale=stale,
         new=new,
+        filtered_internal=filtered_count,  # V10.4.1: 记录被白名单过滤的数量
     )
 
 
@@ -201,10 +230,12 @@ def main() -> int:
             if r.stale:
                 print(f"🛑 STALE binary: {r.binary}")
                 print(f"   binary 引用但 dist 中不存在 ({len(r.stale)} 个):")
-                for c in r.stale[:10]:
+                for c in r.stale[:STALE_DISPLAY_LIMIT]:
                     print(f"     - {c}")
-                if len(r.stale) > 10:
-                    print(f"     ... +{len(r.stale) - 10} more")
+                if len(r.stale) > STALE_DISPLAY_LIMIT:
+                    print(f"     ... +{len(r.stale) - STALE_DISPLAY_LIMIT} more")
+                if r.filtered_internal:
+                    print(f"   ⏭️  {r.filtered_internal} 个 Tauri 内部 JS 已白名单过滤(非 stale)")
                 if r.new:
                     print(f"   dist 中新增但 binary 未引用 ({len(r.new)} 个):")
                     for c in r.new[:5]:
@@ -212,6 +243,8 @@ def main() -> int:
                 print()
             else:
                 print(f"✅ {r.binary}: binary chunk ({len(r.binary_chunks)}) vs dist ({len(r.dist_chunks)}) 一致")
+                if r.filtered_internal:
+                    print(f"   ⏭️  {r.filtered_internal} 个 Tauri 内部 JS 已白名单过滤(非 stale)")
                 if r.new:
                     print(f"   ⚠️ dist 中新增 {len(r.new)} 个 chunk,建议重新 build binary")
 

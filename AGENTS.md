@@ -8,7 +8,6 @@
 
 这个项目存储和开发 Trae IDE 的**技能包**（skills），每个技能包是给 AI 代理加载的指令集。
 
----
 
 ```
 
@@ -28,14 +27,14 @@
 ### 技能安装路径
 
 ```
-✅ 正确: C:\Users\septe\.trae-cn\builtin_skills\
+✅ 正确: C:\Users\septe\.trae-cn\skills\
 ❌ 幻觉: C:\Users\septe\.trae-cn\builtin\global\skills\   ← AI 之前造的错误路径
 ```
 
-**装到 `builtin_skills/`**，不要发明路径。安装命令：
+**装到 `skills/`**，不要发明路径。安装命令：
 
 ```powershell
-Copy-Item -Recurse "${PWD}\{package}\skills\{skill-name}" "$env:USERPROFILE\.trae-cn\builtin_skills\{skill-name}"
+Copy-Item -Recurse "${PWD}\{package}\skills\{skill-name}" "$env:USERPROFILE\.trae-cn\skills\{skill-name}"
 ```
 
 ### 技能格式
@@ -55,7 +54,7 @@ description: 一句话描述 + 触发条件
 1. SKILL.md 必须带 YAML frontmatter（name + description）
 2. 技能目录放 skill-markets/ 下，每个技能一个子目录
 3. 大类技能用: SKILL.md + references/ + workflows/ + agents/ + scripts/
-4. 安装到 builtin_skills/，不要造路径
+4. 安装到 skills/，不要造路径
 5. 安装后提醒用户重启 IDE
 6. 写代码时保持 ponytail 思路（最简实现、标准库优先）
 7. 任务明确时才用 fullstack 流程（不加不必要的阶段）
@@ -117,7 +116,7 @@ Step 3 — 评估扫描结果
     └─ 通过 → 🟢 继续
 Step 4 — 注册到 CAPABILITY-MAP.md
 Step 5 — 更新 SECURITY-MAP.md（评分 + 点评）
-Step 6 — 安装到 builtin_skills/ 后重启 IDE
+Step 6 — 安装到 skills/ 后重启 IDE
 ```
 
 ### 流程二：引入第三方 Skill
@@ -188,13 +187,13 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
 
 ```powershell
 # 安装技能到全局（从仓库根运行）
-Copy-Item -Recurse "${PWD}\{pkg}\skills\{name}" "$env:USERPROFILE\.trae-cn\builtin_skills\{name}"
+Copy-Item -Recurse "${PWD}\{pkg}\skills\{name}" "$env:USERPROFILE\.trae-cn\skills\{name}"
 
 # 清理单个技能
-Remove-Item -Recurse -Force "$env:USERPROFILE\.trae-cn\builtin_skills\{name}"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.trae-cn\skills\{name}"
 
 # 查看已安装技能
-Get-ChildItem -Directory "$env:USERPROFILE\.trae-cn\builtin_skills\" | Select-Object Name
+Get-ChildItem -Directory "$env:USERPROFILE\.trae-cn\skills\" | Select-Object Name
 ```
 
 <!-- gitnexus:start -->

@@ -28,6 +28,8 @@
 | [e2e-module-audit](e2e-module-audit/SKILL.md) | 纯Skill | E2E 双模式验证 — 批量验收 + 即时诊断 | 无（⚠ 已整合到 acceptance-discipline） |
 | [doc-map-manager](doc-map-manager/SKILL.md) | 纯Skill | 文档地图管理器 — 结构化索引构建 + 多模式查询（grab/lookup/fuzzy/semantic/file） | build-index.py, query-index.py |
 | [vibe-coding-standards](vibe-coding-standards/SKILL.md) | 纯Skill | Vibe Coding 组件编写原则 — AGENTS.md/Rules/Skills/Subagents 结构规范与防击穿策略 | 无 |
+| [skill-optimization-method](skill-optimization-method/SKILL.md) | 纯Skill | 技能包优化升级方法论 — 体积诊断 + 外部对标 + 缺口对照 + 最小修复（项目级） | 无 |
+| [session-distiller](session-distiller/SKILL.md) | 纯Skill | 会话蒸馏器 — 从完整会话历史中提炼高质量方法论、最佳实践和可复用技能包 | 无 |
 
 ### L1 集成层（整合 L0 能力）
 
@@ -57,6 +59,7 @@
 | [comfyui-api-skills](comfyui-api-skills/SKILL.md) | 纯Skill | ComfyUI 视频制作全流程 — 15 子技能编排 | 15 子Skill + 10 脚本 + lib/ 共享库 |
 | [trae-security-review](trae-security-review/SKILL.md) | Agent驱动 | 双引擎安全审查 — AI 驱动的代码安全审查 + Skill 目录静态扫描 | 2 Agent + 1 脚本 + 3 参考文档 |
 | [vibe-coding-diagnosis](vibe-coding-diagnosis/SKILL.md) | 纯Skill | Vibe Coding 项目合规自检诊断 — 三步流程(定类型→套矩阵→出诊断)，9类项目 × 6维度(A-F) × 体量分级 | 3 参考文档 + 1 模板 |
+| [docsify-doc-builder](docsify-doc-builder/SKILL.md) | 纯Skill | UE 5 风格 docsify 文档系统 — 顶栏/多级分类/面包屑/右侧页内目录 + Mermaid 全屏/导出 + Markmap 思维导图（默认全部展开） | 1 SKILL + 4 ps1/sh 脚本（init-docs/serve/check-env/generate-sidebar）+ 6 模板（index.html/custom.css/_sidebar/_navbar/README/logo.svg） |
 
 ### 游戏制作群岛（单一 Kit 入口，内部 7 子技能）
 

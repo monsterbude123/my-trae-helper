@@ -85,7 +85,7 @@ Python >= 3.11
 ## 安装到 Trae IDE 全局技能目录
 
 ```powershell
-Copy-Item -Recurse "{skill_root}" "$env:USERPROFILE\.trae-cn\builtin_skills\voice-acting-skill"
+Copy-Item -Recurse "{skill_root}" "$env:USERPROFILE\.trae-cn\skills\voice-acting-skill"
 ```
 
 安装后重启 IDE 即可在对话中触发技能加载。
