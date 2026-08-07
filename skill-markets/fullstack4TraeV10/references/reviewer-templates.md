@@ -158,7 +158,7 @@ Reviewer 必须在 Completion Report 附以下事实证据（file:line 或日志
 | **B. 交互流程一致性** | spec.md User Story 行为 vs prototypes/ui-ux-logic.md 状态/事件流 |
 | **C. 数据模型一致性** | spec.md Entities/字段 vs contracts/domain-models.md |
 | **D. 验收标准完整性** | 每个 Requirement（FR/SC）都有对应 Acceptance Criteria 或 E2E Scenario |
-| **E. Constitution 对齐** | 与 `memory/constitution.md` MUST 原则无冲突（无该文件则跳过） |
+| **E. Constitution 对齐** | 与 `docs/constitution.md` MUST 原则无冲突（无该文件则跳过） |
 | **F. 覆盖度** | 需求 → 任务 → 实现 三层映射是否完整 |
 
 **判定**:

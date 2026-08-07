@@ -48,7 +48,7 @@
 
 ## §3. 沙箱绕过预案
 
-**症状**：Edit/Write 工具被 CWD 策略阻止跨项目写入（如从 `my-trae-helper` 写 `ai-dev/AIGCMediaDesktop`）
+**症状**：Edit/Write 工具被 CWD 策略阻止跨项目写入（如从当前项目写其他项目目录）
 
 **降级方案**（按优先级尝试）：
 1. `[System.IO.File]::WriteAllText($path, $content, [Text.UTF8Encoding]::new($false))` — .NET API 最稳
@@ -62,7 +62,7 @@
 ## §4. 验收命令
 
 ```powershell
-$spec = "d:\workspace\ai-dev\{project}\docs\specs\changes\{change}\spec.md"
+$spec = "docs/specs/{feature}/spec.md"  # 示例：相对路径，项目可按需调整
 $content = Get-Content $spec -Raw
 $bytes = (Get-Item $spec).Length  # 期望 >= 改前
 ([regex]::Matches($content, "### Requirement: REQ-{MODULE}-")).Count  # >= 5

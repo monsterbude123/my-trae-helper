@@ -17,7 +17,7 @@ python ~/.trae-cn/skills/fullstack4TraeV10/scripts/install-hooks.py --project-ro
 
 | # | Hook | 事件 | 默认 | V10.1 关键能力 |
 |---|------|------|:---:|------|
-| 1 | **fullstack-project-context** | `SessionStart` | ✅ | 6 层知识发现协议注入 + `.specify/constitution.md` v10_simplified 检测 + spec-purge 历史感知 + prototypes/ 完整性检查 |
+| 1 | **fullstack-project-context** | `SessionStart` | ✅ | 6 层知识发现协议注入 + `docs/constitution.md` v10_simplified 检测 + spec-purge 历史感知 + prototypes/ 完整性检查 |
 | 2 | **fullstack-complexity-guard** | `UserPromptSubmit` | ❌ | 新增「方向变/重置」(+4) +「UI/UX 重设计」(+3) + code-hygiene.py 调用结果检测 |
 | 3 | **fullstack-doc-sync-gate** | `PreToolUse` | ✅ | 写 src/ 前校验 DOC SYNC，`archive/out/spec-purge/` 存在时警告旧状态已归档 |
 | 4 | **fullstack-contract-gate** | `PreToolUse` | ✅ | 写代码前检查 contracts/，spec-purge 历史存在时区分「重置缺契约」vs「遗漏」 |
@@ -32,7 +32,7 @@ python ~/.trae-cn/skills/fullstack4TraeV10/scripts/install-hooks.py --project-ro
 
 | 脚本 | V10.1 升级点 |
 |------|------|
-| `session-start.py` | 6 层知识发现协议（state-card→INDEX→ARCHITECTURE→GitNexus→spec→define）+ `.specify/constitution.md` v10_simplified 标记检测 + spec-purge 历史检测 + prototypes 缺失检测与 backfill 路由建议 |
+| `session-start.py` | 6 层知识发现协议（state-card→INDEX→ARCHITECTURE→GitNexus→spec→define）+ `docs/constitution.md` v10_simplified 标记检测 + spec-purge 历史检测 + prototypes 缺失检测与 backfill 路由建议 |
 | `complexity-guard.py` | 新增「方向变/重置」信号 (score+4, CRITICAL) +「UI/UX 重设计」信号 (score+3) + code-hygiene.py 调用结果检测 |
 | `doc-sync-gate.py` | spec-purge 历史检测 → "旧 DOC SYNC 状态已归档" 警告 |
 | `contract-gate.py` | spec-purge 历史检测 → 区分「归档后契约待重建」vs「遗漏 contracts/」 |

@@ -82,7 +82,7 @@
 ### 白名单（可索引 layer=fact 目录）
 
 - `docs/contracts/`、`docs/modules/`、`docs/ARCHITECTURE.md`
-- `docs/specs/changes/{active}/`（仅活跃 change，排除 archive 子目录）
+- `docs/specs/{active}/`（仅活跃 feature，排除 archive 子目录）
 - `docs/api-endpoints/`、`docs/domain-models/`、`docs/events/`（spec-knowledge-extract 产物，layer=fact）
 - `AGENTS.md`
 

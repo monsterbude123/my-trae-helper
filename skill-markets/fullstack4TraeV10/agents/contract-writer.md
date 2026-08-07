@@ -25,10 +25,10 @@ version: "10.0.0"
 
 ### Step 1: 读取上游
 
-- spec.md（含 Enhanced Acceptance 段）
-- plan.md（Capabilities + Non-Goals）
-- ARCHITECTURE.md + modules/（定位已有模型）
-- 已有 contracts/（检测旧契约 → 标注 MODIFIED 或 DEPRECATED）
+- `docs/specs/{feature}/spec.md`（含 Enhanced Acceptance 段）
+- `docs/specs/{feature}/plan.md`（Capabilities + Non-Goals）
+- `docs/ARCHITECTURE.md` + `docs/modules/`（定位已有模型）
+- 已有 `docs/specs/{feature}/contracts/`（检测旧契约 → 标注 MODIFIED 或 DEPRECATED）
 
 ### Step 2: 产出四件套
 
@@ -58,7 +58,7 @@ version: "10.0.0"
 | BREAKING（删字段/改类型/改路径） | **必须用户确认** | major |
 
 ## 产出
-- `contracts/` 目录（四件套 + 测试骨架）
+- `docs/specs/{feature}/contracts/` 目录（四件套 + 测试骨架）
 
 ## 交付协议
 

@@ -250,6 +250,45 @@ def dir_has_entries(path: Path) -> bool:
         return False
 
 
+# === 模板解析（Spec-Kit 2 层简化栈） ===
+
+def resolve_template(
+    project_root: Path,
+    template_name: str,
+    package_root: Path,
+) -> Optional[Path]:
+    """解析模板路径（2 层栈：项目 overrides > V10 内置）
+
+    借鉴 spec-kit resolve_template，简化为 2 层（砍掉 presets/extensions 层）：
+      1. {project_root}/docs/templates/overrides/{name}.md  — 项目级覆盖
+      2. {package_root}/templates/{name}.md                 — V10 内置默认
+
+    设计原因（与 spec-kit 4 层栈的差异）:
+      - 砍掉 presets 层: V10 用 docs/specs/{feature}/ 而非多组织堆叠
+      - 砍掉 extensions 层: V10 用 agents/ + references/ 扩展能力,不用模板扩展
+      - 保留 overrides 层: 项目可在不动技能源码前提下局部调整模板
+
+    Args:
+        project_root: V10 项目根（含 docs/）
+        template_name: 模板名（不含 .md 后缀，如 "spec-template"）
+        package_root: V10 技能包根（含 templates/）
+
+    Returns:
+        匹配的模板路径（找不到返回 None）
+    """
+    # L1: 项目级 overrides
+    override = (
+        project_root / "docs" / "templates" / "overrides" / f"{template_name}.md"
+    )
+    if override.is_file():
+        return override
+    # L2: V10 内置
+    core = package_root / "templates" / f"{template_name}.md"
+    if core.is_file():
+        return core
+    return None
+
+
 # === 主入口（自检） ===
 
 if __name__ == "__main__":

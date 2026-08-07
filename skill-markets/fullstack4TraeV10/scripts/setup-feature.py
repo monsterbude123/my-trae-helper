@@ -47,6 +47,7 @@ try:
         detect_feature_dir,
         emit_json,
         get_project_root,
+        resolve_template,
         validate_feature_name,
     )
 except ImportError:  # pragma: no cover
@@ -56,13 +57,13 @@ except ImportError:  # pragma: no cover
         detect_feature_dir,
         emit_json,
         get_project_root,
+        resolve_template,
         validate_feature_name,
     )
 
 
 # V10 模板默认路径（相对 V10 包根）
 V10_PACKAGE_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_TEMPLATE = V10_PACKAGE_ROOT / "templates" / "spec-template.md"
 
 # feature.json 元数据结构
 FEATURE_JSON_VERSION = "1.0"
@@ -75,11 +76,17 @@ HELP_TEXT = """用法: setup-feature.py --name FEATURE [OPTIONS]
 选项:
   --name NAME            feature 名（必填，格式: NN-NN-name）
   --project-root PATH    项目根（默认自动查找）
-  --template PATH        spec.md 模板路径（默认用 V10 内置 spec-template.md）
+  --template PATH        spec.md 模板路径（一次性覆盖，默认走 2 层栈解析）
+  --print-template-path  只输出实际解析到的模板路径，不创建任何文件
   --dry-run              预览，不实际创建
   --force                已存在时补全缺失文件（不覆盖已有文件）
   --json                 JSON 格式输出
   --help, -h             显示此帮助
+
+模板解析优先级（借鉴 spec-kit，简化为 2 层）:
+  1. --template PATH                       （命令行一次性覆盖，最高）
+  2. docs/templates/overrides/spec-template.md  （项目级长期覆盖）
+  3. {V10 包}/templates/spec-template.md        （V10 内置默认）
 
 示例:
   # 创建标准 feature
@@ -90,6 +97,9 @@ HELP_TEXT = """用法: setup-feature.py --name FEATURE [OPTIONS]
 
   # 强制补全（已存在但缺文件时）
   python scripts/setup-feature.py --name 00-05-task-queue --force
+
+  # 回归扫描：查看当前项目实际会用到哪个模板
+  python scripts/setup-feature.py --name 00-05-task-queue --print-template-path
 
 创建结构（自动适配布局）:
   - V10 标准:   docs/specs/{feature}/
@@ -185,6 +195,33 @@ def _load_template(template_path: Path) -> Optional[str]:
         return template_path.read_text(encoding="utf-8")
     except OSError:
         return None
+
+
+def _resolve_actual_template(
+    cli_template: Optional[Path],
+    project_root: Path,
+    package_root: Path,
+) -> Optional[Path]:
+    """3 层栈解析实际使用的模板路径
+
+    优先级（借鉴 spec-kit 4 层栈，简化为 3 层）:
+      1. --template PATH                       （命令行一次性覆盖）
+      2. docs/templates/overrides/spec-template.md  （项目级长期覆盖）
+      3. {package_root}/templates/spec-template.md  （V10 内置默认）
+
+    Args:
+        cli_template: --template 参数（None 表示未指定）
+        project_root: V10 项目根
+        package_root: V10 技能包根
+
+    Returns:
+        实际使用的模板路径（找不到返回 None → 走最小骨架）
+    """
+    # L1: 命令行一次性覆盖
+    if cli_template is not None:
+        return cli_template
+    # L2 + L3: 走 common.resolve_template 2 层栈
+    return resolve_template(project_root, "spec-template", package_root)
 
 
 def _render_spec_content(feature: str, template_text: Optional[str], today: str) -> str:
@@ -362,11 +399,15 @@ def setup_feature(
         created, line = _create_directory(sub_dir, dry_run)
         actions.append(line)
 
-    # 3. 加载模板并写 spec.md
-    actual_template = template_path or DEFAULT_TEMPLATE
-    template_text = _load_template(actual_template)
+    # 3. 加载模板并写 spec.md（2 层栈：--template > overrides > V10 内置）
+    resolved_template = _resolve_actual_template(
+        template_path, project_root, V10_PACKAGE_ROOT
+    )
+    template_text = _load_template(resolved_template) if resolved_template else None
     if template_text is None:
-        actions.append(f"  ⚠️ 模板未找到: {actual_template}，使用最小骨架")
+        actions.append(
+            f"  ⚠️ 模板未找到: {resolved_template or '(全部层级均无匹配)'}，使用最小骨架"
+        )
 
     spec_content = _render_spec_content(feature, template_text, today)
     written, line = _write_file(paths.spec, spec_content, force, dry_run)
@@ -382,6 +423,7 @@ def setup_feature(
         "status": "ok" if not dry_run else "dry-run",
         "feature": feature,
         "feature_dir": str(paths.feature_dir),
+        "resolved_template": str(resolved_template) if resolved_template else None,
         "created_paths": {
             "feature_dir": str(paths.feature_dir),
             "spec": str(paths.spec),
@@ -436,7 +478,12 @@ def main(argv: List[str] | None = None) -> int:
     )
     parser.add_argument("--name", type=str, help="feature 名（必填，NN-NN-name）")
     parser.add_argument("--project-root", type=str, help="项目根路径")
-    parser.add_argument("--template", type=str, help="spec.md 模板路径")
+    parser.add_argument("--template", type=str, help="spec.md 模板路径（一次性覆盖）")
+    parser.add_argument(
+        "--print-template-path",
+        action="store_true",
+        help="只输出实际解析到的模板路径，不创建任何文件（回归扫描用）",
+    )
     parser.add_argument("--dry-run", action="store_true", help="预览模式")
     parser.add_argument("--force", action="store_true", help="已存在时补全缺失文件")
     parser.add_argument("--json", action="store_true", help="JSON 格式输出")
@@ -477,6 +524,37 @@ def main(argv: List[str] | None = None) -> int:
                 file=sys.stderr,
             )
             template_path = None
+
+    # --print-template-path: 只输出实际解析到的模板路径，不创建任何文件
+    if args.print_template_path:
+        resolved = _resolve_actual_template(
+            template_path, project_root, V10_PACKAGE_ROOT
+        )
+        if args.json:
+            emit_json(
+                {
+                    "template_name": "spec-template",
+                    "resolved_path": str(resolved) if resolved else None,
+                    "source": (
+                        "cli"
+                        if template_path is not None
+                        else (
+                            "project-overrides"
+                            if resolved
+                            and str(resolved).replace("\\", "/").endswith(
+                                "docs/templates/overrides/spec-template.md"
+                            )
+                            else "v10-core"
+                        )
+                    ),
+                }
+            )
+        else:
+            if resolved:
+                print(str(resolved))
+            else:
+                print("(无匹配模板，将走最小骨架)")
+        return 0
 
     # 执行
     result = setup_feature(

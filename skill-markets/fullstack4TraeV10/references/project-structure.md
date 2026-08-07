@@ -33,12 +33,18 @@ project/
 │   ├── modules/                        # 模块文档（DOC SYNC 写入）
 │   │   └── {module-name}.md
 │   ├── reports/                        # 审查/验收报告历史
+│   ├── verifications/tauri/            # ★ V10.3.9 视觉证据目录（Tauri 桌面应用）
+│   │   └── YYYY-MM-DD-{intent}.png     #   截图命名：日期-意图
+│   ├── rot-discoveries/                # ★ V10.5 腐烂点发现报告（项目运行时产物）
+│   │   ├── .state-card.md              #   rot-reinforcer 状态卡
+│   │   └── YYYY-MM-DD-{project}.md     #   具体腐烂点发现报告（项目特定）
 │   ├── api-endpoints/                   # ★ 项目级 API 注册表（归档时积累，一个 feature 一个文件）
 │   │   └── {feature}.md
 │   ├── domain-models/                   # ★ 项目级领域模型注册表（归档时积累，一个 feature 一个文件）
 │   │   └── {feature}.md
 │   ├── events/                          # ★ 项目级事件目录（归档时积累，一个 feature 一个文件）
 │   │   └── {feature}.md
+│   ├── constitution.md                 # ★ V10.8 宪法文件（项目不可协商铁律）
 │   ├── ARCHITECTURE.md                 # 架构总览
 │   ├── DECISIONS.md                    # 技术决策记录
 │   ├── INDEX.md                        # 项目文档索引
@@ -67,6 +73,12 @@ V9:  docs/specs/{feature}/prototypes/
 ```
 
 纯后端 feature 不产生 `prototypes/` 目录。
+
+> **V10.8 边界澄清**：
+> - 技能包内 `scripts/`：通用工具（code-hygiene.py, phase-gate.py 等）
+> - 项目级 `.trae/hooks/`：项目特定钩子
+> - 项目级 `.trae/rules/`：项目级规则（如 agent-机械验证.md）
+> - 技能包内无 `rules/` 目录
 
 ---
 

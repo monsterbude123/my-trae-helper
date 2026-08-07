@@ -25,7 +25,7 @@ version: "10.0.0"
 
 ### Step 0: 上游检测（必走）
 
-读取目标 `spec.md`，分三种情况：
+读取目标 `docs/specs/{feature}/spec.md`，分三种情况：
 
 | 情况 | 触发条件 | 行为 |
 |------|---------|------|
@@ -40,8 +40,9 @@ version: "10.0.0"
   ├── 上游 Trae Spec Mode / V10 迁移（已含 Requirements + Scenarios）
   │     → 走 Step 1-4 正常 Enhanced Acceptance
   │
-  └── 上游已含原型 HTML（aigc-desktop-ui.design/pages/*.html）
+  └── 上游已含原型 HTML（{project_prototype_dir}/*.html）
         → 委派 [spec-prototype-enhancer.md](spec-prototype-enhancer.md) 反推 ADDED Requirements
+        注：项目应在 constitution 或 state-card 声明原型路径
         → 主上下文并行运行 prototype-spec-enhancer，不阻塞 spec-enhancer 主体
         → Completion Report 追加 `prototype_requirements: {N}` 字段
 ```
@@ -55,8 +56,8 @@ spec-prototype-enhancer 输出的 §ADDED Requirements 与 Enhanced Acceptance �
 
 ### Step 1: 读取上游（情况 A/B）
 
-- 读取 Trae 产出的 `spec.md` 或 V10 迁移后的 spec.md
-- 读取 planner 产出的 `plan.md`（Capabilities + Non-Goals + Impact）
+- 读取 Trae 产出的 `docs/specs/{feature}/spec.md` 或 V10 迁移后的 spec.md
+- 读取 planner 产出的 `docs/specs/{feature}/plan.md`（Capabilities + Non-Goals + Impact）
 
 ### Step 2: 补充 Enhanced Acceptance
 

@@ -4,7 +4,7 @@ description: 主动诊断腐烂点 + 输出 actionable fix list
 triggers:
   - 每个 Phase 4 (Review) 末尾强制
   - 用户提问"流程有没有问题"时
-  - .specify/constitution.md 更新时
+  - docs/constitution.md 更新时
   - Phase 4.5 (Proactive Rot Scan) Review→Accept 之间强制
 version: "10.5.0"
 ---

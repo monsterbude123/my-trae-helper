@@ -42,21 +42,21 @@ spec-prototype-enhancer (本次新增):
 
 ### Step 1: 读 5 件套
 
-- 目标 `spec.md` 全文
-- 已有 `prototypes/design-prompt.md` + `ui-ux-logic.md`
+- 目标 `docs/specs/{feature}/spec.md` 全文
+- 已有 `docs/specs/{feature}/prototypes/design-prompt.md` + `ui-ux-logic.md`
 - 对应 HTML 原型 (main context 会列出路径清单)
-- 标杆 `00-03-diagnostic/spec.md` §ADDED Requirements (质量对齐)
+- 标杆 `{标杆_feature}/spec.md` §ADDED Requirements (质量对齐，项目需自选标杆)
 - 标杆 `agents/spec-enhancer.md` 了解上游契约
 
 ### Step 2: 识别 6 类缺口
 
 按上表逐类扫描 prototype + spec，列出缺失项。
 
-### Step 3: 追加到 spec.md
+### Step 3: 追加到 `docs/specs/{feature}/spec.md`
 
 **保留现有 §1-§3 / §5+ 内容不动**：
-- 若 spec.md **无** `## 4. ADDED Requirements` → 在 §3 Non-Goals 后插入
-- 若 spec.md **已有** → **追加**到现有 §4 末尾，不替换
+- 若 `docs/specs/{feature}/spec.md` **无** `## 4. ADDED Requirements` → 在 §3 Non-Goals 后插入
+- 若 `docs/specs/{feature}/spec.md` **已有** → **追加**到现有 §4 末尾，不替换
 
 **格式模板 + REQ ID 命名规范**：详见 [prototype-reverse-spec.md](../references/prototype-reverse-spec.md) §2（含 Requirement/Scenario 格式 + MODULE/CATEGORY/NN 命名规范）。
 
@@ -77,7 +77,7 @@ Edit/Write 被沙箱拦截时按优先级尝试 3 个降级方案（.NET WriteAl
 
 ## 产出
 
-- `docs/specs/changes/{change}/spec.md`（追加 §ADDED Requirements）
+- `docs/specs/{feature}/spec.md`（追加 §ADDED Requirements）
 - 无新文件、无新文档、无 prototype 改动
 
 ## 门禁底线

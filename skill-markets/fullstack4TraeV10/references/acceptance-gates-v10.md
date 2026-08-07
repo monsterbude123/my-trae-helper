@@ -141,10 +141,12 @@ Phase B — 交互逻辑:
 
 ## 关联规则
 
-- 主上下文机械校验：`/rules/agent-机械验证.md` Step 0 字段值校验
-- 代码卫生：`scripts/code-hygiene.py`
-- 阶段转换：`scripts/phase-gate.py`
-- 评分制度强化：`rules/agent-机械验证.md` §V10 评分制度
+- 主上下文机械校验：项目级 `.trae/rules/agent-机械验证.md` Step 0 字段值校验
+- 代码卫生：技能包内 `scripts/code-hygiene.py`（或项目级 `.trae/hooks/code-hygiene.py`）
+- 阶段转换：技能包内 `scripts/phase-gate.py`（或项目级 `scripts/phase-gate.py`）
+- 评分制度强化：项目级 `.trae/rules/agent-机械验证.md` §V10 评分制度
+
+> **边界澄清（V10.8）**：技能包内 `scripts/` 是通用工具；项目级 `.trae/hooks/` 是项目特定钩子；项目级 `.trae/rules/` 是项目级规则。技能包内无 `rules/` 目录。
 
 ### §3.2 零残留规则 (V10.3.5 NEW)
 

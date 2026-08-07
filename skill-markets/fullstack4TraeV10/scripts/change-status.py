@@ -133,7 +133,7 @@ def read_change_status(change_dir: str) -> dict:
         blockers.append(f"tasks 未全部完成: {artifacts['tasks']['completed']}/{artifacts['tasks']['total']}")
 
     # 检测 spec-purge 归档（V10 取代 V9 _invalidated/）
-    # change_dir 通常是 {project_root}/docs/specs/changes/{change_name}
+    # change_dir 通常是 {project_root}/docs/specs/{feature_name}
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(change_dir)))
     spec_purge_dir = os.path.join(project_root, 'docs', 'archive', 'out', 'spec-purge')
     reset_mode = os.path.isdir(spec_purge_dir)

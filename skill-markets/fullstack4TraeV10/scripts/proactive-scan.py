@@ -378,20 +378,20 @@ def run_state_card_staleness(project_root: Path, feature: Optional[str] = None) 
 def run_stub_pileup(project_root: Path, feature: Optional[str] = None) -> CheckResult:
     """检查 8: 骨架堆积腐烂 (腐烂点 17)
 
-    算法: 扫 docs/specs/changes/*/ 各文件存在性
+    算法: 扫 docs/specs/*/ 各文件存在性
           → 分类 archived / full-plan / stub (only define.md) / controller
           → stub_rate = stub / total
     """
     t0 = time.time()
-    changes_dir = project_root / "docs" / "specs" / "changes"
-    if not changes_dir.is_dir():
+    specs_dir = project_root / "docs" / "specs"
+    if not specs_dir.is_dir():
         return CheckResult(
             "stub-pileup", "skip", "PASS",
-            "无 docs/specs/changes/ 目录（非 V10 项目）",
+            "无 docs/specs/ 目录（非 V10 项目）",
             0, int((time.time() - t0) * 1000),
         )
     buckets = {"archived": [], "full": [], "stub": [], "controller": [], "other": []}
-    for d in sorted(changes_dir.iterdir()):
+    for d in sorted(specs_dir.iterdir()):
         if not d.is_dir():
             continue
         # 控制器: 有 plan.md/spec.md 但无 tasks.md

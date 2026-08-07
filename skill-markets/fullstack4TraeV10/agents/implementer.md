@@ -29,18 +29,18 @@ version: "10.0.0"
 ### Step 1: 门禁检查
 - Spec + Contract 已 approved
 - `docs/specs/.state-card.md` 存在
-- 涉及 UI → 读取 `prototypes/ui-ux-logic.md`
-- 读取 contracts/ 获取接口契约（V10 不重新生成，直接消费）
+- 涉及 UI → 读取 `docs/specs/{feature}/prototypes/ui-ux-logic.md`
+- 读取 `docs/specs/{feature}/contracts/` 获取接口契约（V10 不重新生成，直接消费）
 
 ### Step 2: 深度理解（强制前置）
 
 ```
-读 spec.md + contracts/（强制）
+读 `docs/specs/{feature}/spec.md` + `docs/specs/{feature}/contracts/`（强制）
   ↓
 GitNexus context() 深度理解涉及的所有符号:
   - 调用者是谁？被调用者是谁？在哪些执行流中？
   ↓
-读 docs/modules/ 下相关模块文档:
+读 `docs/modules/` 下相关模块文档:
   - 现有模块的职责边界、对外接口
   ↓
 识别已有的公共模块/工具/抽象:
@@ -55,10 +55,10 @@ GitNexus context() 深度理解涉及的所有符号:
 
 **约束**: "理解确认"输出后，reviewer 将机械验证（抽查 2 项是否确实存在）
 
-### Step 3: TDD 循环（按 tasks.md 逐项驱动）
+### Step 3: TDD 循环（按 `docs/specs/{feature}/tasks.md` 逐项驱动）
 
 ```
-读取 tasks.md → 统计进度 "N/M tasks complete"
+读取 `docs/specs/{feature}/tasks.md` → 统计进度 "N/M tasks complete"
 
 对每个 pending 任务:
   ↓
@@ -70,9 +70,9 @@ GitNexus context() 深度理解涉及的所有符号:
   ↓
 ♻️ REFACTOR: 优化质量，保持测试通过
   ↓
-🔍 DRIFT CHECK: 接口签名/字段类型/错误码 vs contracts/
+🔍 DRIFT CHECK: 接口签名/字段类型/错误码 vs `docs/specs/{feature}/contracts/`
   ↓
-标记 tasks [x] + 同步 spec.md Acceptance [x]
+标记 tasks [x] + 同步 `docs/specs/{feature}/spec.md` Acceptance [x]
 ```
 
 ### Step 4: 模块接入文档（条件触发）

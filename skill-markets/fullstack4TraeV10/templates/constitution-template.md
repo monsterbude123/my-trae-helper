@@ -222,7 +222,7 @@ Constitution 任何 Article 的修改必须：
 
 > **V10.5 新增（2026-07-31，腐烂点 15 修复）**
 
-**Rationale**: state-card/INDEX 声称的 INV 必在 spec.md 落地。文档自我吹嘘 = 假质量信号。V10.5 强制所有"已完成"声明必含证据锚定。实战教训: AIGCMediaDesktop state-card 声称 9 跨模块不变量,实际只有 2 (INV-STORE-02 + INV-EV-04) 真正在 spec.md 落地,7 个 (78%) 自我吹嘘。
+**Rationale**: state-card/INDEX 声称的 INV 必在 spec.md 落地。文档自我吹嘘 = 假质量信号。V10.5 强制所有"已完成"声明必含证据锚定。实战教训（脱敏）: 某项目 state-card 声称 9 跨模块不变量,实际只有 2 (INV-XXX-001 + INV-XXX-002) 真正在 spec.md 落地,7 个 (78%) 自我吹嘘。INV 编号格式: `INV-{模块}-{NNN}`，跨模块不变量建议用 `INV-CROSS-{NNN}`。
 
 **Enforcement**:
 - state-card.md / INDEX.md / SPEC-ENHANCEMENT 报告中声称的 `INV-XXX` 必须在对应 `spec.md` 中实际出现
@@ -239,7 +239,7 @@ Constitution 任何 Article 的修改必须：
 
 > **V10.5 新增（2026-07-31，腐烂点 17 修复）**
 
-**Rationale**: 🟡 骨架 (只 define.md,无 spec/tasks) 不是"中性"状态,而是隐性技术债。骨架堆积是破窗效应——一个 stub 出现后,新模块也开始只起 define。V10.5 强制骨架必须在 2 周内推进到 spec/tasks,或显式冻结/归档。实战教训: AIGCMediaDesktop 19 个 change 中 12 个 (63%) 是 stub,实际 0% 推进,破窗临界。
+**Rationale**: 🟡 骨架 (只 define.md,无 spec/tasks) 不是"中性"状态,而是隐性技术债。骨架堆积是破窗效应——一个 stub 出现后,新模块也开始只起 define。V10.5 强制骨架必须在 2 周内推进到 spec/tasks,或显式冻结/归档。实战教训（脱敏）: 某实战项目 19 个 change 中 12 个 (63%) 是 stub,实际 0% 推进,破窗临界。
 
 **Enforcement**:
 - 新建 define.md 后,14 天内必须出现 spec.md (否则自动冻结,不再列入"活跃变更")

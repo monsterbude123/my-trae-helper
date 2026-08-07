@@ -92,6 +92,8 @@ layer: fact     # 事实文档 — 任务执行时必读
 | define.md | 80 行 | 精简 Non-Goals + Out of Scope |
 | Contract 单文件 | 200 行 | 拆分为子契约 |
 
+**注**: 状态卡 40 行是目标值（最佳实践），80 行是硬上限（触发重置）。目标值用于日常维护参考，硬上限是强制性门禁。
+
 ---
 
 ## 状态卡四态重置
@@ -117,7 +119,7 @@ layer: fact     # 事实文档 — 任务执行时必读
 
 - 修剪/迁移文档时，操作前编目事实 → 操作后逐项验证 → 缺失 = 回退
 - `archive/` 目录下文件不可修改（归档 = 只读）
-- 过程文档（layer=process）不进 `contracts/` 或 `specs/changes/`，放 `docs/bugs/` 或 `docs/reports/`
+- 过程文档（layer=process）不进 `docs/specs/{feature}/contracts/`，放 `docs/bugs/` 或 `docs/reports/`
 
 ---
 
@@ -173,9 +175,9 @@ layer: fact     # 事实文档 — 任务执行时必读
 ### 四步流程
 
 ```
-1. 编目旧产物: ls specs/changes/{NN}/ → 列出 V1-V3 所有文件
+1. 编目旧产物: ls docs/specs/{feature}/ → 列出 V1-V3 所有文件
 2. 创建隔离目录: mkdir _invalidated/v{N}/
-3. 移动旧产物: mv specs/changes/{NN}/* → _invalidated/v{N}/
+3. 移动旧产物: mv docs/specs/{feature}/* → _invalidated/v{N}/
 4. 写 REFACTOR_MODE.md: 说明本次重做范围 + 禁止读 _invalidated/
 ```
 
@@ -190,7 +192,7 @@ layer: fact     # 事实文档 — 任务执行时必读
 ### 反例
 
 - 现象：某 change V1-V3 漂移，只重置状态卡未物理隔离 → implementer glob 捞出 38 个文件 30 个是旧产物 → 上下文爆炸
-- 根因：只重置状态卡，未物理隔离旧产物，旧产物仍在 specs/changes/{NN}/
+- 根因：只重置状态卡，未物理隔离旧产物，旧产物仍在 docs/specs/{feature}/
 - 教训：V4+ 重做必须物理隔离到 _invalidated/v{N}/，不能只重置状态卡
 - 来源：absorption-plan §七（物理隔离机制 V4+ 重做）
 

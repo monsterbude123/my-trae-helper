@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""install-v10.py — 一键升级 fullstack4TraeV10 到 10.2.0
+"""install-v10.py — 一键升级 fullstack4TraeV10 到 10.9.0
 
 用法（在 my-trae-helper 目录执行）：
     python install-v10.py
@@ -25,7 +25,7 @@ def step(n: int, total: int, msg: str) -> None:
 
 
 def main() -> int:
-    banner("Fullstack4TraeV10 10.2.0 升级安装")
+    banner("Fullstack4TraeV10 10.9.0 升级安装")
     print(f"源:   {SOURCE}")
     print(f"目标: {TARGET}")
 
@@ -43,7 +43,7 @@ def main() -> int:
         print(f"[1/4] 无旧版本")
 
     # 3. 复制新版本
-    print(f"[2/4] 复制 10.2.0 → {TARGET}")
+    print(f"[2/4] 复制 10.9.0 → {TARGET}")
     TARGET.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(SOURCE, TARGET, dirs_exist_ok=False)
 
@@ -87,7 +87,8 @@ def main() -> int:
     print()
     print("验证命令（重启后执行）:")
     print(f"  python {TARGET / 'scripts' / 'acceptance-audit.py'} --help")
-    print(f"  python {TARGET / 'scripts' / 'check_prerequisites.py'} --phase acceptance-precheck --feature 00-01-foundation --project-root D:\\workspace\\ai-dev\\AIGCMediaDesktop --json")
+    print(f"  python {TARGET / 'scripts' / 'check_prerequisites.py'} --phase acceptance-precheck --feature {{feature_name}} --project-root {{project_root}} --json")
+    print(f"  # 例如: --feature 00-01-foundation --project-root {{your_project_root}}")
 
     return 0
 

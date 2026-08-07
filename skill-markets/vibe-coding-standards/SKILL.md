@@ -1,6 +1,6 @@
 ---
 name: vibe-coding-standards
-description: Vibe Coding 核心组件编写原则 v2.3 — AGENTS.md、Rules、Skills、Subagents 的结构规范、体积红线和防上下文击穿策略。v2.3 新增标准三件套模式、Skills 可选增强段、AGENTS.md 扩展模块。适用于编写/审查 AI 代理的提示词、规则、技能和子代理定义。
+description: Vibe Coding 核心组件编写原则 v2.4 — AGENTS.md、Rules、Skills、Subagents 的结构规范、体积弹性范围（100~250 行）和防上下文击穿策略。v2.4 新增弹性范围取代硬边限制（> 250 行才考虑提取 references/）。
 triggers:
   - "编写AGENTS.md"
   - "写规则"
@@ -26,7 +26,7 @@ triggers:
 
 ## §1 通用铁律（适用于所有组件类型）
 
-1. **体积红线：单文件 ≤ 150 行。** 超过即击穿上下文，触发"中间遗忘"。
+1. **体积弹性范围 100~250 行（最合适）**。< 100 行可能过度拆分导致文件碎片化；> 250 行才考虑提取到 references/。超过 250 行 = 触发"中间遗忘"风险，应拆。
 2. **指针优先：** 只放大纲 + 引用路径，禁止内联大段代码或详细说明。
 3. **原子化：** 每个文件只做一件事，按需加载，非必需不读取。
 
@@ -50,7 +50,7 @@ triggers:
 | 核心设计决策（Why，≤3条） | 历史决策记录 |
 | 关键命名约定/路径约定 | 各模块内部实现细节 |
 
-**地图的 150 行上限可以弹性放宽到 ~200 行**，但必须满足：每行都是"不知道就会迷路"的内容。
+**地图的弹性范围 100~250 行（最合适）**，但必须满足：每行都是"不知道就会迷路"的内容。> 250 行才考虑提取 references/。
 
 ---
 
@@ -60,7 +60,10 @@ triggers:
 结构: 项目地图(内联) + Non-negotiables(≤5) + Version + Goal-driven + Surgical changes
        + Persistence + Tool/Failure + Communication + Session hygiene
        + Self-improvement loop + 规范指针
-体积: 含地图 ≤ 200 行（地图弹性），纯铁律 ≤ 150 行
+体积: 弹性范围 100~250 行。 含地图 ≤ 250 行（地图弹性放宽），纯铁律 ≤ 150 行
+  - < 100 行: 文件碎片化，反而难维护
+  - 100~250 行: 最合适
+  - > 250 行: 必须提取 references/
 地图: 技术栈/目录树/架构拓扑/入口文件/启动命令/设计决策 — agent 不知道就会迷路
 规范: 详细文档/长代码示例 → references/ 指针引用
 关键模块:
@@ -95,11 +98,14 @@ triggers:
 ## §4 Skills 编写原则（专业手册）
 
 ```
-体积: SKILL.md ≤ 150 行
+体积: 弹性范围 100~250 行。 纯铁律 ≤ 150 行
+  - < 100 行: 过度拆分
+  - 100~250 行: 最合适
+  - > 250 行: 必须提取 references/errors.md 或 references/*.md
 内容: 核心铁律 + 骨架流程（每步一句话引用 references/）
 结构: YAML frontmatter → Prerequisites → Core Workflow → Constraints → Quality Checklist
 可选增强: [Quick Start] [Examples] [Troubleshooting] — 按需添加，示例比描述管用 10 倍
-  若加完后超 150 行 → 把 Troubleshooting 移到 references/errors.md
+  若加完后超 250 行 → 把 Troubleshooting 移到 references/errors.md
 
 ### §4.1 技能依赖检查（硬性标准）
 
@@ -119,7 +125,10 @@ triggers:
 ## §5 Subagents 编写原则（外包团队）
 
 ```
-体积: ≤ 150 行
+体积: 弹性范围 100~250 行。 纯铁律 ≤ 150 行
+  - < 100 行: 过度拆分
+  - 100~250 行: 最合适
+  - > 250 行: 必须提取 references/
 内联禁令: 严禁把 references/templates 已有内容内联到 agent 文件
 组成: 核心铁律(≤10) + 骨架工作流(每步引用 references/) + I/O 骨架 + 异常速查 + 参考链接
 通信: 输出必须是结构化 JSON Lines 或 Markdown 表格，严禁大段散文

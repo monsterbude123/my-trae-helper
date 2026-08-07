@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """self-diagnose.py — V10.4 检测器自身腐烂点诊断
 
-实战教训: AIGCMediaDesktop 实测时发现 proactive-scan 的子检测器有 2 个自身腐烂点:
+实战教训（脱敏）: 某实战项目实测时发现 proactive-scan 的子检测器有 2 个自身腐烂点:
   - dist-hash-check.py regex 太贪婪(把 icon kebab-name 误当 chunk)
   - visual-content-check.py L5 阈值硬编码 5(深色主题误报)
 本脚本作为 V10 自我反思机制,在 release 前跑一遍。

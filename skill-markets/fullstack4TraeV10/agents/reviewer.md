@@ -40,7 +40,7 @@ Step -2: 拆解验收基准 → 必须满足条件清单 + 高风险/易遗漏�
          详见 [reviewer-templates.md](../references/reviewer-templates.md) §Step -2
          强制联动: Step 1.5 必须逐项核查高风险清单
 
-Step -1: Analyze → 跨4工件(spec/contracts/prototypes/plan)静态一致性分析
+Step -1: Analyze → 跨4工件(docs/specs/{feature}/spec.md + contracts/ + prototypes/ + plan.md)静态一致性分析
          检测维度 A-F 详见 [reviewer-templates.md](../references/reviewer-templates.md) §Step -1
          阻塞项≥1 → 🛑 REJECT
 

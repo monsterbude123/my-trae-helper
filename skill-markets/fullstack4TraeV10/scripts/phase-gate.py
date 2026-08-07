@@ -18,7 +18,7 @@ V10.4 新增 (2026-07-30):
   python scripts/phase-gate.py --phase spec-to-contract --feature 00-05-task-queue --json
 
   # 接入契约门禁（V10 新增 2026-07-28）
-  python scripts/phase-gate.py --phase integration-contract --project-root /path/to/AIGCMediaDesktop
+  python scripts/phase-gate.py --phase integration-contract --project-root /path/to/your-project
 
 任意检查失败 = exit 1 + 具体缺失项
 """

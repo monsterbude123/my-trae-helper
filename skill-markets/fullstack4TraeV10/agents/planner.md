@@ -51,7 +51,7 @@ version: "10.0.0"
 
 ```
 子代理 A — 文档探索（search）:
-  - 读 INDEX.md → ARCHITECTURE.md → 相关 spec → 对应模块文档
+  - 读 `docs/INDEX.md` → `docs/ARCHITECTURE.md` → 相关 spec → 对应模块文档
   - 产出: 已有能力清单 + 架构约束 + 受影响模块
 
 子代理 B — 代码探索（search）:

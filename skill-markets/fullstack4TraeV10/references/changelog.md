@@ -1,9 +1,77 @@
 # CHANGELOG
 
+## v10.9.0 (2026-08-07)
+
+### 模板覆盖机制 — 借鉴 spec-kit resolve_template 2 层栈
+
+- **新增** `scripts/common.py::resolve_template()` — 2 层栈解析模板路径（项目 overrides > V10 内置）
+  - 借鉴: spec-kit `scripts/python/common.py::resolve_template()`（4 层栈：overrides/presets/extensions/core）
+  - 简化: 砍掉 presets（V10 用 docs/specs/{feature}/ 替代多组织堆叠）+ extensions 层（V10 用 agents/+references/ 扩展能力）
+- **新增** `scripts/scan-templates.py` — 模板解析回归扫描（CI/审计用，支持 `--json --strict`）
+- **改造** `scripts/setup-feature.py`:
+  - 改用 `resolve_template()` 替代直接 `DEFAULT_TEMPLATE` 引用
+  - 新增 `--print-template-path` 选项（输出实际解析到的模板路径，不创建文件）
+  - 删除未被引用的 `DEFAULT_TEMPLATE` 常量
+  - 3 层栈: `--template` > `docs/templates/overrides/spec-template.md` > V10 内置
+- **新增** SKILL.md §-1 末尾「模板覆盖机制」段（说明 3 层栈 + 何时用/不该用 overrides）
+- **验证**: 3 层栈端到端测试通过（CLI / project-overrides / v10-core 各一次）+ py_compile 通过
+
+### 技能包自身腐败治理（基于通读事实的 19 处修正）
+
+**治理范围**: 12 处路径冲突 + 5 处目录树缺失 + 3 处项目污染 + 1 处行数双标准 + 1 处追加治理
+
+**P0 — 路径前缀统一（7 处冲突）**:
+- 统一 agents 文件路径前缀为 `docs/`（与 SKILL.md §1.5 注入表对齐）
+- 修正文件: contract-writer.md / implementer.md / planner.md / spec-enhancer.md / spec-prototype-enhancer.md
+
+**P0 — change 目录统一（1 处冲突）**:
+- 统一 `specs/changes/{change}/` → `docs/specs/{feature}/`（与 project-structure.md 目录树对齐）
+- 修正文件: SKILL.md §1.5 注入表 + 6 个引用文件
+
+**P0 — 项目污染清除（4 处）**:
+- 清除项目特定路径（脱敏）:`{某项目原型目录}/` / `{某 change 编号}/` / `{某项目绝对路径}/`
+- 改用占位符：`{project_prototype_dir}` / `{标杆_feature}` / 相对路径
+- 修正文件: spec-enhancer.md / spec-prototype-enhancer.md / prototype-reverse-spec.md
+
+**P1 — 补目录树缺失（3 处）**:
+- 补 `docs/constitution.md`（V10.8 迁移）
+- 补 `docs/verifications/tauri/`（V10.3.9 视觉证据）
+- 补 `docs/rot-discoveries/`（V10.5 腐烂点发现）
+- 更新文件: project-structure.md L36-47
+
+**P1 — V8 残留清理 + 边界澄清（2 处）**:
+- 清 V8 残留引用（`docs/prototypes/HANDOFF-DESIGNER.md`）
+- 澄清 scripts/rules 边界（技能包 `scripts/` vs 项目级 `.trae/hooks/` vs 项目级 `.trae/rules/`）
+- 更新文件: designer-handoff.md / acceptance-gates-v10.md / project-structure.md L78-80
+
+**P2+P3 — 行数双标准澄清（1 处）**:
+- 澄清状态卡行数双标准：40 行目标值 / 80 行硬上限
+- 更新文件: artifact-lifecycle.md L95
+
+**追加 — reviewer.md 路径格式（1 处）**:
+- 展开简化路径格式 `跨4工件` 为绝对路径列表
+- 更新文件: reviewer.md L43
+
+**治理结果**: 19 处腐败全部修正，无遗留问题。反例存根见 `docs/reports/v10-self-rot-2026-08-07.md`
+
+### 项目健康度自检 agent（动态适应项目类型）
+
+- **新增** `agents/project-health-auditor.md` — 项目健康度审计师
+  - 触发: 用户要求"自检项目"/"迁移项目"/"对齐新治理方案"
+  - 职责: 动态自检项目健康度，输出诊断报告（不自动修正）
+  - 检查维度: 路径一致性 / 目录树完整性 / 版本残留+污染 / 文档同步机制（layer 标签）
+  - 项目类型适配: CLI / 全栈 / 后端 / 纯前端（动态判定）
+  - 输出: `docs/reports/project-health-{YYYY-MM-DD}.md` + `.json`
+- **补充** SKILL.md §1 委派速查表新增 Project Health 行
+- **设计原则**: 基于刚治理的 19 处腐败经验，让现存项目自检并迁移对齐新治理方案
+
 ## v10.8.0 (2026-08-05)
 
 **经验吸收整合 — 反踩坑铁律 + 破坏性操作红线 + 严重度分层 + 小任务流线化 + 质疑式验收官**
 
+- **迁移** Constitution 路径 `.specify/constitution.md` → `docs/constitution.md`（脱离文档管理范围 → 纳入 docs/ 统一管理，与 ARCHITECTURE.md/DECISIONS.md 平级）
+  - 影响: SKILL.md / agents/rot-detector.md / templates/hooks/session-start.py / templates/hooks/README.md / references/reviewer-templates.md（共 7 处引用同步）
+  - 兼容: scripts/common.py 早已用 docs/specs/ 替代 .specify/ 作为项目根锚点（L14 注释说明）
 - **新增** 反踩坑 6 条铁律（SKILL.md §2 V10.8 NEW 标注）
 - **新增** 破坏性操作 4 步协议（references/reset-and-verify-protocol.md）
 - **新增** 严重度分层 P0/P1/P2/P4（SKILL.md §3 禁止项按场景分组）
@@ -50,7 +118,7 @@
 - **新增** `proactive-scan.py` 3 项新 check (5→8 项):
   - `self-aggrandizing-doc` (腐烂点 15) — 抽 state-card/INDEX 中 `INV-XXX` vs spec.md 实际 INV,`doc_claims - spec_actual` 比例 > 30% → 🛑 FAIL
   - `state-card-staleness` (腐烂点 16) — `.state-card.md` mtime (>24h WARN, >72h FAIL) + change 数量一致性
-  - `stub-pileup` (腐烂点 17) — `docs/specs/changes/*/` 中只 define.md 的 stub 比例,>40% WARN, >60% FAIL
+  - `stub-pileup` (腐烂点 17) — `docs/specs/*/` 中只 define.md 的 stub 比例,>40% WARN, >60% FAIL
 - **新增** `self-diagnose.py` 第 4 项 check `proactive-v105-coverage` — 验 proactive-scan.py 含 3 新函数 + INV_RE 锚定 + 阈值常量
 - **新增** 2 条不可协商 Articles (总数 11→13):
   - **Article XII — 文档诚实 (Document Honesty)** — state-card/INDEX 声称的 INV 必在 spec.md 落地,不可自评"完成"无证据
@@ -254,3 +322,34 @@
 - SKILL.md 从 84 行扩至 121 行，铁律 4→8 条，禁止项 4→8 条
 - 补齐核心门禁：5 维度量化打分、Visual Gate、归档 3 门禁、回流判定树、Bug 快速链、Cockpit 启动感知、DELTA ONLY、工件生命周期
 - 保留 V8 核心能力的 90%+，文件数较 V8 减少 31%
+
+## v10.9.1 (2026-08-08)
+
+**refactor 提交 adfc56c 失真修复（仅修复认定的 + 记录剩余）**
+
+已修复（7 处 P0 失真）：
+
+- ✅ SKILL.md 标题 v10.8 → v10.9（与 frontmatter 一致）
+- ✅ process-rot-analysis.md §4.5.6 标题"三类反例共性" → "项目特定误删补丁"（消除与 §4.5.4 重复）
+- ✅ install-v10.py 3 处 10.2.0 → 10.9.0（消除版本漂移）
+- ✅ SECURITY-MAP.md fullstack4TraeV10 (10.5.0) → (10.9.0) + 文件计数 7→9 agent / 19→32 ref / 12→17 py / 8→9 hook
+- ✅ bug-workflow.md 3 处项目特定 ID（"test-other-dev 86237/86192/86235"）→ 通用化（"实战项目 ID 已脱敏"）
+- ✅ constitution-template.md INV-STORE-02 + INV-EV-04 → INV-XXX-001 + INV-XXX-002（脱敏 + 编号格式规范）
+- ✅ scenarios 重建 10 个场景（基于 V9.2 walkthrough.md 对标，V10.9 新增场景 10 项目健康度自检）
+
+未修复（已记录决策）：
+
+- ⚠️ AGENTS.md 256 行 vs project-structure.md 200 行上限 — 涉及 refactor 自身规则，创建 vs 违反同一规则，避免破坏其他东西，留待专项治理
+- ⚠️ README.md 子代理报告 V10.1.0 漂移 — 实际 grep 未发现 V10.1.0 字段，可能子代理误判
+- ⚠️ refactor 整体暂不合并（用户决策）
+- ⚠️ README.md L488 子代理报告 V10.1.0 漂移 — 实际验证未发现该字段，跳过
+
+新增防失真机制（V10.9 NEW）：
+
+- [SKILL.md §0.5](../skill-markets/fullstack4TraeV10/SKILL.md) — Skill 加载协议
+- [SKILL.md §7.5](../skill-markets/fullstack4TraeV10/SKILL.md) — AskUserQuestion 反模式
+- [sub-agent-rules.md §0](../skill-markets/fullstack4TraeV10/references/sub-agent-rules.md) — 主上下文必读清单
+- [clarify-checklist.md §7](../skill-markets/fullstack4TraeV10/references/clarify-checklist.md) — 反复返工根因诊断
+- [process-rot-analysis.md §5.5](../skill-markets/fullstack4TraeV10/references/process-rot-analysis.md) — rot #21/22/23 代理腐烂检测
+- [project-health-auditor.md](../skill-markets/fullstack4TraeV10/agents/project-health-auditor.md) — 项目健康度自检 agent
+- [scenarios](../skill-markets/fullstack4TraeV10/scenarios) — 10 个真实演练场景（V10.9 重写）

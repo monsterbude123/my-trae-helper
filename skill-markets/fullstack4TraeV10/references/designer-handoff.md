@@ -71,7 +71,10 @@ Phase 2: Spec 正常继续
 ## §4 HANDOFF 索引格式
 
 ```
-项目级: docs/prototypes/HANDOFF-DESIGNER.md
+项目级约定（V10）: 项目在 docs/specs/ 或项目根目录维护 HANDOFF-DESIGNER.md
+
+> V8 残留路径: docs/prototypes/HANDOFF-DESIGNER.md（已废弃，不应使用）
+> V10 项目应在 docs/specs/HANDOFF-DESIGNER.md 或自定义项目级位置维护索引
 
 内容:
   §1 索引表（HTML 文件名 → spec 映射）

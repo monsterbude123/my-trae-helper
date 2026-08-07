@@ -21,7 +21,7 @@ ITEMS = [
     # type: "dir" | "file" | "hook"
     ("docs/specs/", "docs/specs", "dir"),
     ("docs/modules/", "docs/modules", "dir"),
-    ("docs/prototypes/ (V9 project-level)", "docs/prototypes", "dir"),
+    ("docs/specs/ (V10 feature-level prototypes)", "docs/specs", "dir"),
     ("docs/test-plan/ (V9 test plan)", "docs/test-plan", "dir"),
     ("docs/CODEMAPS/", "docs/CODEMAPS", "dir"),
     ("docs/contracts/ (project-level)", "docs/contracts", "dir"),

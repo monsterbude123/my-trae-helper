@@ -5,8 +5,8 @@
 每个违例 = 🛑 REJECT。
 
 用法:
-  python check_integration_contract.py --project-root /path/to/AIGCMediaDesktop
-  python check_integration_contract.py --project-root /path/to/AIGCMediaDesktop --json
+  python check_integration_contract.py --project-root /path/to/your-project
+  python check_integration_contract.py --project-root /path/to/your-project --json
 
 5 项契约:
   1. 不直接 fetch('/api/v1/...') — 必须走 apiClient.get/post/...
