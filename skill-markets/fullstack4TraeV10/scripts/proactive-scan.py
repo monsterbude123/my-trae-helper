@@ -112,10 +112,8 @@ def run_orphan_detector(project_root: Path, feature: Optional[str] = None) -> Ch
 def run_deprecated_scan(project_root: Path, feature: Optional[str] = None) -> CheckResult:
     """检查 2: @deprecated 标记代码"""
     t0 = time.time()
-    # 复用 orphan-detector 的 deprecated 检测（--no-deprecated-scan 反向控制）
+    # 复用 orphan-detector 的 deprecated 检测（normal 模式输出 deprecated 项）
     script = Path(__file__).parent / "orphan-detector.py"
-    cmd = ["python", str(script), "--project-root", str(project_root), "--no-deprecated-scan", "--json"]
-    # 反向: 这次让 deprecated 部分输出（通过解析 normal 模式）
     cmd = ["python", str(script), "--project-root", str(project_root), "--json"]
     rc, stdout, stderr = _run_subprocess(cmd, cwd=project_root)
     duration = int((time.time() - t0) * 1000)

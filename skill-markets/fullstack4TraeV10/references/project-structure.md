@@ -1,6 +1,6 @@
 # 项目目录结构
 
-> V9.2 扁平化结构。Spec 是唯一真相源，prototypes/ 按 feature 存放，archive/ 只读。
+> V10 扁平化结构。Spec 是唯一真相源，prototypes/ 按 feature 存放，archive/ 只读。
 
 ---
 
@@ -96,8 +96,8 @@ V9:  docs/specs/{feature}/prototypes/
 | Authentication | modules/auth.md | user-auth |
 
 ## Architecture
-- [ARCHITECTURE.md](ARCHITECTURE.md) — 系统架构总览
-- [DECISIONS.md](DECISIONS.md) — 技术决策记录
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 系统架构总览（项目级）
+- [docs/DECISIONS.md](docs/DECISIONS.md) — 技术决策记录（项目级）
 ```
 
 ### 更新规则
@@ -131,3 +131,50 @@ Agent 启动或开始新任务时，按以下顺序读取：
 - `archive/done/` 只读，禁止修改
 - 模块文档必须在 `docs/modules/`，由 DOC SYNC 写入
 - `docs/specs/.state-card.md` ≤ 40 行
+
+---
+
+## AGENTS.md 与 rules 协同（V10.8 NEW — 回流自 04-p4-asset-hygiene）
+
+> AGENTS.md 是 agent 入口地图，rules/ 是分层规范指针。两者协同防止 agent 迷路 + 上下文击穿。
+
+### AGENTS.md 必须内联（agent 不知道就会迷路）
+
+```
+技术栈清单 + 版本 | 目录结构树（一级）| 架构拓扑图
+关键入口文件路径   | 启动/构建命令    | 核心设计决策（Why，≤3 条）
+```
+
+### rules/ 分层规范指针
+
+```
+P0 生产阻断（违反即 bug）| P1 架构规范（违反即设计债）
+P2 代码风格（偏离需说明）| P4 资产卫生（文档协同）
+```
+
+### 协同铁律
+
+```
+1. AGENTS.md "规范指针"章节必须指向 rules/
+2. rules/ 的"参考指针"章节必须指向外部文档
+3. 禁止在 AGENTS.md 内联 >10 行代码块（地图内联 ≠ 代码内联）
+4. 禁止在 rules/ 内联 >10 行代码块（示例放 references/）
+```
+
+### 行数限制
+
+| 文件 | 上限 | 原因 |
+|------|------|------|
+| `AGENTS.md` | 200 行（地图弹性） | 地图必须内联，防止迷路 |
+| `rules/*.md` | 150 行 | 规范指针，防止击穿 |
+
+### 反例（文档击穿）
+
+```
+❌ AGENTS.md 内联 50 行代码示例 → agent 上下文击穿，中间遗忘
+❌ rules/ 内联完整 API 文档   → 规则文件膨胀，agent 拒绝加载
+✓ AGENTS.md 只放地图 + 指向 rules/
+✓ rules/ 只放铁律 + 指向 references/
+```
+
+> 来源: example/test-other-project 会话蒸馏，V10.8 通用化回流（去 AIGCWorkspace 项目特定资产目录，保留 AGENTS.md ↔ rules 协同铁律）

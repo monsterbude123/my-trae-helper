@@ -1,491 +1,456 @@
-# 流程腐烂分析报告 — V10 更新
+# 流程腐烂分析报告 — V10.8 更新
 
-> V10 变更：移除 _invalidated/ 隔离机制，替换为 spec-purge.py 机械归档。消除腐烂点 1/2/6。
+> V10: 移除 _invalidated/ 隔离机制，替换为 spec-purge.py 机械归档。
+> V10.4: 实战暴露腐烂点 9-14（视觉假阳性 / Archive 漂移 / 自验自签 / 孤儿测试 / build 假设 / 不主动诊断）。
+> V10.5: 腐烂点 15-17（自我吹嘘 / 状态卡陈旧 / 骨架堆积）。
+> V10.8: 反例价值 > 正例价值 + 反踩坑 6 条铁律 + Skill 自我升级协议 + 规则编写自检清单。
 
 ---
 
 ## §0 腐烂(Rot)定义与分类框架
 
-### 0.1 腐烂(rot)的本义
+### 0.1 腐烂的本义
 
-**腐烂(rot)** 是软件/流程/AI 代理在长期运行中,**因被动的无序增长(熵增)而逐渐丧失可验证性、可维护性、可信度**的缓慢退化过程。它不是 bug,bug 是"已知不该这样",腐烂是"没人发现它已经这样了"。
+**腐烂(rot)** 是软件/流程/AI 代理在长期运行中，**因被动的无序增长(熵增)而逐渐丧失可验证性、可维护性、可信度**的缓慢退化过程。它不是 bug，bug 是"已知不该这样"，腐烂是"没人发现它已经这样了"。
 
-**词源**:
-- 英文 `rot` = 腐烂、腐朽(物理: 物质分解; 隐喻: 系统退化)
-- 中文 `腐烂` = 物质腐烂 + 抽象系统腐化
-
-### 0.2 腐烂的 5 大共性特征(诊断依据)
+### 0.2 腐烂 5 大共性特征
 
 | 特征 | 含义 | 检测方法 |
 |------|------|---------|
-| **渐进性** | 不是突然出现,是缓慢积累 | 时间序列分析(mtime 趋势) |
-| **累积性** | 多个小问题叠加成大问题 | 数量阈值(N 个 WARN → FAIL) |
-| **自强化** | 破窗效应: 一个腐烂引发更多腐烂 | 同一区域多个腐烂点聚集 |
-| **可检测但需工具** | 主观判断常常漏掉 | 机械脚本(rot-detector) |
-| **可逆但需主动** | 重构/清理可治愈,放任会致命 | 修复成本随腐烂时长指数增长 |
+| 渐进性 | 缓慢积累，非突然出现 | 时间序列分析(mtime 趋势) |
+| 累积性 | 多个小问题叠加成大问题 | 数量阈值(N 个 WARN → FAIL) |
+| 自强化 | 破窗效应: 一个腐烂引发更多腐烂 | 同一区域多个腐烂点聚集 |
+| 可检测但需工具 | 主观判断常常漏掉 | 机械脚本(rot-detector) |
+| 可逆但需主动 | 重构/清理可治愈，放任会致命 | 修复成本随腐烂时长指数增长 |
 
-> **《程序员修炼之道》(Hunt/Thomas)**: "一旦一扇窗被打破,接下来所有的窗都会被打破。" —— 破窗效应是腐烂自强化的核心机制。
+### 0.3 腐烂 vs 技术债 vs Bug
 
-### 0.3 腐烂 vs 技术债 vs Bug(易混概念)
+Bug = 主动失误（开发者造成/QA 发现）；技术债 = 主动权衡（开发者有意识）；腐烂 = 被动积累（环境/时间/忽略造成，需专门工具发现）。关键区别: 技术债可记账，腐烂常被遗忘。
 
-| 概念 | 定义 | 主动/被动 | 谁造成 | 谁发现 |
-|------|------|:---:|------|------|
-| **Bug** | 已知不该这样但就是这样 | 主动失误 | 开发者 | 开发者/QA |
-| **技术债 (technical debt)** | 短期收益换取长期成本(主动借债) | 主动权衡 | 开发者有意识 | 开发者有意识 |
-| **腐烂 (rot)** | 没人发现它已经这样了 | 被动积累 | 环境/时间/忽略 | 需专门工具 |
+### 0.4 V10 腐烂 7 大分类
 
-**关键区别**: 技术债是**主动选择**,腐烂是**被动积累**;技术债可记账,腐烂常被遗忘。
+| # | 腐烂类 | 典型腐烂点 | 检测器 |
+|---|------|----------|------|
+| 1 | 代码腐烂 | rot #3 | orphan-detector |
+| 2 | 流程腐烂 | rot #4, #7, #8, #11, #14 | rot-detector 主上下文门禁 |
+| 3 | 文档腐烂 | rot #1, #2, #4, #6, #10 | proactive-scan (archive-drift) |
+| 4 | 测试腐烂 | rot #5, #12 | proactive-scan (orphan-tests) |
+| 5 | 视觉腐烂 | rot #9 | proactive-scan (visual-freshness) |
+| 6 | 构建腐烂 | rot #13 | proactive-scan (bundle-staleness) |
+| 7 | 代理腐烂 | rot #11, #14 | rot-detector 注入协议 + Article X |
 
-### 0.4 V10 腐烂 7 大分类(与 proactive-scan + rot-detector 对齐)
-
-| # | 腐烂类 | 定义 | 典型腐烂点 | 检测器 |
-|---|------|------|----------|------|
-| 1 | **代码腐烂** (Code Rot) | 代码本身的腐化(依赖过时、API 废弃、注释失效) | rot #3 | orphan-detector (--no-deprecated-scan) |
-| 2 | **流程腐烂** (Process Rot) | 流程阶段的腐化(阶段跳过、铁律放弃、spec-purge 未执行) | rot #4, #7, #8, #11, #14 | rot-detector 主上下文门禁 |
-| 3 | **文档腐烂** (Document Rot) | spec/contract/archive 过期或被改 | rot #1, #2, #4, #6, #10 | proactive-scan (archive-drift) |
-| 4 | **测试腐烂** (Test Rot) | 测试套件过期/孤儿/持续失败 | rot #5, #12 | proactive-scan (orphan-tests) |
-| 5 | **视觉腐烂** (Visual Rot) | 视觉证据假阳性(PNG 真但内容错) | rot #9 | proactive-scan (visual-freshness) |
-| 6 | **构建腐烂** (Build Rot) | 构建产物不一致(dist vs binary) | rot #13 | proactive-scan (bundle-staleness) |
-| 7 | **代理腐烂** (Agent Rot) | AI 代理自验自签、不主动诊断、跳过验证 | rot #11, #14 | rot-detector 注入协议 + Article X |
-
-### 0.5 腐烂的修复原则(NO ROT, NO ACCEPT)
+### 0.5 腐烂修复原则（NO ROT, NO ACCEPT）
 
 ```
-1. 早发现     — 主动扫描,不靠用户问 (Article XIV: rot-detector 必跑)
-2. 早修复     — 单个腐烂点立即修,不等堆积 (破窗效应要求)
-3. 机械验证   — 用脚本检测,不靠主观判断 (proactive-scan / self-diagnose)
+1. 早发现     — 主动扫描，不靠用户问 (Article XIV: rot-detector 必跑)
+2. 早修复     — 单个腐烂点立即修，不等堆积 (破窗效应要求)
+3. 机械验证   — 用脚本检测，不靠主观判断
 4. 阻断流程   — NO ROT, NO ACCEPT (任一 FAIL = 🛑 REJECT)
 5. 元检测     — 检测器自身也要被检测 (Phase 4.5.1 self-diagnose)
-6. 知识沉淀   — 新腐烂点编号 15+ 写入 process-rot-analysis.md
+6. 知识沉淀   — 新腐烂点编号 15+ 写入本文件
 ```
-
-### 0.6 腐烂点编号体系
-
-```
-[1-8]   V10 引入时的已知腐烂点(部分已 RESOLVED)
-[9-14]  V10.4 实战暴露的腐烂点(全部 P0/P1)
-[15+]   未来 rot-detector 自动发现并写入
-```
-
-每个腐烂点必须含 4 要素:
-- **场景**: 具体失败现象
-- **腐烂路径**: 根因链(从触发到失控的因果序列)
-- **修复方案**: 机械检测 + 主动门禁
-- **验证证据**: 故意造一个该腐烂,扫描应能发现
 
 ---
 
-## 腐烂点 7（HIGH）：外部结构冲突 — 多技能并存时的双重真相
+## §1 腐烂点 1-8（V9/V10 已知，精简）
 
-**场景**：项目同时使用 V10 和另一个技能包，产生冲突目录结构。
-
-**修复**: planner 增加结构兼容检测 → 发现外部结构 → 标注 + 建议归一。不强行转换，不静默忽略。
-
----
-
-## 腐烂点 1（✅ RESOLVED — V10）：_invalidated_ 盲区
-
-> **V10 解决**：移除 _invalidated/ 机制。spec-purge.py 物理删除目录 + 将旧产物归档到 archive/out/spec-purge/（Agent 不可读取）。去重只扫描活跃目录，无盲区。
-
----
-
-## 腐烂点 2（✅ RESOLVED — V10）：change-status.py 盲区
-
-> **V10 解决**：无 _invalidated/ → 无此问题。
-
----
-
-## 腐烂点 3（RESOLVED）：Implementer L1 重做 — 旧代码残留
-
-> **维持 V9 结论**：不删源码。agent 知道自己在重构，按新 spec 改代码是正常实现流程。
-
----
-
-## 腐烂点 4（MEDIUM）：契约残留
-
-**腐烂路径**:
-```
-spec 问题 → rework → spec-enhancer 增强 spec
-  ↓
-contract-writer "续写非重写" → 看到已有 contracts/
-  ↓
-在旧的 approved 契约上追加新接口
-  ↓
-旧接口可能已被 spec 废弃，但 contract 还在
-```
-
-**V10 修复**: contract-writer 必须检测旧契约 → 标注 MODIFIED 或 DEPRECATED。重构时 Planner 调 spec-purge.py 彻底清除。
-
----
-
-## 腐烂点 5（LOW）：孤儿测试文件
-
-**V10 保留修复**: contract-writer 完成时检查 __tests__/contracts/ → 移入 _deprecated/。
-
----
-
-## 腐烂点 6（✅ RESOLVED — V10）：_invalidated/ 嵌套膨胀
-
-> **V10 解决**：移除 _invalidated/。重构 = spec-purge.py 移动目录至 archive/out/spec-purge/，< 24h 的保留在工作目录外，无膨胀问题。
-
----
-
-## 新增腐烂点 8（V10 引入 — LOW）：spec-purge.py 未执行
-
-**腐烂路径**:
-```
-用户说"重构 XX" → Planner 应该调 spec-purge.py
-  ↓
-Planner 遗漏了 spec-purge → 直接在旧 spec 上 Plan
-  ↓
-旧 tasks 残留 [x] → 新一轮实现跳过部分 task
-```
-
-**V10 修复**: planner agent 铁律第 5 条强制 PURGE ON REFACTOR。主上下文机械验证 planner Completion Report 中 `spec_purged: yes`。
-
----
-
-## 修复优先级（V10 更新）
-
-| # | 严重度 | 腐烂点 | 修复方向 |
-|---|:---:|------|---------|
-| 1 | ✅ RESOLVED | _invalidated_ 盲区 (V9 #1) | spec-purge.py 替换 |
-| 2 | ✅ RESOLVED | change-status.py 盲区 (V9 #2) | 无 _invalidated_ |
-| 3 | RESOLVED | implementer 旧代码残留 (V9 #3) | 不删源码 |
-| 4 | MEDIUM | 契约残留 (V9 #4) | contract-writer 检测 + spec-purge |
-| 5 | LOW | 孤儿测试文件 (V9 #5) | contract-writer 清理 |
-| 6 | ✅ RESOLVED | _invalidated_ 膨胀 (V9 #6) | spec-purge.py |
-| 7 | HIGH | 外部结构冲突 (V9 #7) | planner 结构检测 |
-| 8 | LOW | spec-purge 未执行 (NEW) | planner 铁律 + 机械验证 |
-
----
-
-## 腐烂点 9（V10.4 实战新增 — P0）：视觉验证假阳性
-
-**场景**：
-```
-AIGCMediaDesktop 00-04-system-settings 实战:
-- V10.3.9 三层校验全过（PNG magic + bytes + PIL 亮度）
-- 但用户实际看到：双齿轮 + TabBar 出现系统设置 + 三层标题（布局错乱）
-- 结论：PNG 真、内容真、亮度合法，但布局错位全部 PASS
-```
-
-**腐烂路径**:
-```
-PNG magic 校验 → 通过
-文件大小 ≥ 5000 → 通过
-PIL 亮度 [30, 240] → 通过
-视觉"内容错乱" → 没有任何校验
-```
-
-**V10.4 修复**: 
-- `scripts/visual-content-check.py` 加 3 层: PIL 完整解码 + 颜色直方图（unique ≥ 50）+ 4 象限亮度极差（≥ 5）
-- `acceptance-audit.py` uiux 维度先调 visual-content-check
-- 任一不通过 = 🛑 REJECT,不允许 `--no-visual` 绕过
-
-**验证证据**:
-- `proactive-scan.py --only visual-freshness` 能发现此类问题
-- 实战: 故意放一个"单色 PNG"或"整页同色"截图,visual-content-check 应报 FAIL
-
----
-
-## 腐烂点 10（V10.4 实战新增 — P0）：Archive 修改无回溯
-
-**场景**:
-```
-archive/ 目录本应"只读",但缺乏机械检测,可能:
-- Agent 误改 archive/done/{feature}/spec.md
-- 主上下文修复问题时直接编辑 archive/out/spec-purge/
-- 1 周后"历史快照"已被修改,无法回溯
-```
-
-**腐烂路径**:
-```
-archive/ 无机械只读保护
-  ↓
-任何 Editor (含 Agent) 可修改
-  ↓
-历史快照被污染
-  ↓
-未来 review/事故复盘失去基线
-```
-
-**V10.4 修复**: 
-- `proactive-scan.py` 的 `archive-drift` check: 扫 archive/ 下 7 天内 mtime 变化
-- 发现 7 天内修改 → FAIL
-- 兜底:archive/ 配 .gitignore? 不,改为 chmod 555 (Linux) 或设置 Windows ACL
-
-**验证证据**:
-- `proactive-scan.py --only archive-drift` 能发现此类问题
-- 实战: 故意在 archive/ 下 touch 一个新文件,扫描应报 FAIL
-
----
-
-## 腐烂点 11（V10.4 实战新增 — P0）：自验自签
-
-**场景**:
-```
-主上下文自己当 reviewer
-  ↓
-自己写 review-latest.md
-  ↓
-自己 PASS（"total_score: 5.0"）
-  ↓
-实际是自我背书,无任何独立验证
-```
-
-**腐烂路径**:
-```
-reviewer = implementer (同 session)
-  ↓
-reviewer 自评"通过"= reviewer 自验自签
-  ↓
-"全绿"= 心理安慰,无独立证据
-```
-
-**V10.4 修复**: 
-- Reviewer Completion Report 强制含 `session_id` + `self_attested` + `independently_verified_by`
-- 主上下文对 `self_attested: true` 必做二次抽检
-- 抽检项目: 随机挑 1 个核心断言,独立命令验证（如 `git diff --stat` / `find . -name "X"` / `pytest tests/feature.test.ts`）
-
-**验证证据**:
-- 故意让 reviewer 自评 `self_attested: true` 但不填 `independently_verified_by`
-- 主上下文应检测出来,要求补填或抽检
-
----
-
-## 腐烂点 12（V10.4 实战新增 — P0）：过期测试/孤儿组件
-
-**场景**:
-```
-AIGCMediaDesktop 实战:
-- 00-04-system-settings 新建了 SystemSettingsPage
-- 但旧的 SettingsPage.tsx + SettingsPage.test.tsx 都没即时清除
-- 结果: 9 failed 测试持续 1 周没人管
-- 实现层"代码可用"≠"测试层清洁"
-```
-
-**腐烂路径**:
-```
-新组件 SystemSettingsPage 替代 SettingsPage
-  ↓
-仅添加新文件
-  ↓
-旧 SettingsPage.tsx 仍在代码中（旧实现）
-旧 SettingsPage.test.tsx 仍在测试中（继续跑）
-  ↓
-旧测试继续失败 = 噪音
-```
-
-**V10.4 修复**: 
-- `scripts/orphan-detector.py`: 扫测试文件 import 目标是否仍存在
-- `scripts/orphan-detector.py`: 扫 @deprecated / DEPRECATED 标记
-- Article IX (TDD 即时): 改实现 / 删组件 → 同 PR 改测试 / 删测试
-- 触发时机: Phase 2 (Contract 开始前) / Phase 3 (Implement 末尾) / Phase 4.5 (rot scan)
-
-**验证证据**:
-- `python scripts/orphan-detector.py` 能发现孤儿
-- AIGCMediaDesktop 演练: 预期发现 SettingsPage.test.tsx 引用了不存在的 SettingsPage
-
----
-
-## 腐烂点 13（V10.4 实战新增 — P1）：隐式 build 假设
-
-**场景**:
-```
-改 TS 文件 src/components/Settings.tsx
-  ↓
-跑 cargo build（Rust 改动编译）
-  ↓
-但 cargo build 不重触 pnpm build
-  ↓
-dist/assets/Settings-XXX.js 仍是旧 hash
-  ↓
-binary 内嵌的 chunk 引用旧的 Settings-YYY.js
-  ↓
-运行时 JS chunk 404 或加载旧版本
-```
-
-**腐烂路径**:
-```
-改 frontend (TS/TSX)
-  ↓
-cargo build（仅编译 Rust 端）
-  ↓
-pnpm build 没自动跑（cargo 不会触发）
-  ↓
-dist/ 过期但 binary 引用了 dist
-  ↓
-binary 嵌入了过期 chunk 引用
-```
-
-**V10.4 修复**: 
-- `scripts/dist-hash-check.py`: 提取 binary 内嵌的 chunk 名称 vs dist/ 实际 chunk 列表
-- 不一致 = 🛑 FAIL
-- 仅 Tauri 项目启用（Web 项目无 binary）
-- 触发时机: Phase 3 (Implement 末尾, 改 TS 后必跑) / Phase 4.5 (rot scan)
-
-**验证证据**:
-- `python scripts/dist-hash-check.py` 能发现 stale binary
-- 故意在 dist/ 加新 chunk 但不重 build binary,扫描应报 FAIL
-
----
-
-## 腐烂点 14（V10.4 实战新增 — P1）：Agent 不主动发现问题
-
-**场景**:
-```
-V10.3.9 流程：
-- Agent 完成 implementer
-- 主上下文只读 Completion Report
-- 不主动扫腐化
-- 实战: 孤儿测试 / 过期 build / 视觉问题都没人发现，直到用户截图
-```
-
-**腐烂路径**:
-```
-implementer 完成 → 报"全绿"
-  ↓
-主上下文不主动诊断
-  ↓
-腐化点 9/10/11/12/13 全部潜伏
-  ↓
-用户问"流程有没有问题"才查
-```
-
-**V10.4 修复**: 
-- 新 Agent: `agents/rot-detector.md`
-- 新脚本: `scripts/proactive-scan.py`（5 项腐化扫描包）
-- 新阶段: **Phase 4.5 (Proactive Rot Scan)** — Review 末尾 + Accept 之前强制
-- 任一 FAIL = 阻断 Accept,implementer 必修复
-
-**验证证据**:
-- 演练 AIGCMediaDesktop: 5 项扫描应至少发现 1 项 WARN 或 FAIL
-- proactive-scan.py 应能输出 Markdown 报告 + JSON
-
----
-
-## V10.4 修复优先级（实战暴露，全部 P0/P1）
-
-| # | 严重度 | 腐烂点 | 修复方向 | 引入版本 |
+| # | 严重度 | 腐烂点 | 修复方向 | 状态 |
 |---|:---:|------|---------|:---:|
-| 9 | P0 | 视觉验证假阳性 | visual-content-check.py | V10.4 |
-| 10 | P0 | Archive 修改无回溯 | archive-drift check | V10.4 |
-| 11 | P0 | 自验自签 | Session-ID + 二次抽检 | V10.4 |
-| 12 | P0 | 过期测试/孤儿组件 | orphan-detector.py + Article IX | V10.4 |
-| 13 | P1 | 隐式 build 假设 | dist-hash-check.py | V10.4 |
-| 14 | P1 | Agent 不主动发现问题 | rot-detector + Phase 4.5 | V10.4 |
-| 15 | P0 | 自我吹嘘腐烂 | self-aggrandizing-doc check | V10.5 |
-| 16 | P1 | 状态卡陈旧腐烂 | state-card-staleness check | V10.5 |
-| 17 | P1 | 骨架堆积腐烂 | stub-pileup check | V10.5 |
+| 1 | ✅ | _invalidated_ 盲区 | spec-purge.py 替换 | RESOLVED |
+| 2 | ✅ | change-status.py 盲区 | 无 _invalidated_ | RESOLVED |
+| 3 | ✅ | implementer 旧代码残留 | 不删源码，按新 spec 改 | RESOLVED |
+| 4 | MEDIUM | 契约残留 | contract-writer 检测旧契约 + spec-purge | 活跃 |
+| 5 | LOW | 孤儿测试文件 | contract-writer 清理 _deprecated/ | 活跃 |
+| 6 | ✅ | _invalidated_ 嵌套膨胀 | spec-purge.py | RESOLVED |
+| 7 | HIGH | 外部结构冲突 | planner 结构兼容检测 | 活跃 |
+| 8 | LOW | spec-purge 未执行 | planner 铁律 + 机械验证 | 活跃 |
 
 ---
 
-## 腐烂点 15（V10.5 实战新增 — P0）：自我吹嘘腐烂 (Self-Aggrandizing Document Rot)
+## §2 腐烂点 9-17（V10.4/V10.5 实战新增 — proactive-scan 8 项检查）
 
-**场景**:
-```
-AIGCMediaDesktop .state-card.md 末段:
-"跨模块不变量 | 9 个 (INV-STORE-02 / INV-API-IDEMPOTENT / INV-EV-04 / INV-ERR-CASCADE /
- INV-SSE-RESUME / INV-DEBOUNCE-SEARCH / INV-CONFIG-DEFAULTS / INV-OPTIMISTIC-ROLLBACK /
- INV-CAP-MAX)"
+### 腐烂点 9（P0）：视觉验证假阳性
 
-实际扫描 19 个 spec.md:
-- INV-STORE-02  → 4 changes ✓
-- INV-EV-04     → 1 change  ✓
-- 其余 7 个      → 0 changes ✗
-```
+**场景**: V10.3.9 三层校验全过（PNG magic + bytes + PIL 亮度），但用户实际看到布局错乱。PNG 真、内容真、亮度合法，但布局错位全部 PASS。
 
-**腐烂路径**:
-```
-批次报告写"9 个跨模块不变量" → 复制到 state-card.md
-  ↓
-但实际只有 2 个 invariant 真正跨模块提及
-  ↓
-后续模块以为 9 个 invariant 都有约束 → 实际无任何约束
-  ↓
-跨模块修改时无人对齐 (因为 invariant 不存在)
-```
+**修复**: `scripts/visual-content-check.py` 加 3 层: PIL 完整解码 + 颜色直方图（unique ≥ 50）+ 4 象限亮度极差（≥ 5）。`acceptance-audit.py` uiux 维度先调 visual-content-check。V10.8 扩展: 详见 `reset-and-verify-protocol.md` V10.8 G1/G2/G3。
 
-**V10.5 修复**:
-- `scripts/proactive-scan.py` 新增 `self-aggrandizing-doc` check
-- 算法: 抽取 state-card.md (或 INDEX.md) 中所有 `INV-[A-Z0-9-]+` → 抽取所有 spec.md 的 INV → 比对 `doc_claims - code_actual`
-- self_aggrandizing_rate = |doc_claims - code_actual| / |doc_claims|
-- > 0.3 → 🛑 FAIL
-- 文章层面: 新增 Article XII — **Document Honesty** (文档必含证据锚定,不可自评"完成"无 spec 落地)
+### 腐烂点 10（P0）：Archive 修改无回溯
 
-**验证证据**:
-- `proactive-scan.py --only self-aggrandizing-doc` 在 AIGCMediaDesktop 上能发现 7/9 (78%) 失效
-- 故意在 fixture 写 "5 个 INV" 但 spec.md 只 1 个 → 应报 FAIL
+**场景**: archive/ 目录本应"只读"，但缺乏机械检测，Agent 误改或主上下文直接编辑 → 历史快照被污染，无法回溯。
+
+**修复**: `proactive-scan.py` 的 `archive-drift` check: 扫 archive/ 下 7 天内 mtime 变化 → FAIL。
+
+### 腐烂点 11（P0）：自验自签
+
+**场景**: 主上下文自己当 reviewer → 自己写 review-latest.md → 自己 PASS → 自我背书，无任何独立验证。
+
+**修复**: Reviewer Completion Report 强制含 `session_id` + `self_attested` + `independently_verified_by`。主上下文对 `self_attested: true` 必做二次抽检。
+
+### 腐烂点 12（P0）：过期测试/孤儿组件
+
+**场景**: 新组件替代旧组件，但旧组件 + 旧测试都没即时清除 → 旧测试持续失败成为噪音。实现层"代码可用"≠"测试层清洁"。
+
+**修复**: `scripts/orphan-detector.py`: 扫测试文件 import 目标是否仍存在 + @deprecated 标记。Article IX (TDD 即时): 改实现/删组件 → 同 PR 改测试/删测试。
+
+### 腐烂点 13（P1）：隐式 build 假设
+
+**场景**: 改 TS 文件 → 跑 cargo build（仅编译 Rust 端）→ pnpm build 没自动跑 → dist/ 过期但 binary 引用了 dist → 运行时 JS chunk 404 或加载旧版本。
+
+**修复**: `scripts/dist-hash-check.py`: 提取 binary 内嵌的 chunk 名称 vs dist/ 实际 chunk 列表。不一致 = 🛑 FAIL。仅 Tauri 项目启用。
+
+### 腐烂点 14（P1）：Agent 不主动发现问题
+
+**场景**: implementer 完成 → 报"全绿" → 主上下文不主动扫腐化 → 腐化点 9/10/11/12/13 全部潜伏 → 用户问"流程有没有问题"才查。
+
+**修复**: 新 Agent `agents/rot-detector.md` + 新脚本 `scripts/proactive-scan.py`（8 项腐化扫描包）+ 新阶段 **Phase 4.5 (Proactive Rot Scan)** — Review 末尾 + Accept 之前强制。任一 FAIL = 阻断 Accept。
+
+### 腐烂点 15（P0）：自我吹嘘腐烂 (Self-Aggrandizing Document Rot)
+
+**场景**: state-card.md 写"9 个跨模块不变量"，实际扫描 spec.md 只有 2 个真正跨模块提及。后续模块以为 9 个 invariant 都有约束 → 跨模块修改时无人对齐。
+
+**修复**: `proactive-scan.py` 新增 `self-aggrandizing-doc` check。算法: 抽取文档中所有 `INV-[A-Z0-9-]+` → 抽取所有 spec.md 的 INV → 比对 `doc_claims - code_actual`。self_aggrandizing_rate > 0.3 → 🛑 FAIL。Article XII — Document Honesty。
+
+### 腐烂点 16（P1）：状态卡陈旧腐烂 (State Card Staleness)
+
+**场景**: state-card.md mtime 46h 前，列出 15 个 change，实际 19 个 change。实战决策基于过期数据 → 误判项目进度。
+
+**修复**: `proactive-scan.py` 新增 `state-card-staleness` check。mtime vs 当前时间 (>24h WARN, >72h FAIL) + change 数量比对。
+
+### 腐烂点 17（P1）：骨架堆积腐烂 (Stub Pile-up Rot)
+
+**场景**: 19 个 change 中 12 个只起 define.md (Stub)，Stub 比例 63%。状态卡"🟡 骨架"给人"项目在前进"印象，实际 0% 推进。破窗效应: 新模块也开始只起 define。
+
+**修复**: `proactive-scan.py` 新增 `stub-pileup` check。stub_rate > 0.4 → ⚠️ WARN; > 0.6 → 🛑 FAIL (破窗临界)。Article XIII — Stub is Debt (🟡 骨架 = 隐性技术债，2 周未推进必冻结或归档)。
+
+### proactive-scan 8 项检查汇总
+
+| # | 检查项 | 脚本 | 阈值 | 来源腐烂点 |
+|---|--------|------|------|-----------|
+| 1 | visual-freshness | visual-content-check.py | unique ≥ 50 + 4 象限亮度极差 ≥ 5 | rot #9 |
+| 2 | archive-drift | proactive-scan.py | archive/ 7 天内 mtime 变化 → FAIL | rot #10 |
+| 3 | self-attested | reviewer 报告 | self_attested: true → 二次抽检 | rot #11 |
+| 4 | orphan-tests | orphan-detector.py | 测试 import 目标不存在 → FAIL | rot #12 |
+| 5 | bundle-staleness | dist-hash-check.py | binary chunk vs dist/ 不一致 → FAIL | rot #13 |
+| 6 | self-aggrandizing-doc | proactive-scan.py | doc_claims - code_actual > 0.3 → FAIL | rot #15 |
+| 7 | state-card-staleness | proactive-scan.py | mtime >72h 或 change 数量不匹配 → FAIL | rot #16 |
+| 8 | stub-pileup | proactive-scan.py | stub_rate > 0.6 → FAIL | rot #17 |
 
 ---
 
-## 腐烂点 16（V10.5 实战新增 — P1）：状态卡陈旧腐烂 (State Card Staleness)
+## §3 反例价值 > 正例价值原则（V10.8 NEW）
 
-**场景**:
+> 来源: 反踩坑姿态蒸馏。3 次修复历程比一次成功更有学习价值。
+
+### 反例库组织
+
 ```
-AIGCMediaDesktop/docs/specs/.state-card.md:
-- mtime: 2026-07-29 21:11:40 (46h ago)
-- 列出 15 个 change
-- 实际 19 个 change (新加 01-04 / 02-01 / 03-04 / 03-06 等)
+反例库组织（两层）:
+  1. cases 文件（完整反例库）— 每条反例 4 行结构
+  2. summary 文件（短摘要 + 6 问口诀）— 速查用
+
+每条反例 4 行结构:
+  - 当时做了: {具体行为}
+  - 导致后果: {用户/系统受到的影响}
+  - 根因: {分析出的根本原因}
+  - 教训: {可复用的方法论}
+
+原则:
+  - 正例证明"这样做对"，反例证明"不这样做会死"
+  - 反例的代价已付，不记录 = 浪费代价
+  - 3 次修复历程比一次成功更有学习价值
 ```
 
-**腐烂路径**:
-```
-主上下文 7/29 完成批次后写 state-card.md
-  ↓
-7/30 之后多个 stub 加入但未更新状态卡
-  ↓
-7/31 rot-reinforcer 启动看到的还是 7/29 的"全绿"状态
-  ↓
-实战决策基于过期数据 → 误判项目进度
-```
+### 6 问口诀（自检前先问 6 个问题）
 
-**V10.5 修复**:
-- `proactive-scan.py` 新增 `state-card-staleness` check
-- 算法: mtime vs 当前时间 (>24h WARN, >72h FAIL) + change 数量比对
-- 长期: spec/define/tasks 文件变更时 PostToolUse hook 触发 state-card 自动更新
-
-**验证证据**:
-- `proactive-scan.py --only state-card-staleness` 应报 AIGCMediaDesktop 46h stale + 4 个 change 缺失
-- fixture: state-card 故意 96h 前 mtime,应报 FAIL
+```
+1. 这条命令本应是哪个 CLI 子命令的 --dry-run？→ 有 → 改去走 CLI
+2. 我在陌生路径上做操作吗？→ 是 → 先 probe allowlist
+3. 这是在下载/同步文件吗？→ 是 → 是否写了 .partial + 原子 rename？
+4. URL 带 query 吗？→ 是 → dry-run size 与预期一致吗？
+5. 报告里有"三层文件名"吗？→ 没有 → 补
+6. 用户语气变硬了吗？→ 是 → 停下列已知事实，不辩解
+```
 
 ---
 
-## 腐烂点 17（V10.5 实战新增 — P1）：骨架堆积腐烂 (Stub Pile-up Rot)
+## §4 反踩坑姿态 6 条铁律（V10.8 NEW — 通用化）
 
-**场景**:
+> 反踩坑姿态蒸馏为 6 条通用铁律。
+
+### 4.1 反临时指令自旋
+
+**铁律**: 临时指令仅用于调试/探查，不允许作为交付手段。连续 2 次未达成 → 停下分流根因（Bug→修源码 / 缺能力→扩 CLI / 环境问题→修环境）。禁止第 3 次换临时指令再试。自检问"这条命令本应是哪个 CLI 子命令的 --dry-run？"
+
+**反例**:
+- 当时做了: 跨多个域名探查 → curl 下直链 → 手 mv 文件，绕过项目 CLI 4 步链
+- 导致后果: 半截文件无 .partial 命名 → 入库断裂 → 消费者扫到残骸当完整文件
+- 根因: 没把"已有 CLI + Bug"当主线；潜意识认为"CLI 慢，自己跑快"
+- 教训: Bug 不应绕过 CLI 跑，应修 CLI → 让 CLI 跑完整流程。"自己跑更快"是陷阱
+
+### 4.2 Probe 不要 Assume
+
+**铁律**: 陌生路径/工具/域 → 先 probe（allowlist/连通性/字段语义）再动手。"记忆是过去快照，当前调用才是事实"。
+
+**反例**:
+- 当时做了: 凭印象"沙箱不让删某路径"，浪费 4 轮 + 用户拍桌子
+- 导致后果: 其实 MCP FileSystem allowlist 包含该路径，一行 trash_file 就搞定
+- 根因: 没分清 shell wrapper 兜 vs MCP FileSystem 兜；记忆里"沙箱不让动"是个笼统印象
+- 教训: 工具 allowlist 是动态数据，必须跑一次调用拿真实值
+
+### 4.3 半截文件不暴露给消费者
+
+**铁律**: 写入 `dst.partial` → size+sha 验证通过后 `os.rename(partial → dst)` → 中间失败不重命名。适用于任何"消费者会扫描目录"的场景。
+
+**反例**:
+- 当时做了: curl 直写完整名，中途 Stop-Process 杀进程
+- 导致后果: 消费者扫到残骸当完整文件 → 加载失败 → 错误匹配
+- 根因: 把命名当文件名（标签）而非状态机（变量）。"半截"应被文件系统结构强制隔离
+- 教训: 命名 = 不变量的一部分。半截文件用 `.partial` 后缀是结构性保证，不是装饰
+
+### 4.4 URL query 必须显式保留
+
+**铁律**: 任何带 query 的 URL → dry-run 必跑 → 比对预期 size vs API size → 不一致 = bug，立即修不绕过。"query 是用户对服务器的强约定，看起来多余也要逐项保留"。
+
+**反例**:
+- 当时做了: 用户给 `?fileId=xxx` 期望 12GB fp8 → CLI 实际下到 25GB primary
+- 导致后果: 25GB 占盘 → 用户删盘 → 重下 → 12GB 又 sha 不匹配 → 第三轮折腾才接受
+- 根因: CLI 漏掉 extra_query 参数，server 按 primary 推
+- 教训: dry-run 是 size 校验的最低线。query 透传 bug 必须修 CLI，不能 curl 绕
+
+### 4.5 API metadata 与物理资源名分层报告
+
+**铁律**: 完成后必报三层（API 字段名 / 物理 URL basename / 落盘最终文件名）。"漏报 = 谎报"。
+
+**反例**:
+- 当时做了: 只汇报"找到文件"，没点物理名差异
+- 导致后果: 用户问"为啥没对应上"，自己重新看才发现物理名含上传者内部 hash tag
+- 根因: 默认信任"API 字段是完整事实"，没意识到 metadata ≠ 真实存储
+- 教训: 报告 = 主动暴露事实，不让用户发现你漏了什么
+
+### 4.6 用户语气转硬 = 主上下文自审信号
+
+**铁律**: 用户说"搞笑/草率/你认真的吗/又想偷懒了" → 🛑 立即停下新动作 → 列"已知事实 + 已有动作 + 当前卡点"三段式 → 不辩解、不连续新动作。"用户的硬语气 = 我刚刚的汇报缺关键事实，立刻补已知清单"。
+
+**反例**:
+- 当时做了: 用户质疑"草率"后还尝试自圆其说继续 curl
+- 导致后果: 浪费 + 用户更不耐烦；最后用户直接拍桌"你认真的吗"
+- 根因: 把用户质疑当情绪，没当"你没把事实讲全"的信号
+- 教训: 用户的硬语气 = 我刚刚的汇报缺关键事实，立刻补"已知清单"
+
+---
+
+## §4.5 Agent 行为反例 3 类（V10.8 NEW — 本次会话蒸馏）
+
+> 来源: 本次 V10.8 升级会话。用户反复纠正的 3 类 agent 行为问题，通用适用于所有 skill 升级/规则编写场景。
+> 核心原则: 反例价值 > 正例价值。这 3 类反例的代价已付，记录 = 防止下次 agent 再犯。
+
+### 4.5.1 用力过猛（Over-engineering）
+
+**铁律**: 吸收经验 ≠ 堆砌内容。先识别核心问题，再设计最小可行修复，最后只加判断标签不加新规则。
+
+**反例**:
+- 当时做了: 用户说"吸收三个 example 项目经验"→ 主上下文把方法论大量搬进 fullstack4TraeV10，+1265 行
+- 导致后果: skill 本身违反"不啰嗦不腐败"原则，子代理加载更慢
+- 根因: 把"吸收"理解为"堆砌"，没识别核心问题是"场景判断缺位"
+- 教训: 吸收 = 识别核心问题 + 加场景判断层，不是堆砌内容。1396 行若全是反例指导有价值，但堆砌的方法论重复 = 腐烂
+
+**自检问**: "这次修改是在加价值，还是在堆砌？如果删掉这部分，agent 会踩坑吗？"
+
+### 4.5.2 矫枉过正（Over-correction）
+
+**铁律**: 修复"规则缺失" ≠ 给所有场景强加规则。区分"产生产物的编码类"和"纯调研的探索类"，分别给模板。
+
+**反例**:
+- 当时做了: 用户指出"子代理裸奔"→ 主上下文想给所有委派加强制头部模板
+- 导致后果: 纯探索任务被强加 AGENTS.md/铁律/流水线，上下文被规则挤占
+- 根因: 没区分"编码类需要规则注入"和"探索类需要轻装"，一刀切
+- 教训: 修复规则缺失时，先做场景分类（产生产物 vs 纯调研），再分别给模板。判断标准: 是否产生项目产物
+
+**自检问**: "这个修复是否会让另一类场景被压垮？我区分场景了吗？"
+
+### 4.5.3 头痛医头脚痛医脚（Reactive-only）
+
+**铁律**: 用户指出一个问题 → 主动举一反三扫描同类问题，不是只改用户指出的点。
+
+**反例**:
+- 当时做了: 用户指出"委派注入一刀切"→ 主上下文只改委派注入，没扫描其他一刀切规则
+- 导致后果: 用户再次指出"你还是只做了一部分"，消耗信任
+- 根因: 把用户指出的问题当独立个案，没识别它是"一刀切"这个模式的一个实例
+- 教训: 用户指出 A 问题 → 立即扫描 B/C/D 同类问题（如 TDD 强制/视觉验证/机械验证是否也一刀切），系统性修复
+
+**自检问**: "用户指出的这个问题，是哪个模式的实例？同模式还有哪些未修复的点？"
+
+### 4.5.4 三类反例的共性 — 主动判断缺失
+
 ```
-AIGCMediaDesktop 19 个 change:
-- Archived: 4 个
-- Plan 完成: 1 个
-- Stub (只 define.md): 12 个
-- 控制器: 1 个
-- 其他: 1 个
+三类反例的共同根因: agent 被动响应用户指出，没主动判断
+  ├─ 用力过猛 = 没判断"什么是核心问题"就堆砌
+  ├─ 矫枉过正 = 没判断"场景差异"就一刀切
+  └─ 头痛医头 = 没判断"问题模式"就只改个案
 
-Stub 比例: 12/19 = 63%
+修复方向: 主动判断 > 被动响应
+  ├─ 吸收经验前 → 先判断核心问题是什么
+  ├─ 修复规则前 → 先判断有哪些场景需要区分
+  └─ 用户指出问题后 → 先判断这是哪个模式的实例，扫描同类
 ```
 
-**腐烂路径**:
+### 4.5.5 项目特定敏捷流程误删（V10.8 补丁 — 清理误判）
+
+**铁律**: 通用方法论吸收 ≠ 项目特定敏捷流程可删除。fullstack4TraeV10 提供通用门禁底线，项目敏捷流程提供门禁之上的加速通道，两者协同不替代。
+
+**判定标准 — 可删除 vs 不可删除**:
 ```
-里程碑 (00-01~00-04) 完成后进入扩张期
-  ↓
-11+ 个新模块同时起 define.md (急于铺开)
-  ↓
-但无 1 个模块完成 define→spec→tasks 全流程
-  ↓
-状态卡 "🟡 骨架" 给人"项目在前进"印象
-  ↓
-实际 0% 推进,破窗效应: 新模块也开始只起 define
+读 SKILL.md 前 30 行，检查是否含项目特定信号:
+  ├─ 项目特定路径（如 docs/bugs/{id}/、10.255.91.158、app/ods/parsers/）
+  ├─ 项目特定工具（如 FieldMapper、switchboard.invoke、model-todo CLI）
+  ├─ 项目特定环境（如 test env IP、ComfyUI URL、特定端口）
+  ├─ 项目特定业务场景（如 OTA crawler/parser、AIGC 模型管理、冷热库迁移）
+  └─ 项目特定 ID 格式（如 BUG-YYYYMMDD-NNN、禅道数字 ID）
+
+含任一项目特定信号 → 不可删除（项目敏捷流程，保留）
+全部是通用方法论（无项目特定细节）→ 可删除（通用方法论蒸馏，吸收后删除原文件）
+混合型 → 拆分：通用部分吸收到 fullstack4TraeV10，项目特定部分保留原文件
 ```
 
-**V10.5 修复**:
-- `proactive-scan.py` 新增 `stub-pileup` check
-- 算法: 扫 `docs/specs/changes/*/` 各文件存在性 → 分类 (archived/full-plan/stub/controller) → stub_rate = stub/total
-- stub_rate > 0.4 → ⚠️ WARN; > 0.6 → 🛑 FAIL (破窗临界)
-- 文章层面: 新增 Article XIII — **Stub is Debt** (🟡 骨架 = 隐性技术债,2 周未推进必冻结或归档)
+**反例**:
+- 当时做了: 看到 skill 名字含 "bug-fix" → 判定 "诊断部分已被 debugger.md 吸收" → 删除整个 skill
+- 导致后果: 项目失去 4 Phase 敏捷流程 + Intake 8 步 + 跨层契约范式 + 6 个真实反例 → 每个 bug 都走完整 6 阶段 → 效率暴跌
+- 根因: 把"部分通用方法论被吸收"等同于"整个 skill 可删除"，未读文件核实是否含项目特定内容
+- 教训: 看到 skill 名字就判定冗余 = 用力过猛。必须读 SKILL.md 前 30 行，检查项目特定信号
 
-**验证证据**:
-- `proactive-scan.py --only stub-pileup` 在 AIGCMediaDesktop 上应报 63% → 🛑 FAIL
-- fixture: 10 个 changes,8 个 stub → 应报 FAIL
+**自检问**: "这个 skill 含项目特定路径/工具/环境/业务场景吗？如果有，它是敏捷流程不是通用方法论，不能删。"
 
+### 4.5.6 四类反例的共性 — 主动判断缺失（V10.8 补丁更新）
+
+```
+四类反例的共同根因: agent 被动响应用户指出，没主动判断
+  ├─ 用力过猛 = 没判断"什么是核心问题"就堆砌
+  ├─ 矫枉过正 = 没判断"场景差异"就一刀切
+  ├─ 头痛医头 = 没判断"问题模式"就只改个案
+  └─ 敏捷流程误删 = 没判断"项目特定内容"就当通用方法论删除（V10.8 补丁）
+
+修复方向: 主动判断 > 被动响应
+  ├─ 吸收经验前 → 先判断核心问题是什么
+  ├─ 修复规则前 → 先判断有哪些场景需要区分
+  ├─ 用户指出问题后 → 先判断这是哪个模式的实例，扫描同类
+  └─ 清理冗余前 → 先读文件核实是否含项目特定内容（V10.8 补丁）
+```
+
+### 4.5.7 自检 3 问（每次修改 skill 前过一遍）
+
+```
+1. 我是在加价值，还是在堆砌？→ 删掉这部分 agent 会踩坑吗？
+2. 这个修复会让另一类场景被压垮吗？→ 我区分场景了吗？
+3. 用户指出这个问题，是哪个模式的实例？→ 同模式还有哪些未修复？
+```
+
+---
+
+## §5 Skill 自我升级协议（V10.8 NEW）
+
+> 来源: Skill 自我升级协议蒸馏。适用于任何 Skill 的自我维护。
+
+### 5.1 触发升级的 4 个条件
+
+```
+A. 新发现 Bug（试水踩坑）→ 立即在关联文档追加「事故复盘」段
+B. 新增 CLI/工具 → 在 CLI 清单追加
+C. 新增操作类别/迁移类别 → 在类别清单追加
+D. 试水参数调整（如保留时长/阈值变化）→ 在对应章节修改
+```
+
+### 5.2 升级流程（5 步）
+
+```
+Step 1: 备份当前 SKILL.md
+Step 2: 修改 SKILL.md（version +0.0.1 / last-updated / next-review 延后 90 天 / 修改对应章节）
+Step 3: 修改关联文档（互引，追加新章节或修订旧章节）
+Step 4: 跑测试守护（pytest baseline 只增不减 / verify 命令 OK）
+Step 5: 机械验证 SKILL.md 与实际代码一致（CLI 清单 vs 实际依赖 / 文档清单 vs 实际文件）
+```
+
+### 5.3 升级边界
+
+```
+OK 允许升级（无需用户确认）:
+  - 类别清单 / Bug 表 / CLI 清单 / 参数调整
+  - frontmatter version / last-updated / next-review
+
+NO 禁止升级（必须用户确认）:
+  - 总览铁律（核心不可变）
+  - 紧急恢复流程（破坏性操作）
+  - 任何"删除"操作改为"非 trash 模式"
+  - 任何"跳过 verify 验证"
+  - 任何"跳过 dry-run 直接 --apply"
+```
+
+### 5.4 每月自我审计
+
+```
+审计项:
+  1. CLI 清单 vs 实际依赖是否一致
+  2. Bug 表是否全部修复
+  3. 文档是否反映最新经验
+  4. pytest baseline 是否只增不减
+
+审计后:
+  - 不达标项 → 立即升级 SKILL.md
+  - 达标 → 更新 next-review 到下月
+```
+
+---
+
+## §6 规则编写自检清单（元规则，V10.8 NEW）
+
+> 来源: 规则编写细节检查清单。元规则: 编写规则时必须遵循的规则。
+
+### 6.1 7 类死引用检测
+
+| # | 检测项 | 检测方法 |
+|---|--------|---------|
+| 1 | 路径引用 | 搜索 "详见|参见.*\.md|完整版详见" |
+| 2 | 错项目名 | 搜索非当前项目的项目名 |
+| 3 | 错仓库路径 | 搜索非当前项目的目录路径 |
+| 4 | 不存在的 agent 名 | 交叉校验 agents/ 目录 |
+| 5 | 不存在的规则文件名 | 搜索 "xxx.mdc" 是否在 rules/ 目录 |
+| 6 | 不存在的 MCP 工具名 | 交叉校验 mcp.json |
+| 7 | 硬编码路径 | 搜索 Windows/Linux 绝对路径 |
+
+### 6.2 正反约束必须成对
+
+```
+每类行为必须有正向（MUST）和反向（NEVER）：
+  ✅ "MUST: 修改代码前 → impact()"
+  ✅ "NEVER: GitNexus 可用时降级为 grep/glob"
+
+单一方向 = 规则不完整：
+  ❌ 只有 "MUST 用 GitNexus" 无 NEVER → AI 不知道失败时能不能用 grep
+  ❌ 只有 "NEVER 跳过 DOC SYNC GATE" 无正向 → AI 不知道 DOC SYNC GATE 具体是什么
+```
+
+### 6.3 编写后自检 9 项
+
+```
+[ ] 触发配置正确？（alwaysApply / description 足够描述触发场景？）
+[ ] 触发条件明确？（AI 能否判断何时激活此规则？）
+[ ] 决策树有兜底分支？（遇到"不确定"情况有明确行为？）
+[ ] 异常处理每行有判定标准？（AI 能否机械判断"何时触发此行"？）
+[ ] 每条禁止有替代方案？（NEVER 后面跟着"应该怎么做"？）
+[ ] 全文无路径引用？（搜索 "详见" "参见" ".md" 确认）
+[ ] 全文无错项目名？
+[ ] 与已有规则无 > 1 句的概念重叠？
+[ ] 硬编码路径已替换为变量或概念描述？
+```
+
+### 6.4 禁止行为
+
+| 禁止 | 替代 |
+|------|------|
+| 规则中引用其他规则文件路径 | 概念性关联（"与 X 阶段形成闭环"） |
+| 同一概念在多文件重复展开 | 确定主归属方，对端只留 1 句核心约束 |
+| 决策树有分支遗漏 | 显式标注 "N/A（原因）"，补齐 4 路 |
+| 异常处理用模糊词（酌情/适当/根据情况） | 客观判定标准 + 具体操作步骤 |
+| 只有 MUST 没有 NEVER | 成对出现 |
+| 硬编码项目名/路径 | 概念描述或变量化 |
+| 新增规则前不检测是否与已有规则重叠 | 先用自检清单 + 搜索已有规则中的关键词 |

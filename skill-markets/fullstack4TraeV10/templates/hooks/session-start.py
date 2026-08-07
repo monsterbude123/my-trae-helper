@@ -76,6 +76,7 @@ else:
 # ── Step 4: prototypes 完整性 ──
 print()
 proto_missing = []
+specs_dir = project_root / "docs" / "specs"
 if specs_dir.exists():
     for feat_dir in specs_dir.iterdir():
         if not feat_dir.is_dir() or feat_dir.name.startswith('.') or feat_dir.name.startswith('_'):

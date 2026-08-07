@@ -371,76 +371,30 @@ def _audit_uiux(project_root: Path, no_visual: bool = False) -> Tuple[str, str]:
     size = newest.stat().st_size
 
     # V10.4 升级 (2026-07-30): 在 _audit_visual_evidence 之前先调 visual-content-check
-
-
     # 腐烂点 9 修复: 解决 PNG magic OK 但内容是空白/布局错乱的假阳性
-
-
     try:
-
-
         vcc_script = Path(__file__).parent / "visual-content-check.py"
-
-
         if vcc_script.exists():
-
-
             vcc = subprocess.run(
-
-
                 ["python", str(vcc_script), str(newest), "--json"],
-
-
                 cwd=project_root, capture_output=True, text=True, timeout=15,
-
-
             )
-
-
             if vcc.returncode != 0:
-
-
                 try:
-
-
                     vcc_data = json.loads(vcc.stdout)
-
-
                     results_list = vcc_data.get("results", [{}])
-
-
                     first = results_list[0] if results_list else {}
-
-
                     fail_msg = first.get("detail", "unknown")
-
-
                 except json.JSONDecodeError:
-
-
                     fail_msg = vcc.stdout[:200] or vcc.stderr[:200] or "visual-content-check failed"
-
-
                 return (
-
-
                     "FAIL",
-
-
                     test_part + " + V10.4 visual-content-check FAIL: " + fail_msg,
-
-
                 )
-
-
     except (subprocess.TimeoutExpired, FileNotFoundError):
-
-
         pass  # visual-content-check 不可用时,降级到原有 _audit_visual_evidence
 
-
-    
-# V10.3.9 升级 (2026-07-29): 三层视觉证据校验 (PNG magic + bytes + PIL 亮度)
+    # V10.3.9 升级 (2026-07-29): 三层视觉证据校验 (PNG magic + bytes + PIL 亮度)
     visual_ok, visual_msg = _audit_visual_evidence(newest)
     if not visual_ok:
         return ("FAIL", f"{test_part} + ❌ {visual_msg}")

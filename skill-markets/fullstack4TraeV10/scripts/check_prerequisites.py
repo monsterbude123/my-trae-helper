@@ -222,6 +222,8 @@ def _check_prereqs(paths: FeaturePaths, phase: str) -> List[str]:
         script = Path(__file__).parent / "orphan-detector.py"
         if not script.exists():
             return [f"missing script: {script}"]
+        project_root = paths.project_root
+        feature = paths.feature
         cmd = ["python", str(script), "--project-root", str(project_root)]
         if feature:
             cmd += ["--feature", feature]

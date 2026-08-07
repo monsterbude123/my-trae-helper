@@ -70,3 +70,48 @@
 - **更新索引**: `build-index.py --incremental` → 同步后维护索引
 
 未安装时降级为 grep + glob（文件级定位，允许但大项目不推荐）。
+
+---
+
+## 文档索引器范围白名单/黑名单（V10.8 NEW — doc-mgr 噪音修复）
+
+> 根因：未规定索引器扫描范围 → doc-map-manager / spec-knowledge-extract / 自定义 grep 扫描器
+> 默认扫描整个 docs/ → archive/bugs/reports/history/_invalidated 等噪音目录被索引 → 事实索引被污染。
+> 治理：显式白/黑名单，索引器启动前必读本段，违反 = 索引无效。
+
+### 白名单（可索引 layer=fact 目录）
+
+- `docs/contracts/`、`docs/modules/`、`docs/ARCHITECTURE.md`
+- `docs/specs/changes/{active}/`（仅活跃 change，排除 archive 子目录）
+- `docs/api-endpoints/`、`docs/domain-models/`、`docs/events/`（spec-knowledge-extract 产物，layer=fact）
+- `AGENTS.md`
+
+### 黑名单（索引器必须显式 exclude）
+
+| 目录/文件 | layer | 排除原因 |
+|----------|:-----:|---------|
+| `docs/archive/`、`docs/specs/archive/` | log | 归档不可变，索引即污染 |
+| `docs/bugs/` | process | Bug 修复记录，非事实源 |
+| `docs/reports/` | log | Review 报告，非事实源 |
+| `docs/history/`、`.history.md` | log | 完工签名薄，按需 grep |
+| `_invalidated/` | process | 回流隔离旧产物 |
+| `diagnostic/` | process | 诊断手记 |
+| `docs/DECISIONS.md` | process | 决策过程记录 |
+| 任何 frontmatter 含 `layer: process` 或 `layer: log` 的文档 | — | 按 layer 标签判定 |
+
+### 明文规定
+
+```
+1. 任何文档索引器（doc-map-manager / spec-knowledge-extract / 自定义 grep 扫描）
+   启动前必须读本段，确认扫描范围符合白/黑名单
+2. 索引器实现必须显式 exclude 黑名单目录，禁止"默认全扫描"
+3. 违反 = 索引结果无效，必须重建索引
+4. 外部索引器示例: doc-map-manager skill 的 build-index.py
+```
+
+### 反例
+
+- 现象：索引器默认扫描 docs/ → query 返回 archive 旧契约 + bugs 修复记录 → agent 拿到过时事实
+- 根因：索引器未配置 exclude，默认全扫描污染事实层
+- 教训：索引器必须显式 exclude 黑名单，启动前必读 doc-sync.md §索引器范围
+- 来源：absorption-plan §一（doc-mgr 噪音修复 P0）

@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 SOURCE = Path(r"D:\workspace\my-trae-helper\skill-markets\fullstack4TraeV10")
-TARGET = Path(os.path.expanduser(r"~\.trae-cn\builtin_skills\fullstack4TraeV10"))
+TARGET = Path(os.path.expanduser(r"~\.trae-cn\skills\fullstack4TraeV10"))
 
 
 def banner(msg: str) -> None:
@@ -35,7 +35,7 @@ def main() -> int:
         return 1
     print(f"[OK]   源验证通过")
 
-    # 2. 覆盖安装（不备份，避免 builtin_skills/ 下残留多版本技能造成污染）
+    # 2. 覆盖安装（不备份，避免 skills/ 下残留多版本技能造成污染）
     if TARGET.exists():
         print(f"[1/4] 删除旧版本: {TARGET.name}")
         shutil.rmtree(TARGET)

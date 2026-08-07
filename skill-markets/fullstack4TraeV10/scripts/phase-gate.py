@@ -29,7 +29,7 @@ import re
 import sys
 from pathlib import Path
 
-# å…è®¸ç›´æŽ¥æ‰§è¡Œæˆ– import
+# 允许直接执行或 import
 try:
     from common import (
         FeaturePaths,
@@ -48,26 +48,26 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 
 
 def _find_review_report(project_root: Path) -> Path | None:
-    """æŸ¥æ‰¾ review æŠ¥å‘Šï¼ˆV10 review-latest.md ä¼˜å…ˆ, V9 acceptance-scorecard-*.md fallbackï¼‰
-    
-    V10_STRICT_REVIEW=1: ç¦æ­¢ fallbackï¼Œå¿…é¡» review-latest.md å­˜åœ¨ï¼ˆç¡¬é—¨ç¦ï¼‰
-    é»˜è®¤: V10_STRICT_REVIEW=1ï¼ˆå¼ºåˆ¶ï¼‰
+    """查找 review 报告（V10 review-latest.md 优先, V9 acceptance-scorecard-*.md fallback）
+
+    V10_STRICT_REVIEW=1: 禁止 fallback，必须 review-latest.md 存在（硬门禁）
+    默认: V10_STRICT_REVIEW=1（强制）
 
     Returns:
-        æ‰¾åˆ°çš„ review æŠ¥å‘Šè·¯å¾„; æ‰¾ä¸åˆ°è¿”å›ž None
+        找到的 review 报告路径; 找不到返回 None
     """
     strict_review = os.environ.get("V10_STRICT_REVIEW", "1") == "1"
     reports = project_root / "docs" / "reports"
     if not reports.is_dir():
         return None
-    # V10 ä¼˜å…ˆ
+    # V10 优先
     latest = reports / "review-latest.md"
     if latest.is_file():
         return latest
-    # V10_STRICT_REVIEW=1 æ—¶ç¦æ­¢ fallback
+    # V10_STRICT_REVIEW=1 时禁止 fallback
     if strict_review:
         return None
-    # V9 fallback: acceptance-scorecard-{date}.mdï¼ˆæŒ‰æ—¥æœŸå€’åº, æœ€æ–°ä¼˜å…ˆï¼‰
+    # V9 fallback: acceptance-scorecard-{date}.md（按日期倒序, 最新优先）
     scorecards = sorted(reports.glob("acceptance-scorecard-*.md"), reverse=True)
     if scorecards:
         return scorecards[0]
@@ -75,7 +75,7 @@ def _find_review_report(project_root: Path) -> Path | None:
 
 
 def get_paths(project_root: Path, feature: str | None) -> dict:
-    """è§£æžé˜¶æ®µé—¨ç¦æ‰€éœ€çš„è·¯å¾„é›†åˆ"""
+    """解析阶段门禁所需的路径集合"""
     if feature:
         paths = FeaturePaths.from_root(project_root, feature)
         return {
@@ -109,7 +109,7 @@ def check_plan_to_spec(project_root: Path, feature: str | None = None) -> tuple[
     paths = get_paths(project_root, feature)
     plan_path = paths["plan"]
     if not plan_path.exists():
-        errors.append(f"ç¼ºå¤±: {plan_path.relative_to(project_root)}")
+        errors.append(f"缺失: {plan_path.relative_to(project_root)}")
         return False, errors
     content = plan_path.read_text(encoding="utf-8")
     if not re.search(
@@ -117,9 +117,9 @@ def check_plan_to_spec(project_root: Path, feature: str | None = None) -> tuple[
         content,
         re.MULTILINE | re.IGNORECASE,
     ):
-        errors.append(f"{plan_path.name} ç¼º '## Closure' æ ‡é¢˜æ®µï¼ˆæˆ– '## Acceptance Criteria'ï¼‰")
+        errors.append(f"{plan_path.name} 缺 '## Closure' 标题段（或 '## Acceptance Criteria'）")
     if "P0" not in content:
-        errors.append(f"{plan_path.name} ç¼º P0 ä¼˜å…ˆçº§ä»»åŠ¡")
+        errors.append(f"{plan_path.name} 缺 P0 优先级任务")
     return len(errors) == 0, errors
 
 
@@ -128,7 +128,7 @@ def check_spec_to_contract(project_root: Path, feature: str | None = None) -> tu
     paths = get_paths(project_root, feature)
     spec_path = paths["spec"]
     if not spec_path.exists():
-        errors.append(f"ç¼ºå¤±: {spec_path.relative_to(project_root)}")
+        errors.append(f"缺失: {spec_path.relative_to(project_root)}")
         return False, errors
     content = spec_path.read_text(encoding="utf-8")
     req_count = len(re.findall(
@@ -136,9 +136,9 @@ def check_spec_to_contract(project_root: Path, feature: str | None = None) -> tu
         content,
     ))
     if req_count < 3:
-        errors.append(f"{spec_path.name} Requirement æ•° = {req_count}ï¼ˆè¦æ±‚ â‰¥ 3ï¼‰")
+        errors.append(f"{spec_path.name} Requirement 数 = {req_count}（要求 ≥ 3）")
     if "Invariants" not in content and "Invariant" not in content:
-        errors.append(f"{spec_path.name} ç¼º Invariants æ®µ")
+        errors.append(f"{spec_path.name} 缺 Invariants 段")
     return len(errors) == 0, errors
 
 
@@ -147,10 +147,10 @@ def check_contract_to_implement(project_root: Path, feature: str | None = None) 
     paths = get_paths(project_root, feature)
     contracts_dir = paths["contracts_dir"]
     if not contracts_dir.exists():
-        errors.append(f"ç¼ºå¤±ç›®å½•: {contracts_dir.relative_to(project_root)}")
+        errors.append(f"缺失目录: {contracts_dir.relative_to(project_root)}")
     md_files = list(contracts_dir.rglob("*.md")) if contracts_dir.exists() else []
     if contracts_dir.exists() and not md_files:
-        errors.append(f"contracts/ ä¸‹æ—  .md æ–‡ä»¶")
+        errors.append(f"contracts/ 下无 .md 文件")
 
     test_skel = paths["test_skel"]
     alt_skel = paths["alt_skel"]
@@ -172,9 +172,9 @@ def check_contract_to_implement(project_root: Path, feature: str | None = None) 
 
     if not has_skel:
         errors.append(
-            f"ç¼ºå¤±æµ‹è¯•éª¨æž¶ã€‚è¯·åœ¨ä»¥ä¸‹ä¸¤ä¸ªè·¯å¾„ä¹‹ä¸€åˆ›å»ºæµ‹è¯•æ–‡ä»¶ï¼š\n"
-            f"  é€‰é¡¹ 1: docs/specs/{{feature}}/contracts/test-skeleton/  (V10 æ ‡å‡†)\n"
-            f"  é€‰é¡¹ 2: __tests__/contracts/  (Vitest/Jest é¡¹ç›®æƒ¯ä¾‹)"
+            f"缺失测试骨架。请在以下两个路径之一创建测试文件：\n"
+            f"  选项 1: docs/specs/{{feature}}/contracts/test-skeleton/  (V10 标准)\n"
+            f"  选项 2: __tests__/contracts/  (Vitest/Jest 项目惯例)"
         )
 
     return len(errors) == 0, errors
@@ -185,13 +185,13 @@ def check_implement_to_review(project_root: Path, feature: str | None = None) ->
     paths = get_paths(project_root, feature)
     tasks_path = paths["tasks"]
     if not tasks_path.exists():
-        errors.append(f"ç¼ºå¤±: {tasks_path.relative_to(project_root)}")
+        errors.append(f"缺失: {tasks_path.relative_to(project_root)}")
         return False, errors
 
     content = tasks_path.read_text(encoding="utf-8")
     unchecked = re.findall(r"- \[ \]", content)
     if unchecked:
-        errors.append(f"{tasks_path.name} è¿˜æœ‰ {len(unchecked)} é¡¹æœªå‹¾é€‰")
+        errors.append(f"{tasks_path.name} 还有 {len(unchecked)} 项未勾选")
 
     import os
     import subprocess
@@ -210,7 +210,7 @@ def check_implement_to_review(project_root: Path, feature: str | None = None) ->
         text=True,
     )
     if result.returncode != 0:
-        errors.append(f"code-hygiene å¤±è´¥ï¼ˆbase={last_commit}ï¼‰:\n{result.stdout}")
+        errors.append(f"code-hygiene 失败（base={last_commit}）:\n{result.stdout}")
 
     return len(errors) == 0, errors
 
@@ -221,7 +221,7 @@ def check_review_to_accept(project_root: Path, feature: str | None = None) -> tu
     review_report = paths["review_report"]
     if review_report is None or not review_report.is_file():
         errors.append(
-            f"ç¼ºå¤± review æŠ¥å‘Šï¼ˆdocs/reports/review-latest.md æˆ– acceptance-scorecard-*.mdï¼‰"
+            f"缺失 review 报告（docs/reports/review-latest.md 或 acceptance-scorecard-*.md）"
         )
         return False, errors
 
@@ -231,37 +231,37 @@ def check_review_to_accept(project_root: Path, feature: str | None = None) -> tu
         if dim not in content or not re.search(
             rf"(?:\*\*{dim}\*\*|{dim}):\s*PASS", content
         ):
-            errors.append(f"{dim} éž PASS")
+            errors.append(f"{dim} 非 PASS")
 
     if "total_score: 5.0" not in content:
-        errors.append("total_score â‰  5.0ï¼ˆè¦æ±‚æ»¡åˆ†ï¼‰")
+        errors.append("total_score ≠ 5.0（要求满分）")
 
     doc_sync = paths["doc_sync"]
     if not doc_sync.exists():
-        errors.append(f"ç¼ºå¤± DOC SYNC æŠ¥å‘Š: {doc_sync.relative_to(project_root)}")
+        errors.append(f"缺失 DOC SYNC 报告: {doc_sync.relative_to(project_root)}")
 
     return len(errors) == 0, errors
 
 
 def check_integration_contract(project_root: Path, feature: str | None = None) -> tuple[bool, list[str]]:
-    """æŽ¥å…¥å¥‘çº¦é—¨ç¦ (V10 æ–°å¢ž 2026-07-28) â€” å§”æ‰˜ç»™ check_integration_contract.py
-    è§ skill-markets/fullstack4TraeV10/scripts/check_integration_contract.py
+    """接入契约门禁 (V10 新增 2026-07-28) — 委托给 check_integration_contract.py
+    见 skill-markets/fullstack4TraeV10/scripts/check_integration_contract.py
     """
     import subprocess
     script = Path(__file__).parent / "check_integration_contract.py"
     if not script.exists():
-        return False, [f"ç¼ºå¤±æ£€æŸ¥è„šæœ¬: {script}"]
+        return False, [f"缺失检查脚本: {script}"]
     result = subprocess.run(
         ["python", str(script), "--project-root", str(project_root)],
         cwd=project_root,
         capture_output=True,
         text=True,
     )
-    # é€ä¼ è„šæœ¬è¾“å‡º
+    # 透传脚本输出
     if result.stdout:
         print(result.stdout, end='')
     if result.returncode != 0:
-        return False, [result.stderr.strip() or "integration-contract å¤±è´¥"]
+        return False, [result.stderr.strip() or "integration-contract 失败"]
     return True, []
 
 def check_orphan_precheck(project_root: Path, feature: str | None = None) -> tuple[bool, list[str]]:
@@ -351,22 +351,22 @@ GATES = {
 
 def main():
     parser = argparse.ArgumentParser(
-        description="V10 é˜¶æ®µè½¬æ¢ç¡¬é—¨ç¦ï¼ˆæ”¯æŒ feature-scopedï¼‰",
+        description="V10 阶段转换硬门禁（支持 feature-scoped）",
     )
     parser.add_argument(
         "--project-root", type=str, default=".",
-        help="é¡¹ç›®æ ¹è·¯å¾„ï¼ˆé»˜è®¤è‡ªåŠ¨å‘ä¸ŠæŸ¥æ‰¾ V10 é”šç‚¹ï¼‰",
+        help="项目根路径（默认自动向上查找 V10 锚点）",
     )
     parser.add_argument(
         "--feature", type=str,
-        help="feature åï¼ˆå¦‚ 00-05-task-queueï¼‰ï¼›ä¸ä¼ åˆ™æ£€æŸ¥é¡¹ç›®çº§å•æ–‡ä»¶å¸ƒå±€ï¼ˆV9 å…¼å®¹ï¼‰",
+        help="feature 名（如 00-05-task-queue）；不传则检查项目级单文件布局（V9 兼容）",
     )
     parser.add_argument(
         "--phase", required=True, choices=list(GATES.keys()),
-        help="é˜¶æ®µè½¬æ¢åï¼ˆå¦‚ spec-to-contractï¼‰/ æŽ¥å…¥å¥‘çº¦é—¨ç¦ï¼ˆintegration-contractï¼‰",
+        help="阶段转换名（如 spec-to-contract）/ 接入契约门禁（integration-contract）",
     )
     parser.add_argument(
-        "--json", action="store_true", help="JSON è¾“å‡ºï¼ˆæœºæ¢°éªŒè¯å‹å¥½ï¼‰",
+        "--json", action="store_true", help="JSON 输出（机械验证友好）",
     )
     args = parser.parse_args()
 
@@ -392,13 +392,13 @@ def main():
         print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     elif ok:
         scope = f"feature={feature}" if feature else "project-level"
-        print(f"âœ… {args.phase} é˜¶æ®µè½¬æ¢é—¨ç¦é€šè¿‡ï¼ˆ{scope}ï¼‰")
+        print(f"✅ {args.phase} 阶段转换门禁通过（{scope}）")
     else:
         scope = f"feature={feature}" if feature else "project-level"
-        print(f"ðŸ›‘ {args.phase} é˜¶æ®µè½¬æ¢é—¨ç¦å¤±è´¥ï¼ˆ{scope}ï¼‰ï¼š\n")
+        print(f"🛑 {args.phase} 阶段转换门禁失败（{scope}）：\n")
         for err in errors:
             print(f"  - {err}")
-        print(f"\nä¿®å¤åŽå†è¯•ã€‚ä»»ä¸€ FAIL = ðŸ›‘ REJECT")
+        print(f"\n修复后再试。任一 FAIL = 🛑 REJECT")
 
     sys.exit(0 if ok else 1)
 

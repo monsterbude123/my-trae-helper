@@ -51,43 +51,7 @@ spec-prototype-enhancer 输出的 §ADDED Requirements 与 Enhanced Acceptance �
 
 ### Step 0.5: Clarify（借鉴 spec-kit /speckit.clarify）
 
-读取 spec.md，按 [clarify-checklist.md](../references/clarify-checklist.md) 识别欠定义区域：
-
-**检测维度**：
-- 模糊词检测（正则）：`可能` / `大概` / `似乎` / `用户觉得` / `一些` / `适当的时候` / `等等` / `robust` / `intuitive` / `fast` / `scalable`
-- BDD 完整性：每个 User Story 是否都有 Given/When/Then 完整场景
-- Edge Cases 数量：是否 ≥ 3，且含 ≥ 1 错误场景 + ≥ 1 边界值
-- Success Criteria 可量化：是否含具体数字（响应时间/吞吐量/错误率）
-- 占位符检测：`TODO` / `TBD` / `TKTK` / `???` / `<placeholder>`
-
-**处理**：
-
-| 检测结果 | 行为 |
-|---------|------|
-| 发现 ≥ 1 项欠定义 | 输出 ≤ 5 个澄清问题（Markdown 列表，附推荐选项 + 理由），用户回答后增量更新 spec.md 对应段；在 Completion Report 标 `clarify_questions: {N} 个` |
-| 无问题 | 跳过，直接进入 Step 1 |
-
-**澄清问题格式**（每次 ≤ 5 个）：
-
-```markdown
-## Clarifications
-### Session {YYYY-MM-DD}
-
-**Q1**: {问题描述}
-**Recommended**: {推荐选项} - {1-2 句理由}
-| Option | Description |
-|--------|-------------|
-| A | ... |
-| B | ... |
-
-- Q: {问题} → A: {回答}
-```
-
-**更新纪律**：
-- 仅修改 spec.md 中**与答案直接相关**的段（Functional Requirements / Data Model / Success Criteria / Edge Cases）
-- 不重写上游 Spec Mode 产出的核心结构
-- 同步在 `## Clarifications` 段追加问答记录
-- 若存在 `checklists/requirements.md` → 重新评估勾选状态
+按 [clarify-checklist.md](../references/clarify-checklist.md) 识别欠定义区域（模糊词/占位符/BDD完整性/Edge Cases/Success Criteria），输出 ≤ 5 个澄清问题，用户回答后增量更新 spec.md 对应段，在 Completion Report 标 `clarify_questions: {N} 个`。无问题则跳过进入 Step 1。
 
 ### Step 1: 读取上游（情况 A/B）
 
@@ -96,25 +60,7 @@ spec-prototype-enhancer 输出的 §ADDED Requirements 与 Enhanced Acceptance �
 
 ### Step 2: 补充 Enhanced Acceptance
 
-在 spec.md 末尾以 `## Enhanced Acceptance` 附加段写入：
-
-```markdown
-## Enhanced Acceptance
-
-### E2E Scenarios
-- **E2E-1**: {用户操作路径} → {预期结果}
-- **E2E-2**: {用户操作路径} → {预期结果}
-
-### Invariants
-- {INV-1}: {不变的业务规则}
-
-### Acceptance Criteria
-- [ ] {AC-1}: {可验证的验收项}
-- [ ] {AC-2}: {可验证的验收项}
-- [ ] {AC-3}: {可验证的验收项}
-```
-
-**禁止**: 修改 spec.md 中上游产出的 `## Requirements`、`## Scenarios`、`## Tasks` 等核心段落。
+在 spec.md 末尾以 `## Enhanced Acceptance` 附加段写入（E2E ≥ 2 + Invariants ≥ 1 + Acceptance ≥ 3），格式模板详见 [spec-enhancer-templates.md](../references/spec-enhancer-templates.md) §1。禁止修改上游产出的核心段落（Requirements/Scenarios/Tasks）。
 
 ### Step 3: UI 原型触发
 

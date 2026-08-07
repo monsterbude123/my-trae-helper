@@ -7,11 +7,12 @@ V10.1 变更:
   - "重置/方向变"信号改用 spec-purge 路径
 """
 
+import os
 import re
 import sys
 from pathlib import Path
 
-user_prompt = os.environ.get("TRAE_USER_PROMPT", "") if "os" in dir() else ""
+user_prompt = os.environ.get("TRAE_USER_PROMPT", "")
 if not user_prompt:
     sys.exit(0)
 

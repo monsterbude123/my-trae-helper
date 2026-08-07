@@ -55,6 +55,7 @@
 | 技能包 | 文件数 | HIGH | MED | LOW | 评分 | 判定 | 点评 |
 |--------|--------|------|-----|-----|------|------|------|
 | fullstack4TraeV7 | 1 md + 9 agent + 30 ref + 1 py + 12 tpl | 0 | 0 | 0 | **5.0** | 🟢 | 大量文档和模板，无执行风险。V10: 软引用 doc-map-manager（安全评分 5.0） |
+| **skill-optimization-method**（项目级） | 1 md + 3 ref | 0 | 0 | 0 | **5.0** | 🟢 | 纯方法论文档，无脚本无执行面。位置：`.trae/skills/skill-optimization-method/` |
 | fullstack4TraeV9 | 1 md + 6 agent + 9 ref + 6 tpl | 0 | 0 | 0 | **5.0** | 🟢 | 精简版，无执行脚本，纯文档和模板。软引用 doc-map-manager（安全评分 5.0） |
 
 ### L3 配置模板

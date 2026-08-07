@@ -19,7 +19,7 @@ skill-markets/
 ## 安装
 
 ```powershell
-Copy-Item -Recurse "${PWD}\{pkg}\skills\{name}" "$env:USERPROFILE\.trae-cn\builtin_skills\{name}"
+Copy-Item -Recurse "${PWD}\{pkg}\skills\{name}" "$env:USERPROFILE\.trae-cn\skills\{name}"
 ```
 
 安装后需重启 IDE。

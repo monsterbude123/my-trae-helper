@@ -163,8 +163,10 @@ Constitution 任何 Article 的修改必须：
 - 委派纪律（Article IV）
 - GitNexus First（Article V）
 - 归档不可变（Article VIII）
+- TDD 即时（Article IX）
+- rot-detector 必跑（Article XIV）
 
-**降级禁止**: 任何提案试图废除或弱化上述 5 条 = 🛑 立即拒绝。
+**降级禁止**: 任何提案试图废除或弱化上述 7 条 = 🛑 立即拒绝。
 
 ---
 
@@ -250,4 +252,21 @@ Constitution 任何 Article 的修改必须：
 
 ---
 
-**Version**: 1.2.0 | **Ratified**: 2026-07-27 | **Last Amended**: 2026-07-31 (V10.5: +Articles XII/XIII)
+## Article XIV — rot-detector 必跑（Rot-Detector Mandatory, NON-NEGOTIABLE）
+
+> **V10.4 新增（2026-07-30，腐烂点 14 修复；V10.8 补遗到 Constitution）**
+
+**Rationale**: Phase 4.5 Proactive Rot Scan 是 V10.4 引入的主动诊断机制，不靠用户问。rot-detector 调用双层扫描（4.5.1 self-diagnose + 4.5.2 proactive-scan），任一 FAIL = 🛑 REJECT。实战教训: Agent 不主动诊断腐化,靠用户发现 = 破窗效应已扩散。
+
+**Enforcement**:
+- Phase 4.5 不可跳过,不可降级为"可选"
+- `scripts/self-diagnose.py` 必须先跑（检测器自身无腐烂）
+- `scripts/proactive-scan.py` 5+3 项 check 必须全部 PASS
+- 任一 FAIL = 🛑 REJECT,implementer 必修复后才能 Accept
+- rot-detector Agent 必须在 Review 阶段被委派
+
+**禁止例外**: 无。Phase 4.5 是硬门禁,任何 change 都必须经过。
+
+---
+
+**Version**: 1.3.0 | **Ratified**: 2026-07-27 | **Last Amended**: 2026-08-05 (V10.8: +Article XIV, 永不可降级列表 +IX/XIV)

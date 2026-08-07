@@ -1,5 +1,48 @@
 # CHANGELOG
 
+## v10.8.0 (2026-08-05)
+
+**经验吸收整合 — 反踩坑铁律 + 破坏性操作红线 + 严重度分层 + 小任务流线化 + 质疑式验收官**
+
+- **新增** 反踩坑 6 条铁律（SKILL.md §2 V10.8 NEW 标注）
+- **新增** 破坏性操作 4 步协议（references/reset-and-verify-protocol.md）
+- **新增** 严重度分层 P0/P1/P2/P4（SKILL.md §3 禁止项按场景分组）
+- **新增** 小任务流线化门禁链例外（SKILL.md §0 — ≤6 Task + LOW 可跳过 Contract 阶段）
+- **新增** 通过依据 3 类分层（references/acceptance-gates-v10.md）
+- **新增** `references/bug-workflow.md` — 19 方法论吸收（含 5 步 Intake 防御 / 5 步精简流程 / Ponytail 决策 ladder / 类型系统陷阱 / 反例库）
+- **新增** `references/reviewer-templates.md` — reviewer 模板库（验收基准拆解 / 事实证据索要 / Completion Report / 四维验收 checklists）
+- **新增** `references/clarify-checklist.md` — Spec 澄清检查清单
+- **重构** `agents/reviewer.md` — 质疑式验收官角色（ZERO TRUST / EVIDENCE MANDATORY / ACTIVE FALSIFICATION / REQUIREMENT TRACING 四铁律 + 双轨制证据索要）
+- **新增** process-rot-analysis.md §4.5.5 项目特定敏捷流程误删反模式（5 类项目特定信号 + 自检 3 问）
+- **新增** process-rot-analysis.md §4.5.6 四类反例共性（V10.8 补丁更新）
+- **新增** SKILL.md fullstack4TraeV10 边界声明（通用门禁底线 vs 项目敏捷流程加速通道协同）
+- **新增** Article XIV — rot-detector 必跑（Phase 4.5 不可跳过，补遗到 Constitution）
+- **修复** phase-gate.py 中文乱码（全面重写 UTF-8 编码）
+- **修复** acceptance-audit.py _audit_uiux 函数空行结构异常（约 60 个空行压缩）
+- **修复** proactive-scan.py run_deprecated_scan dead code（--no-deprecated-scan 参数被覆盖）
+- **修复** complexity-guard.py os 未 import 导致 hook 静默失效
+- **修复** session-start.py specs_dir 未定义导致 Step 4 崩溃
+- **修复** change-status.py project_root 未定义导致 spec-purge 检测崩溃
+- **修复** check_prerequisites.py _check_prereqs 函数 project_root/feature 未传入
+- **修复** SKILL.md §6 脚本表缺失 5 个核心脚本（phase-gate / check_prerequisites / code-hygiene / check_integration_contract / acceptance-audit / self-diagnose）
+- **修复** SKILL.md L16 §15-§17 断链（改为 §2 腐烂点 15-17）
+- **修复** process-rot-analysis.md §4.5.5 编号重复（第二个改为 §4.5.7）
+- **修复** project-structure.md ARCHITECTURE.md/DECISIONS.md 断链（改为项目级路径）
+- **清理** 删除过时 scenarios 文件 + __pycache__ 目录 + .pyc 文件
+- **变更** 版本 10.5.0 → 10.8.0 + Constitution 13 → 14 Articles
+
+## v10.6.0 (2026-08-01)
+
+**Evidence 独立抽检 — 防虚假汇报**
+
+- **新增** SKILL.md §-1.5 D 段 — V10.6 Evidence 独立抽检机制
+  - 主上下文对 agent 返回的 evidence 亲自验证（Read file:line ≤50 行）
+  - 验证文件存在性 / 内容匹配 / pass_count 一致性
+  - 不匹配 = 🛑 REJECT（虚假汇报）+ 计入失败计数
+- **新增** 禁止依赖清单（意图声明 / 部分进度 / 之前记忆 / "看起来没问题" / 推测性答案 / 代理解释）
+- **新增** 不匹配典型模式（evidence 指向空行 / pass_count 造假 / status ✓ 但文件不存在）
+- **变更** 版本 10.5.0 → 10.6.0
+
 ## v10.5.0 (2026-07-31)
 
 **rot-reinforcer Cycle 1 实战驱动更新 — 3 新腐烂点修复**
@@ -20,6 +63,31 @@
 - **变更** proactive-scan.py: 5 → 8 项 check + 标题 V10.4 → V10.5
 - **修复** AIGCMediaDesktop rot #15 (state-card 9→2 跨模块不变量自我吹嘘, 78% 失效) + rot #16 (state-card 47h 未更新 + 2 change 缺失) + rot #17 (骨架 11/19 = 58% 破窗警戒)
 - **战绩**: rot-reinforcer Cycle 1 完成,rot-detector 腐烂点覆盖 1-14 → 1-17 (3/17 实战暴露新腐烂点)
+
+## v10.4.0 (2026-07-30)
+
+**实战暴露 5 大腐烂点 — 视觉假阳性 / 自验自签 / 孤儿测试 / 隐式 build / Agent 不主动诊断**
+
+- **新增** 4 条不可协商 Articles (总数 10→14，含 XIV 补遗):
+  - **Article IX — TDD 即时** — 改实现/删组件 → 立即同步改测试/删测试
+  - **Article X — 异会话验证** — 自评 = self_attested,主上下文必二次抽检
+  - **Article XI — 视觉真实验证** — PIL 解码 + 直方图 + 关键区域采样（解决 PNG magic OK 但内容空白假阳性）
+  - **Article XIV — rot-detector 必跑** — Phase 4.5 不可跳过（V10.8 补遗到 Constitution）
+- **新增** 1 个 Agent: `agents/rot-detector.md` — 主动诊断腐化,不靠用户问
+- **新增** Phase 4.5: Proactive Rot Scan（双层）
+  - 4.5.1 Self-Diagnose: `self-diagnose.py` (Meta 自我诊断 — 检测器自身无腐烂)
+  - 4.5.2 Proactive Scan: `proactive-scan.py` (5 项腐化扫描目标项目)
+- **新增** 5 个脚本:
+  - `scripts/self-diagnose.py` — Meta 自我诊断（regex/阈值/锚定检测）
+  - `scripts/orphan-detector.py` — 孤儿测试/组件检测
+  - `scripts/dist-hash-check.py` — Bundle 一致性检查（binary 嵌入 JS chunk hash vs dist/assets）
+  - `scripts/proactive-scan.py` — 5 项腐化扫描包
+  - `scripts/visual-content-check.py` — 视觉内容深度校验（PIL 解码 + 直方图 + 象限亮度）
+- **新增** phase-gate.py 3 个新 phase: `orphan-precheck` / `bundle-check` / `proactive-scan`
+- **新增** `references/process-rot-analysis.md` — 腐烂点 9-14 详细分析 + 修复原则
+- **新增** `references/reset-and-verify-protocol.md` — Stage 0-3 主上下文自证协议
+- **新增** SKILL.md §0 Phase 4.5 段 + §-1.5 §C 视觉证据硬门禁 V10.4 升级 3 层
+- **变更** 版本 10.3.8 → 10.4.0 + Constitution 10 → 14 Articles
 
 ## v10.3.8 (2026-07-28)
 
@@ -164,7 +232,7 @@
 - `scripts/migrate-v8-to-v9.py` — V8 项目一键迁移到 V9.2（hooks 安装 + 目录拍平 + state-card 转换 + 清理）
 
 **修改文件**: SKILL.md（35 处 + §6.1 Hook 安装段 + §6 脚本表）+ 4 个 agent + intake + changelog
-**新增文件**: references/artifact-schema.md + 5 个 scripts/ + 13 个 templates/（8 hooks + 1 json + 1 readme + 3 scripts）+ scenarios/v9.2-scenario-walkthrough.md
+**新增文件**: references/artifact-schema.md + 5 个 scripts/ + 13 个 templates/（8 hooks + 1 json + 1 readme + 3 scripts）+ ~~scenarios/v9.2-scenario-walkthrough.md~~（V10.8 已删除: V9.2 旧内容腐烂,引用不存在的 agent/脚本）
 **版本号**: 9.1.0 → 9.2.0
 
 ## v9.1.0

@@ -69,3 +69,31 @@
 - ❌ 绕过回流直接编码
 - ❌ 修改测试掩盖漂移
 - ❌ 单方面修改 approved 契约（必须走 ADDITIVE/BREAKING 流程）
+- ❌ 改 API 契约前不跑 GitNexus impact()（V10.8 NEW，详见下方三步）
+
+---
+
+## 契约漂移检测三步（V10.8 NEW）
+
+> Implementer 改 API 契约时强制执行。来源: agent-delegation-discipline/references/contract-drift-detection.md。
+> **触发条件**: 改后端 API 响应结构 / 改前端 API 调用参数 / 改 DB schema / 改事件 payload。
+
+```
+Step 1 GitNexus impact() 找所有调用点
+  impact({target, direction: "upstream"}) 找上游 / impact({target, direction: "downstream"}) 找下游 / context({name}) 查看 360 度视图
+  禁止: 用 grep/glob 代替 impact() 找调用点
+
+Step 2 逐个检查调用点是否同步修改
+  后端改字段名/类型/新增/删除 → 前端是否同步改/适配/移除引用？
+  任一答 N → 契约漂移风险
+
+Step 3 写漂移测试（mock 后端新契约）
+  mock 后端新响应 → 验证前端解析正确（字段映射 / 空数组 / undefined 防御）→ 测试 PASS 才可提交
+```
+
+### 反例: 字段对齐漏改一处
+```
+现象: 后端多端点统一 data.items，前端仍期望 data.models，页面白屏
+根因: 字段对齐时漏改一处调用，未跑 impact() 找所有调用点
+教训: 改 API 契约必须 GitNexus impact() 找所有调用点 + 写漂移测试
+```
