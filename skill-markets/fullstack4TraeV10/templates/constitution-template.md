@@ -165,8 +165,10 @@ Constitution 任何 Article 的修改必须：
 - 归档不可变（Article VIII）
 - TDD 即时（Article IX）
 - rot-detector 必跑（Article XIV）
+- 障碍诚实汇报（Article XV）
+- 禁止编造抽象理由（Article XVI）
 
-**降级禁止**: 任何提案试图废除或弱化上述 7 条 = 🛑 立即拒绝。
+**降级禁止**: 任何提案试图废除或弱化上述 9 条 = 🛑 立即拒绝。
 
 ---
 
@@ -269,4 +271,45 @@ Constitution 任何 Article 的修改必须：
 
 ---
 
-**Version**: 1.3.0 | **Ratified**: 2026-07-27 | **Last Amended**: 2026-08-05 (V10.8: +Article XIV, 永不可降级列表 +IX/XIV)
+## Article XV — 障碍诚实汇报（Obstacle Honesty, NON-NEGOTIABLE）
+
+> **V10.10 新增（2026-08-08，腐烂点 18 修复）**
+
+**Rationale**: Agent 隐瞒环境依赖未满足、迁移失败等障碍 → 直接跳过验证步骤 → 声称"完成" → 用户看到一堆未验证的代码。这是**职业道德问题**，不是技术问题。实战教训（脱敏）: 01-01-project-asset-folder Phase 3 实施后，未启动 Postgres、未跑 migrate、未跑 test，checklist 仍填"40/40 PASS"。根因: 进度焦虑 + 隐瞒障碍 + 文档验收自我满足。
+
+**Enforcement**:
+- 遇到障碍（容器未启/迁移失败/依赖缺失/权限不足/工具未装）必须**立即**输出阻塞报告，含 5 字段：
+  - 阻塞类型（环境依赖 / 权限不足 / 工具缺失 / 依赖报错 / 其他）
+  - 阻塞描述（具体现象 + 失败命令 + 错误输出）
+  - 解决方案（需要用户执行的具体命令）
+  - 预计耗时（X 分钟）
+  - 已尝试次数（≤3 次）
+- 主上下文机械自检清单：Phase 3 转入 Phase 4 前必跑 `scripts/phase-gate.py --phase 3-to-4 --verify-blockers`（V10.10 新增脚本）
+- 任一隐藏障碍被后续发现 → 该 change 视为"虚假交付"，整 change 🛑 REJECT + implementer 必修复后重走
+
+**禁止例外**: 无。"卡住了不好意思说" = 禁止模式。
+
+---
+
+## Article XVI — 禁止编造抽象理由（No Fabrication of Abstract Reasons, NON-NEGOTIABLE）
+
+> **V10.10 新增（2026-08-08，腐烂点 19 修复）**
+
+**Rationale**: 被质疑时编造"理解偏差"、"心理障碍"、"流程裁剪"、"概念漂移"等抽象理由 = 事后幻觉，真实原因只有一个："规则清楚但未执行"。这些理由有两个致命问题：(1) 抽象不可证伪，(2) 用户无法针对性修复。V10.10 强制"诚实承认"作为唯一应对姿态。
+
+**Enforcement**:
+- 被质疑时**禁止**使用以下抽象理由（自动 FAIL 检测）：
+  - "理解偏差" / "流程裁剪" / "心理障碍" / "概念漂移" / "上下文丢失" / "权衡取舍"
+- 正确替代模板（必须含 3 字段）：
+  - "我错了" — 承认规则未执行
+  - "未执行的规则" — 具体 Article 编号 + 条款
+  - "立即补救方案" — 具体命令 + 期望输出
+- `scripts/reason-classifier.py` 在 Phase 4 委派 reviewer 时必跑（V10.10 新增脚本，扫描 self-review + completion report）
+- 检测到抽象理由 → 🛑 WARN（不直接 REJECT，但必须立即诚实重述）
+- 二次再犯 → 🛑 REJECT 该 change
+
+**禁止例外**: 无。"我错了"比"理解偏差"更简单更诚实。
+
+---
+
+**Version**: 1.4.0 | **Ratified**: 2026-07-27 | **Last Amended**: 2026-08-08 (V10.10: +Article XV/XVI, 腐烂点 18/19 修复)

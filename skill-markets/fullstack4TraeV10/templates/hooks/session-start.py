@@ -102,10 +102,13 @@ else:
     print("  ✅ All prototypes/ documents present")
 
 # ── Step 5: GitNexus ──
+# V10.10 提示同步: gitnexus-session-check.py (SessionStart ①) 已自动后台触发 analyze（如过期）
+# 无需手动跑 `npx gitnexus analyze` — 手动跑会和后台 analyze 撞写竞争
 print()
-print("  ⑤ GitNexus: run `npx gitnexus list` to verify index")
+print("  ⑤ GitNexus: index staleness check 已由 SessionStart ① 自动后台完成（见 gitnexus-session-check 输出）")
 print("     → impact() before any code change")
 print("     → detect_changes() before any commit")
+print("     → 禁止手动跑 `npx gitnexus analyze`（与后台 analyze 撞写竞争）")
 
 print()
 print("[Fullstack V10.1] Session context loaded — 6 layers available")

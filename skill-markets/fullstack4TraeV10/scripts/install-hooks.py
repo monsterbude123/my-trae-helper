@@ -1,12 +1,12 @@
 """
-V9.2 Hook 安装脚本 — 从技能包安装 hooks 到目标项目。
+V10.10 Hook 安装脚本 — 从技能包安装 hooks 到目标项目。
 
 用法:
   python install-hooks.py --project-root <目标项目路径>
   python install-hooks.py --project-root D:/workspace/my-project --force
 
 功能:
-  1. 复制 8 个 .py Hook 脚本到 .trae/hooks/
+  1. 复制 10 个 .py Hook 脚本到 .trae/hooks/
   2. 复制 hooks.json 到 .trae/hooks.json
   3. 复制 3 个 .py 支持脚本到 .trae/scripts/
   4. 创建 .trae/logs/ 目录
@@ -14,6 +14,9 @@ V9.2 Hook 安装脚本 — 从技能包安装 hooks 到目标项目。
 
 原理: 技能包 templates/ 是模板源，脚本确定性复制到项目。
       与 env-init.py 不同：env-init 是项目端检查修复，install-hooks 是技能端安装部署。
+
+V10.10 增量: +gitnexus-session-check.py (SessionStart) +gitnexus-session-finalize.py (Stop)
+  → GitNexus 索引"读-写"配对: SessionStart 端 staleness check, Stop 端后台 refresh
 """
 
 import argparse
@@ -35,6 +38,9 @@ HOOK_SCRIPTS = [
     "auto-test.py",
     "drift-detect.py",
     "tasks-integrity.py",
+    # V10.10 NEW: GitNexus 索引"读-写"配对 (SessionStart + Stop 双端)
+    "gitnexus-session-check.py",
+    "gitnexus-session-finalize.py",
 ]
 
 SUPPORT_SCRIPTS = [
@@ -143,7 +149,7 @@ def install(project_root: Path, force: bool = False) -> dict:
     install_log = logs_dir / "hook-install.log"
     with open(install_log, "a", encoding="utf-8") as f:
         f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "
-                f"V9.2 hooks installed | {len(result['hooks_installed'])} hooks | "
+                f"V10.10 hooks installed | {len(result['hooks_installed'])} hooks | "
                 f"{len(result['scripts_installed'])} scripts | "
                 f"skipped: {len(result['skipped'])} | errors: {len(result['errors'])}\n")
 
@@ -154,7 +160,7 @@ def install(project_root: Path, force: bool = False) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="V9.2 Hook 安装脚本 — 从技能包安装 hooks 到目标项目"
+        description="V10.10 Hook 安装脚本 — 从技能包安装 hooks 到目标项目"
     )
     parser.add_argument(
         "--project-root", required=True,
@@ -204,7 +210,7 @@ def main():
         return
 
     # 安装模式
-    print(f"安装 V9.2 Hooks 到: {project_root}")
+    print(f"安装 V10.10 Hooks 到: {project_root}")
     print()
 
     result = install(project_root, force=args.force)

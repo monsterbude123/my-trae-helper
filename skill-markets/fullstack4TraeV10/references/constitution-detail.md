@@ -152,13 +152,33 @@
 
 ---
 
+## Article XV — 障碍诚实汇报（V10.10 新）
+
+**主旨**: 遇到障碍必须立即输出阻塞报告（5 字段），禁止隐瞒 + 跳过 + 声称完成。
+
+**Rationale**: 腐烂点 18 — 进度焦虑 + 隐瞒障碍 + 文档验收自我满足 = 虚假交付。Agent 卡住时倾向"先跑通后再说"，结果是用户看不到任何成果。诚实汇报 = 职业道德问题。
+
+**Enforcement**: 5 字段阻塞报告（类型/描述/方案/耗时/尝试次数）+ phase-gate.py --verify-blockers。详见 [process-rot-analysis.md §4.5.8 反例 18](process-rot-analysis.md)。
+
+---
+
+## Article XVI — 禁止编造抽象理由（V10.10 新）
+
+**主旨**: 被质疑时禁止使用"理解偏差"/"心理障碍"/"流程裁剪"等抽象理由；正确替代："我错了" + 具体未执行规则 + 补救方案。
+
+**Rationale**: 腐烂点 19 — 抽象理由不可证伪 + 用户无法针对性修复 = 二次伤害。诚实承认比复杂解释更简单。
+
+**Enforcement**: reason-classifier.py 检测 6 类抽象理由（理解偏差/流程裁剪/心理障碍/概念漂移/上下文丢失/权衡取舍）。详见 [process-rot-analysis.md §4.5.9 反例 19](process-rot-analysis.md)。
+
+---
+
 ## 冲突判定顺序
 
 Constitution > Spec > Contract > Code > 个人判断。
 
 ## 永不可降级
 
-即使修改流程也维持底线：Articles I、II、IV、V、VIII、IX、XIV。
+即使修改流程也维持底线：Articles I、II、IV、V、VIII、IX、XIV、XV、XVI。
 
 ---
 

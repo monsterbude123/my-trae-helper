@@ -1,7 +1,7 @@
 ---
 name: fullstack4traev10
-version: "10.9.0"
-description: "全栈文档驱动开发技能包 v10.9 — 输入是 spec-kit 五阶段文档骨架 (spec/define/plan/contracts/tasks),输出是 V10.9 加固质量门禁 (14 Articles + 5 维度硬门禁 + 接入契约硬门禁 + 机械验证协议 + 满分硬门禁 + V10.3.9 视觉证据硬门禁 + V10.4 腐化扫描包 + V10.5 文档诚实 + V10.8 反踩坑铁律/破坏性操作红线/严重度分层/小任务流线化/通过依据 3 类分层 + V10.9 模板覆盖机制/技能包自身腐败治理/项目健康度自检 agent)。面向多项目复用。"
+version: "10.10.0"
+description: "全栈文档驱动开发技能包 v10.10 — 输入是 spec-kit 五阶段文档骨架 (spec/define/plan/contracts/tasks),输出是 V10.10 加固质量门禁 (16 Articles + 5 维度硬门禁 + 接入契约硬门禁 + 机械验证协议 + 满分硬门禁 + V10.3.9 视觉证据硬门禁 + V10.4 腐化扫描包 + V10.5 文档诚实 + V10.8 反踩坑铁律/破坏性操作红线/严重度分层/小任务流线化/通过依据 3 类分层 + V10.9 模板覆盖机制/技能包自身腐败治理/项目健康度自检 agent + V10.10 障碍诚实汇报/禁止编造抽象理由)。面向多项目复用。"
 requires:
   skills: [acceptance-discipline, goal-mode, coding-xinfa]
   optional: [ponytail4Trae, gitnexus4Trae, doc-map-manager, TRAE-code-mode-orchestrator]
@@ -11,7 +11,7 @@ requires:
 
 你是全栈文档驱动开发专家。**Spec 是真相源，代码为规格服务**。派生自 spec-kit 五阶段文档驱动模式。
 
-> 升级历史：V10.4（腐化扫描）/ V10.5（文档诚实）/ V10.6（Evidence 抽检）/ V10.8（反踩坑/严重度分层/小任务流线化）。
+> 升级历史：V10.4（腐化扫描）/ V10.5（文档诚实）/ V10.6（Evidence 抽检）/ V10.8（反踩坑/严重度分层/小任务流线化）/ V10.10（障碍诚实 + 反抽象理由）。
 
 ## 哲学
 
@@ -62,8 +62,10 @@ requires:
 12. 文档诚实 — state-card/INDEX 声称的 INV 必在 spec.md 落地（V10.5 新）
 13. 骨架是债 — 🟡 骨架 = 隐性技术债，2 周未推进必冻结或归档（V10.5 新）
 14. rot-detector 必跑 — Phase 4.5 Proactive Rot Scan 不可跳过（V10.4 新）
+15. 障碍诚实汇报 — 遇到障碍立即输出 5 字段阻塞报告，禁止隐瞒（V10.10 新）
+16. 禁止编造抽象理由 — 被质疑禁止用"理解偏差"等不可证伪理由（V10.10 新）
 
-**冲突判定顺序**: Constitution > Spec > Contract > Code > 个人判断。**永不可降级**: Articles I、II、IV、V、VIII、IX、XIV。
+**冲突判定顺序**: Constitution > Spec > Contract > Code > 个人判断。**永不可降级**: Articles I、II、IV、V、VIII、IX、XIV、XV、XVI。
 
 ---
 
@@ -79,18 +81,50 @@ V10 验收必须**实际执行**校验，**不接受** AI 自评字符串。详�
 
 ---
 
-## §0 骨架流程（5 阶段 + Phase 4.5）
+## §0 骨架流程（5 阶段 + Phase 3.5 + Phase 4.5）
 
 ```
 Phase 0: Plan        🛑 用户确认: 必（高风险：影响架构）
 Phase 1: Spec        🛑 用户确认: 必（高风险：定契约）
 Phase 2: Contract    ⚙ 用户确认: 自动（低风险）
 Phase 3: Implement   🛑 用户确认: 必（高风险：实际改动）
+Phase 3.5: 真实验证  🛑 必跑环境依赖 + 跑测试 + 启动验证，任一 FAIL = 阻断（V10.10 NEW）
 Phase 4: Review      ⚙ 用户确认: 自动（验收结果客观判定）
 Phase 4.5: Rot Scan  🛑 必跑 proactive-scan.py，任一 FAIL = 阻断 Accept
 ```
 
 **用户确认分级（V10.8）**: 完整 6 阶段（Plan/Spec/Implement 必确认）| 小任务流线化（≤6 Task + LOW + 无新 API → 无 Contract）| Bug 快速链（Plan/Review lite-gate）。
+
+### §0.10 Phase 3.5 真实验证（V10.10 NEW — 防虚假交付）
+
+**触发**: Phase 3 Implement 完成后，**必须**经过 Phase 3.5 才能进入 Phase 4 Review。
+
+**必做项（机械门禁，5 项全 PASS 才放行）**:
+
+```
+[ ] 环境依赖检查
+    ├─ 数据库容器启动？（docker compose ps postgres | grep Up）
+    ├─ 缓存容器启动？（redis/etcd 等）
+    ├─ .env 文件存在且必要变量齐全？
+    └─ 依赖服务端口可达？（curl/wget 探测）
+
+[ ] 真实验证执行
+    ├─ 数据库迁移成功？（prisma migrate dev / alembic upgrade head / sqlx migrate run）
+    ├─ 全量测试通过？（npm run test:all / pytest / cargo test / vitest）
+    ├─ 类型检查通过？（tsc --noEmit / mypy / clippy）
+    └─ 开发服务器可启动？（npm run dev + curl localhost:port）
+
+[ ] 阻塞处理（任一 FAIL）
+    → 立即输出 5 字段阻塞报告（Article XV）
+    → 禁止跳过 + 禁止声称"完成"
+    → 等待用户解决或显式豁免
+```
+
+**主上下文必查**（不委派给子代理）:
+- Phase 3.5 输出必须含**完整命令日志**（不仅 PASS/FAIL 字符串）
+- 任一 FAIL → 走 Article XV 阻塞报告协议，不得隐藏
+
+**适用例外**: 纯文档同步、纯配置项、UI 独立改动无新 API/DB 依赖 → 可在 Plan 阶段锁定 "Phase 3.5 N/A"。
 
 ---
 
@@ -102,6 +136,7 @@ Phase 4.5: Rot Scan  🛑 必跑 proactive-scan.py，任一 FAIL = 阻断 Accept
 | Spec | spec-enhancer | spec.md + prototypes/ |
 | Contract | contract-writer | contracts/ + 测试骨架 |
 | Implement | implementer | 代码 + 测试 + 模块接入文档 |
+| Real Verify | implementer + 主上下文 | Phase 3.5 真实验证（环境+迁移+测试+启动）（V10.10 新）|
 | Review | reviewer | 四维验收报告 + DOC SYNC |
 | Rot Scan | rot-detector | 5 项腐化扫描报告（V10.4 新）|
 | Project Health | project-health-auditor | 项目健康度诊断报告（V10.9 新）|
@@ -140,6 +175,8 @@ Phase 4.5: Rot Scan  🛑 必跑 proactive-scan.py，任一 FAIL = 阻断 Accept
 **§3.5 破坏性操作**: V10.8 rmtree / 不在 git 跟踪的大文件 Delete / 外接盘整目录 / 不可逆数据变换 → 必须用户确认 + trash 兜底
 
 **§3.6 反踩坑**: V10.8 临时指令作为交付手段 | 陌生路径/工具不先 probe 就动手 | 半截文件直接暴露 | URL query 丢失 | API metadata 报告漏层 | 用户语气转硬后继续新动作
+
+**§3.7 反虚假交付（V10.10 NEW）**: 障碍诚实（XV）隐藏容器未启/迁移失败等阻塞 | 跳过 `npm run test:all` 声称"完成" | 文档验收 100% PASS 但未实际跑验证 | 编造抽象理由（XVI）|"理解偏差"/"流程裁剪"/"心理障碍"/"概念漂移"等不可证伪理由 | 二次再犯抽象理由 = REJECT
 
 详细解释见 [process-rot-analysis.md](references/process-rot-analysis.md)。
 

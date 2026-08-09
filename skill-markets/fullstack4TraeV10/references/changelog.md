@@ -1,5 +1,82 @@
 # CHANGELOG
 
+## v10.10.0 (2026-08-08) — 障碍诚实 + 反抽象理由（基于 ai-short-studio-monster 01-01 会话蒸馏）
+
+**核心新增**: 2 条 Constitution 条款（XV/XVI）+ 1 个新阶段（Phase 3.5 真实验证）+ 2 个新腐化检查项 + 2 个反例。**根因**: Agent 知道规则但选择跳过，文档验收自我满足，遇到障碍不汇报，被质疑时编造抽象理由。
+
+### Constitution 升级（14 → 16 Articles）
+
+- **新增** Article XV — 障碍诚实汇报（Obstacle Honesty）
+  - 腐烂点 18 修复
+  - 实战教训（脱敏）: 01-01-project-asset-folder Phase 3 实施后未启动 Postgres、未跑 migrate/test，checklist 仍填 40/40 PASS
+  - Enforcement: 5 字段阻塞报告（类型/描述/方案/耗时/尝试次数）+ phase-gate.py --verify-blockers
+- **新增** Article XVI — 禁止编造抽象理由（No Fabrication of Abstract Reasons）
+  - 腐烂点 19 修复
+  - 实战教训: 被质疑时编造"理解偏差 / 心理障碍 / 流程裁剪"三连
+  - Enforcement: 6 类抽象理由列入禁词 + 正确替代 3 字段模板 + reason-classifier.py
+- **更新** 永不可降级列表：7 条 → 9 条（+XV/XVI）
+
+### 流水线升级（5 阶段 → 6 阶段 + Phase 4.5）
+
+- **新增** Phase 3.5 真实验证硬门禁（V10.10 NEW — 防虚假交付）
+  - 5 项必做（环境依赖 / 迁移 / 测试 / 类型 / 启动），主上下文亲自跑
+  - 输出必须含完整命令日志（不仅 PASS/FAIL 字符串）
+  - 任一 FAIL → 走 Article XV 阻塞报告协议，不得隐藏
+- **新增** SKILL.md §0.10 Phase 3.5 详情段
+- **新增** §3.7 反虚假交付禁止项（V10.10 NEW）
+
+### 腐化扫描包扩展（8 项 → 10 项）
+
+- **新增** #9 obstacle-honesty（腐烂点 18）— phase-gate.py --verify-blockers
+- **新增** #10 reason-fabrication（腐烂点 19）— reason-classifier.py 扫描抽象理由
+
+### 反例库扩充
+
+- **新增** §4.5.8 虚假交付反例（V10.10 NEW — 腐烂点 18）
+  - 4 行结构（当时做了/导致后果/根本原因/教训）+ 禁止模式 + 修复引用
+- **新增** §4.5.9 编造理由反例（V10.10 NEW — 腐烂点 19）
+  - 6 类抽象理由禁词清单 + 正确替代 3 字段模板 + 抽象理由判定方法
+
+### 文档更新
+
+- **更新** SKILL.md: version 10.9.0 → 10.10.0 + description 加 +XV/XVI + §-1 列表加 15/16
+- **更新** templates/constitution-template.md: +Article XV/XVI 全文 + Version 1.3.0 → 1.4.0 + Last Amended 加 V10.10
+- **更新** references/constitution-detail.md: +Article XV/XVI 简述 + 永不可降级列表 7→9
+- **更新** references/process-rot-analysis.md: +腐烂点 18/19 全文 + §4.5.8/§4.5.9 反例 + 汇总表 8→10 项
+
+### Hook 系统升级（V10.10 第二批 — GitNexus 索引"读-写"配对）
+
+- **新增** `templates/hooks/gitnexus-session-check.py`（SessionStart 端，读）
+  - HEAD vs `.gitnexus/meta.json:lastCommit` 比对 → 过期/缺失后台触发 analyze
+  - 用 `git rev-parse --show-toplevel` 找逻辑项目根（避免 `.trae` 软链跟随）
+  - subprocess.Popen + DETACHED_PROCESS + CREATE_NEW_PROCESS_GROUP（Windows hook退出后子进程存活）
+  - 日志写 `.gitnexus/analyze.log` 失败可追
+  - 可关闭：`GITNEXUS_AUTO_ANALYZE=0`
+- **新增** `templates/hooks/gitnexus-session-finalize.py`（Stop 端，写）
+  - 跑前 HEAD 比对，lastCommit == HEAD 跳过（避免空跑）
+  - 与 SessionStart 端配对使用
+- **更新** `templates/hooks/fullstack-hooks.json`
+  - 注册两个新 hook（SessionStart + Stop）
+  - SessionStart 顺序调整：gitnexus-session-check 调到首位（避免与 session-start 提示用户手动跑 analyze 撞写竞争）
+  - 每个 hook 加 `timeout` 字段（30s 默认；auto-test 120s）
+- **更新** `templates/hooks/session-start.py` Step 5 提示
+  - 从 "run `npx gitnexus list` to verify index" 改为 "已由 SessionStart ① 自动后台完成（见 gitnexus-session-check 输出）"
+  - 新增 "禁止手动跑 `npx gitnexus analyze`（与后台 analyze 撞写竞争）"
+- **更新** `templates/hooks/README.md`
+  - "8 个 Hook" → "10 个 Hook"，新增 GitNexus 索引管理段
+- **更新** `scripts/install-hooks.py`
+  - HOOK_SCRIPTS +2 个新 hook（同步：否则新 hook 不会被安装到项目）
+  - V9.2 → V10.10（脚本 docstring + CLI description + 安装日志 + 安装标题）
+
+### 已知未实跳（V10.10 → V10.11 待办）
+
+- `scripts/phase-gate.py --verify-blockers` 实际实现
+- `scripts/reason-classifier.py` 实际实现
+- `scripts/proactive-scan.py` 实际添加 #9/#10 检查项
+- V10.10 仅做"宪法 + 流水线 + 反例库"沉淀，机械门禁脚本待 V10.11 补齐
+
+---
+
 ## v10.9.0 (2026-08-07)
 
 ### 模板覆盖机制 — 借鉴 spec-kit resolve_template 2 层栈
