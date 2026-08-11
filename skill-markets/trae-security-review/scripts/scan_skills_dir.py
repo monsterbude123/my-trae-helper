@@ -1,10 +1,20 @@
 """
-TRAE Security Review — Skill 目录静态扫描脚本
+TRAE Security Review — Skill 目录静态扫描脚本（V2.0 +白名单机制）
 
-对 Skill 目录做 5 类风险静态检测：
+对 Skill 目录做 8 类风险静态检测：
 - HIGH: 危险删除命令、动态执行代码、硬编码密钥
-- MEDIUM: Shell 执行调用、不安全网络请求
-- LOW: 信息泄露、宽权限、弱算法
+- MEDIUM: Shell 执行调用、不安全网络请求、提权操作
+- LOW: 栈追踪泄露、弱加密算法
+
+V2.0 新增（2026-08-10）：白名单机制（解决文档引用误报）
+  三层优先级（高 → 低）：
+    1. 文件级白名单：扫描根目录放 `.scanignore` 文件，glob 模式匹配
+    2. 区块级白名单：HTML 注释 `<!-- scan-whitelist:CODE -->` ... `<!-- /scan-whitelist -->`
+       Markdown 注释：`<!-- scan-ignore -->` ... `<!-- /scan-ignore -->`
+    3. 行级白名单：单行 `<!-- scan-ignore-line -->` / `# scan-ignore-line`
+
+  注：白名单只豁免**真实误报**（文档描述规则 / 示例代码 / 教程引用）。
+     豁免**实际可执行风险**（如某 .py 真调用 `os.system()`）= 白名单失效。
 
 用法:
     python scan_skills_dir.py <skills_dir> [output_dir]
@@ -79,8 +89,8 @@ CHECK_ITEMS = [
         "name": "栈追踪泄露",
         "severity": "low",
         "regex": re.compile(
-            r"(print\(.*traceback|print\(.*stack|console\.(error|log)"
-            r".*stack|logging\.exception)",
+            r"(print\(.*\btraceback\b|print\(.*\bstack\b|console\.(error|log)"
+            r".*\bstack\b|logging\.exception)",
         ),
         "message": "检测到潜在栈追踪泄露",
         "remediation": "生产环境关闭 DEBUG 输出"
@@ -102,8 +112,20 @@ TEXT_FILE_EXTS = {
 
 IGNORE_DIRS = {"node_modules", ".git", "dist", "build", "coverage", "__pycache__", ".venv"}
 
+# 白名单机制配置
+BLOCK_WHITELIST_START = re.compile(
+    r"<!--\s*(?:scan-whitelist(?::[A-Z_,\s]+)?|scan-ignore)\s*-->"
+)
+BLOCK_WHITELIST_END = re.compile(
+    r"<!--\s*/(?:scan-whitelist|scan-ignore)\s*-->"
+)
+LINE_WHITELIST = re.compile(
+    r"(?:<!--\s*scan-ignore-line\s*-->|#\s*scan-ignore-line)"
+)
+
 
 def iter_files(root: Path):
+    """递归遍历 root 下的可扫描文件（按 IGNORE_DIRS 过滤）"""
     for path in root.rglob("*"):
         if path.is_dir():
             continue
@@ -113,25 +135,151 @@ def iter_files(root: Path):
             yield path
 
 
+def load_file_whitelist(skills_dir: Path) -> list[str]:
+    """读取 skills_dir/.scanignore（gitignore 格式 glob 列表）
+
+    支持行内注释（# 开头）和空行忽略。
+    """
+    ignore_file = skills_dir / ".scanignore"
+    patterns = []
+    if not ignore_file.is_file():
+        return patterns
+    try:
+        for line in ignore_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            patterns.append(line)
+    except OSError:
+        pass
+    return patterns
+
+
+def is_file_whitelisted(file_path: Path, file_patterns: list[str]) -> bool:
+    """判断 file_path 是否被文件级白名单匹配"""
+    if not file_patterns:
+        return False
+    rel = str(file_path).replace("\\", "/")
+    for pat in file_patterns:
+        # glob 模式匹配（fnmatch 语义）
+        if Path(rel).match(pat) or rel.endswith(pat.lstrip("/")):
+            return True
+        # 简化：basename 包含也算
+        basename = file_path.name
+        if pat in basename:
+            return True
+    return False
+
+
+def build_line_whitelist_mask(content: str, file_ext: str = "") -> dict:
+    """构造与 content 行一一对应的白名单遮罩 + 当前 CODE 限定
+
+    返回 dict：
+      - "mask": list[bool] 行级遮罩
+      - "block_codes": set[str] 区块级 CODE 限定（None = 豁免全部）
+
+    处理三种白名单：
+    1. 区块级：<!-- scan-whitelist:CODE --> ... <!-- /scan-whitelist -->
+              支持指定 CODE（仅豁免该 CODE）
+              文档文件（.md/.txt）忽略 CODE 限定（默认全部豁免）
+    2. 区块级：<!-- scan-ignore --> ... <!-- /scan-ignore -->（全部豁免）
+    3. 行级：<!-- scan-ignore-line --> 或 # scan-ignore-line
+    """
+    lines = content.split("\n")
+    mask = [False] * len(lines)
+    in_block = False
+    block_codes = None  # None = 豁免全部；set = 仅豁免指定 CODE
+
+    for i, line in enumerate(lines):
+        # 检查区块结束
+        if in_block and BLOCK_WHITELIST_END.search(line):
+            in_block = False
+            mask[i] = True
+            continue
+        # 检查区块开始
+        if not in_block:
+            start_match = BLOCK_WHITELIST_START.search(line)
+            if start_match:
+                in_block = True
+                mask[i] = True
+                # 解析可选 CODE 列表
+                full_match = start_match.group(0)
+                if ":" in full_match:
+                    codes_str = (
+                        full_match.split(":", 1)[1].split("-->")[0].strip()
+                    )
+                    if codes_str:
+                        parsed = {
+                            c.strip() for c in codes_str.split(",") if c.strip()
+                        }
+                        # 文档文件忽略 CODE 限定（默认全部豁免）
+                        if file_ext in {".md", ".txt"}:
+                            block_codes = None
+                        else:
+                            block_codes = parsed
+                continue
+        # 行级豁免
+        if LINE_WHITELIST.search(line):
+            mask[i] = True
+            continue
+        # 区块内：标记 mask
+        if in_block:
+            mask[i] = True
+
+    return {"mask": mask, "block_codes": block_codes}
+
+
 def scan(skills_dir: Path):
     findings = []
     scanned = 0
+    file_patterns = load_file_whitelist(skills_dir)
+    whitelist_stats = {
+        "files_skipped": 0,
+        "lines_whitelisted": 0,
+        "by_code": {},
+    }
+
     for file_path in iter_files(skills_dir):
+        # 文件级白名单：整个文件跳过
+        if is_file_whitelisted(file_path, file_patterns):
+            whitelist_stats["files_skipped"] += 1
+            continue
+
         scanned += 1
         try:
             content = file_path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
+
+        # 行级 / 区块级白名单遮罩
+        wl = build_line_whitelist_mask(content, file_path.suffix.lower())
+        line_mask = wl["mask"]
+        block_codes = wl["block_codes"]
+        lines = content.split("\n")
+        whitelist_stats["lines_whitelisted"] += sum(line_mask)
+
         for item in CHECK_ITEMS:
-            if item["regex"].search(content):
-                findings.append({
-                    "file": str(file_path),
-                    "severity": item["severity"],
-                    "code": item["code"],
-                    "name": item["name"],
-                    "message": item["message"],
-                    "remediation": item["remediation"],
-                })
+            pattern = item["regex"]
+            code = item["code"]
+            for line_idx, line in enumerate(lines):
+                # 行级白名单遮罩
+                if line_idx < len(line_mask) and line_mask[line_idx]:
+                    # 区块级 CODE 限定：代码文件需检查 code 是否在限定内
+                    if block_codes is not None and code not in block_codes:
+                        continue
+                    continue
+                if pattern.search(line):
+                    findings.append({
+                        "file": str(file_path),
+                        "line": line_idx + 1,
+                        "severity": item["severity"],
+                        "code": code,
+                        "name": item["name"],
+                        "message": item["message"],
+                        "remediation": item["remediation"],
+                    })
+                    whitelist_stats["by_code"].setdefault(code, 0)
+                    whitelist_stats["by_code"][code] += 1
 
     risk_counts = {"high": 0, "medium": 0, "low": 0}
     for f in findings:
@@ -171,6 +319,7 @@ def scan(skills_dir: Path):
         "detection_items": detection_items,
         "remediation": remediation,
         "verdict": verdict,
+        "whitelist_stats": whitelist_stats,
         "summary": (
             f"扫描文件 {scanned} 个 | "
             f"HIGH {risk_counts['high']} | "
@@ -186,7 +335,6 @@ def write_reports(result, skills_dir: Path, output_dir: Path):
     safe_name = re.sub(r'[<>:"/\\|?*]+', "_", skills_dir.name) or "skills-scan"
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # JSON
     json_path = output_dir / f"{safe_name}_{ts}.json"
     json_path.write_text(
         json.dumps({**result, "skills_dir": str(skills_dir), "generated_at": ts},
@@ -194,7 +342,6 @@ def write_reports(result, skills_dir: Path, output_dir: Path):
         encoding="utf-8",
     )
 
-    # Markdown
     md_path = output_dir / f"{safe_name}_{ts}.md"
     sev_zh = {"high": "🔴 HIGH", "medium": "🟠 MEDIUM", "low": "🔵 LOW"}
     lines = [
@@ -213,13 +360,30 @@ def write_reports(result, skills_dir: Path, output_dir: Path):
         f"| MEDIUM | {result['risk_counts']['medium']} |",
         f"| LOW | {result['risk_counts']['low']} |",
     ]
+
+    # 白名单透明报告
+    ws = result.get("whitelist_stats", {})
+    if ws.get("files_skipped", 0) > 0 or ws.get("lines_whitelisted", 0) > 0:
+        lines += [
+            "",
+            "## 白名单豁免（V2.0 NEW）",
+            "",
+            "| 维度 | 数量 |",
+            "|------|------|",
+            f"| 文件级跳过 | {ws.get('files_skipped', 0)} |",
+            f"| 行/区块级豁免 | {ws.get('lines_whitelisted', 0)} |",
+            "",
+            "> 注：白名单只豁免**真实误报**（文档规则 / 示例代码 / 教程引用），"
+            "豁免**实际可执行风险** = 白名单失效。",
+        ]
+
     if result["findings"]:
         lines += [
             "",
             "## 发现明细",
             "",
-            "| 级别 | 类型 | 描述 | 文件 | 建议 |",
-            "|------|------|------|------|------|",
+            "| 级别 | 行 | 类型 | 描述 | 文件 | 建议 |",
+            "|------|---|------|------|------|------|",
         ]
         for f in result["findings"]:
             f_sev = sev_zh.get(f["severity"], f["severity"])
@@ -227,7 +391,8 @@ def write_reports(result, skills_dir: Path, output_dir: Path):
             f_msg = f["message"].replace("|", "\\|")
             f_name = f["name"].replace("|", "\\|")
             f_fix = f["remediation"].replace("|", "\\|")
-            lines.append(f"| {f_sev} | {f_name} | {f_msg} | `{f_file}` | {f_fix} |")
+            f_line = f.get("line", 0)
+            lines.append(f"| {f_sev} | {f_line} | {f_name} | {f_msg} | `{f_file}` | {f_fix} |")
     lines += [
         "",
         "## 整改建议",

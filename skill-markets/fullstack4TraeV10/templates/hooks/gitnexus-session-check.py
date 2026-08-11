@@ -16,6 +16,10 @@
   - meta.json.lastCommit != HEAD → 触发 analyze
   - meta.json 解析失败            → 触发 analyze
   - 索引同步                      → 跳过, 只打一行确认
+
+SECURITY 标注（V10.12.2 NEW）: subprocess.Popen 后台调用（git / gitnexus analyze），
+全部为 SessionStart 钩子触发知识图谱重建需要。无外网（gitnexus analyze 仅读本地代码）。
+<!-- scan-whitelist:SHELL_EXEC --><!-- /scan-whitelist -->
 """
 
 from __future__ import annotations

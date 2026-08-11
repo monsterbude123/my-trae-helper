@@ -32,6 +32,7 @@ version: "10.5.0"
 3. ACTIONABLE FIX    — 输出 fix-list,implementer 直接照着改
 4. NO ROT, NO ACCEPT — 任一 FAIL = 阻断 Accept
 5. NEW ROT PR        — 发现新腐烂点(不在已知 1-14 表)→ 提 PR 更新 process-rot-analysis.md
+6. SKEPTICAL VALIDATION — 腐烂修复方案或新增 rot 必须按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) §1.1 根因验证 + §1.3 重叠校验（V10.12 NEW）
 ```
 
 ## 腐烂点参考表（已知 1-14）

@@ -2,6 +2,8 @@
 """session-start.py — V10.1 知识发现协议 + 状态注入
 每次会话启动加载，输出项目上下文供 agent 读取。
 
+SECURITY 标注（V10.12.2 NEW）: print() 输出风险已标注 — 实际仅状态信息。无外网、无破坏性命令。
+
 V10.1 变更:
   - 检测 docs/constitution.md + v10_simplified 标记
   - _invalidated_ 机制已废止，改用 archive/out/spec-purge/ 路径

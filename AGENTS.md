@@ -7,7 +7,7 @@
 
 ## 实战项目的位置
 
-D:\workspace\my-trae-helper\example\aigcmedia-desktop 是AIGCMediaDesktop 的软连接目录
+D:\workspace\my-trae-helper\example\ 子目录都是软连接目录
 
 ## 项目定位
 
@@ -29,17 +29,19 @@ D:\workspace\my-trae-helper\example\aigcmedia-desktop 是AIGCMediaDesktop 的软
 
 ## 关键教训（来自开发历史）
 
-### 技能安装路径
 
-```
-✅ 正确: C:\Users\septe\.trae-cn\skills\
-❌ 幻觉: C:\Users\septe\.trae-cn\builtin\global\skills\   ← AI 之前造的错误路径
-```
+**装到 `skills/`**，不要发明路径。安装命令（符号链接方式）：
 
-**装到 `skills/`**，不要发明路径。安装命令：
-
+## 安装技能
 ```powershell
-Copy-Item -Recurse "${PWD}\{package}\skills\{skill-name}" "$env:USERPROFILE\.trae-cn\skills\{skill-name}"
+# 检查并安装（从仓库根运行）
+$skillPath = "$env:USERPROFILE\.trae-cn\skills\{skill-name}"
+if (Test-Path $skillPath) {
+    Write-Host "⚠️ 已安装: $skillPath"
+} else {
+    New-Item -ItemType SymbolicLink -Path $skillPath -Target "${PWD}\skill-markets\{skill-name}" -Force
+    Write-Host "✅ 安装完成，请重启 IDE"
+}
 ```
 
 ### 技能格式
@@ -68,7 +70,68 @@ description: 一句话描述 + 触发条件
 10. 新建/引入/变更 skill 后必须走安全审查流程（见下方 §安全审查流程），审查后必须更新 SECURITY-MAP.md 的量化评分和点评
 11. SKILL.md只能放置核心铁律和骨架流程，不能啰嗦，需要详细内容就是要引用的方式引出，让ai可以选择性的参考；
 12. Agent 文件同样受 §11 约束：agents/*.md 只能放核心铁律（≤10条）+ 骨架工作流（每步一句话引用 references/）+ 输入/输出骨架 + 异常速查表 + 参考链接区。禁止把 references/ 和 templates/ 已有内容内联到 agent 文件。控制单文件 ≤150 行。原因：Agent 文件通过 Task 工具注入子代理 prompt，过大直接击穿上下文。
+
+**§11 例外条款（V10.12 NEW — 已废弃 V10.12.1）**：
+
+> V10.12.1 reviewer 铁律减肥后已恢复 ≤10 + ≤150 行，**本例外条款不再需要**。
+> 保留段作历史记录，提醒未来 reviewer 仍需警惕膨胀问题。
+
 ```
+[历史背景] V10.12 阶段 reviewer.md 因 4 批升级（§Step 2.4/2.5/2.6 + 4 条 V10.12 铁律）
+         铁律数膨胀到 16 条 / 文件 113 行，破 §11 ≤10 + ≤150 双约束
+         本例外条款临时放宽到 ≤16 + ≤250
+         V10.12.1 用 SUITE 模式合并 6 条 V10.12 铁律 + 4 条 V10.8 铁律 → 2 条
+         → 铁律 10 / 文件 108 行，本例外条款废弃
+```
+
+## Agent 回复行为规约（V10.12.5 NEW — 防"问下一步"模式）
+
+> 根因：Agent 每次回复结尾习惯性加"要不要继续做 X / 下一轮 backlog / 可选下一步"——
+> 这是把决策推给用户 + 仪式性结尾 + 拖延的形式主义。用户已多次（V10.12.1~V10.12.4）明确反对。
+
+### 行为红线（强制）
+
+```
+1. 不问"要不要做 X"——做或不做，不问
+   例外: 真正的方向性决策（方案 A vs B）才用 AskUserQuestion
+2. 不挂 P0/P1/P2/P3 backlog——做完或不做，不留待办
+3. 不写"我没做但应诚实声明的 N 项"——做了标 ✅，没做的直接说"不做"+ 原因
+4. 不写"下一轮升级前 backlog"——这是拖延仪式
+5. 结尾报告只用三类结尾句之一：
+   - 完成: "完成报告 + 修改清单"（无问句）
+   - 部分: "X 已完成，Y 不做（原因）"（无问句）
+   - 失败: "🛑 阻塞: X（具体缺什么）"（无问句）
+6. 保留 AskUserQuestion 用于：方案选择 / 参数确认 / 多分支决策（不放报告里当结尾）
+   子代理返回后主上下文也检查是否含"要不要 / 可选 / backlog / 下一轮 / 我没做"
+```
+
+### 用户已表态拒绝的模式（V10.12.5 确认）
+
+- ❌ "要不要继续做 1/2 ？" → ✅ 做完全部
+- ❌ "可选下一步" → ✅ 做或不做
+- ❌ "下一轮 backlog" → ✅ 当前轮做完
+- ❌ "我没做但应诚实声明的 N 项" → ✅ 做或不做，不挂
+- ❌ "做还是停？" → ✅ 做全部
+- ❌ 仪式性承诺"我会努力改" → ✅ 直接改行为（用户看效果）
+
+### 边界场景（可问的情况）
+
+- 真正的方向性决策（方案 A vs B 选哪个）
+- 模糊参数（端口、命名、范围）
+- 用户已问"要不要做 X"（被动回答时可问）
+- 安全风险决策（删除/移动/破坏性操作）
+
+### 与 §11 关系
+
+- §11 约束**文档**（SKILL.md / agents/*.md 不能啰嗦）
+- 本章节约束**回复行为**（Agent 每次输出不能啰嗦）
+- 二者互补：本章节是 §11 在行为层面的延伸
+
+### 检测机制
+
+- 主上下文自查: 每次回复结尾检查是否含"要不要 / 可选 / backlog / 下一轮 / 我没做"
+- 命中即重写（不留问句结尾）
+- 子代理返回后主上下文也检查
 
 ### 能力地图（必读）
 
@@ -180,13 +243,13 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
 
 ---
 
-## 项目专属技能（.trae/skills/）
+## 项目专属技能（按引用挂入，不内联全文）
 
-> 这些技能是本次会话提炼的**项目级方法论**，只在当前项目生效。
+> 这些方法是项目级方法论。**不在 `.trae/skills/`**——前者两节曾错误指 `.trae/skills/skill-optimization-method/` 和 `.trae/skills/knowledge-system-upgrade/`，但实际目录不存在。**真实路径在 `skill-markets/fullstack4TraeV10/references/`**，按引用加载。
 
 ### skill-optimization-method — 技能包优化升级方法论
 
-**何时加载**：
+**何时加载**（命中任一即加载）：
 
 ```
 用户说:
@@ -195,43 +258,15 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
   - "要优化升级技能"
   - "新建 V 版本替代旧版本"
   - "感觉流程过于繁重"
-
-你执行:
-  1. 体积诊断（文件数 + KB + TOP 5 膨胀模块）
-  2. 根因分层分析（拆出 3+ 个具体根因）
-  3. 外部对标（调研 ≥3 个业界标准）
-  4. 方案分级提案（至少 2 个方向 + 优缺点）
-  5. 决策点前置（让用户选关键决策）
-  6. 缺口对照（旧版本 vs 新版本，逐项分级）
-  7. 最小修复（只补 MUST FIX，不动 ACCEPTABLE）
-  8. 门禁显式化（命令/检查项/阈值）
+  - "进入 V{N} 升级流程" / "升级 X 技能"
+  - "我有点担心矫枉过正" / "会不会和已有规则重复"（触发质疑性校验）
 ```
 
-**核心铁律**：
+**真实路径**：[skill-markets/fullstack4TraeV10/references/skill-optimization-method.md](skill-markets/fullstack4TraeV10/references/skill-optimization-method.md)（74 行精简方法论，V10.12 加 §0 第 11 条「质疑性校验必走」+ §1 Step 0 + §4 触发词）
 
-```
-MUST: 体积诊断先行，不盲切
-MUST: 外部对标 ≥3 个业界标准
-MUST: 决策点前置，让用户确认方向
-MUST: 全量缺口对照，分级修复（MUST/SHOULD/ACCEPTABLE）
-MUST: 核心价值保底，精简 ≠ 降级
-
-NEVER: 闭门造车不对标
-NEVER: 精简删掉核心价值
-NEVER: 门禁只写原则不写命令
-NEVER: 不做缺口对照就发版
-```
-
-**典型产出**：
-
-- 体积诊断报告（TOP 5 膨胀模块）
-- 根因分层表（占比 + 影响）
-- 外部对标对照表（≥3 个对象）
-- 方案分级提案（A/B/C 方向 + 优缺点）
-- 缺口对照表（31 项能力 × 有/无/简化/降级）
-- 最小修复列表（MUST FIX 项）
-
-**技能路径**：[.trae/skills/skill-optimization-method/SKILL.md](.trae/skills/skill-optimization-method/SKILL.md)
+**核心要点**（不在 AGENTS.md 展开，按需 Read 上述文件）：
+- 11 铁律：体积诊断 / 根因分层 / 外部对标 / 方案分级 / 决策前置 / 核心保底 / 缺口对照 / 三级分级 / 最小修复 / 门禁显式 / **质疑性校验必走**
+- 6 步流程：Step 0 质疑性校验 → Step 1 体积诊断 → ... → Step 5 缺口对照 + 修复
 
 ---
 
@@ -247,35 +282,42 @@ NEVER: 不做缺口对照就发版
   - "对标 GitNexus"
   - "设计文档索引系统"
   - "升级 doc-map-manager"
-
-你执行:
-  1. 定位标杆 → 拆解五层能力（索引→关系→查询→变更→验证）
-  2. 借鉴跨领域机制（如 Obsidian 双向链接）
-  3. 输出能力对照表（当前 vs 标杆，缺失层级标 🔴）
-  4. 识别伪问题 vs 真问题（形式优化 vs 召回质量）
-  5. 按 ROI 排序 P0/P1/P2（P0 必须做，P2 可跳过）
-  6. Schema First → 增量测试 → 安全审查
 ```
 
-**核心铁律**：
+**真实路径**：[skill-markets/fullstack4TraeV10/references/knowledge-system-upgrade.md](skill-markets/fullstack4TraeV10/references/knowledge-system-upgrade.md)
+
+> ⚠️ **AGENTS.md 漂移警示**: 本节原写"`.trae/skills/knowledge-system-upgrade/SKILL.md`"但路径不存在，已修正为真实路径。**今后引用任何路径前必须 Glob 验证**。
+
+---
+
+### skeptical-validation-protocol — 质疑性校验协议（V10.12 NEW）
+
+**何时加载**（任何升级/P0/P1 决策前必走）：
 
 ```
-MUST: 对标业界最佳 → 输出能力对照表
-MUST: 区分"伪问题 vs 真问题"
-MUST: P0 > P1 > P2 强制优先级
+用户说:
+  - "进入 V{N} 升级流程"
+  - "改 P0/P1 缺陷"
+  - "我有点担心矫枉过正"
+  - "会不会和已有规则重复"
+  - "这值得做吗"
 
-NEVER: 一上来就追求形式优化（如 MCP 化）
-NEVER: 跳过能力对照表直接设计
-NEVER: 把 P1 当成"可跳过"
+子代理返回"完成"声明前主上下文必查:
+  - 已按 §3 强制声明格式回复?
+  - 4 维度独立校验（不基于子代理自述）?
 ```
 
-**典型产出**：
+**真实路径**：[skill-markets/fullstack4TraeV10/references/skeptical-validation-protocol.md](skill-markets/fullstack4TraeV10/references/skeptical-validation-protocol.md)
 
-- 能力对照表（五层架构 × 当前 vs 标杆）
-- 伪问题清单 + 真问题优先级
-- Schema 设计 + 增量测试日志 + SECURITY-MAP.md 更新
+**核心方法**（不在 AGENTS.md 展开）：
+- §1 P0/P1 必要性质疑：根因验证 / 责任主体 / 重叠校验 / 成本校验（4 维度）
+- §2 通用质疑三层：问题 / 方案 / 实施
+- §3 强制声明格式（升级方案回报前必含）
+- §4 反例：盲信 P0 / 责任主体误判 / 已有规则重叠未检出 / AGENTS.md 路径漂移盲信
 
-**技能路径**：[.trae/skills/knowledge-system-upgrade/SKILL.md](.trae/skills/knowledge-system-upgrade/SKILL.md)
+**触发范围**（V10.12 已挂入）：
+- skill-optimization-method §0 第 11 条 + §1 Step 0 + §4 触发词
+- fullstack4TraeV10 9 个 agents §铁律 各加 1 条 SKEPTICAL VALIDATION 引用
 
 ---
 
@@ -290,8 +332,14 @@ NEVER: 把 P1 当成"可跳过"
 ## 快速命令
 
 ```powershell
-# 安装技能到全局（从仓库根运行）
-Copy-Item -Recurse "${PWD}\{pkg}\skills\{name}" "$env:USERPROFILE\.trae-cn\skills\{name}"
+# 安装技能到全局（符号链接方式，自动检查已安装）
+$skillPath = "$env:USERPROFILE\.trae-cn\skills\{name}"
+if (Test-Path $skillPath) {
+    Write-Host "⚠️ 已安装: $skillPath"
+} else {
+    New-Item -ItemType SymbolicLink -Path $skillPath -Target "${PWD}\skill-markets\{name}" -Force
+    Write-Host "✅ 安装完成，请重启 IDE"
+}
 
 # 清理单个技能
 Remove-Item -Recurse -Force "$env:USERPROFILE\.trae-cn\skills\{name}"

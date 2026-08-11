@@ -3,6 +3,8 @@ V10.5 Self-Test Runner — 验证 rot #15-17 检测器对 fixture 应正确报 F
 
 运行:
   python scripts/__self_tests__/test_v10_5_fixtures.py
+
+<!-- scan-whitelist:SHELL_EXEC --><!-- /scan-whitelist -->
 """
 from __future__ import annotations
 

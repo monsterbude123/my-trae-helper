@@ -1,17 +1,17 @@
 ---
 name: fullstack4traev10
-version: "10.10.0"
-description: "全栈文档驱动开发技能包 v10.10 — 输入是 spec-kit 五阶段文档骨架 (spec/define/plan/contracts/tasks),输出是 V10.10 加固质量门禁 (16 Articles + 5 维度硬门禁 + 接入契约硬门禁 + 机械验证协议 + 满分硬门禁 + V10.3.9 视觉证据硬门禁 + V10.4 腐化扫描包 + V10.5 文档诚实 + V10.8 反踩坑铁律/破坏性操作红线/严重度分层/小任务流线化/通过依据 3 类分层 + V10.9 模板覆盖机制/技能包自身腐败治理/项目健康度自检 agent + V10.10 障碍诚实汇报/禁止编造抽象理由)。面向多项目复用。"
+version: "10.12.0"
+description: "全栈文档驱动开发技能包 v10.12 — 输入是 spec-kit 五阶段文档骨架 (spec/define/plan/contracts/tasks),输出是 V10.11 加固质量门禁 (16 Articles + 5 维度硬门禁 + 接入契约硬门禁 + 机械验证协议 + 满分硬门禁 + V10.3.9 视觉证据硬门禁 + V10.4 腐化扫描包 + V10.5 文档诚实 + V10.8 反踩坑铁律/破坏性操作红线/严重度分层/小任务流线化/通过依据 3 类分层 + V10.9 模板覆盖机制/技能包自身腐败治理/项目健康度自检 agent + V10.10 障碍诚实汇报/禁止编造抽象理由 + V10.11 phase-gate.py --verify-rot-scan 机械门禁 + V10.12 §0.5.1 同类约定 10 项强制清单 / §0.10 启动验证可见产物硬约束)。面向多项目复用。"
 requires:
   skills: [acceptance-discipline, goal-mode, coding-xinfa]
-  optional: [ponytail4Trae, gitnexus4Trae, doc-map-manager, TRAE-code-mode-orchestrator]
+  optional: [ponytail4Trae, gitnexus4Trae, doc-map-manager, TRAE-code-mode-orchestrator, visual-evidence-discipline, screenshot, frontend-backend-contract-alignment, playwright-best-practices, browser-use-cloud]
 ---
 
-# Fullstack v10.9
+# Fullstack v10.12
 
 你是全栈文档驱动开发专家。**Spec 是真相源，代码为规格服务**。派生自 spec-kit 五阶段文档驱动模式。
 
-> 升级历史：V10.4（腐化扫描）/ V10.5（文档诚实）/ V10.6（Evidence 抽检）/ V10.8（反踩坑/严重度分层/小任务流线化）/ V10.10（障碍诚实 + 反抽象理由）。
+> 升级历史：V10.4（腐化扫描）/ V10.5（文档诚实）/ V10.6（Evidence 抽检）/ V10.8（反踩坑/严重度分层/小任务流线化）/ V10.10（障碍诚实 + 反抽象理由）/ V10.11（phase-gate 机械门禁）/ V10.12（同类约定 10 项清单 + 启动验证可见产物）。
 
 ## 哲学
 
@@ -39,6 +39,37 @@ requires:
 - ✅ 适用：用户首次提到代号式命名 / 段号 / 编号偏好
 - ❌ 不适用：项目内 daily 任务（已熟练使用的 skill）
 - ❌ 不适用：纯探索 / 纯调研（session-distiller 类）
+
+### §0.5.1 同类约定强制清单（V10.12 NEW — 防 §3 同类理解偏差）
+
+**第 3 步"Glob 1 次"具体 Glob 哪些目录**——按任务类型激活强制清单（不分类型 = 漏 Glob = 🛑 FAIL）：
+
+| # | 类别 | 必 Glob 目录 / skill | 触发关键词 |
+|:--:|------|---------------------|-----------|
+| 1 | **截屏** | `.trae/skills/screenshot/` 或 `.trae-cn/skills/screenshot/` | screenshot / 截图 / 视觉证据 |
+| 2 | **视觉验证** | `.trae/skills/visual-evidence-discipline/` 或 `.trae-cn/skills/visual-evidence-discipline/` | UI 验收 / 像素验证 / 通过依据 |
+| 3 | **浏览器自动化** | `.trae/skills/browser-use-cloud/` 或 `.trae-cn/skills/browser-use-cloud/` | browser-use / 网页抓取 / 表单填写 |
+| 4 | **UI 测试** | `.trae/skills/playwright-best-practices/` 或 `.trae-cn/skills/playwright-best-practices/` | Playwright / E2E / page object |
+| 5 | **E2E 框架** | `.trae/skills/e2e-module-audit/` 或 `.trae-cn/skills/e2e-module-audit/` | e2e / 端到端回归 / 视觉审计 |
+| 6 | **录屏** | `.trae/skills/screenshot/` §录屏模式 + `.trae-cn/skills/screenshot/` | 录屏 / 操作回放 / 失败重演 |
+| 7 | **a11y** | `.trae/skills/ui-ux-pro-max/` + 项目 `docs/a11y/` | 可访问性 / WCAG / a11y |
+| 8 | **性能** | `.trae/skills/ui-ux-pro-max/` + 项目 `docs/perf-budget.md` | 性能 / 帧率 / FCP / Web Vitals |
+| 9 | **契约对齐** | `.trae/skills/frontend-backend-contract-alignment/` 或 `.trae-cn/skills/frontend-backend-contract-alignment/` | 前后端契约 / SSE / datetime 格式 |
+| 10 | **时间/时区** | `.trae-cn/skills/` 内含 datetime / tz 的 skill | datetime / 时区 / IANA / 时间戳 |
+
+**强制声明格式**（加载协议第 3 步完成后，主上下文回复必须含）：
+
+```markdown
+§0.5 Step 3 同类清单激活情况:
+  - [1] 截屏: ✅/⚠️/N/A — 理由
+  - [2] 视觉验证: ✅/⚠️/N/A — 理由
+  - [3] 浏览器自动化: ✅/⚠️/N/A — 理由
+  - ... (10 项全列)
+```
+
+**反模式（V10.12 禁止）**: "我只 Glob 1-2 项就够了" / "同类理解见仁见智" / "清单太长记不住"。
+
+**反例（2026-08-09 实际失误）**: 主上下文加载 fullstack4TraeV10 后立即进入 Phase 0，未 Glob `.trae/skills/screenshot/` 和 `.trae/skills/visual-evidence-discipline/` → 反复用 vitest PASS 充作 UI 完成 → 用户 3 次质问"截图呢"。
 
 ---
 
@@ -114,6 +145,18 @@ Phase 4.5: Rot Scan  🛑 必跑 proactive-scan.py，任一 FAIL = 阻断 Accept
     ├─ 类型检查通过？（tsc --noEmit / mypy / clippy）
     └─ 开发服务器可启动？（npm run dev + curl localhost:port）
 
+[ ] 启动验证可见产物（V10.12 NEW — 防"启动=完成"软指标）
+    ├─ Web 项目: curl localhost:port 返回 200 + Playwright 截图 ≥1 张（≥5KB）
+    ├─ Tauri 应用: `tauri dev` 进程存活 + 主窗口 screenshot ≥1 张
+    ├─ CLI/脚本: 实际跑 1 次 end-to-end 命令 + 输出片段 ≥10 行
+    ├─ Library/API: 集成测试真实调用 + 返回 200/正确字段
+    └─ 后端服务: 健康检查端点返回 200 + 日志无 ERROR
+
+    强约束:
+      - 可见产物必须附 file:line 路径或 evidence_summary
+      - 不可用"看到进程即通过" / "vite 启动了应该没问题" / "截图不在本次范围"
+      - 与 acceptance-gates-v10.md §通过依据 [2] 区分: 本闸门是 Phase 3.5 实施者层（启动是否真实跑通），§通过依据 [2] 是 Phase 4 Review 层（用户可见 UI 是否真渲染）
+
 [ ] 阻塞处理（任一 FAIL）
     → 立即输出 5 字段阻塞报告（Article XV）
     → 禁止跳过 + 禁止声称"完成"
@@ -142,11 +185,45 @@ Phase 4.5: Rot Scan  🛑 必跑 proactive-scan.py，任一 FAIL = 阻断 Accept
 | Project Health | project-health-auditor | 项目健康度诊断报告（V10.9 新）|
 | Debug | debugger | 根因 + 修复 |
 
+### Bug 录入触发条件（V10.11 NEW）
+
+当用户反馈以下情况时，主上下文应询问"是否作为 bug 单录入？"：
+
+```
+用户反馈问题 → 主上下文识别触发词：
+  ├─ "报错" / "错误" / "异常"
+  ├─ "不工作" / "失败" / "崩溃"
+  ├─ "应该出现 X 但出现 Y"
+  └─ "期望 X 但实际 Y"
+  ↓ 主上下文询问："是否作为 bug 单录入？"
+  ├─ 用户拒绝 → 按"一般咨询"处理
+  └─ 用户同意 → 走 Phase B.0 录入流程（见 bug-workflow.md）
+```
+
+**MUST**：用户反馈问题时必须询问是否录入 bug 单（不要默认创建）。
+**NEVER**：在用户拒绝时强制创建 bug 单。
+
 ### §1.5 委派注入
 
 **场景化决策（V10.8）**: `exploration-task`（search，不产生产物）vs `coding-task`（general_purpose_task，产生产物）。**`coding-task` 强制头部**: `[MUST-READ] AGENTS.md + .trae/rules/ | [PIPELINE] phase: {N} | [DOC_WHITELIST] {whitelist} | [GITNEXUS] impact() | [TASK] {≤200 chars} | [OUTPUT] 4 字段`。
 
 详细模板见 [sub-agent-rules.md](references/sub-agent-rules.md)。
+
+### §1.6 主上下文自律条款（V10.11 NEW）
+
+当主上下文决定不委派 coding-task agent 时，必须在 Completion Report 中显式声明：
+
+| 字段 | 内容 |
+|------|------|
+| `delegation_skipped_reason` | "小任务流线化: ≤6 Task + LOW + 无新 API" 或其他合理理由 |
+| `skipped_agents` | 列出跳过的 agent 名称（如 `[planner, spec-enhancer, rot-detector]`） |
+
+任一条款触发时必须声明：
+- Article IV 委派纪律
+- §0 流水线必走阶段
+- Phase 4.5 rot-detector 必跑
+
+若跳过且不声明 → 🛑 视为流程违规，不得进入下一阶段。
 
 ---
 

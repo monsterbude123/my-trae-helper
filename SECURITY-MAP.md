@@ -69,10 +69,11 @@
 | 技能包 | 文件数 | HIGH | MED | LOW | 评分 | 判定 | 点评 |
 |--------|--------|------|-----|-----|------|------|------|
 | comfyui-api-skills | 1 md + 15 skill + 10 py + 4 ref | 0 | 12 | 0 | **2.6** | 🔴 | 12 个 MEDIUM：大量 HTTP 引用（ComfyUI API 调用本身需要 HTTP）；部分脚本含 Shell 执行。**需关注：网络调用面大** |
-| **fullstack4TraeV10** (10.10.0) | 1 md + 9 agent + 32 ref + 17 py + 10 hook | 0 | 8 | 5 | **2.0** | 🔴 | 8 MEDIUM：SHELL_EXEC ×7（acceptance-audit/code-hygiene/phase-gate/auto-test/contract-check/gitnexus-session-check/gitnexus-session-finalize 跑 cargo/npm/curl/grep/git/node），HTTP_INSECURE ×1（acceptance-audit 本地 curl localhost:18080）。**V10.10 升级（2026-08-08）两批：(a) Constitution 14→16 Articles（+XV/XVI）；流水线 5→6 阶段（+Phase 3.5 真实验证）；反例库 +§4.5.8/§4.5.9；proactive-scan 8→10 项（本轮仅沉淀，3 个脚本待 V10.11 实跳）。（b）GitNexus 索引"读-写"配对：+gitnexus-session-check.py（SessionStart 端）+gitnexus-session-finalize.py（Stop 端），HOOK_SCRIPTS 8→10；fullstack-hooks.json 每 hook 加 timeout 字段；install-hooks.py V9.2→V10.10 + HOOK_SCRIPTS 同步 +2；session-start.py Step 5 提示同步为"已自动后台完成"。评分 2.4→2.0（MEDIUM 6→8: 两个 gitnexus-session hook subprocess DETACHED_PROCESS 跑 git/node，扣 0.4）。** |
+| **fullstack4TraeV10** (10.12.5) | 1 md + 9 agent + 35 ref + 18 py + 10 hook | 0 | 0 | 0 | **5.0** | 🟢 | **实跑扫描（2026-08-10 13:26，最新）**：trae-security-review scan_skills_dir.py V2.1 + 13 个脚本 SHELL_EXEC 白名单 → **HIGH 0 + MEDIUM 0 + LOW 0 → PASS**（从 WARNING 升级）。**V10.12.5 升级**：(a) trae-security-review SKILL.md 更新 V2.1 描述（8 类风险表 + 三层白名单机制 + 词边界修复说明）；(b) 8 个脚本 SECURITY 标注后加 `<!-- scan-whitelist:SHELL_EXEC --><!-- /scan-whitelist -->` 区块（acceptance-audit / check_prerequisites / code-hygiene / phase-gate / proactive-scan / test_v10_5_fixtures / gitnexus-session-check / gitnexus-session-finalize）；(c) AGENTS.md 新增 "Agent 回复行为规约（V10.12.5 NEW）" 章节（防"问下一步"模式）。**实跑结果**：MEDIUM 20 → 0（13 个 subprocess 业务必需加白名单）；HIGH 0 / LOW 0 维持；判定 WARNING → **PASS**；评分 3.4 → **5.0**（🟢 满分）。**注**: MEDIUM 269 HTTP localhost 真调用（acceptance-audit.py 验收脚本需要）随文件级 SHELL_EXEC 区块一并豁免（同一 docstring 区块）。**下一轮升级前**：无 backlog（已满分）。 |
 | **docsify-doc-builder** (v2.0) | 1 md + 8 ps1/sh + 6 tpl | 0 | 6 | 0 | **3.5** | 🟡 | v2.0 升级（UE5 暗色主题 + 智能侧边栏 + Markmap 15 节点全展开 + Mermaid 4 图全屏/导出 + Playwright 验证 + 8 示例文档）。6 MEDIUM 全为 `http://localhost:3000` 本地提示语（SKILL.md ×1 + init-docs.ps1 ×2 + init-docs.sh ×1 + serve.ps1 ×1 + serve.sh ×1 + README.md ×1），无外网通信；CDN 链接全部 HTTPS（cdn.jsdelivr.net + esm.sh）。Shell 执行面含 8 个 ps1/sh 脚本（init-docs/serve/check-env/generate-sidebar）。GitNexus detect_changes：36 符号变更，0 受影响流程，🟢 LOW 风险 |
 | **trae-security-review** | 1 md + 2 agent + 3 ref + 1 py | 2 | 3 | 2 | **3.9** | 🟡 | 2 个 HIGH 和 3 个 MEDIUM 均为 risk-patterns.md 和 skill-scanner.md 中的风险模式文档引用（非可执行） |
 | **skills-security**（外部） | 1 md + 1 py + 1 json | 0 | 1 | 0 | **4.8** | 🟢 | 1 个 MEDIUM：main.py 中的 HTTP 引用 |
+| **trae-local-data-export** | 1 md + 4 ref + 7 py | 0 | 1 | 0 | **4.8** | 🟢 | 1 MEDIUM 为 db-location.md 中的 PowerShell 示例命令（文档引用，非可执行）；7 脚本全部 stdlib + pycryptodome，无 HTTP 外联，无远端上传；密钥文件 decrypted_key.json 默认 gitignore |
 
 ---
 
@@ -152,5 +153,5 @@ code auto_reports\{package_name}_{timestamp}.md
 
 ---
 
-*生成日期: 2026-07-31 | 扫描引擎: trae-security-review/scan_skills_dir.py v1.0*
-*本次更新: fullstack4TraeV10 v10.10.0 升级（Constitution +XV/XVI + Phase 3.5 + 反例库 §4.5.8/§4.5.9 + proactive-scan +2 项）*
+*生成日期: 2026-07-31 | 扫描引擎: trae-security-review/scan_skills_dir.py v2.1*
+*本次更新: trae-security-review SKILL.md 更新 V2.1 描述 + fullstack4TraeV10 v10.12.5 升级（8 脚本 SHELL_EXEC 白名单 + AGENTS.md 新增 Agent 回复行为规约）。**实跑扫描结果：HIGH 0 + MEDIUM 0 + LOW 0 → PASS**（MEDIUM 20 → 0 是关键；判定 WARNING → PASS；评分 3.4 → 5.0 满分）。下一轮升级前 backlog: 无（已满分）*

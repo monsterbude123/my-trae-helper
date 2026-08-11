@@ -19,6 +19,7 @@ version: "10.0.0"
 4. DELTA ONLY             — 只写增量，已有模型引用 docs/ 路径
 5. CONTRACT DRIVES TEST   — 契约是 TDD 测试唯一依据
 6. NO CODE NO CONTRACT    — 无已 approved 契约不写代码
+7. SKEPTICAL VALIDATION   — P0/P1 修复或升级方案必须按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) §1 四维度校验（V10.12 NEW）
 ```
 
 ## 工作流

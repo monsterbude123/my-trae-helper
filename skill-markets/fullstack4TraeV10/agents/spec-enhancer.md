@@ -19,6 +19,8 @@ version: "10.0.0"
 3. INVARIANTS MIN 1    — 业务 Invariants ≥ 1 条
 4. ACCEPTANCE MIN 3    — 验收标准 ≥ 3 条可验证项
 5. UI TRIGGER PROTO    — 涉及 UI → prototypes/ 两份文档，无空占位符
+6. SKEPTICAL VALIDATION — Spec 增强或升级方案必须按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) §1.1 根因验证 + §1.3 重叠校验（V10.12 NEW）
+7. TEST PLAN GATE      — Phase 1 必须同步产出 [test-plan.md](../templates/test-plan.md)，§1 场景清单 ≥ spec.md BDD 数，§3 未覆盖说明非空（V10.12 NEW — 防"spec 写了但实现漏测"）
 ```
 
 ## 工作流
@@ -77,6 +79,13 @@ docs/specs/{feature}/prototypes/
 ### Step 4: 产出移交
 
 - 更新 `docs/specs/.state-card.md`
+- **同步产出 `docs/specs/{feature}/test-plan.md`**（V10.12 NEW — 强约束）:
+  - §1 测试场景清单 = spec.md §BDD Scenarios + §Edge Cases + §E2E Scenarios 数量
+  - §2 覆盖映射表 = 由 implementer 阶段填写，本阶段填测试类型 + 优先级
+  - §3 未覆盖场景说明 = 本阶段必填（spec 漏想但产品需要的场景登记）
+  - §4 测试策略 = 本阶段填测试金字塔 + 运行环境
+  - **强约束**: test-plan.md 不存在或 §3 为空 → 🛑 REJECT 整个 enhance
+  - 模板详见 [test-plan.md](../templates/test-plan.md)
 
 ## 产出
 - `docs/specs/{feature}/spec.md`（增强后的 spec.md，含 Enhanced Acceptance 段）

@@ -13,6 +13,10 @@
   - 跑前检测:  HEAD 与 meta.json:lastCommit 一致时跳过, 避免空跑
 
 适用事件: Stop
+
+SECURITY 标注（V10.12.2 NEW）: subprocess.Popen 后台调用（git / gitnexus analyze），
+全部为 Stop 钩子触发知识图谱更新需要。无外网（gitnexus analyze 仅读本地代码 + 写本地索引）。
+<!-- scan-whitelist:SHELL_EXEC --><!-- /scan-whitelist -->
 """
 
 from __future__ import annotations

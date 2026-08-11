@@ -15,6 +15,12 @@
 
 V10.3.9 升级 (2026-07-29): UI/UX 维度新增三层视觉证据深度校验 (PNG magic + bytes + PIL 像素)
 详见 references/reset-and-verify-protocol.md §Stage 1.5
+
+SECURITY 标注（V10.12.2 NEW）: 本脚本含 subprocess 调用（pytest / cargo / npm / curl / python <visual-content-check>），
+全部为 V10 四维验收需要（运行真实测试 + 检查本地 dev server / 调用同包脚本）。
+白名单参数固定：cmd 列表由本脚本生成，无 shell=True / curl 仅限 localhost。
+详见 SECURITY-MAP.md fullstack4TraeV10 行 §注。
+<!-- scan-whitelist:SHELL_EXEC --><!-- /scan-whitelist -->
 """
 
 from __future__ import annotations

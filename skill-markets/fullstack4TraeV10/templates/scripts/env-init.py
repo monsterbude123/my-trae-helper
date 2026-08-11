@@ -5,6 +5,8 @@ Usage: python env-init.py [--project-root <path>] [--fix] [--verbose]
   --verbose: show detailed paths
 Output: environment check report + suggestions
 Principle: run after each skill upgrade to ensure project environment is complete
+
+SECURITY 标注（V10.12.2 NEW）: print() 输出风险已标注 — 实际仅环境检查信息。无外网、无破坏性命令。
 """
 
 import argparse

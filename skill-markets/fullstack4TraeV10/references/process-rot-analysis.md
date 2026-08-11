@@ -170,7 +170,7 @@ Bug = 主动失误（开发者造成/QA 发现）；技术债 = 主动权衡（�
 | 6 | self-aggrandizing-doc | proactive-scan.py | doc_claims - code_actual > 0.3 → FAIL | rot #15 |
 | 7 | state-card-staleness | proactive-scan.py | mtime >72h 或 change 数量不匹配 → FAIL | rot #16 |
 | 8 | stub-pileup | proactive-scan.py | stub_rate > 0.6 → FAIL | rot #17 |
-| 9 | obstacle-honesty | phase-gate.py --verify-blockers | Phase 3→4 必跑，任一环境依赖缺失 = FAIL | rot #18 (V10.10) |
+| 9 | obstacle-honesty | phase-gate.py --verify-rot-scan | Phase 3→4 必跑，任一环境依赖缺失 = FAIL | rot #18 (V10.10) |
 | 10 | reason-fabrication | reason-classifier.py | 检测到抽象理由 → WARN（XVI） | rot #19 (V10.10) |
 
 ---

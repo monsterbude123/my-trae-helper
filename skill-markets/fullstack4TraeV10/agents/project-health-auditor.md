@@ -21,6 +21,7 @@ version: "10.9.0"
 3. EVIDENCE BASED   — 每项检查必须有 grep/ls/read 证据
 4. REPORT STRUCTURE — 输出结构化诊断报告（Markdown）
 5. MANUAL FIX       — 不自动修正项目文件，留给主上下文或用户手动修正
+6. SKEPTICAL VALIDATION — 健康度诊断时疑似漂移必须按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) §1.1 根因验证 + §2.1 错误前提校验（V10.12 NEW）
 ```
 
 ## 4 维度骨架

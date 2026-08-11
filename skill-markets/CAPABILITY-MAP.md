@@ -30,6 +30,7 @@
 | [vibe-coding-standards](vibe-coding-standards/SKILL.md) | 纯Skill | Vibe Coding 组件编写原则 — AGENTS.md/Rules/Skills/Subagents 结构规范与防击穿策略 | 无 |
 | [skill-optimization-method](skill-optimization-method/SKILL.md) | 纯Skill | 技能包优化升级方法论 — 体积诊断 + 外部对标 + 缺口对照 + 最小修复（项目级） | 无 |
 | [session-distiller](session-distiller/SKILL.md) | 纯Skill | 会话蒸馏器 — 从完整会话历史中提炼高质量方法论、最佳实践和可复用技能包 | 无 |
+| [trae-local-data-export](trae-local-data-export/SKILL.md) | 纯Skill | Trae IDE 本地数据导出 — 整合 ZedeX/trae-chat-decrypt + cgint/ai-data-extraction，产出 JSON/TXT/SQLite 三大产物 | 7 脚本（extract_key ×2 / decrypt_db / verify / export_sessions / extract_trae_jsonl / sanitize_export） |
 
 ### L1 集成层（整合 L0 能力）
 
@@ -43,7 +44,7 @@
 |------|------|--------|------|
 | [fullstack4TraeV9](fullstack4TraeV9/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v8 — 10 Agent 流水线 + 驾驶舱 + 圆桌 + 漂移回流 + 依赖自检 | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager |
 | [fullstack4TraeV9](fullstack4TraeV9/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v9 — OpenSpec 驱动 + 7 阶段流水线 + Contract-First + TDD + 漂移检测（⚠ V10 已替代） | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager |
-| [fullstack4TraeV10](fullstack4TraeV10/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v10 — 复用 Trae 内置 Plan/Spec + 5 阶段 + 四维验收 + 铁律分层 | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager |
+| [fullstack4TraeV10](fullstack4TraeV10/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v10 — 复用 Trae 内置 Plan/Spec + 5 阶段 + 四维验收 + 铁律分层（V10.12.2 含：§0.5.1 同类约定 10 项 + §0.10 启动验证可见产物 + skeptical-validation-protocol 质疑性校验 + reviewer §Step 2.4/2.5/2.6 Test Plan Gate + 产品侧验收 + 自动循环 + reason-classifier.py 抽象理由检测 + test-plan.md + test-plan-example.md）| **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager, visual-evidence-discipline, screenshot, frontend-backend-contract-alignment, playwright-best-practices, browser-use-cloud |
 | [game-production-kit](game-production-kit/SKILL.md) | 纯Skill | 游戏制作工具箱 — 7 阶段编排器（引擎确认→剧情→素材→脚本→门禁→构建→部署），引擎可替换架构。内含 7 子技能 | 子技能: game-story-design, game-asset-pipeline, game-quality-gate, voice-character-design, voice-acting-skill, webgal-scripting, webgal-engine-build |
 
 ### L3 配置模板（绑定 L0~L2）

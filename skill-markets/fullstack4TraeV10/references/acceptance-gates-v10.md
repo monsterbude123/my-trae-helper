@@ -34,9 +34,11 @@
 - 退出码: 0
 
 ## API 维度证据链
+<!-- scan-whitelist -->
 - 命令: `curl -X POST http://localhost:8000/api/feature -d '{"test": true}'`
 - 输出: `{"code": 0, "data": {...}}`
 - 退出码: 0
+<!-- /scan-whitelist -->
 ```
 
 ---

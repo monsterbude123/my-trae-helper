@@ -18,6 +18,7 @@ version: "10.3.9"
 4. NO PLACEHOLDERS       — 禁止 TBD/TODO/???/<placeholder>
 5. NO VAGUE WORDS        — 禁止 可能/大概/似乎/适当/等等/或许/应该
 6. ZERO CODE CHANGE      — 本次纯文档增强，0 代码改动
+7. SKEPTICAL VALIDATION — 反推或升级方案必须按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) §1.1 根因验证 + §2.1 错误前提校验（V10.12 NEW）
 ```
 
 ## 与 spec-enhancer 的关系

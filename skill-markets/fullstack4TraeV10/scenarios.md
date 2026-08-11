@@ -1,6 +1,6 @@
-# V10.9 SDD 场景模拟演练
+# V10.11 SDD 场景模拟演练
 
-> **与 V9.2 场景对标**，逐场景展示 V10 流程优化 + 14 Articles 铁律 + 5 阶段硬门禁 + 机械验证协议 + 5 维度腐化扫描 + 项目健康度自检 agent。
+> **与 V9.2 场景对标**，逐场景展示 V10 流程优化 + 16 Articles 铁律 + 5 阶段硬门禁 + 机械验证协议 + 5 维度腐化扫描 + 项目健康度自检 agent + Bug 录入流程（V10.11 NEW）。
 >
 > **每场景演练起点**：SKILL.md §0.5（V10.9 NEW — Skill 加载协议），主上下文必读 references + Glob 项目惯例。
 
@@ -244,18 +244,34 @@ implementer agent → 主上下文 Completion Report
 
 **V9.2 流程**：intake → debugger → implementer 轻量 → 轻量 review
 
-**V10.9 流程**：
+**V10.11 流程**（新增 Phase B.0 录入）：
 
 ```
 用户: "并发刷新 token 时报 500"
   ↓
-主上下文（§0.5 已执行）:
+主上下文识别触发词："报 500" → 检测到异常信号
+  ↓ 询问："是否作为 bug 单录入？"
+  ├─ 用户拒绝 → 按"一般咨询"处理，不创建 bug 单
+  └─ 用户同意 → 进入 Phase B.0 录入
+      ↓ 主上下文收集 6 字段：
+      ├─ 用户原话："并发刷新 token 时报 500"（用户原始描述，不加修饰）
+      ├─ 用户操作："1. 打开设置页面 2. 点击刷新 token 按钮 3. 并发请求..."
+      ├─ 实际效果："HTTP 500，错误信息：database lock"
+      ├─ 关联功能文档：docs/modules/00-04-system-settings.md（token 刷新章节）
+      ├─ 期望："并发刷新应该成功，返回 200"
+      └─ 状态：OPEN
+      ↓ 生成 bug 单：
+      → 编号：settings-010-concurrent-token-refresh-500
+      → 文件：docs/bugs/settings-010-concurrent-token-refresh-500.md
+      → 内容：按 bug-template.md 填充 6 字段
+      ↓ 输出："已录入 bug 单 settings-010-concurrent-token-refresh-500"
   ↓
-intake agent:
+intake agent（V10.11 更新）:
   Step 1: 意图 = Bug → 路由: debugger agent
+  Step 2: 读 docs/bugs/settings-010-...md（fact 层，任务输入）
   ↓
 debugger agent (V10.9 5 步流水 + 6 层排查):
-  Step 1: 复现 → docs/bugs/BUG-YYYYMMDD-NNN/reproduction.md
+  Step 1: 复现 → docs/bugs/settings-010-.../reproduction.md
   Step 2: 根因 → root-cause.md
   Step 3: 修复（不直接修改代码，由 implementer 做）
   Step 4: 回归测试
@@ -272,11 +288,13 @@ reviewer (轻量):
   ⚠️ Phase 4.5 rot-detector 必跑（Article XIV）
 ```
 
-**V9.2→V10.9 优化**：
+**V9.2→V10.11 优化**：
 
-| 项目 | V9.2 | V10.9 |
-|------|------|-------|
-| Bug 路径 | 3 步 | 5 步（debugger 拆细） |
+| 项目 | V9.2 | V10.11 |
+|------|------|--------|
+| Bug 路径 | 3 步 | 6 步（新增 Phase B.0 录入） |
+| 录入流程 | 无 | 6 字段结构化录入（用户原话、操作、效果、文档、期望、状态） |
+| Bug 单 | 无 | docs/bugs/{bug-id}.md（fact 层，可被子代理读取） |
 | 文档 | 0 | docs/bugs/{num}/ + INDEX.md |
 | 6 层排查 | 0 | GitNexus First → 6 层逐层排除 |
 | 腐化扫描 | 0 | 必跑 |

@@ -19,6 +19,7 @@ version: "10.8.0"
 5. 5 轮上限 — 同一段代码改 5 轮仍失败 → 停下，汇报，换思路
 6. 禁止篡改测试用例 — 不可为了让测试通过而修改已有测试的断言
 7. GitNexus First — 修改符号前 impact()，禁止降级 grep 分析代码结构
+8. SKEPTICAL VALIDATION   — Bug 修复或升级方案必须按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) §1.1 根因验证 + §1.4 成本校验（V10.12 NEW）
 ```
 
 ## 5 步流水线（V10.8 NEW）

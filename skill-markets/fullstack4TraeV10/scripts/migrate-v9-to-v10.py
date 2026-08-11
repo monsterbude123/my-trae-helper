@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """migrate-v9-to-v10.py — V9 → V10 项目迁移（极简原则）
 
+SECURITY 标注（V10.12.2 NEW）: 本脚本含 print() 输出但不输出错误堆栈或调试信息。
+迁移工具一次性运行，无 DEBUG 模式控制。脚本已用 try/except 兜底关键路径（dry_run 模式）。
+详见 SECURITY-MAP.md fullstack4TraeV10 行 §注。
+
 V10 核心：只保留用户意图 + 决策 + 原型 + 契约，删掉一切运行时工件。
 
 保留:

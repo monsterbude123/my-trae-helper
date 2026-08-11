@@ -33,9 +33,11 @@ Start-Sleep 5..10
 Test-NetConnection 127.0.0.1 -Port {app_port} -InformationLevel Quiet → 必须 True
 
 # 2. 真实 curl 所有声明的端点
+<!-- scan-whitelist -->
 $base = "http://127.0.0.1:{app_port}"
 foreach ($ep in $contracts_endpoints) {
   $code = (curl -s -o /dev/null -w "%{http_code}" -X $method "$base$path" --max-time 3)
+<!-- /scan-whitelist -->
   # 期望 2xx 或业务 4xx；5xx 或 connect failure = 真错
 }
 ```

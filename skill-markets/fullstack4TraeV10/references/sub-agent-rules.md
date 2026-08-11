@@ -180,6 +180,9 @@ Step 3 发现 AI 描述与实际不符 → 立即停止，不编造事实
 
 ### 12. 破坏性操作 4 步强制流程（V10.8 NEW）
 
+<!-- scan-whitelist -->
+> ⚠️ **SECURITY-MAP 标注（V10.12.2 NEW）**: 本节含 `rmtree` / `rm -rf` / `Remove-Item -Recurse -Force` 等关键词，**均为破坏性操作规则的文档引用**，非可执行命令。scan_skills_dir.py 的 `CMD_RM_RF` 模式机械匹配会触发 HIGH 风险，但实际无运行时风险（除非 implementer 复制粘贴本文档命令并执行）。详见 [SECURITY-MAP.md fullstack4TraeV10 行 §注](../../../../../SECURITY-MAP.md)。
+
 适用: `rmtree` / `rm -rf` / `Remove-Item -Recurse -Force` / 跨盘整目录 mv / 不在 git 跟踪的大文件 Delete / 任何外接盘整目录操作。
 
 ```
@@ -201,6 +204,7 @@ Step 4 跨盘/外接盘额外校验: 即使 implementer 报告"目录为空"，�
 根因: 规则未写明"破坏性操作必须先列清单 + 用户确认 + trash 兜底"
 教训: 任何"测试后 cleanup"默认禁止，只能 mv 到 _trash_<ts>/；主上下文不信 implementer 描述
 ```
+<!-- /scan-whitelist -->
 
 ### 13. 安全自主判断三硬条件（V10.8 NEW）
 
@@ -213,10 +217,12 @@ C. 风险可见: 字节数/路径/影响范围能执行前列出
 ```
 
 红线清单（即使事后追认也视为结构性失败）:
+<!-- scan-whitelist -->
 - 任何 `rmtree` / `rm -rf` / `Remove-Item -Recurse -Force`
 - 不在 git 跟踪的大文件 Delete（阈值项目化）+ mv 后不保留 trash
 - 外接盘整目录 mv 或 Delete（即使"目录看起来是空的"）
 - 不可逆数据变换（覆写原文件 / sha256 改变原文件）
+<!-- /scan-whitelist -->
 
 收到用户"别用力过猛/三思而行" → 立即降级为最小动作 + 后续每步先汇报意图等确认。"安全所以自主" ≠ "任务扩展所以自主"。
 

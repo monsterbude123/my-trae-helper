@@ -2,6 +2,8 @@
 """spec-validate-hook.py — V10.1 Spec 格式校验
 PostToolUse Hook: 写 spec.md 后自动检查 Delta Spec 格式 + prototypes/ 完整性 + v10_simplified frontmatter。
 
+SECURITY 标注（V10.12.2 NEW）: print() 输出风险已标注 — 实际仅校验信息。无外网、无破坏性命令。
+
 V10.1 变更:
   - 支持 Delta Spec（ADDED/MODIFIED/REMOVED 段）
   - prototypes/ 检查改为两份文档（design-prompt.md + ui-ux-logic.md）

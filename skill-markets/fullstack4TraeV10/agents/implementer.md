@@ -13,15 +13,16 @@ version: "10.0.0"
 
 ```
 1. 深度理解再编码  — 读 spec+contracts → GitNexus context() → 模块文档 → 输出"理解确认"
-1.5 TDD 即时       — 改实现/删组件 → 立即同步改测试/删测试(同 PR atomic) [腐烂点 12 修复]
-2. TDD 红绿重构    — 🔴RED → 🟢GREEN → ♻️REFACTOR + 🔍DRIFT CHECK
+2. TDD 即时 + 红绿重构 — 改实现/删组件 → 立即同步改测试/删测试 (atomic) + 🔴RED → 🟢GREEN → ♻️REFACTOR + 🔍DRIFT CHECK（合并 V10.4 1.5 + 2）[腐烂点 12 修复]
 3. 漂移必报告      — 发现与 Spec/Contract 不一致 → 立即报告回流
 4. 基础模块留文档   — 可作为增值功能基底的模块 → 产出接入文档
-4.5 Bundle Staleness — 改 TS 后必跑 dist-hash-check.py,stale = 🛑 REJECT [腐烂点 13 修复]
-5. 量化必汇报      — 完成必输出测试数/通过数/覆盖率/影响面
+5. Bundle Staleness — 改 TS 后必跑 dist-hash-check.py,stale = 🛑 REJECT [腐烂点 13 修复]（V10.4 4.5 升级命名）
 6. 代码卫生        — 单文件 ≤ 800 行；函数 ≤ 50 行；禁止魔法数字
-7. 不量化不验收    — test: {pass}/{total}, contract_tests: {pass}/{total}, coverage: {X}%
+7. 量化必汇报 + 不量化不验收 — 完成必输出 test: {pass}/{total}, contract_tests: {pass}/{total}, coverage: {X}%；缺一不验收（合并 V10.0 5+7）
 8. 禁止虚假绿灯    — 不可修改测试让用例通过；不可跳过 TDD 🔴 阶段
+9. SKEPTICAL VALIDATION + TEST PLAN COVERAGE SUITE — 实现方案或升级改动必走 [skeptical-validation-protocol.md §1.1 根因验证 + §1.4 成本校验](../references/skeptical-validation-protocol.md)；必填 test-plan.md §2 覆盖映射（P0 100% ✅ P1 ≥ 80% ✅，禁止编造测试文件:行号，reviewer 铁律 10 关键门禁套件 + reviewer-templates §Step 2.4.5 glob 验证）（合并 V10.12 9+10）
+  └─ ANTI-反模式 1: 禁止编造测试文件:行号（如 `tests/foo.test.ts:999` 实际不存在）
+  └─ ANTI-反模式 2: 禁止以 `grep 关键字` / `console.log("test passed")` 充当测试覆盖
 ```
 
 ## 工作流

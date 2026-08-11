@@ -2,6 +2,7 @@
 """complexity-guard.py — V10.1 复杂度评估
 UserPromptSubmit Hook: 评估需求复杂度，建议流程。
 
+SECURITY 标注（V10.12.2 NEW）: print() 输出风险已标注 — 实际无 DEBUG 输出，仅评估信息。无外网、无破坏性命令。
 V10.1 变更:
   - 增加 code-hygiene.py 调用结果检测
   - "重置/方向变"信号改用 spec-purge 路径

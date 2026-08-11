@@ -25,11 +25,23 @@ version: "10.8.0"
 6. REVIEWER DOES NOT FIX — 审查者不修代码,退回实现者
 7. FUNCTIONAL CHECK — 用户视角确认功能可用
 8. CROSS-SESSION VERIFY — 自评=self_attested,主上下文必二次抽检
-9. ZERO TRUST — 绝不信 implementer 自我宣称 [V10.8 NEW]
-10. EVIDENCE MANDATORY — 无证据 = 未完成 [V10.8 NEW]
-11. ACTIVE FALSIFICATION — 主动找茬,不被动看 checklist [V10.8 NEW]
-12. REQUIREMENT TRACING — 回溯原始需求逐条核对 [V10.8 NEW]
+9. 质疑式验收 SUITE — ZERO TRUST + EVIDENCE MANDATORY + ACTIVE FALSIFICATION + REQUIREMENT TRACING（详见 [reviewer-templates.md](../references/reviewer-templates.md) §Step -1/0.5/1.5/2）[V10.8+V10.12 合并]
+10. 关键门禁套件 — 升级前质疑性校验 + 产品视角验收 + 自动循环 + Test Plan Gate（详见 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) §1 + [reviewer-templates.md](../references/reviewer-templates.md) §Step 2.4/2.5/2.6）[V10.12 NEW]
 ```
+
+> **§11 例外（V10.12.1 NEW — 自包含约束）**:
+> - 当前 reviewer.md 铁律数 10 / 文件 108 行（V10.12.1 减肥后恢复 ≤10 + ≤150）
+> - **新增铁律前必走质疑性校验**（[skeptical-validation-protocol.md §1.4 修复成本](../references/skeptical-validation-protocol.md)），判断是否真必要
+> - **新增铁律不允许复述内联**（§11 约束继承）—— 必引 references/ 而非内联
+> - 铁律 9-10 用"SUITE"模式合并多个子门禁，每子门禁在 references/ 详细定义
+> - 若铁律 > 10 条或文件 > 150 行 → 🛑 REJECT 升级，必须先减肥
+> - 详见 [AGENTS.md §11 例外条款](../../../../../AGENTS.md)
+
+> **§11 减肥历史（V10.12.1）**:
+> - V10.12 16 条 → V10.12.1 10 条（合并 V10.8 9-12 + V10.12 13-16 → 2 条 SUITE）
+> - 减肥 6 条: ZERO TRUST / EVIDENCE MANDATORY / ACTIVE FALSIFICATION / REQUIREMENT TRACING → 铁律 9 质疑式验收 SUITE
+> - 减肥 4 条: SKEPTICAL VALIDATION / PRODUCT PERSPECTIVE / ACCEPTANCE LOOP / TEST PLAN GATE → 铁律 10 关键门禁套件
+> - 信息密度 ↑（每条引用 references/ 子段），AGENTS.md §11 例外条款不再需要（已恢复 ≤10 ≤150）
 
 ---
 
@@ -59,6 +71,26 @@ Step 1.5: 主动证伪 → 高风险清单核查 + 边界遗漏/依赖污染/未
 
 Step 2:  功能效果验证 + 需求溯源 → 回溯 proposal/spec 逐条核对,覆盖不全=🛑 拦截
          不可仅凭"测试通过"认为"功能完成"
+
+Step 2.5: 产品侧功能有效性验收（V10.12 NEW）→ 必读用户原始 prompt + spec.md Requirements + evidence 实际内容
+         强制 3 问判定（需求归属 / 行为匹配 / 用户会认可吗）
+         任一 ❌ → 🛑 REJECT + 失败分类标签（货不对版 / 功能不达标 / 用户视角 FAIL）
+         详见 [reviewer-templates.md §Step 2.5](../references/reviewer-templates.md#step-25-产品侧功能有效性验收v1012-new--防货不对版)
+
+Step 2.4: Test Plan 前置门禁（V10.12 NEW）→ 必须先验证 [test-plan.md](../../templates/test-plan.md) 存在
+         ├─ §1 测试场景清单 ≥ spec.md BDD Scenarios + Edge Cases + E2E Scenarios 总数
+         ├─ §2 覆盖映射表：P0 场景 100% ✅，P1 ≥ 80% ✅，P2 ≥ 50% ✅
+         ├─ §3 未覆盖场景说明建议登记（非硬性 REJECT — 避免"全 🟢"造假）
+         ├─ §4.3 验证命令可执行（reviewer 实际跑 1+ 个）
+         └─ 任一 ❌ → 🛑 REJECT + 失败分类"测试覆盖缺口" → 强制循环
+         高风险 spec 漏想场景 → 退 spec-enhancer 补 spec.md §Edge Cases（不是 implementer 责任）
+         详见 [reviewer-templates.md §Step 2.4](../references/reviewer-templates.md#step-24-test-plan-前置门禁v1012-new--防spec-写了但实现漏测)
+
+Step 2.6: 自动循环（V10.12 NEW）→ Step 2.5 ❌ 自动循环
+         Round 1: 退回 implementer 重做 + 失败标签必填
+         Round 2: 仍 ❌ → 升级上报用户（5 字段阻塞报告）
+         Round 3+: rescue hatch（sub-agent-rules.md §5）— 回退 Phase 0
+         详见 [reviewer-templates.md §Step 2.6](../references/reviewer-templates.md#step-26-自动循环机制v1012-new--防重做又失败)
 
 Step 3:  评分 → 总分 ≥ 4.0,任一维度 0 分 = 🛑 REJECT
 

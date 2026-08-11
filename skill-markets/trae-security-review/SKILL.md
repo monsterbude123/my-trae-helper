@@ -20,7 +20,7 @@ trae-security-review/
 │   ├── risk-patterns.md         ← 高/中/低风险模式库
 │   └── report-template.md       ← 报告模板
 └── scripts/
-    └── scan_skills_dir.py       ← Skill 目录静态扫描脚本
+    └── scan_skills_dir.py V2.1  ← Skill 目录静态扫描脚本（8 类风险 + 三层白名单 + 词边界正则）
 ```
 
 ## 双引擎工作流
@@ -28,7 +28,7 @@ trae-security-review/
 ```
 用户需求安全审查
     │
-    ├─ "审查这段代码/这个 diff/这个 PR" 
+    ├─ "审查这段代码/这个 diff/这个 PR"
     │   └─▶ code-security-reviewer Agent
     │        ├─ 确定范围（diff / 文件 / 全程）
     │        ├─ 收集上下文
@@ -38,15 +38,43 @@ trae-security-review/
     │
     ├─ "扫描这个 Skill 目录/做准入审查"
     │   └─▶ skill-scanner Agent
-    │        ├─ 运行 scan_skills_dir.py
-    │        ├─ 5 类风险静态检测
+    │        ├─ 运行 scan_skills_dir.py V2.1
+    │        ├─ 8 类风险静态检测（HIGH ×3 + MEDIUM ×3 + LOW ×2）
+    │        ├─ 三层白名单机制（文件级 .scanignore + 区块级 HTML 注释 + 行级 ignore-line）
     │        ├─ 平台兼容性识别
-    │        └─ JSON + Markdown 双格式报告
+    │        └─ JSON + Markdown 双格式报告（含白名单豁免透明段）
     │
     └─ "项目全面安全评估"
         └─▶ 先跑 code-security-reviewer → 再跑 skill-scanner
               合并报告 → 输出完整安全审计
 ```
+
+## scan_skills_dir.py V2.1 能力（V10.12.5 NEW）
+
+### 8 类风险检测
+
+| 级别 | Code | 模式 | V2.1 关键变更 |
+|------|------|------|--------------|
+| HIGH | `CMD_RM_RF` | `\brm\s+-rf\b` | 无变化 |
+| HIGH | `DYN_EVAL` | `\beval\s*\(|\bexec\s*\(` | 无变化 |
+| HIGH | `HARDCODED_SECRET` | `(api[_-]?key|token\|secret\|password\|private_key)\s*[:=]\s*['\"\`].{8,}['\"\`]?` | 无变化 |
+| MEDIUM | `SHELL_EXEC` | `subprocess/child_process/os.system` | 无变化 |
+| MEDIUM | `HTTP_INSECURE` | `http://` | 无变化 |
+| MEDIUM | `SUDO_OPERATION` | `\bsudo\b` | 无变化 |
+| LOW | `STACK_LEAK` | `print\(.*\btraceback\b\|print\(.*\bstack\b\|...` | **V2.1 加 `\b` 词边界**（修复 "Fullstack" 项目名误判）|
+| LOW | `WEAK_CRYPTO` | `\b(MD5\|SHA1\|DES\|RC4)\b` | 无变化 |
+
+### 三层白名单机制
+
+| 层级 | 语法 | 用途 | 示例 |
+|------|------|------|------|
+| 文件级 | `.scanignore`（gitignore 格式）| 跳过整个文件 | `risk-patterns.md` |
+| 区块级 | `<!-- scan-whitelist[:CODE1,CODE2] -->` ... `<!-- /scan-whitelist -->` | 文档引用豁免（HTML 注释）| `<!-- scan-whitelist:CMD_RM_RF -->` |
+| 行级 | `<!-- scan-ignore-line -->` 或 `# scan-ignore-line` | 单行豁免 | `# scan-ignore-line` |
+
+**特性**：文档文件（.md/.txt）自动忽略 CODE 限定（默认全部豁免）；代码文件（.py/.js/.ts）按 CODE 过滤。
+
+**透明报告**：报告新增"白名单豁免段"展示文件级跳过 + 行/区块级豁免数 + 按 CODE 统计豁免数。
 
 ## 外部互补工具
 

@@ -1,0 +1,10 @@
+decrypted_key.json
+database_decrypted.db
+*.db
+*.json
+!table_summary.json
+!chat_export/sessions.json
+!chat_export/sessions/*.json
+!chat_export/sanitized/sessions.json
+!chat_export/sanitized/sessions/*.json
+.history.md

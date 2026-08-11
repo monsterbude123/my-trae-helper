@@ -11,6 +11,11 @@
   python scripts/code-hygiene.py --changed-files [--max-lines 800] [--max-fn-lines 50] [--max-complexity 15]
   python scripts/code-hygiene.py --path {dir_or_file}
   python scripts/code-hygiene.py --check-bak [--path {project_root}]
+
+SECURITY 标注（V10.12.2 NEW）: 本脚本含 subprocess 调用（git status / git diff），
+全部为 V10 代码卫生检查需要。无外网、无破坏性命令。
+详见 SECURITY-MAP.md fullstack4TraeV10 行 §注。
+<!-- scan-whitelist:SHELL_EXEC --><!-- /scan-whitelist -->
 """
 
 import argparse

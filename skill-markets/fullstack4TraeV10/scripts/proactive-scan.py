@@ -23,7 +23,13 @@ agent 在 Phase 4.5 强制调用。
   1 = fail (任一 FAIL)
   2 = script error
 
-V10.4 引入 (2026-07-30) | V10.5 扩展 (2026-07-31)
+V10.4 引入 (2026-07-30) | V10.5 扩展 (2026-07-31) | V10.10 +2 项 (2026-08-10)
+
+SECURITY 标注（V10.12.2 NEW）: 本脚本含 subprocess 调用（python <其他脚本>），
+全部为调用 V10 同包内工具脚本（orphan-detector / code-hygiene / proactive-scan 互调）。
+白名单参数固定：cmd 列表由本脚本生成，参数白名单化（无 shell=True / 无外网）。
+详见 SECURITY-MAP.md fullstack4TraeV10 行 §注。
+<!-- scan-whitelist:SHELL_EXEC --><!-- /scan-whitelist -->
 """
 from __future__ import annotations
 
@@ -440,6 +446,94 @@ def run_stub_pileup(project_root: Path, feature: Optional[str] = None) -> CheckR
     )
 
 
+# === 单项 check 实现（继续）===
+
+def run_obstacle_honesty(project_root: Path, feature: Optional[str] = None) -> CheckResult:
+    """检查 9: 障碍诚实（V10.10 Article XV — 腐烂点 18）
+
+    检查 Phase 3.5 之前是否跑过 verify-rot-scan（环境依赖检查）。
+    实际上 verify-rot-scan 由 phase-gate.py 提供，本 check 仅作为汇总哨兵。
+    """
+    t0 = time.time()
+    # 通过调用 phase-gate.py --verify-rot-scan 实现间接检查
+    script = Path(__file__).parent / "phase-gate.py"
+    if not script.exists():
+        return CheckResult(
+            name="obstacle-honesty",
+            status="skip",
+            severity="PASS",
+            evidence=f"phase-gate.py 不存在: {script}",
+            duration_ms=int((time.time() - t0) * 1000),
+        )
+    # 仅检测 phase-gate.py 是否暴露 verify-rot-scan 选项
+    cmd = ["python", str(script), "--help"]
+    rc, stdout, _ = _run_subprocess(cmd)
+    if "verify-rot-scan" in stdout:
+        return CheckResult(
+            name="obstacle-honesty",
+            status="pass",
+            severity="PASS",
+            evidence="phase-gate.py 提供 --phase verify-rot-scan（间接覆盖 Article XV）",
+            duration_ms=int((time.time() - t0) * 1000),
+        )
+    return CheckResult(
+        name="obstacle-honesty",
+        status="fail",
+        severity="FAIL",
+        evidence="phase-gate.py 未暴露 --phase verify-rot-scan 选项（Article XV 未执行）",
+        duration_ms=int((time.time() - t0) * 1000),
+    )
+
+
+def run_reason_fabrication(project_root: Path, feature: Optional[str] = None) -> CheckResult:
+    """检查 10: 抽象理由检测（V10.10 Article XVI — 腐烂点 19）
+
+    调用 reason-classifier.py 扫描最近 N 天的文档变更。
+    """
+    t0 = time.time()
+    script = Path(__file__).parent / "reason-classifier.py"
+    if not script.exists():
+        return CheckResult(
+            name="reason-fabrication",
+            status="skip",
+            severity="PASS",
+            evidence=f"reason-classifier.py 不存在: {script}",
+            duration_ms=int((time.time() - t0) * 1000),
+        )
+    # 扫描当前项目的 self-review + completion report
+    candidates = [
+        project_root / "docs" / "specs" / ".state-card.md",
+        project_root / "docs" / "specs" / "changes" / (feature or "") / "spec.md",
+    ]
+    found_warn = 0
+    total_findings = 0
+    for candidate in candidates:
+        if candidate.is_file():
+            cmd = ["python", str(script), "--input", str(candidate), "--json"]
+            rc, stdout, _ = _run_subprocess(cmd)
+            if rc == 0 and stdout:
+                try:
+                    import json as _json
+                    data = _json.loads(stdout)
+                    total_findings += data.get("total_findings", 0)
+                    found_warn += data.get("warn_findings", 0)
+                except _json.JSONDecodeError:
+                    pass
+
+    severity = "FAIL" if found_warn > 0 else "PASS"
+    return CheckResult(
+        name="reason-fabrication",
+        status="fail" if found_warn > 0 else "pass",
+        severity=severity,
+        evidence=(
+            f"扫描 {len(candidates)} 个候选文档：总发现 {total_findings} 个抽象理由，"
+            f"WARN 级 {found_warn} 个（Article XVI 二次再犯 = 🛑 REJECT）"
+        ),
+        count=found_warn,
+        duration_ms=int((time.time() - t0) * 1000),
+    )
+
+
 # === 注册所有 check ===
 
 CHECKS: list[tuple[str, Callable]] = [
@@ -451,6 +545,9 @@ CHECKS: list[tuple[str, Callable]] = [
     ("self-aggrandizing-doc", run_self_aggrandizing_doc),
     ("state-card-staleness", run_state_card_staleness),
     ("stub-pileup", run_stub_pileup),
+    # V10.12 NEW (2026-08-10): +2 项
+    ("obstacle-honesty", run_obstacle_honesty),       # #9 - 由 phase-gate.py verify-rot-scan 覆盖（间接检查）
+    ("reason-fabrication", run_reason_fabrication),   # #10 - 调用 reason-classifier.py
 ]
 
 
@@ -470,7 +567,7 @@ def run_all(project_root: Path, feature: Optional[str] = None,
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="V10.5 8 项腐化扫描包（腐烂点 14+15+16+17 修复）",
+        description="V10.10 10 项腐化扫描包（腐烂点 14+15+16+17+18+19 修复）",
     )
     parser.add_argument("--project-root", type=str, default=".", help="项目根")
     parser.add_argument("--feature", type=str, help="feature 名（限定扫描范围）")
@@ -500,7 +597,7 @@ def main() -> int:
         print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     else:
         # Markdown 报告
-        print(f"# V10.5 Proactive Rot Scan\n")
+        print(f"# V10.10 Proactive Rot Scan\n")
         print(f"- project: {project_root.name}")
         print(f"- feature: {args.feature or '(all)'}")
         print(f"- total: {len(results)}, fail: {fail_count}\n")

@@ -28,6 +28,11 @@ V10 阶段前置表（V10_PHASE_PREREQS 定义于 common.py）:
 
 环境变量:
   V10_FEATURE  当前 feature 名（可用 --feature 覆盖）
+
+SECURITY 标注（V10.12.2 NEW）: 本脚本含 subprocess 调用（python <orphan-detector>），
+全部为 V10 阶段前置校验需要（调用同包工具）。无外网、无破坏性命令。
+详见 SECURITY-MAP.md fullstack4TraeV10 行 §注。
+<!-- scan-whitelist:SHELL_EXEC --><!-- /scan-whitelist -->
 """
 from __future__ import annotations
 

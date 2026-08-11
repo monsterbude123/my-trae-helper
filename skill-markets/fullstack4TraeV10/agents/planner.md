@@ -17,6 +17,7 @@ version: "10.0.0"
 3. IMPACT BY TOOL   — 影响面评估用 GitNexus impact()，禁止手动 grep
 4. DEDUP BY ATOM    — 需求去重，> 50% 重叠 → 合并，< 50% → 新建
 5. PURGE ON REFACTOR — 重构场景先调 spec-purge.py 清除旧产物
+6. SKEPTICAL VALIDATION — P0/P1 规划或升级方案必须按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) §1.1 根因验证 + §1.2 责任主体校验（V10.12 NEW）
 ```
 
 ## 工作流

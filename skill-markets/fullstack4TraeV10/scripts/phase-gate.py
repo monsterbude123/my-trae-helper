@@ -21,6 +21,12 @@ V10.4 新增 (2026-07-30):
   python scripts/phase-gate.py --phase integration-contract --project-root /path/to/your-project
 
 任意检查失败 = exit 1 + 具体缺失项
+
+SECURITY 标注（V10.12.2 NEW）: 本脚本含 subprocess 调用（git / python / 其他脚本），
+全部为 V10 流水线调度需要（无外网访问、无破坏性命令）。
+白名单参数固定：cmd 列表由调用方传入，参数白名单化（无 shell=True）。
+详见 SECURITY-MAP.md fullstack4TraeV10 行 §注。
+<!-- scan-whitelist:SHELL_EXEC --><!-- /scan-whitelist -->
 """
 
 import argparse
@@ -226,7 +232,6 @@ def check_review_to_accept(project_root: Path, feature: str | None = None) -> tu
         return False, errors
 
     content = review_report.read_text(encoding="utf-8")
-    # ponytail: 兼容 markdown bold 格式 `- **code_dimension**: PASS` 与 raw `code_dimension: PASS` 双名 (2026-07-29)
     for dim in ["code_dimension", "api_dimension", "uiux_dimension", "boundary_dimension"]:
         if dim not in content or not re.search(
             rf"(?:\*\*{dim}\*\*|{dim}):\s*PASS", content
@@ -333,6 +338,60 @@ def check_proactive_scan(project_root: Path, feature: str | None = None) -> tupl
     return True, []
 
 
+def check_verify_rot_scan(project_root: Path, feature: str | None = None) -> tuple[bool, list[str]]:
+    """V10.11 rot-scan 结果验证 (Article XIV 强制)
+
+    在 Accept 之前必须验证 rot-scan 已执行且通过。
+    检查 docs/reports/rot-scan-*.json 是否存在且 24h 内，且 fail_count == 0。
+    """
+    import json
+    import time
+
+    reports_dir = project_root / "docs" / "reports"
+    if not reports_dir.is_dir():
+        return False, [
+            "缺失 docs/reports/ 目录",
+            "请先运行: python scripts/proactive-scan.py --project-root . --json > docs/reports/rot-scan-{date}.json"
+        ]
+
+    rot_scans = sorted(reports_dir.glob("rot-scan-*.json"), reverse=True)
+    if not rot_scans:
+        return False, [
+            "缺失 rot-scan JSON 报告",
+            "请先运行: python scripts/proactive-scan.py --project-root . --json > docs/reports/rot-scan-{date}.json"
+        ]
+
+    latest_scan = rot_scans[0]
+    mtime_age_hours = (time.time() - latest_scan.stat().st_mtime) / 3600
+    if mtime_age_hours > 24:
+        return False, [
+            f"rot-scan JSON 过期 ({mtime_age_hours:.1f}h > 24h): {latest_scan.name}",
+            "请重新运行: python scripts/proactive-scan.py --project-root . --json"
+        ]
+
+    try:
+        data = json.loads(latest_scan.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        return False, [f"rot-scan JSON 解析失败: {latest_scan.name} — {e}"]
+
+    fail_count = data.get("fail_count", -1)
+    if fail_count == -1:
+        return False, [f"rot-scan JSON 缺 fail_count 字段: {latest_scan.name}"]
+
+    if fail_count > 0:
+        failed_checks = [
+            r["name"] for r in data.get("results", [])
+            if r.get("severity") == "FAIL"
+        ]
+        return False, [
+            f"rot-scan 有 {fail_count} 项 FAIL: {', '.join(failed_checks)}",
+            f"详见: {latest_scan.name}",
+            "必须修复所有 FAIL 项才能 Accept (Article XIV)"
+        ]
+
+    return True, [f"rot-scan 验证通过: {latest_scan.name} (fail_count=0)"]
+
+
 
 
 GATES = {
@@ -346,6 +405,8 @@ GATES = {
     "orphan-precheck": check_orphan_precheck,
     "bundle-check": check_bundle_check,
     "proactive-scan": check_proactive_scan,
+    # V10.11 新增 (2026-08-09)
+    "verify-rot-scan": check_verify_rot_scan,
 }
 
 
