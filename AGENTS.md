@@ -245,7 +245,7 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
 
 ## 项目专属技能（按引用挂入，不内联全文）
 
-> 这些方法是项目级方法论。**不在 `.trae/skills/`**——前者两节曾错误指 `.trae/skills/skill-optimization-method/` 和 `.trae/skills/knowledge-system-upgrade/`，但实际目录不存在。**真实路径在 `skill-markets/fullstack4TraeV10/references/`**，按引用加载。
+> 这些方法是项目级方法论。**不在 `.trae/skills/`**——前者两节曾错误指 `.trae/skills/skill-optimization-method/` 和 `.trae/skills/knowledge-system-upgrade/`，但实际目录不存在。**真实路径在 `skill-markets/fullstack4TraeV11/references/`**，按引用加载。
 
 ### skill-optimization-method — 技能包优化升级方法论
 
@@ -262,7 +262,7 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
   - "我有点担心矫枉过正" / "会不会和已有规则重复"（触发质疑性校验）
 ```
 
-**真实路径**：[skill-markets/fullstack4TraeV10/references/skill-optimization-method.md](skill-markets/fullstack4TraeV10/references/skill-optimization-method.md)（74 行精简方法论，V10.12 加 §0 第 11 条「质疑性校验必走」+ §1 Step 0 + §4 触发词）
+**真实路径**：[skill-markets/fullstack4TraeV11/references/skill-optimization-method.md](skill-markets/fullstack4TraeV11/references/skill-optimization-method.md)（74 行精简方法论，V10.12 加 §0 第 11 条「质疑性校验必走」+ §1 Step 0 + §4 触发词）
 
 **核心要点**（不在 AGENTS.md 展开，按需 Read 上述文件）：
 - 11 铁律：体积诊断 / 根因分层 / 外部对标 / 方案分级 / 决策前置 / 核心保底 / 缺口对照 / 三级分级 / 最小修复 / 门禁显式 / **质疑性校验必走**
@@ -284,7 +284,7 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
   - "升级 doc-map-manager"
 ```
 
-**真实路径**：[skill-markets/fullstack4TraeV10/references/knowledge-system-upgrade.md](skill-markets/fullstack4TraeV10/references/knowledge-system-upgrade.md)
+**真实路径**：[skill-markets/fullstack4TraeV11/references/knowledge-system-upgrade.md](skill-markets/fullstack4TraeV11/references/knowledge-system-upgrade.md)
 
 > ⚠️ **AGENTS.md 漂移警示**: 本节原写"`.trae/skills/knowledge-system-upgrade/SKILL.md`"但路径不存在，已修正为真实路径。**今后引用任何路径前必须 Glob 验证**。
 
@@ -307,7 +307,7 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
   - 4 维度独立校验（不基于子代理自述）?
 ```
 
-**真实路径**：[skill-markets/fullstack4TraeV10/references/skeptical-validation-protocol.md](skill-markets/fullstack4TraeV10/references/skeptical-validation-protocol.md)
+**真实路径**：[skill-markets/fullstack4TraeV11/references/skeptical-validation-protocol.md](skill-markets/fullstack4TraeV11/references/skeptical-validation-protocol.md)
 
 **核心方法**（不在 AGENTS.md 展开）：
 - §1 P0/P1 必要性质疑：根因验证 / 责任主体 / 重叠校验 / 成本校验（4 维度）
@@ -317,7 +317,7 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
 
 **触发范围**（V10.12 已挂入）：
 - skill-optimization-method §0 第 11 条 + §1 Step 0 + §4 触发词
-- fullstack4TraeV10 9 个 agents §铁律 各加 1 条 SKEPTICAL VALIDATION 引用
+- fullstack4TraeV11 9 个 agents §铁律 各加 1 条 SKEPTICAL VALIDATION 引用
 
 ---
 
@@ -325,7 +325,7 @@ BLOCKED          ≥ 1              任意                🛑 拒绝/修复
 
 | 技能包 | 路径 | 说明 |
 |--------|------|------|
-| fullstack4TraeV10 | `skill-markets/fullstack4TraeV10/` | 全栈文档驱动开发 V10 — 满分硬门禁 + 五阶段流水线 + spec-purge 物理归档 |
+| fullstack4TraeV11 | `skill-markets/fullstack4TraeV11/` | 全栈文档驱动开发 V10 — 满分硬门禁 + 五阶段流水线 + spec-purge 物理归档 |
 
 ---
 
