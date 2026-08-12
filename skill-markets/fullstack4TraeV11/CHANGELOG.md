@@ -11,12 +11,12 @@
 - **架构升级**: 从 V10 agents/ + references/ 分散架构升级为 **高内聚专家 skill** 架构
 - **13 stage skill**: 每个 stage 自包含 SKILL/README/workflows/references/templates/anti-patterns
 - **公共 references/**: 10 个文档（constitution / common-iron-rules / common-anti-patterns / stage-card-protocol / stage-interaction-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns / V10-distillation-source-map）
-- **公共 scripts/**: 12 个 Python 脚本（全部实装，非占位）
+- **公共 scripts/**: 24 个公共 Python 脚本（全部实装，非占位）
 - **公共 templates/**: 8 个模板（含 spec / plan / test-plan / domain-models / api-contracts / events / validation-rules / bug）
 
 ### 📦继承（V10.10-10.12 蒸馏）
 
-- **16 Articles 宪法**（Article I-XVI，含 V10.10 新增 XV 障碍诚实 + XVI 质疑性校验）
+- **17 Articles 宪法**（Article I-XVII，含 V10.10 新增 XV 障碍诚实 + XVI 质疑性校验 + V11.1 新增 XVII Secret Redaction）
 - **13 stage 流水线**（-1 Intake → 0 Plan → 0.5 Test Plan → 1 Spec → 1.5 Prototype → 2 Contract → 3 Implement → 3.5 Real Verify → 4 Review → 4.5 Rot Scan → 5 Accept + 6 Bug Fix + 7 Project Health）
 - **10 项腐化扫描**（V10.10 NEW）
 - **4 维评分**（代码 25% / API 30% / UIUX 25% / 边际 20%）
@@ -36,21 +36,30 @@
 
 | # | 脚本 | 状态 |
 |---|------|------|
-| 1 | stage-gate.py | ✅ 实装 + Fresh 验证 |
-| 2 | state-card-validator.py | ✅ 实装 + Fresh 验证 |
-| 3 | phase-gate.py | ✅ 实装 |
-| 4 | acceptance-audit.py | ✅ 实装 |
-| 5 | proactive-scan.py | ✅ 实装（10 项 V10.10） |
-| 6 | self-diagnose.py | ✅ 实装（6 项元检测） |
-| 7 | orphan-detector.py | ✅ 实装 |
-| 8 | dist-hash-check.py | ✅ 实装 |
-| 9 | visual-content-check.py | ✅ 实装（3 层校验） |
-| 10 | code-hygiene.py | ✅ 实装 |
-| 11 | spec-purge.py | ✅ 实装 |
-| 12 | spec-knowledge-extract.py | ✅ 实装 |
-| 13 | reason-classifier.py | ✅ 实装（6 类抽象理由） |
-| 14 | setup-feature.py | ✅ 实装 |
-| 15 | change-status.py | ✅ 实装 |
+| 1 | _lib_state_card.py | ✅ 实装（状态卡共享库） |
+| 2 | acceptance-audit.py | ✅ 实装 |
+| 3 | change-status.py | ✅ 实装 |
+| 4 | check_integration_contract.py | ✅ 实装 |
+| 5 | code-hygiene.py | ✅ 实装 |
+| 6 | dispatch-agent.py | ✅ 实装 |
+| 7 | dist-hash-check.py | ✅ 实装 |
+| 8 | hooks-fidelity.py | ✅ 实装 |
+| 9 | init-from-zero.py | ✅ 实装 |
+| 10 | install-hooks.py | ✅ 实装 |
+| 11 | orphan-detector.py | ✅ 实装 |
+| 12 | phase-gate.py | ✅ 实装 |
+| 13 | proactive-scan.py | ✅ 实装（10 项 V10.10） |
+| 14 | reason-classifier.py | ✅ 实装（6 类抽象理由） |
+| 15 | scan-templates.py | ✅ 实装 |
+| 16 | self-diagnose.py | ✅ 实装（6 项元检测） |
+| 17 | setup-feature.py | ✅ 实装 |
+| 18 | spec-knowledge-extract.py | ✅ 实装 |
+| 19 | spec-purge.py | ✅ 实装 |
+| 20 | stage-gate.py | ✅ 实装 + Fresh 验证 |
+| 21 | state-card-validator.py | ✅ 实装 + Fresh 验证 |
+| 22 | sync-after-upgrade.py | ✅ 实装 |
+| 23 | upgrade-from-v10.py | ✅ 实装 |
+| 24 | visual-content-check.py | ✅ 实装（3 层校验） |
 
 ### 📋 13 stage skill 文件清单
 
@@ -59,7 +68,7 @@
 | 01-intake | 3 | 3 | 2 | 4 + V10 | ✓ | ✓ |
 | 02-plan | 1 | 2 | 1 | 4 + V10 | ✓ | ✓ |
 | 03-test-plan | 1 | 1 | 1 | 4 + V10 | ✓ | ✓ |
-| 04-spec | 1 | 2 | 1 | 4 + V10 | ✓ | ✓ |
+| 04-spec | 1 | 2 | 1 | 3 + V10 | ✓ | ✓ |
 | 05-prototype | 2 | 2 | 1 | 4 + V10 | ✓ | ✓ |
 | 06-contract | 1 | 2 | 4 | 4 + V10 | ✓ | ✓ |
 | 07-implement | 1 | 3 | 0 | 4 + V10 | ✓ | ✓ |

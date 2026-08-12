@@ -1,6 +1,6 @@
 # Common Iron Rules — 公共铁律（所有 stage 必读）
 
-> V11 所有 13 stage skill 必读的公共铁律。每条铁律引用 16 Articles 宪法。
+> V11 所有 13 stage skill 必读的公共铁律。每条铁律引用 17 Articles 宪法。
 
 ---
 
@@ -144,6 +144,6 @@
 
 ## 关联引用
 
-- [constitution.md](constitution.md) — 16 Articles 全文
+- [constitution.md](constitution.md) — 17 Articles 全文
 - [common-anti-patterns.md](common-anti-patterns.md) — 公共反模式
 - [stage-card-protocol.md](state-card-protocol.md) — 状态卡协议

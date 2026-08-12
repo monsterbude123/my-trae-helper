@@ -292,4 +292,4 @@ FAIL 立刻停 → 走紧急恢复（trash 还原 / 反向 mv）
 - [common-anti-patterns.md](common-anti-patterns.md) — 22 反例
 - [document-layer.md](document-layer.md) — 索引器范围白/黑名单
 - [stage-interaction-protocol.md](stage-interaction-protocol.md) — 通过依据 3 类分层
-- V10 来源（开发期）: `../../fullstack4TraeV10/references/sub-agent-rules.md`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

@@ -9,7 +9,7 @@
 - **高内聚专家架构**: 每个 stage 自包含（SKILL/README/workflows/references/templates/anti-patterns）
 - **13 stage 流水线**: Intake → Plan → Test Plan → Spec → Prototype → Contract → Implement → Real Verify → Review → Rot Scan → Accept + Bug Fix + Project Health
 - **独立部署**: 不依赖 V10 目录
-- **V10 思想完整继承**: 16 Articles 宪法 + 10 项腐化扫描 + 4 维评分 + 5 类项目验证
+- **V10 思想完整继承**: 17 Articles 宪法（V11.1 新增 Article XVII Secret Redaction）+ 10 项腐化扫描 + 4 维评分 + 5 类项目验证
 
 ---
 
@@ -126,6 +126,6 @@ rm -rf ~/.trae-cn/skills/fullstack4TraeV11/skills/*/anti-patterns/V10-battle-tes
 
 - [SKILL.md](SKILL.md) — V11 总编排器（V11 入口）
 - [CHANGELOG.md](CHANGELOG.md) — 版本变更
-- [references/constitution.md](references/constitution.md) — 16 Articles 宪法
+- [references/constitution.md](references/constitution.md) — 17 Articles 宪法
 - [references/common-iron-rules.md](references/common-iron-rules.md) — 公共铁律
 - [references/V10-distillation-source-map.md](references/V10-distillation-source-map.md) — V10 蒸馏溯源

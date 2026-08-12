@@ -97,4 +97,4 @@ aop_handoff_checklist:
 - [stage-card-protocol.md](state-card-protocol.md) — 状态卡流转
 - [common-iron-rules.md](common-iron-rules.md) — Article XII workflow discipline
 - [ask-question-anti-patterns.md](ask-question-anti-patterns.md) — AskUserQuestion 反模式
-- V10 来源（开发期）: `../../fullstack4TraeV10/references/stage-interaction-protocol.md`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

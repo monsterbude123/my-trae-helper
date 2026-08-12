@@ -84,4 +84,4 @@ python scripts/scan-templates.py --project-root . --strict
 - [references/templates/](../templates/) — 跨 stage 共享契约模板
 - [skills/*/templates/](../../skills/) — stage 私有模板
 - [templates/](../../templates/) — 项目级 + 通用模板
-- V10 来源（开发期）: `../../../fullstack4TraeV10/scripts/scan-templates.py`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns（scan-templates.py 已迁入 V11 scripts/）

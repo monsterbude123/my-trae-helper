@@ -47,4 +47,4 @@ Step 4: 跑全量回归（确认没破坏其他）
 
 - [five-step-flow.md](../references/five-step-flow.md) — 5 步精简流程
 - [SKILL.md §铁律 2](../SKILL.md) — e2e 先行
-- V10 来源: `../../../../fullstack4TraeV10/references/debugger-methodology.md`
+- V10 来源（已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）references/debugger-methodology.md`

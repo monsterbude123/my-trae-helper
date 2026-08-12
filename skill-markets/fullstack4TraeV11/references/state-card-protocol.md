@@ -345,7 +345,7 @@ notes: 涉及 regex 宽松校验，需前后端契约三方同步
 
 **教训**: 状态卡必须经过 state-card-validator.py 校验。
 
-### 反例 2: 状态卡永远��
+### 反例 2: 状态卡永远🟢 on-track
 
 **现象**: 任何阶段都显示 `health: �� on-track`，从不降级。
 

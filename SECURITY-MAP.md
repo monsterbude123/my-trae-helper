@@ -43,6 +43,7 @@
 | e2e-module-audit | 1 md + 5 ref | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档 |
 | doc-map-manager | 1 md + 2 py | 0 | 3 | 1 | **4.3** | 🟢 | v2 升级：新增 links/tags/metadata 表 + 新鲜度评分 + context/impact 查询。SHELL_EXEC(子进程 git log，参数化安全) + HTTP(用户配置的 Ollama/OpenAI 端点，非全量外联)。脚本规模未膨胀(仍 2 py)，核心路径无新增风险。 |
 | vibe-coding-standards | 2 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档，无脚本，无风险 |
+| **project-rules-gate** (v0.2) | 1 md + 2 ref + 1 py + 2 tpl + 1 wf | 0 | 0 | 0 | **5.0** | 🟢 | **实跑扫描（2026-08-12 16:11，最新）**：trae-security-review scan_skills_dir.py V2.1 → **HIGH 0 + MEDIUM 0 + LOW 0 → PASS**（白名单扩到 15 行）。**V0.2 升级**：(a) 加 `--move` 选项：物理移走源 rules 到 `.trae/rules/_archived/`（防 sub-agent 绕过 skill）；(b) 加 frontmatter 自动注入：检测 rule 文件缺 YAML frontmatter 时补 `description:`（已含则跳过保护用户自定义）；(c) 6 文件全扫描：SKILL.md + 2 references + 1 py + 2 templates + 1 workflow + README.md。**脚本安全性**：仅 Python 3.8+ 标准库，无 subprocess / 无网络 / 无 eval-exec；`--move` 用 `pathlib.Path.replace()` 不是 `os.remove()`（保留归档目录 + 可回溯）；仅在 `--project-root` 指定目录内操作；改写 .trae/rules/README.md 为强制入口是高频写操作。**适用面**：V11 [PROJECT-RULES-GATE] 协议的独立分发版，可单独安装，不依赖 V11/GitNexus/任何编排器 |
 
 ### L1 集成层
 
@@ -109,6 +110,7 @@
 | `scripts/webhook_server.py` | browser-use-cloud | 🟡 MEDIUM | HTTP 服务端 |
 | `scripts/scan_skills_dir.py` | trae-security-review | 🟢 LOW | 仅文件扫描，无 Shell/网络执行 |
 | `scripts/init-docs.ps1` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行（New-Item/Compress-Archive/IO.File.WriteAllText）+ 本地 dev server 提示 |
+| `scripts/forge_project_rules_skill.py` | project-rules-gate | 🟢 LOW | 纯文件 IO + 模板渲染；无 subprocess / 无网络 / 无 eval-exec；仅在 --project-root 内操作；改写 .trae/rules/README.md 是高频写操作（明确语义）；--move 用 pathlib.Path.replace() 移走到 _archived/（归档非删除，可回溯）；frontmatter 注入只追加不覆盖（已有则跳过） |
 | `scripts/serve.ps1` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行（Start-Process 启动 docsify serve）+ localhost 浏览器唤起 |
 | `scripts/init-docs.sh` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行 + localhost 浏览器唤起 |
 | `scripts/serve.sh` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行 + localhost 浏览器唤起 |
@@ -153,5 +155,5 @@ code auto_reports\{package_name}_{timestamp}.md
 
 ---
 
-*生成日期: 2026-07-31 | 扫描引擎: trae-security-review/scan_skills_dir.py v2.1*
-*本次更新: trae-security-review SKILL.md 更新 V2.1 描述 + fullstack4TraeV10 v10.12.5 升级（8 脚本 SHELL_EXEC 白名单 + AGENTS.md 新增 Agent 回复行为规约）。**实跑扫描结果：HIGH 0 + MEDIUM 0 + LOW 0 → PASS**（MEDIUM 20 → 0 是关键；判定 WARNING → PASS；评分 3.4 → 5.0 满分）。下一轮升级前 backlog: 无（已满分）*
+*生成日期: 2026-08-12 | 扫描引擎: trae-security-review/scan_skills_dir.py v2.1*
+*本次更新: project-rules-gate v0.1 → v0.2 升级（加 --move + frontmatter 自动注入）。**实跑扫描结果：HIGH 0 + MEDIUM 0 + LOW 0 → PASS**（白名单 15 行）。agent 反馈 2 条已采纳：(a) 原 rules 没移走 → 加 --move 物理移走到 .trae/rules/_archived/；(b) 没主动建 rule 的 README → 改 frontmatter 注入（不发明 README 文件，元信息内嵌）。下一轮升级前 backlog: 无（已满分）*

@@ -53,4 +53,4 @@ mcp__gitnexus__impact(target="BuggyClass", direction="downstream")
 - [cross-layer-fix.md](../references/cross-layer-fix.md) — 跨层修复协议
 - [gitnexus-6-layer.md](../references/gitnexus-6-layer.md) — 6 层 + GitNexus 工具
 - [SKILL.md §铁律 6](../SKILL.md) — 跨层修复最小化
-- V10 来源: `../../../../fullstack4TraeV10/references/debugger-methodology.md`
+- V10 来源（已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）references/debugger-methodology.md`

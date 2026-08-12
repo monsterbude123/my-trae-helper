@@ -28,6 +28,7 @@
 | [e2e-module-audit](e2e-module-audit/SKILL.md) | 纯Skill | E2E 双模式验证 — 批量验收 + 即时诊断 | 无（⚠ 已整合到 acceptance-discipline） |
 | [doc-map-manager](doc-map-manager/SKILL.md) | 纯Skill | 文档地图管理器 — 结构化索引构建 + 多模式查询（grab/lookup/fuzzy/semantic/file） | build-index.py, query-index.py |
 | [vibe-coding-standards](vibe-coding-standards/SKILL.md) | 纯Skill | Vibe Coding 组件编写原则 — AGENTS.md/Rules/Skills/Subagents 结构规范与防击穿策略 | 无 |
+| [project-rules-gate](project-rules-gate/SKILL.md) | 纯Skill | 项目级 Rules 强制加载与子代理门禁 — 把 .trae/rules/ 锻造为 project_rules_skills 入口 skill + 强制 sub-agent [PROJECT-RULES-GATE] 头。V11 同名协议独立分发版(v0.2 加 --move 物理移走 + frontmatter 自动注入) | forge_project_rules_skill.py |
 | [skill-optimization-method](skill-optimization-method/SKILL.md) | 纯Skill | 技能包优化升级方法论 — 体积诊断 + 外部对标 + 缺口对照 + 最小修复（项目级） | 无 |
 | [session-distiller](session-distiller/SKILL.md) | 纯Skill | 会话蒸馏器 — 从完整会话历史中提炼高质量方法论、最佳实践和可复用技能包 | 无 |
 | [trae-local-data-export](trae-local-data-export/SKILL.md) | 纯Skill | Trae IDE 本地数据导出 — 整合 ZedeX/trae-chat-decrypt + cgint/ai-data-extraction，产出 JSON/TXT/SQLite 三大产物 | 7 脚本（extract_key ×2 / decrypt_db / verify / export_sessions / extract_trae_jsonl / sanitize_export） |
@@ -80,6 +81,7 @@
 | 视觉验收 | `vision-audit/scripts/vision-audit.mjs` | acceptance-discipline, e2e-module-audit, fullstack-auto | Node.js 脚本 | Playwright 截图 → Qwen3-VL 分析 |
 | 视觉验收 (Python) | `vision-audit/scripts/vision-audit.py` | acceptance-discipline | Python 脚本 | 同上，Python 版，支持 --resize 缩放 |
 | 线框图识别 | `vision-audit/scripts/vision-audit.py --describe` | vision-audit（内部） | Python 模式 | 截图 → ASCII 线框图；VL 不可用时降级输出 MCP read_media_file 指令 |
+| 项目 Rules 锻造器 | `project-rules-gate/scripts/forge_project_rules_skill.py` | fullstack4TraeV11（init-from-zero.py --rules-as-skill 等价）, 任何想给子代理加规则门禁的项目 | Python 脚本 | 把 .trae/rules/ 收纳为 .trae/skills/project_rules_skills/ 入口 skill + 改写 README 为强制入口 |
 | 项目环境初始化 | `fullstack4TraeV7/templates/scripts/env-init.py` | fullstack-auto | Python 脚本 | 一键初始化项目 .trae/ 配置 |
 | 驾驶舱渲染 | `fullstack4TraeV7/templates/scripts/render-cockpit.py` | fullstack4TraeV7（内部） | Python 脚本 | 渲染 Cockpit 状态卡 |
 | ComfyUI API 客户端 | `comfyui-api-skills/scripts/lib/comfy_client.py` | comfyui 全部 15 子技能 | Python 库 | ComfyUI REST API 封装 |

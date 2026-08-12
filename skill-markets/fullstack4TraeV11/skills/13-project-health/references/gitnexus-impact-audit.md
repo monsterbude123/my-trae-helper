@@ -93,4 +93,4 @@ project_health_report:
 - [four-dimension-check.md](four-dimension-check.md) — 4 维度检查协议
 - [Stage 2 impact-assessment.md](../../02-plan/references/impact-assessment.md) — 工具基础
 - [公共铁律 Article V](../../references/common-iron-rules.md)
-- V10 来源（开发期）: `../../../../fullstack4TraeV10/agents/project-health-auditor.md` Step 4
+- V10 来源（开发期，已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）agents/project-health-auditor.md` Step 4

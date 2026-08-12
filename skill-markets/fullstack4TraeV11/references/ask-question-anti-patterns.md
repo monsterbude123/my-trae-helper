@@ -110,4 +110,4 @@ NotifyUser: 通知用户已完成（如 spec ready for review）
 
 - [stage-interaction-protocol.md](stage-interaction-protocol.md) — 阶段间交互
 - [common-iron-rules.md](common-iron-rules.md) — Article V 验证性主张
-- V10 来源（开发期）: `../../fullstack4TraeV10/references/ask-question-anti-patterns.md`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

@@ -129,4 +129,4 @@ gitnexus_retry_compliance:
 - [gitnexus-tools.md](gitnexus-tools.md) — 4 工具使用
 - [Article V](common-iron-rules.md) — GitNexus First 不可降级
 - [02-grep-instead-of-gitnexus.md](02-grep-instead-of-gitnexus.md) — 反例
-- V10 来源（开发期）: `../../fullstack4TraeV10/references/debugger-methodology.md` §1.6
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns §1.6

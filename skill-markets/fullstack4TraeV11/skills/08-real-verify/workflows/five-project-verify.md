@@ -136,6 +136,48 @@ blocker:
   attempt_count: N
 ```
 
+### 阻塞升级路径（V11.2 NEW — 蒸馏自 08-real-verify 自检报告）
+
+`attempt_count ≥ 3` 仍未解决 → 必走升级路径,禁止主上下文硬扛：
+
+| 升级层级 | 触发条件 | 动作 |
+|---------|---------|------|
+| L1 自助修复 | attempt_count 1-2 | 主上下文 + sub-agent 继续修 |
+| L2 主上下文决策 | attempt_count = 3 | **必 AskUserQuestion** 三选项：① 接受风险(降级/PASS 豁免) ② 等待修复(暂停 stage) ③ 显式豁免(标 acceptable_risk,记录决策理由) |
+| L3 用户审批 | attempt_count ≥ 5 或用户主动升级 | 主上下文汇报 + 用户确认是否继续 / 回滚 / 改方向 |
+
+**禁止**:attempt_count ≥ 3 后不升级、继续硬扛 → 必触发 Article XV Obstacle Honesty 反例。
+
+详见 [references/blockage-report.md §升级路径](../references/blockage-report.md)。
+
+## Step → 状态卡字段映射表（V11.2 NEW — 蒸馏自 08-real-verify 自检报告）
+
+主上下文执行 5 步时,按下列映射**自动填写** `docs/specs/changes/{id}/.state-card.md`：
+
+| Step | 状态卡字段 | 取值规则 |
+|------|-----------|---------|
+| Step 1 项目启动验证 | `gate_result.gate` = "real-verify/startup" | step_status: PASS/FAIL |
+| | `artifacts[].path` = "screenshots/{name}.png" | exists: true/false(由 visual-content-check.py 实跑决定) |
+| Step 2 类型/Lint/测试 | `gate_result.gate` = "real-verify/quality" | PASS 需 ≥90% 覆盖率 + 0 lint + 0 type error |
+| Step 3 视觉证据(PIL 3 层校验) | `artifacts[].evidence` = "visual-content-check.py PASS" | 见 [references/visual-evidence.md](../references/visual-evidence.md) |
+| Step 4 契约/产物对照 | `gate_result.gate` = "real-verify/contract-drift" | FAIL 时 `health = 🔴 blocked` + `next_stage = blocked` |
+| Step 5 全 PASS | `stage_status` = "completed", `stage_ended_at` = ISO 8601 | `next_stage = "4/review"` |
+| 任何 FAIL | `health = 🔴 blocked` | 立即按阻塞升级路径走 |
+
+完整字段定义见 [references/state-card-protocol.md §二](../../references/state-card-protocol.md)。
+
+## 5 工作流 × 4 维度总览表（V11.2 NEW — 蒸馏自 08-real-verify 自检报告）
+
+| 项目类型 | 输入物 | 输出物 | 失败兜底 | 验证手段 |
+|---------|--------|--------|---------|---------|
+| **Web** | `package.json` 启动脚本 | dev server 200 + 首页截图 ≥5KB | 进程未启动 → 检查端口占用 + 重启 3 次 | `curl %{http_code}` + playwright_screenshot + PIL 3 层 |
+| **Tauri** | `src-tauri` + `package.json` | cargo build OK + tauri dev 截图 | cargo 编译错误 → `cargo clean` 重试 | `ps aux \| grep tauri` + playwright_screenshot |
+| **CLI** | `bin/` 或 `dist/` 可执行文件 | end-to-end run 输出非空 + 退出码 0 | 二进制缺失 → `cargo build --release` 或 `pnpm build` | 直接执行 + 退出码断言 |
+| **Library** | `lib/` 或 `dist/lib` + 测试 | 单元测试全 PASS + 覆盖率 ≥90% | 测试失败 → 看失败用例输出 | `pnpm test --run --coverage` 或 `cargo test --coverage` |
+| **Backend** | `src/server.*` + 启动脚本 | 端口 200 + 关键 endpoint 健康检查 | 端口未就绪 → 看日志 + 重启 | `curl %{http_code}` + 日志 tail |
+
+> 注: 5 项目类型命令在 [§1-§5 各小节](../workflows/five-project-verify.md)详写;本表只标"4 维度",主上下文按表判读。
+
 ---
 
 ## 关联引用

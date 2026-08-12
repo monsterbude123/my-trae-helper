@@ -28,6 +28,7 @@ depends_on:
 2. 4 维度检查   — 路径一致性 + 目录树 + 版本残留 + 文档同步
 3. 优先级分级   — P0 阻断 / P1 高优 / P2 中优 / P3 低优
 4. 防失真机制   — 质疑性校验按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md)
+5. 必复盘已分级 — 已分级问题必进入下一轮 health 报告复盘
 6. NEVER 静默   — 发现问题必报，不静默归档
 7. self-diagnose — Meta 自身失真检测
 ```

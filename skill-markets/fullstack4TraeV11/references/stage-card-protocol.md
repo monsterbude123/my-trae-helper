@@ -151,4 +151,4 @@ python scripts/stage-gate.py --state-card docs/specs/.state-card.md --stage 3/im
 - [common-iron-rules.md](common-iron-rules.md) — 12.4 状态卡必更新
 - [../scripts/stage-gate.py](../scripts/stage-gate.py) — 状态卡门禁脚本
 - [../scripts/state-card-validator.py](../scripts/state-card-validator.py) — 字段校验脚本
-- V10 来源（开发期）: `../../fullstack4TraeV10/references/state-card-protocol.md`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

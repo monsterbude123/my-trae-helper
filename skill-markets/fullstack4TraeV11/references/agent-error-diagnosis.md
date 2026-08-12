@@ -82,7 +82,7 @@ Step 4: 若现有铁律缺失 → 🛑 必新增 Article + 反例（不走 Artic
 
 **症状**：用户提供的密码 / token 写到工具调用参数 → 工具调用日志 = 日志文件 = 明文泄露
 
-**真实根因**：V11 16 Articles **完全缺失 secret 红化条款** → 🛑 P0 缺失
+**真实根因**：V11 16 Articles **完全缺失 secret 红化条款**（V11.1 已补） → 🛑 P0 缺失
 
 **反例**：新增 P0 §22 secret-in-tool-arg
 
@@ -111,7 +111,7 @@ Step 4: 若现有铁律缺失 → 🛑 必新增 Article + 反例（不走 Artic
 
 ```
 新增铁律必走:
-  1. 现有 16 Articles + 22 反例是否已含？
+  1. 现有 17 Articles + 23 反例是否已含？
   2. 反例库是否已含？
   3. 是否能用现有铁律 + 引用代替？
   4. 修复成本 vs 价值（避免低价值修复）
@@ -158,4 +158,4 @@ self_reflection:
 - [common-iron-rules.md](common-iron-rules.md) — 16 + 1 Articles
 - [common-anti-patterns.md](common-anti-patterns.md) — 22 反例
 - [Article XVI §1.4](common-iron-rules.md) — 修复成本 vs 价值校验
-- V11 实战反馈（开发期）: `../../fullstack4TraeV10/research/` + `../../research/`
+- V11 实战反馈（开发期）: 见 V11 references 与 anti-patterns（已蒸馏）

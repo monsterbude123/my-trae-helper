@@ -59,6 +59,6 @@ def check_inv(entity):
 
 ## 关联引用
 
-- spec.md: [../spec.md](../../spec.md)
+- spec.md: [../spec.md](../spec.md)
 - api-contracts.md: [api-contracts.md](api-contracts.md)
 - V10 contract-writer: `V10 来源` (已蒸馏到本文档)

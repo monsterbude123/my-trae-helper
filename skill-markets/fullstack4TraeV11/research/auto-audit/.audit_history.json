@@ -89,5 +89,70 @@
       "rejected_changes": 7,
       "overall_score": "8.5/10"
     }
+  },
+  {
+    "stage": "08-real-verify",
+    "angle": 8,
+    "angle_name": "workflow 可执行",
+    "date": "2026-08-12 22:00",
+    "report": "2026-08-12-22-08-real-verify.md",
+    "summary": {
+      "real_issues": 3,
+      "candidate_changes": 3,
+      "rejected_changes": 4,
+      "overall_score": "6.6/10"
+    }
+  },
+  {
+    "stage": "09-review",
+    "angle": 9,
+    "angle_name": "质疑性校验应用",
+    "date": "2026-08-12 15:05",
+    "report": "2026-08-12-15-09-review.md",
+    "summary": {
+      "real_issues": 0,
+      "candidate_changes": 0,
+      "rejected_changes": 3,
+      "overall_score": "9.8/10"
+    }
+  },
+  {
+    "stage": "10-rot-scan",
+    "angle": 10,
+    "angle_name": "强制重置协议",
+    "date": "2026-08-12 23:00",
+    "report": "2026-08-12-23-10-rot-scan.md",
+    "summary": {
+      "real_issues": 1,
+      "candidate_changes": 0,
+      "rejected_changes": 3,
+      "overall_score": "9.2/10"
+    }
+  },
+  {
+    "stage": "11-accept",
+    "angle": 11,
+    "angle_name": "总管路由一致性",
+    "date": "2026-08-12 17:xx",
+    "report": "2026-08-12-17-11-accept.md",
+    "summary": {
+      "real_issues": 0,
+      "candidate_changes": 0,
+      "rejected_changes": 3,
+      "overall_score": "9.8/10"
+    }
+  },
+  {
+    "stage": "12-bug-fix",
+    "angle": 12,
+    "angle_name": "子代理协议",
+    "date": "2026-08-12 24:xx",
+    "report": "2026-08-12-24-12-bug-fix.md",
+    "summary": {
+      "real_issues": 2,
+      "candidate_changes": 2,
+      "rejected_changes": 5,
+      "overall_score": "8.8/10"
+    }
   }
 ]

@@ -42,4 +42,4 @@ mv docs/specs/changes/{change-id}/ docs/specs/archive/done/{change-id}/
 
 - [SKILL.md §铁律 1](../SKILL.md) — 知识沉淀先于归档
 - [knowledge-extract.md](../references/knowledge-extract.md) — 知识提取协议
-- V10 来源: `../../../../fullstack4TraeV10/references/prd-integration-workflow.md`
+- V10 来源（已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）references/prd-integration-workflow.md`

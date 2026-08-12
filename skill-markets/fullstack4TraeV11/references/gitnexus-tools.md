@@ -166,4 +166,4 @@ hooks:
 - [Stage 6 Bug Fix gitnexus-6-layer.md](../skills/12-bug-fix/references/gitnexus-6-layer.md)
 - [Stage 7 Health gitnexus-impact-audit.md](../skills/13-project-health/references/gitnexus-impact-audit.md)
 - [公共铁律 Article V](common-iron-rules.md)
-- V10 来源（开发期）: `../../fullstack4TraeV10/templates/hooks/gitnexus-session-{check,finalize}.py`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns（gitnexus-session 钩子已合入 V11 路径）

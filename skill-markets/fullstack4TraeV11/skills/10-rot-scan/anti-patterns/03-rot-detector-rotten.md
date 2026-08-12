@@ -52,4 +52,4 @@ rot_detector_self_check:
 
 - [SKILL.md §铁律 3](../SKILL.md) — rot-detector 自身腐烂
 - [self-diagnose.py 文档](../../../../scripts/self-diagnose.py)
-- V10 来源: `../../../../fullstack4TraeV10/references/process-rot-analysis.md`
+- V10 来源（已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）references/process-rot-analysis.md`

@@ -1,10 +1,10 @@
-# Constitution — 16 Articles 宪法
+# Constitution — 17 Articles 宪法
 
 > V11 总编排器与所有 stage skill 必读的宪法文件。V10.10 增 XV/XVI，V11 全数继承。
 
 ---
 
-## 16 Articles 全文
+## 17 Articles 全文
 
 ### Article I — Quality First
 代码质量优先于开发速度。不可为赶进度降低测试覆盖 / 代码卫生 / 文档质量。
@@ -70,6 +70,6 @@ Phase 4.5 rot-detector 不可跳过。腐化扫描必跑，fix-list.json 必产�
 
 ## 关联引用
 
-- [SKILL.md §-1](../SKILL.md) — 编排器 16 Articles 引用
+- [SKILL.md §-1](../SKILL.md) — 编排器 17 Articles 引用
 - [common-iron-rules.md](common-iron-rules.md) — 公共铁律 Article 摘要
-- V10 来源（开发期）: `../../fullstack4TraeV10/references/constitution-detail.md`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

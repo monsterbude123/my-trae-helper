@@ -1,7 +1,7 @@
 # AGENTS.md — 项目级 AI 规则模板（让 agent 按需配置）
 
 > **设计原则（无冗余）**：
-> - V11 内部已含的（16 Articles / stage 流水线 / 4 维评分 / 反模式库 / Hook 协议）→ **绝不复制**
+> - V11 内部已含的（17 Articles / stage 流水线 / 4 维评分 / 反模式库 / Hook 协议）→ **绝不复制**
 > - 本模板只列**项目级独有**章节，agent 根据项目实际情况填充
 > - 部署位置：项目根目录 `AGENTS.md`
 
@@ -43,7 +43,7 @@ Step 9: 进入 Stage -1 Intake 工作模式
 - ❌ 跳过 Step 3 Skill(name="project-rules") 而用 grep/Glob 搜项目 rules
 - ❌ 把状态卡写到 `.trae/state-card.md`（V10 残留路径）
 
-V11 入口加载协议、stage 流水线、16 Articles 宪法、铁律、反模式库 → 全部在 `~/.trae-cn/skills/fullstack4TraeV11/SKILL.md` + `references/`。
+V11 入口加载协议、stage 流水线、17 Articles 宪法、铁律、反模式库 → 全部在 `~/.trae-cn/skills/fullstack4TraeV11/SKILL.md` + `references/`。
 
 **禁止**在本文件重复 V11 内部规则（Article XVI §1.4 修复成本 vs 价值 → 重复是低价值修改）。
 
@@ -115,7 +115,7 @@ Step 4: 输出项目根 AGENTS.md
 
 ## 反例（agent 必走 V16）
 
-- ❌ 在 AGENTS.md 复制 16 Articles 全文 → 🛑 低价值重复（Article XVI §1.4）
+- ❌ 在 AGENTS.md 复制 17 Articles 全文 → 🛑 低价值重复（Article XVI §1.4）
 - ❌ 在 AGENTS.md 复制 stage 流水线 → 🛑 V11 SKILL.md 已含
 - ❌ 在 AGENTS.md 复制铁律 / 反模式 → 🛑 V11 references/ 已含
 - ❌ AGENTS.md > 200 行 → 🛑 项目级应精简
@@ -126,7 +126,7 @@ Step 4: 输出项目根 AGENTS.md
 
 | 内容 | 在哪里 |
 |------|--------|
-| 16 Articles 宪法 | `~/.trae-cn/skills/fullstack4TraeV11/references/constitution.md` |
+| 17 Articles 宪法 | `~/.trae-cn/skills/fullstack4TraeV11/references/constitution.md` |
 | 13 stage 流水线 | `~/.trae-cn/skills/fullstack4TraeV11/SKILL.md` §0 |
 | 4 维评分 + 3 类通过依据 | `~/.trae-cn/skills/fullstack4TraeV11/skills/09-review/SKILL.md` |
 | 10 项腐化扫描 | `~/.trae-cn/skills/fullstack4TraeV11/skills/10-rot-scan/SKILL.md` |

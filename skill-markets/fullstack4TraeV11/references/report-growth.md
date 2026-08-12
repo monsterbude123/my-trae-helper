@@ -90,4 +90,4 @@ L4 Archive: 1 段说明  # ❌ 缺失 4 工件
 
 - [stage-card-protocol.md](state-card-protocol.md) — 状态卡流转
 - [document-layer.md](document-layer.md) — 4 层文档
-- V10 来源（开发期）: `../../fullstack4TraeV10/references/report-growth.md`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

@@ -152,4 +152,4 @@ Reviewer: REJECT  # ❌ 无失败标签
 
 - [SKILL.md §铁律 10](../SKILL.md) — 关键门禁套件
 - [stage-interaction-protocol.md](../../../references/stage-interaction-protocol.md) — 修订后产物路径
-- V10 来源（开发期）: `../../../../fullstack4TraeV10/references/multi-round-revision-protocol.md`
+- V10 来源（开发期，已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）references/multi-round-revision-protocol.md`

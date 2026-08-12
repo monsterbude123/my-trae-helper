@@ -89,7 +89,9 @@ stage_config:
 
 1. 加载本 SKILL.md（含 frontmatter `stage_config`）
 2. **必读** 7 个公共 references：constitution / common-iron-rules（含 Article XVII Secret Redaction）/ common-anti-patterns（含 §19-22 反例）/ stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns / **agent-error-diagnosis** / **sub-agent-rules** / **project-structure**
-3. **强制调 Skill(name="project-rules")**（如项目已有 `.trae/skills/project_rules_skills/`）— 拿项目级 rules 路由表，按需加载项目惯例（V11 NEW — 防违反项目级 rules 协议）
+3. **强制调 Skill(name="project-rules")** — 拿项目级 rules 路由表，按需加载项目惯例（V11 NEW — 防违反项目级 rules 协议）。
+   - **若 `.trae/skills/project_rules_skills/SKILL.md` 已存在** → 直接调用
+   - **若不存在** → 必先跑 `python ~/.trae-cn/skills/fullstack4TraeV11/scripts/init-from-zero.py --project-root . --rules-as-skill`（默认开）创建入口，再调用 Skill(name="project-rules"）
 4. **Glob 1 次** 项目自身约定：`AGENTS.md` / `docs/` / `.trae/rules/` / `.trae/fullstack4traev11.config.yaml` + **项目目录结构**（见 §0.5.1）
 5. **核对 V11 标准路径** — 状态卡应在 `docs/specs/.state-card.md`（项目级）/ `docs/specs/changes/{id}/.state-card.md`（change 级）/ `docs/bugs/{id}/.state-card.md`（bug 级）。**禁止用 `.trae/state-card.md`**（V10 残留，已迁移出 `.trae/`）
 6. **如有项目级覆盖** → 按 3 层优先级合并（项目级 > 编排器 stage_config > stage skill depends_on）
@@ -104,6 +106,25 @@ stage_config:
 **反例（V11.2 NEW — 蒸馏自 canvas-asset-folders 实战）**：
 - ❌ 跳过 Skill(name="project-rules") 而用 grep/Glob 搜项目 rules → 违反项目级 rules 协议
 - ❌ 把状态卡写到 `.trae/state-card.md`（V10 残留路径）→ 未核对 [state-card-protocol.md §1.1](references/state-card-protocol.md) 必走协议
+
+### §0.5.2 加载后验证（V11.2 NEW — 蒸馏自 canvas-asset-folders 实战）
+
+加载协议 9 步走完后，**主上下文必跑 3 项验证**（不进入主流程前）：
+
+```bash
+# 1. hooks-fidelity.py: 验证 hooks 链路完整
+python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-root .
+
+# 2. project-rules skill 入口存在性 LS 验证
+ls .trae/skills/project_rules_skills/SKILL.md
+# → 不存在 = 反例 §23 触发,必先跑 init-from-zero.py --rules-as-skill
+
+# 3. state-card 路径核对
+ls docs/specs/.state-card.md
+# → 不存在 = 初始化未完成或路径错误
+```
+
+**反例**: 跳过 §0.5.2 验证 = "看似加载成功但 hooks/rules/state-card 三件套某项缺失 → 主流程跑挂"。这是 V11.2 蒸馏的 canvas-asset-folders 实战教训。
 
 ### §0.5.1 同类约定强制清单（V11.1 NEW — 蒸馏自 V10.12）
 
@@ -443,3 +464,56 @@ skills/{NN}-{name}/
 - **references/**: constitution / common-iron-rules / common-anti-patterns / **skeptical-validation-protocol**（7 stage 永久激活）/ stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns / agent-error-diagnosis / sub-agent-rules / project-structure / gitnexus-tools / gitnexus-retry-protocol / V10-distillation-source-map（详见各节指针）
 - **glossary.md** — 术语表(V10 完整继承 + V11 新增 5 大类 100+ 术语)
 - **templates/**: project-agents-example / project-rules-example / state-card / hooks/ / constitution-template
+
+---
+
+## §14 项目级生态管理规范(V11.2 NEW -- 蒸馏自 init-from-zero.py Step 5 改造)
+
+> 任何 stage skill 涉及项目级配置改动(.trae/rules/ / .trae/skills/project_rules_skills/ / .trae/hooks/ / AGENTS.md 等),必走本规范。
+
+### §14.1 5 项铁律
+
+```
+1. 单点入口原则      所有项目级规则通过 .trae/skills/project_rules_skills/SKILL.md 路由,
+                    按需加载 references/,禁止 agent 直接 Read .trae/rules/{name}.md
+
+2. 物理移走原则      init-from-zero.py --rules-as-skill 必须 move(物理删除源文件)而非 copy,
+                    .trae/rules/ 物理状态 = 仅 README.md
+
+3. README 幂等原则  项目拥有 .trae/rules/README.md,init 不强制覆盖,
+                    只在缺"project-rules skill 入口"声明时追加入口段
+
+4. 占位模板兜底      项目无 rules 时,从 V11 templates/project-rules-example/ 复制占位,
+                    但 README 由项目自己创建,init 不复制
+
+5. 整合协议必走      agent 创建 project-rules skill 后,必走 5 步整合:
+                    Read all → 检查 V11 内部重叠 → 完全重叠删除 / 部分重叠保留独有部分 → 纯机械挪移 = 无意义
+```
+
+### §14.2 后续 stage 引用本规范的触发词
+
+| 触发词 | 必引用本规范 |
+|--------|------------|
+| 改 .trae/rules/ 任何文件 | §14.1 铁律 1-5 |
+| 改 init-from-zero.py Step 5 相关逻辑 | §14.1 铁律 2-4 |
+| 改 .trae/skills/project_rules_skills/ 内容 | §14.1 铁律 1 + 5 |
+| 新建项目级配置文件(如 .trae/hooks/ 新 hook) | §14.1 铁律 1 + README 幂等 |
+| sub-agent 提到"项目惯例" | §14.1 铁律 5(先整合再决策) |
+
+### §14.3 反例(违反任一即 REJECT)
+
+| 反例 | 后果 |
+|------|------|
+| 复制 rule 到 references/ 而不删源文件 | 双份真相, agent 读错版本 |
+| 强制覆盖 .trae/rules/README.md | 项目自定义内容被破坏 |
+| 无 rules 时跳过 --rules-as-skill | SKILL.md §0.5 Step 3 协议等不到触发条件 |
+| 纯机械挪移 rule 不做内容整合 | V11 已含内容重复占用 context |
+| agent 直接 Read .trae/rules/*.md 而不走 skill 入口 | context 撑爆(违反 §0.5 Step 3) |
+
+### §14.4 关联引用
+
+- §0.5 Step 3 -- 项目级 rules 强制加载入口(Skill(name="project-rules"))
+- §0.5.2 加载后验证 -- LS .trae/skills/project_rules_skills/SKILL.md 存在性
+- scripts/init-from-zero.py -- Step 5 (V11.2 MOVE 模式 + README 幂等 + 占位兜底)
+- templates/project-rules-skill-template/ -- project-rules skill 入口模板
+- templates/project-rules-example/ -- 占位 rule 模板(4 个文件 + README)

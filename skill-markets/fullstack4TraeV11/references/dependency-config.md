@@ -170,4 +170,4 @@ stage_config:
 - [stage-card-protocol.md](state-card-protocol.md) — 状态卡流转
 - [common-iron-rules.md](common-iron-rules.md) — Article XII workflow discipline
 - [SKILL.md](../SKILL.md) — 总编排器
-- V10 来源（开发期）: `../../fullstack4TraeV10/references/dependency-config.md`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

@@ -53,4 +53,4 @@ preventive_measures:
 
 - [bug-state-machine.md](../references/bug-state-machine.md) — 状态机
 - [SKILL.md §铁律 7](../SKILL.md) — 修复回写 bug 单
-- V10 来源: `../../../../fullstack4TraeV10/references/bug-workflow.md`
+- V10 来源（已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）references/bug-workflow.md`

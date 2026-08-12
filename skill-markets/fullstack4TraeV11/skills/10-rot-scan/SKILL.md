@@ -1,6 +1,6 @@
 ---
 name: rot-scan
-description: "Stage 4.5 腐化扫描 — proactive-scan.py 8 项必跑 + 元检测 + 修复。NO ROT NO ACCEPT。触发词：rot scan / 腐化扫描 / proactive-scan / 5 维度扫描。"
+description: "Stage 4.5 腐化扫描 — proactive-scan.py 10 项必跑 + 元检测 + 修复。NO ROT NO ACCEPT。触发词：rot scan / 腐化扫描 / proactive-scan / 5 维度扫描。"
 stage: 4.5
 parent: fullstack4traev11
 depends_on:
@@ -25,14 +25,14 @@ depends_on:
 
 ```
 1. rot-detector 必跑 — Phase 4.5 不可跳过（Article XIV）
-2. proactive-scan.py — 8 项腐化扫描必跑
+2. proactive-scan.py -- 10 项腐化扫描必跑
 3. self-diagnose.py — Meta 自我诊断（rot-detector 自身腐烂检测）
 4. NO ROT NO ACCEPT — 任一 FAIL = 🛑 REJECT Accept
 5. fix-list.json 必产出 — 不可"扫完不改"
 6. 归档前必跑 — Accept 前置门禁
 ```
 
-## 8 项腐化扫描（V10.4 蒸馏）
+## 10 项腐化扫描（V10.10 同步 -- 蒸馏自 workflows/rot-detect-and-fix.md）
 
 | # | 检查项 | 检测脚本 |
 |:---:|------|---------|
@@ -44,11 +44,13 @@ depends_on:
 | 6 | 吹嘘腐烂（state-card vs 实际）| proactive-scan.py §6 |
 | 7 | 状态卡腐烂（state-card-staleness）| state-card-validator.py |
 | 8 | 骨架腐烂（rot #13 stub 堆积）| proactive-scan.py §8 |
+| 9 | 障碍诚实(V10.10 NEW -- Article XV Obstacle Honesty)| proactive-scan.py §9 |
+| 10 | 抽象理由检测(V10.10 NEW -- Article XVI Skeptical Validation)| reason-classifier.py |
 
 ## 骨架流程（4 步）
 
 ```
-Step 1: 跑 proactive-scan.py 8 项 → 生成 rot-scan-{date}.md
+Step 1: 跑 proactive-scan.py 10 项 → 生成 rot-scan-{date}.md
 Step 2: 跑 self-diagnose.py → Meta 自身腐烂检测
 Step 3: 输出 fix-list.json（每项含 type/severity/fix_action）
 Step 4: 全部 PASS → 进入 Stage 5 Accept；任一 FAIL → 🛑 REJECT
@@ -73,7 +75,11 @@ Step 4: 全部 PASS → 进入 Stage 5 Accept；任一 FAIL → 🛑 REJECT
 
 - [README.md](README.md)
 - [rot-classification.md](references/rot-classification.md) — 7 大腐烂分类 + 19 个腐烂点
-- [scan-protocol.md](references/scan-protocol.md) — 8 项扫描协议
+- [scan-protocol.md](references/scan-protocol.md) — 10 项扫描协议
 - V10 rot-detector.md: `V10 来源` (已蒸馏到本文档)
 - V10 process-rot-analysis.md: `V10 来源` (已蒸馏到本文档)
 - V10 实战蒸馏: [anti-patterns/V10-battle-tested.md](anti-patterns/V10-battle-tested.md)
+
+
+
+

@@ -109,4 +109,4 @@ CODE:     create_user(name, email, role)  # ❌ 加了未在契约的字段
 
 - [stage-card-protocol.md](state-card-protocol.md) — 4 层流转
 - [common-iron-rules.md](common-iron-rules.md) — Article VIII archive immutable
-- V10 来源（开发期）: `../../fullstack4TraeV10/references/document-layer.md`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

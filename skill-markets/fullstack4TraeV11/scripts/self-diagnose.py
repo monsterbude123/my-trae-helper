@@ -21,7 +21,7 @@ META_CHECKS = {
     "rot_detector_logic": "腐化扫描逻辑自身是否最新？",
     "phase_gate_help": "phase-gate.py --help 输出是否包含 --verify-rot-scan？",
     "score_formula": "4 维评分公式是否正确？",
-    "constitution_articles": "16 Articles 宪法是否对齐？",
+    "constitution_articles": "17 Articles 宪法是否对齐？",
     "state_card_schema": "状态卡 schema 是否最新？",
     "stub_markers": "stub 标记列表是否最新？",
 }
@@ -78,22 +78,23 @@ def check_score_formula(project_root: pathlib.Path) -> tuple:
 
 
 def check_constitution_articles(project_root: pathlib.Path) -> tuple:
-    """检查 16 Articles 宪法"""
+    """检查 17 Articles 宪法（V11.1 含 Article XVII Secret Redaction）"""
     constitution = project_root / "references/constitution.md"
     if not constitution.exists():
         return False, "缺失 constitution.md"
 
     content = constitution.read_text(encoding="utf-8")
-    # 必须有 16 篇文章（I-XVI）
+    # 必须有 17 篇文章（I-XVII）
     articles_required = ["Article I", "Article II", "Article III", "Article IV",
                         "Article V", "Article VI", "Article VII", "Article VIII",
                         "Article IX", "Article X", "Article XI", "Article XII",
-                        "Article XIII", "Article XIV", "Article XV", "Article XVI"]
+                        "Article XIII", "Article XIV", "Article XV", "Article XVI",
+                        "Article XVII"]
     missing = [a for a in articles_required if a not in content]
     if missing:
         return False, f"缺 Articles: {missing}"
 
-    return True, "16 Articles 齐全"
+    return True, "17 Articles 齐全"
 
 
 def check_state_card_schema(project_root: pathlib.Path) -> tuple:

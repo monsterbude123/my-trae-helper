@@ -12,7 +12,7 @@ Usage:
   Step 4: 文档系统骨架                 ← 脚本生成 docs/ 目录结构
 
 设计原则（无冗余）:
-  - V11 skill 内部已含的内容（16 Articles / stage 流水线 / 4 维评分 / 反模式库）→ 不复制
+  - V11 skill 内部已含的内容（17 Articles / stage 流水线 / 4 维评分 / 反模式库）→ 不复制
   - AGENTS.md / rules 必含**项目独有**信息 → 脚本生成骨架,agent 填充
   - config.yaml / hooks / docs 骨架是 V11 强约束的基础设施 → 脚本生成保证一致性
 
@@ -271,27 +271,86 @@ def create_docs_skeleton(project_root: pathlib.Path) -> bool:
     return True
 
 
+def _check_v11_overlap(rule_name: str, content: str) -> bool:
+    """V11.2 NEW: 检查 rule 是否与 V11 内部已含规则重叠(供 agent 整合时识别 hint)
+
+    启发式检测:
+      - 规则文件名匹配 V11 common-iron-rules.md 已含铁律
+      - 内容含 V11 内部关键术语(Article I-XVII / GitNexus / secret redaction 等)
+    返回: True = 可能重叠(hint),False = 未检测到
+    """
+    v11_internal_files = {
+        "common-iron-rules.md", "common-anti-patterns.md",
+        "dependency-config.md", "document-layer.md",
+        "state-card-protocol.md", "stage-interaction-protocol.md",
+        "coding-standards.md",
+    }
+    if rule_name.lower() in v11_internal_files:
+        return True
+    v11_indicators = [
+        "Article I", "Article V", "Article XVII",
+        "Secret Redaction", "GitNexus First", "ponytail",
+        "腐烂点", "rot-scan",
+    ]
+    return any(ind in content for ind in v11_indicators)
+
+
+def _build_default_readme(project_name: str, existing_rules: list) -> str:
+    """V11.2 NEW: 项目无 README 时,创建强制入口"""
+    return f"""# .trae/rules/ 强制入口(V11.2 -- 默认生成)
+
+> **🔴 必读 · 本目录的唯一文件**(其他 rules 通过 .trae/skills/project_rules_skills/ 按需加载)
+>
+> 任何 agent(主 agent / sub-agent / 主上下文开启子 agent 时)进入本项目执行任务前,
+> **必须先调用** `Skill(name="project-rules")` 获取本会话所需 rules。
+>
+> **禁止绕过本入口**直接 Read `.trae/skills/project_rules_skills/references/*.md`。
+>
+> skill 入口: `.trae/skills/project_rules_skills/SKILL.md`
+>
+> ## 本项目 rules 列表
+>
+> {chr(10).join(f"- `{r}`" for r in existing_rules)}
+>
+> ## 加载协议
+>
+> ```
+> Step 1: 调用 Skill(name="project-rules")
+> Step 2: 按路由表拿本会话所需 rules(SKILL.md §2)
+> Step 3: 只 Read 选中的 rules(在 .trae/skills/project_rules_skills/references/)
+> Step 4: sub-agent 必须在 Completion Report 声明 rules_loaded / rules_skipped
+> ```
+>
+> ## 整合协议(agent 必走)
+>
+> 移入的 rules 可能与 V11 内部已含规则重叠。agent 必走 §整合:
+>
+> ```
+> 1. Read 所有 references/*.md
+> 2. 对每个 rule 检查 V11 内部是否已含
+> 3. 若完全重叠 -> 删除该 rule
+> 4. 若部分重叠 -> 保留独有部分
+> 5. 纯机械挪移 = 没有意义
+> ```
+>
+> 项目名: {project_name}
+"""
+
+
 def create_rules_skill(project_root: pathlib.Path, project_name: str) -> bool:
-    """Step 5(可选):把 .trae/rules/ 收纳到 .trae/skills/project_rules_skills/
+    """Step 5(V11.2 默认开): 把 .trae/rules/ 收纳到 .trae/skills/project_rules_skills/
 
-    适用场景:项目 rules 数量 ≥6 个,主上下文全量注入会撑爆 context。
-    设计:把 rules 内容留在 .trae/rules/(single source of truth),在 .trae/skills/
-    下创建 project_rules_skills/ 强制入口 skill,按需加载。
+    V11.2 设计原则:
+      1. 移走(move)而非复制 -- .trae/rules/ 只保留 README.md(强制入口),其他 rules 物理移到 project_rules_skills/references/
+      2. .trae/rules/README.md 是项目拥有,不强制覆盖(只检查是否含 project-rules skill 入口声明,缺则追加)
+      3. 无 rules 时从 V11 templates/project-rules-example/ 复制占位
+      4. 标记 V11 内部已含内容(供 agent 整合时识别)
 
-    动态适应:不写死规则列表,自动从项目现有 rules 检测 + 生成 references 软链接。
+    适用场景: 项目 rules 数量 >=3 个,主上下文全量注入会撑爆 context。
     """
     rules_dir = project_root / ".trae/rules"
-    if not rules_dir.exists():
-        print(f"   ⏭️  .trae/rules/ 不存在(无 rules 可收纳,跳过)")
-        return True
 
-    # 检测现有 rules 列表
-    existing_rules = sorted([f.name for f in rules_dir.glob("*.md") if f.name != "README.md"])
-    if len(existing_rules) < 3:
-        print(f"   ⏭️  rules 数量 {len(existing_rules)} < 3,无需收纳(直接 Read 即可)")
-        return True
-
-    # 创建 project_rules_skills/ 目录
+    # 创建 project_rules_skills/ 目录(无论 rules 是否存在)
     skill_dir = project_root / ".trae/skills/project_rules_skills"
     skill_dir.mkdir(parents=True, exist_ok=True)
     refs_dir = skill_dir / "references"
@@ -315,41 +374,81 @@ def create_rules_skill(project_root: pathlib.Path, project_name: str) -> bool:
     if not dst_wf.exists() and src_wf.exists():
         dst_wf.write_text(src_wf.read_text(encoding="utf-8"), encoding="utf-8")
 
-    # 动态生成 references/ 软链接(Windows: 用文件复制替代符号链接,兼容性更好)
-    # 注:跨平台最佳实践是软链接,但 Windows 需权限,这里用 .ref 文件 + 指向说明
-    created_links = []
+    # 检测现有 rules(排除 README.md)
+    existing_rules = []
+    if rules_dir.exists():
+        existing_rules = sorted([f.name for f in rules_dir.glob("*.md") if f.name != "README.md"])
+
+    # V11.2 NEW: 若无 rules,从 V11 templates/project-rules-example/ 复制占位
+    template_example_dir = V11_TEMPLATES / "project-rules-example"
+    if not existing_rules and template_example_dir.exists():
+        print(f"   ⏭️  .trae/rules/ 无 rules,从 templates/project-rules-example/ 复制占位")
+        rules_dir.mkdir(parents=True, exist_ok=True)
+        existing_rules = []
+        for src_md in sorted(template_example_dir.glob("*.md")):
+            if src_md.name == "README.md":
+                continue  # README 由项目自己拥有,init 不复制
+            dst = rules_dir / src_md.name
+            if not dst.exists():
+                dst.write_text(src_md.read_text(encoding="utf-8"), encoding="utf-8")
+            existing_rules.append(src_md.name)
+
+    if len(existing_rules) < 3:
+        print(f"   ⏭️  rules 数量 {len(existing_rules)} < 3,无需收纳(直接 Read 即可)")
+        return True
+
+    # V11.2 NEW: 移走(move)而非复制 -- .trae/rules/ 物理移出非 README.md
+    moved_rules = []
+    skipped_already_moved = []
     for rule_name in existing_rules:
         rule_path = rules_dir / rule_name
         link_path = refs_dir / rule_name
-        if link_path.exists():
+
+        # 若 references/ 已有该 rule,且 .trae/rules/ 已无该 rule -> 上次已移动,跳过
+        if link_path.exists() and not rule_path.exists():
+            skipped_already_moved.append(rule_name)
             continue
 
-        # 创建引用文件(内容:指向 .trae/rules/ 实际文件 + 提示"single source of truth")
-        link_content = f"""<!-- 本文件由 init-from-zero.py --rules-as-skill 自动生成 -->
-<!-- single source of truth: ../../../../.trae/rules/{rule_name} -->
-<!-- 不修改本文件,直接修改 .trae/rules/{rule_name} -->
+        if not rule_path.exists():
+            continue
 
-<!-- BEGIN SOURCE: .trae/rules/{rule_name} -->
+        # V11.2 NEW: 标记 V11 内部已含内容(供 agent 整合时识别 hint)
+        v11_already_covered = _check_v11_overlap(rule_name, rule_path.read_text(encoding="utf-8"))
+
+        # 移动(move): 读取内容 -> 写入 references/ -> 删除 .trae/rules/{name}.md
+        content = rule_path.read_text(encoding="utf-8")
+        overlap_hint = "WARN: 此 rule 内容可能与 V11 内部已含规则重叠,agent 整合时可考虑删除" if v11_already_covered else "OK: 未检测到 V11 内部重叠"
+        header = f"""<!-- 本文件由 init-from-zero.py --rules-as-skill 自动移入(V11.2 MOVE 模式) -->
+<!-- 源: ../../../../.trae/rules/{rule_name} (已删除,见 README.md) -->
+<!-- 整合提示: {overlap_hint} -->
+<!-- 修改本文件: 直接编辑,无需再走 init-from-zero.py -->
+
 """
-        link_content += rule_path.read_text(encoding="utf-8")
-        link_content += "\n<!-- END SOURCE -->\n"
-        link_path.write_text(link_content, encoding="utf-8")
-        created_links.append(rule_name)
+        link_path.write_text(header + content, encoding="utf-8")
+        rule_path.unlink()  # V11.2 NEW: 物理删除源文件
+        moved_rules.append(rule_name)
 
-    # 改造 .trae/rules/README.md 为强制入口(只在该模式首次运行时)
+    # V11.2 NEW: .trae/rules/README.md 幂等保护 -- 不强制覆盖
     readme_path = rules_dir / "README.md"
-    forced_entry = f"""# .trae/rules/ 强制入口
+    entry_marker = "project-rules skill 入口"
+    if readme_path.exists():
+        existing = readme_path.read_text(encoding="utf-8")
+        if entry_marker not in existing:
+            # 只追加入口说明,不覆盖项目原有内容
+            appendix = f"""
+
+---
+
+## V11 加载入口(V11.2 自动追加 -- 反复执行幂等)
 
 > **🔴 必读 · 本目录的唯一文件**(其他 rules 通过 .trae/skills/project_rules_skills/ 按需加载)
 >
 > 任何 agent(主 agent / sub-agent / 主上下文开启子 agent 时)进入本项目执行任务前,
 > **必须先调用** `Skill(name="project-rules")` 获取本会话所需 rules。
 >
-> **禁止绕过本入口**直接 Read `.trae/rules/*.md` 中除本 README.md 外的其他文件。
+> **禁止绕过本入口**直接 Read `.trae/skills/project_rules_skills/references/*.md`(按路由表按需加载)。
 >
-> skill 入口:`.trae/skills/project_rules_skills/SKILL.md`
->
-> ---
+> skill 入口: `.trae/skills/project_rules_skills/SKILL.md`
 >
 > ## 本项目 rules 列表(由 init-from-zero.py 检测)
 >
@@ -364,19 +463,36 @@ def create_rules_skill(project_root: pathlib.Path, project_name: str) -> bool:
 > Step 4: sub-agent 必须在 Completion Report 声明 rules_loaded / rules_skipped
 > ```
 >
+> ## 整合协议(agent 必走 -- V11.2 NEW)
+>
+> 移入的 rules 可能与 V11 内部已含规则(common-iron-rules / common-anti-patterns)重叠。
+> agent 在创建 project-rules skill 后,必走 §整合:
+>
+> ```
+> 1. Read 所有 references/*.md
+> 2. 对每个 rule 检查 V11 内部是否已含(grep common-iron-rules / common-anti-patterns)
+> 3. 若完全重叠 -> 删除该 rule(references/ + README.md 列表同步)
+> 4. 若部分重叠 -> 保留独有部分,删去 V11 已含部分
+> 5. 纯机械挪移 = 没有意义
+> ```
+>
 > ## 详细说明
 >
 > 详见 [.trae/skills/project_rules_skills/SKILL.md](../../skills/project_rules_skills/SKILL.md)
 >
 > 项目名: {project_name}
 """
-    readme_path.write_text(forced_entry, encoding="utf-8")
+            readme_path.write_text(existing + appendix, encoding="utf-8")
+    else:
+        # README 不存在 -> 创建强制入口
+        readme_path.write_text(_build_default_readme(project_name, existing_rules), encoding="utf-8")
 
-    print(f"   ✅ .trae/skills/project_rules_skills/ 收纳 {len(existing_rules)} 个 rules")
-    print(f"   ✅ .trae/rules/README.md 改为强制入口")
-    print(f"   📋 agent 必走 Skill(name=project-rules)")
+    if moved_rules:
+        print(f"   ✅ 移入 .trae/skills/project_rules_skills/references/: {len(moved_rules)} 个")
+    if skipped_already_moved:
+        print(f"   ⏭️  已存在(跳过): {len(skipped_already_moved)} 个")
+    print(f"   📋 agent 必走 Skill(name=project-rules),并按 README §整合协议 去重")
     return True
-
 
 def print_agent_handoff(project_name: str, project_type: str, language: str) -> None:
     """引导 agent 读取 template 配置 AGENTS.md + rules"""
@@ -424,7 +540,8 @@ def main():
     parser.add_argument("--project-name", help="项目名（默认：项目根目录名）")
     parser.add_argument("--project-type", choices=["web", "tauri", "cli", "library", "backend"], help="项目类型")
     parser.add_argument("--language", help="主语言")
-    parser.add_argument("--rules-as-skill", action="store_true", help="Step 5 可选:把 .trae/rules/ 收纳到 .trae/skills/project_rules_skills/(适用 rules ≥3 个时)")
+    parser.add_argument("--rules-as-skill", dest="rules_as_skill", action="store_true", default=True, help="Step 5 默认开:把 .trae/rules/ 收纳到 .trae/skills/project_rules_skills/(适用 rules ≥3 时)")
+    parser.add_argument("--no-rules-as-skill", dest="rules_as_skill", action="store_false", help="禁用 Step 5(默认开,显式禁用才传此参数)")
     parser.add_argument("--quiet", action="store_true", help="不打印 agent handoff")
     parser.add_argument("--json", action="store_true", help="JSON 输出")
     args = parser.parse_args()
@@ -443,8 +560,10 @@ def main():
     step_count = 5 if args.rules_as_skill else 4
     print(f"🚀 V11 初始化（{step_count} 步全流程）— {project_root}")
     print(f"   项目名: {project_name} | 类型: {project_type} | 语言: {language}")
-    if args.rules_as_skill:
-        print(f"   模式: --rules-as-skill(Step 5 收纳 rules)")
+    if not args.rules_as_skill:
+        print(f"   模式: --no-rules-as-skill(Step 5 已禁用,SKILL.md §0.5 Step 3 需手动调用)")
+    else:
+        print(f"   模式: --rules-as-skill(Step 5 默认开启,自动建 .trae/skills/project_rules_skills/)")
     print()
 
     steps = [

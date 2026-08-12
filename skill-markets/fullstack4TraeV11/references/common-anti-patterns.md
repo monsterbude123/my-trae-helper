@@ -88,6 +88,6 @@ anti_patterns_checklist:
 
 ## 关联引用
 
-- [constitution.md](constitution.md) — 16 Articles 宪法
+- [constitution.md](constitution.md) — 17 Articles 宪法
 - [common-iron-rules.md](common-iron-rules.md) — 公共铁律
 - 各 stage anti-patterns/: skills/{NN}-{name}/anti-patterns/README.md

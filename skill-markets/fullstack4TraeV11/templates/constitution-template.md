@@ -16,7 +16,7 @@ Constitution 是项目的**最高原则集合**，优先级高于：
 
 任何冲突场景的判定顺序：**Constitution > Spec > Contract > Code > 个人判断**。
 
-永不可降级 Articles：I、II、III、IV、V、VIII、IX、X、XIV、XV、XVI、XVII（V11.1 新增）。
+永不可降级 Articles：I、II、III、IV、V、VI、VII、VIII、IX、X、XI、XII、XIII、XIV、XV、XVI、XVII（V11.1 新增）。
 
 ---
 
@@ -216,5 +216,5 @@ Constitution 是项目的**最高原则集合**，优先级高于：
 ## 关联引用
 
 - [references/common-iron-rules.md](../references/common-iron-rules.md) — V11 17 Articles 摘要
-- [references/constitution.md](../references/constitution.md) — V11 16 Articles 全文
-- V10 来源（开发期）: `../../fullstack4TraeV10/templates/constitution-template.md`
+- [references/constitution.md](../references/constitution.md) — V11 17 Articles 全文
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

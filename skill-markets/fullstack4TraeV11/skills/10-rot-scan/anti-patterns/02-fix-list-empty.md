@@ -63,4 +63,4 @@ proactive-scan.py → 输出 rot-scan-{date}.json（10 项 PASS）→ fix-list.j
 - [SKILL.md §铁律 2](../SKILL.md) — fix-list.json 空
 - [proactive-scan.py 文档](../../../../scripts/proactive-scan.py)
 - V11 Article XIV.3
-- V10 来源: `../../../../fullstack4TraeV10/references/process-rot-analysis.md`
+- V10 来源（已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）references/process-rot-analysis.md`

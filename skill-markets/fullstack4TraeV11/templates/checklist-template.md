@@ -126,7 +126,7 @@ spec-writer: "FR-001 测在 tests/foo.test.ts:999"  # ❌ 实际不存在
 
 ## 关联引用
 
-- [references/constitution.md](../references/constitution.md) — V11 16 Articles
+- [references/constitution.md](../references/constitution.md) — V11 17 Articles
 - [skills/04-spec/SKILL.md](../skills/04-spec/SKILL.md) — Stage 1 Spec
 - [skills/03-test-plan/SKILL.md](../skills/03-test-plan/SKILL.md) — Stage 0.5 Test Plan
-- V10 来源（开发期）: `../../fullstack4TraeV10/templates/checklist-template.md`
+- V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

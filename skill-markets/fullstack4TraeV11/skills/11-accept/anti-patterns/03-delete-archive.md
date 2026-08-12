@@ -42,4 +42,4 @@ python scripts/spec-purge.py --feature {change-id}
 - [SKILL.md §铁律 3](../SKILL.md) — 删归档目录
 - [archive-protocol.md](../references/archive-protocol.md) — 归档协议
 - V11 Article VIII（铁律不可降级）
-- V10 来源: `../../../../fullstack4TraeV10/references/artifact-lifecycle.md`
+- V10 来源（已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）references/artifact-lifecycle.md`

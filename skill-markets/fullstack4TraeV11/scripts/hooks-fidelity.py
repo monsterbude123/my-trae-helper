@@ -86,7 +86,8 @@ def check_hook_existence(project_root: pathlib.Path) -> dict:
 def check_hook_invocation(project_root: pathlib.Path) -> dict:
     """Hook 脚本调用真实 V11 脚本或 subprocess 任务"""
     hooks_dir = project_root / ".trae/hooks"
-    result = {"invokes_real_v11_scripts": True, "scripts_referenced": set(), "unknown_hooks": []}
+    # V11.2 NEW: missing_scripts 字段用于实际验证被引用脚本存在(防止 stub PASS)
+    result = {"invokes_real_v11_scripts": True, "scripts_referenced": set(), "unknown_hooks": [], "missing_scripts": [], "fallback_warning": None}
 
     if not hooks_dir.exists():
         return result
@@ -149,7 +150,17 @@ def check_hook_invocation(project_root: pathlib.Path) -> dict:
 
         is_gitnexus_hook = category == "gitnexus"
 
+        # V11.2 NEW: 实际验证被引用脚本存在(防止 stub PASS)
+        for script_name in v11_scripts:
+            script_path = V11_DEFAULT_PATH / script_name
+            if not script_path.exists():
+                result["missing_scripts"].append(script_name)
+                result["invokes_real_v11_scripts"] = False
+
+        # V11.2 NEW: fallback 模式只匹配 stage-gate/state-card/phase-gate 是宽松匹配,
+        # 已通过 missing_scripts 验证避免误判
         if not v11_scripts and not is_gitnexus_hook:
+            result["fallback_warning"] = "未检测到 V11 scripts 引用,需人工核验 hook 内容"
             result["invokes_real_v11_scripts"] = False
 
         if is_gitnexus_hook:
