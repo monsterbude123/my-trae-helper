@@ -39,7 +39,7 @@ depends_on:
 4. DEDUP BY ATOM       — 需求去重，> 50% 重叠 → 合并，< 50% → 新建
 5. PURGE ON REFACTOR   — 重构场景先调 spec-purge.py 清除旧产物
 6. DUAL SEARCH         — 主上下文不直行代码 = 主上下文不直行探索（双委派）
-7. SKEPTICAL VALIDATION — P0/P1 规划按 [constitution.md §XVI] 走质疑性校验
+7. SKEPTICAL VALIDATION — P0/P1 规划按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) 走质疑性校验（4 维度 + 强制声明格式）
 8. PLAN ≤ 80 LINES     — plan.md ≤ 80 行，Capabilities ≤ 5 项
 9. CLOSURE ≤ 5 STEPS   — P0 闭环步骤 ≤ 5 步
 10. NEVER ACT ON PLAN  — plan.md 是规划不是实施，禁止根据 plan 直接改代码
@@ -57,7 +57,7 @@ depends_on:
 ## 骨架流程（6 步）
 
 ```
-Step 0: Cockpit 读取（.trae/state-card.md → 识别活跃 change / 阻塞 / 健康度）
+Step 0: Cockpit 读取（docs/specs/.state-card.md → 识别活跃 change / 阻塞 / 健康度）
 Step 1: 意图识别 + 选链（新功能 / 重构 / Bug 修复 / 文档更新）
 Step 2: 去重检查（docs/specs/ 活跃子目录 + archive/done/ 同名功能扫描）
 Step 3: 3 路并行探索（子代理 A 文档 + 子代理 B 代码 + 子代理 C 依赖）
@@ -114,7 +114,7 @@ hand_over:
 **Completion Report（子代理返回必填 4 字段）**:
 ```
 ## Completion Report
-- artifacts: [docs/specs/{feature}/plan.md, docs/specs/.state-card.md]
+- artifacts: [docs/specs/{feature}/plan.md, docs/specs/changes/{id}/.state-card.md]
 - explored_docs: [{N} files]
 - explored_code: [{N} symbols via GitNexus]
 - explored_deps: [{N} reusable modules]

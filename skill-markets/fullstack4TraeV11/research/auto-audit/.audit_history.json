@@ -1,0 +1,93 @@
+[
+  {
+    "stage": "01-intake",
+    "angle": 1,
+    "angle_name": "铁律完整性",
+    "date": "2026-08-12 16:30",
+    "report": "2026-08-12-16-01-intake.md",
+    "summary": {
+      "real_issues": 0,
+      "candidate_changes": 3,
+      "rejected_changes": 5,
+      "overall_score": "9.6/10"
+    }
+  },
+  {
+    "stage": "02-plan",
+    "angle": 2,
+    "angle_name": "反例覆盖",
+    "date": "2026-08-12 17:05",
+    "report": "2026-08-12-17-02-plan.md",
+    "summary": {
+      "real_issues": 2,
+      "candidate_changes": 3,
+      "rejected_changes": 5,
+      "overall_score": "9.0/10"
+    }
+  },
+  {
+    "stage": "03-test-plan",
+    "angle": 3,
+    "angle_name": "工具链兼容",
+    "date": "2026-08-12 18:05",
+    "report": "2026-08-12-18-03-test-plan.md",
+    "summary": {
+      "real_issues": 4,
+      "candidate_changes": 4,
+      "rejected_changes": 4,
+      "overall_score": "8.5/10"
+    }
+  },
+  {
+    "stage": "04-spec",
+    "angle": 4,
+    "angle_name": "state-card 流转",
+    "date": "2026-08-12 12:30",
+    "report": "2026-08-12-12-04-spec.md",
+    "summary": {
+      "real_issues": 3,
+      "candidate_changes": 3,
+      "rejected_changes": 5,
+      "overall_score": "8.6/10"
+    }
+  },
+  {
+    "stage": "05-prototype",
+    "angle": 5,
+    "angle_name": "反模式引用",
+    "date": "2026-08-12 19:00",
+    "report": "2026-08-12-19-05-prototype.md",
+    "summary": {
+      "real_issues": 2,
+      "candidate_changes": 1,
+      "rejected_changes": 1,
+      "overall_score": "8.8/10"
+    }
+  },
+  {
+    "stage": "06-contract",
+    "angle": 6,
+    "angle_name": "templates 实用性",
+    "date": "2026-08-12 20:00",
+    "report": "2026-08-12-20-06-contract.md",
+    "summary": {
+      "real_issues": 2,
+      "candidate_changes": 4,
+      "rejected_changes": 6,
+      "overall_score": "8.8/10"
+    }
+  },
+  {
+    "stage": "07-implement",
+    "angle": 7,
+    "angle_name": "references 时效",
+    "date": "2026-08-12 21:00",
+    "report": "2026-08-12-21-07-implement.md",
+    "summary": {
+      "real_issues": 2,
+      "candidate_changes": 2,
+      "rejected_changes": 7,
+      "overall_score": "8.5/10"
+    }
+  }
+]

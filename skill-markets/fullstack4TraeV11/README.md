@@ -83,7 +83,7 @@ fullstack4TraeV11/
 python scripts/stage-gate.py --state-card docs/specs/changes/{id}/.state-card.md
 
 # 全局阶段门禁（V10.11 NEW 含 verify-rot-scan）
-python scripts/phase-gate.py --state-card .trae/state-card.md --verify-rot-scan --change-id {id}
+python scripts/phase-gate.py --state-card docs/specs/.state-card.md --verify-rot-scan --change-id {id}
 
 # 腐化扫描
 python scripts/proactive-scan.py --project-root . --output rot-scan.md --output-fix-list fix-list.json

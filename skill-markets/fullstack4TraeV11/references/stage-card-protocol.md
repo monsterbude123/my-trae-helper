@@ -133,10 +133,10 @@ Stage 5 Accept PASS 时 →
 
 ```bash
 # 验证当前状态卡
-python scripts/stage-gate.py --state-card .trae/state-card.md
+python scripts/stage-gate.py --state-card docs/specs/.state-card.md
 
 # 验证特定 stage
-python scripts/stage-gate.py --state-card .trae/state-card.md --stage 3/implement
+python scripts/stage-gate.py --state-card docs/specs/.state-card.md --stage 3/implement
 ```
 
 输出:

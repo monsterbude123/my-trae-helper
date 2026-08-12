@@ -38,7 +38,8 @@ V10 (来源)  ──── 蒸馏吸收 ────>  V11 (运行时)
 |---------|------------|
 | `agents/planner.md` | `skills/02-plan/SKILL.md` 铁律 + `workflows/three-path-exploration.md` |
 | `references/sub-agent-rules.md` | `skills/02-plan/references/...` |
-| `references/skeptical-validation-protocol.md` | `skills/02-plan/SKILL.md` 铁律 7 |
+| `references/skeptical-validation-protocol.md` | `references/skeptical-validation-protocol.md`（V11 完整继承 240 行 + 新增反例 6/7）+ 7 stage 铁律永久引用 |
+| `references/glossary.md` | `references/glossary.md`（V11 完整继承 64 行 V10 术语 + 新增 5 大类 V11 术语 100+）|
 | `scenarios.md §3` | `anti-patterns/V10-battle-tested.md` |
 
 ### Stage 0.5 Test Plan

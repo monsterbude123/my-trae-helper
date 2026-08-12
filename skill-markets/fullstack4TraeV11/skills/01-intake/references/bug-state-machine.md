@@ -68,6 +68,14 @@ ls docs/bugs/{module}-*.md 2>/dev/null | wc -l
 ls docs/bugs/{module}-*.md 2>/dev/null | grep -oE "{module}-[0-9]{3}" | sort -u | tail -1
 ```
 
+### 幂等性测试场景(V11.2 NEW — 蒸馏自 01-intake 自检报告)
+
+| 场景 | 输入 | 期望行为 | 失败后果 |
+|------|------|---------|---------|
+| **A: 重名** | module=auth,已有 auth-001.md / auth-001.md(误复制) | `ls` 命令重复统计 +1,`grep -oE | sort -u` 去重后 NNN 不变 → 自动跳到下一个编号(不会撞号) | 若误用 wc -l 而非 sort -u,会跳号(留空 bug-002) |
+| **B: 模块重命名** | 原 module=user 重命名为 account,旧 bugs/user-001.md 仍存在 | 旧 bug 单不会出现在新 module 扫描结果中(grep -oE 锚定 module 名) | 用户手动迁移或保留旧 module 名,避免丢 bug |
+| **C: 编号格式漂移** | 部分 bug 用 2 位编号(auth-1.md)部分用 3 位(auth-001.md) | `grep -oE "{module}-[0-9]{3}"` 只匹配 3 位,**2 位编号被遗漏**(防漂移强制 3 位) | 必须在 bug 录入阶段强制 3 位编号(intent-types.md L145) |
+
 ### 编号冲突处理
 
 | 冲突类型 | 处置 |

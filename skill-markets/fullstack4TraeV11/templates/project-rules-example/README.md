@@ -15,6 +15,7 @@
 | [stack.md](stack.md) | 任何有构建/测试命令的项目 | 构建/测试/lint 命令 + V11 验收 |
 | [paths.md](paths.md) | 有 secrets / prod-config / deploy 的项目 | 项目级禁读路径 |
 | [git.md](git.md) | 使用 Git 的项目 | 分支策略 + 5 类 stage 标签 + PR 模板 |
+| [coding-standards.md](coding-standards.md) | 有项目独有编码规则时 | 桩代码标记 / 数据模型规则 / 命名约定 |
 
 ---
 

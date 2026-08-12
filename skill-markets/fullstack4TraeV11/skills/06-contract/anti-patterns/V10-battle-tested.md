@@ -4,63 +4,27 @@
 
 ---
 
-## V10 实战反例（4 条）
+## V10 实战反例（4 条：2 部分 + 2 完全重叠）
 
-### 蒸馏 1：D-009 前后端 config key 大小写不一致（V10 配置治理）
+### 蒸馏 1：D-009 前后端 config key 大小写不一致（部分重叠）
 
-**实战场景**（V10 配置治理 D-009，2026-08-08 实战）:
-- 前端 config key: `apiKey`（camelCase）
-- 后端 regex: `[a-z0-9._]+`（严格小写）
-- 前端请求被后端拒绝 → bug
+**独特差异**: 不同于 03-breaking-without-confirm.md 聚焦"破坏性变更未确认"，本条聚焦 D-009 实战——前端 config key `apiKey`（camelCase）vs 后端 regex `[a-z0-9._]+`（严格小写）→ 前端请求被后端拒绝。V11 改进为铁律 9 THREE-WAY SYNC（契约修改必同步改 3 处：代码 + 契约文档 + 测试代码）。
 
-**根因**: 契约修改只改代码，未同步改契约文档 + 测试。
+→ 关联 [03-breaking-without-confirm.md](03-breaking-without-confirm.md)。
 
-**V11 改进**: 铁律 9（THREE-WAY SYNC — 契约修改必同步改 3 处：代码 + 契约文档 + 测试代码）+ D-009 实战案例写入反例 3。
+### 蒸馏 2：删 API 未删测试（完全重叠）
 
-**V10 源**: .trae/rules/配置治理.md §5 契约修改三方同步。
+→ 见 [02-skip-orphan-sweep.md](02-skip-orphan-sweep.md)（V10 rot #12，铁律 3 ORPHAN TEST SWEEP + orphan-detector.py）。
 
----
+### 蒸馏 3：契约包含"未来接口"（部分重叠）
 
-### 蒸馏 2：删 API 未删测试（V10 rot #12）
+**独特差异**: 不同于 01-skip-domain.md 聚焦"跳过领域驱动设计"，本条聚焦 DELTA ONLY 原则被忽略——契约写 5 个 API 实际只实现 2 个 → Stage 4 Review "未实现 API 是否计入验收"分歧。V11 改进为铁律 5 DELTA ONLY（contract-writer 四件套只写当前 change 必需的）。
 
-**实战场景**（V10 腐烂点 12）:
-- 删 `/api/v1/old_login` → 旧测试 `__tests__/contracts/test_old_login.test.ts` 保留
-- Stage 4 Review 时测试失败但查不出原因（接口已删）
+→ 关联 [01-skip-domain.md](01-skip-domain.md)。
 
-**根因**: 删 API 时未删测试。
+### 蒸馏 4：契约类型与实现不一致（完全重叠）
 
-**V11 改进**: 铁律 3（ORPHAN TEST SWEEP）+ orphan-test-sweep.md + orphan-detector.py + 反例 2。
-
-**V10 源**: process-rot-analysis.md rot #12。
-
----
-
-### 蒸馏 3：契约包含"未来接口"（V10 contract-writer 反例）
-
-**实战场景**（V10 蒸馏）:
-- 契约写了 5 个 API，实际只实现 2 个
-- Stage 4 Review 时"未实现的 API 是否计入验收"分歧
-
-**根因**: DELTA ONLY 原则被忽略，写了"将来可能用"的接口。
-
-**V11 改进**: 铁律 5（DELTA ONLY）+ contract-writer 四件套只写当前 change 必需的。
-
-**V10 源**: agents/contract-writer.md 铁律 4 DELTA ONLY。
-
----
-
-### 蒸馏 4：契约类型与实现不一致（V10 frontend-backend-contract-alignment 实战）
-
-**实战场景**（V10 蒸馏）:
-- 契约写 `created_at: ISO8601`
-- 前端实现：`new Date()` 字符串（"2026-08-11"）
-- 后端解析失败
-
-**根因**: 契约格式与代码实现不匹配。
-
-**V11 改进**: depends_on.skills 含 `frontend-backend-contract-alignment` + V10 frontend-backend-contract-alignment skill 蒸馏到 V11 公共 references。
-
-**V10 源**: frontend-backend-contract-alignment skill。
+→ 见 [04-contract-drift.md](04-contract-drift.md)（铁律 datetime 等格式对齐 + depends_on.skills 含 frontend-backend-contract-alignment）。
 
 ---
 

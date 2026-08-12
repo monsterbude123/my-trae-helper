@@ -4,43 +4,23 @@
 
 ---
 
-## V10 实战反例（3 条）
+## V10 实战反例（3 条：2 部分 + 1 完全重叠）
 
-### 蒸馏 1："启动 = 完成"反复失误（V10.10 反虚假交付）
+### 蒸馏 1："启动 = 完成"反复失误（完全重叠）
 
-**实战场景**（V10.10 蒸馏）:
-- 用户: "启动验证通过了吗"
-- 主上下文: "vite 启动了，应该没问题" → 声称 PASS
-- 用户截图证伪："页面空白，截图呢" → 信任坍塌
+→ 见 [01-startup-equals-done.md](01-startup-equals-done.md)（V10.10 反虚假交付，铁律 1 启动可见产物 + 5 类项目启动验证表 + visual-evidence.md 3 层校验）。
 
-**V11 改进**: 铁律 1（启动可见产物）+ 5 类项目启动验证表 + visual-evidence.md 3 层校验。
+### 蒸馏 2：Playwright MCP 路径陷阱（部分重叠）
 
-**V10 源**: SKILL.md §0.10 NEW + .trae/rules/视觉证据铁律.md §1。
+**独特差异**: 不同于 03-skip-screenshot.md 聚焦"跳过截图"，本条聚焦截图**已拍但路径错**——playwright_screenshot 默认存 Downloads/ → 主上下文声称"已截图"但未归档 docs/verifications/ → Stage 4 Review 找不到返工。V11 改进为 SKILL.md §3 Step 4 + visual-evidence.md 主上下文亲自 Read。
 
----
+→ 关联 [03-skip-screenshot.md](03-skip-screenshot.md)。
 
-### 蒸馏 2：Playwright MCP 路径陷阱（V10.11 实战）
+### 蒸馏 3：抽象理由"理解偏差"（部分重叠）
 
-**实战场景**（V10.11 蒸馏）:
-- playwright_screenshot 默认保存到 Downloads/
-- 主上下文声称"已截图"但未归档到 docs/verifications/
-- 文件留在 Downloads → Stage 4 Review 找不到 → 返工
+**独特差异**: 不同于 02-container-not-started.md 聚焦"容器未启动"，本条聚焦 Real Verify FAIL 后用"流程裁剪，等下次一起修"抽象理由搪塞 → 用户要求必须有 5 字段报告。V11 改进为铁律 5（阻塞诚实）+ blockage-report.md 5 字段必含。
 
-**V11 改进**: SKILL.md §3 标准流程 Step 4 + visual-evidence.md 主上下文亲自 Read。
-
-**V10 源**: .trae/rules/视觉证据铁律.md §3.2 Playwright MCP 路径陷阱。
-
----
-
-### 蒸馏 3：抽象理由"理解偏差"（V10.10 Article XVI）
-
-**实战场景**（V10.10 蒸馏）:
-- 主上下文: Real Verify FAIL → "流程裁剪，等下次一起修"
-- 用户: "流程裁剪不算理由，必须有 5 字段报告"
-
-**V11 改进**: 铁律 5（阻塞诚实）+ blockage-report.md 5 字段必含。
-
-**V10 源**: SKILL.md §3.7 反虚假交付 + §10 抽象理由 6 类。
+→ 关联 [02-container-not-started.md](02-container-not-started.md)。
 
 ---
 

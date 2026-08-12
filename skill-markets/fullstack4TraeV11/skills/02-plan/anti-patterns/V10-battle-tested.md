@@ -4,42 +4,23 @@
 
 ---
 
-## V10 实战反例（4 条）
+## V10 实战反例（4 条：1 独有 + 3 部分重叠）
 
-### 蒸馏 1：3 路并行未并行（V10 planner.md 真实失误）
+### 蒸馏 1：3 路并行未并行（部分重叠）
 
-**实战场景**（V10 planner.md 蒸馏）:
-- 主上下文委派子代理 A 文档探索 → 等返回 → 再委派子代理 B 代码 → 等返回 → 再委派子代理 C 依赖
-- 串行执行浪费时间（3x 串行 vs 1x 并行）
-- 子代理 C 实际未启动（依赖 A 的产出）
+**独特差异**: 不同于 01-no-exploration.md 聚焦"未做探索"，本条聚焦探索**存在但串行**——委派子代理 A 等返回 → 再委派 B 等返回 → 再委派 C（3x 串行 vs 1x 并行），子代理 C 实际未启动。V11 改进为 three-path-exploration.md Step 3 "同时委派 3 个 sub-agent（并行）"。
 
-**根因**: 不熟悉 Task 工具的并行调用。
+→ 关联 [01-no-exploration.md](01-no-exploration.md)。
 
-**V11 改进**: three-path-exploration.md Step 3 明确"同时委派 3 个 sub-agent（并行）"+ 反模式 B（串行而非并行）。
+### 蒸馏 2：planner 探索跑主上下文（部分重叠）
 
-**V10 源**: agents/planner.md Step 3。
+**独特差异**: 不同于 01-no-exploration.md 聚焦"未做探索"，本条聚焦探索**跑在主上下文**——主上下文亲自 Read docs/INDEX.md → ARCHITECTURE.md → ...（10+ 文件）→ 上下文击穿。V11 改进为铁律 2 SUBAGENT ONLY + three-path-exploration.md "探索过程不在主上下文进行"。
 
----
+→ 关联 [01-no-exploration.md](01-no-exploration.md)（Article IV 委派纪律）。
 
-### 蒸馏 2：planner 探索跑主上下文（V10 Article IV 违规）
+### 蒸馏 3：SKEPTICAL VALIDATION 缺失（独有蒸馏，无对应反例文件）
 
-**实战场景**（V10 蒸馏）:
-- 主上下文亲自 Read docs/INDEX.md → Read ARCHITECTURE.md → ...
-- 上下文击穿（10+ 文件 Read 进入主上下文）
-
-**根因**: 不理解 Article IV 委派纪律 = 主上下文不直行代码。
-
-**V11 改进**: 铁律 2（SUBAGENT ONLY）+ 反例 A（主上下文直行 Read）+ three-path-exploration.md "探索过程不在主上下文进行（防止上下文击穿）"。
-
-**V10 源**: agents/planner.md Step 3 "约束: 探索过程 SHALL NOT 在主上下文中进行"。
-
----
-
-### 蒸馏 3：SKEPTICAL VALIDATION 缺失（V10.12 NEW）
-
-**实战场景**（V10.12 蒸馏，2026-08-07）:
-- planner 接到"重构 X" → 立即进入 3 路探索 → 出 plan.md
-- 未质疑"重构"分类是否正确 → 用户实际要的是 Bug 修复或新功能
+**实战场景**（V10.12 蒸馏，2026-08-07）: planner 接到"重构 X" → 立即进入 3 路探索 → 出 plan.md，未质疑"重构"分类是否正确 → 用户实际要的是 Bug 修复或新功能。
 
 **根因**: P0/P1 决策前未走 skeptical-validation-protocol。
 
@@ -47,21 +28,11 @@
 
 **V10 源**: agents/planner.md 铁律 6（SKEPTICAL VALIDATION V10.12 NEW）+ references/skeptical-validation-protocol.md。
 
----
+### 蒸馏 4：去重仅按"功能名"对比（部分重叠）
 
-### 蒸馏 4：去重仅按"功能名"对比（V10 实战失误）
+**独特差异**: 不同于 03-refactor-without-purge.md 聚焦"重构未 purge"，本条聚焦**去重粒度太粗**——历史 change"用户认证" vs 当前"用户登录"判定功能不同新建，实际 Capabilities 重叠 80%（密码哈希 / Token 签发）。V11 改进为铁律 4 DEDUP BY ATOM + references/dedup-by-atom.md（原子级对比算法 + 重叠度计算）。
 
-**实战场景**（V10 蒸馏）:
-- 历史 change: "用户认证"（archive/done/2026-07-15-user-auth/）
-- 当前需求: "用户登录"
-- 判定："功能不同" → 新建 change
-- 实际：Capabilities 重叠 80%（密码哈希 / Token 签发等）
-
-**根因**: 按"功能名"对比粒度太粗，未拆原子能力。
-
-**V11 改进**: 铁律 4（DEDUP BY ATOM）+ references/dedup-by-atom.md（原子级对比算法 + 重叠度计算）+ 反例 A（按功能名对比）。
-
-**V10 源**: agents/planner.md Step 2 + 铁律 4。
+→ 关联 [03-refactor-without-purge.md](03-refactor-without-purge.md)。
 
 ---
 

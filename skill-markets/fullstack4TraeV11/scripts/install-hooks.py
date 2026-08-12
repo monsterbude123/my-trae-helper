@@ -28,15 +28,34 @@ import json
 from datetime import datetime, timezone
 
 
-# V11 hook 列表（5 个）
+# V11 hook 列表（13 个：3 shell + 8 TRAE IDE + 2 gitnexus）
 HOOK_SCRIPTS = [
     # V11 shell hooks（3 个）
-    ("pre-stage.sh", "pre-stage", "调用 stage-gate.py 验证当前状态卡"),
-    ("post-stage.sh", "post-stage", "调用 state-card-validator.py 验证状态卡已更新"),
-    ("pre-accept.sh", "pre-accept", "调用 phase-gate.py --verify-rot-scan"),
+    ("pre-stage.sh", "pre-stage", "V11 Stage 切换前必跑 stage-gate.py"),
+    ("post-stage.sh", "post-stage", "V11 Stage 结束后必跑 state-card-validator.py"),
+    ("pre-accept.sh", "pre-accept", "V11 Stage 5 Accept 前必跑 phase-gate.py --verify-rot-scan"),
+
     # V11 GitNexus 双端 hooks（2 个，V10.10 NEW）
     ("gitnexus-session-check.py", "gitnexus-session-check", "SessionStart: GitNexus 索引 staleness 检测 + 后台刷新"),
     ("gitnexus-session-finalize.py", "gitnexus-session-finalize", "Stop: GitNexus 索引后台刷新"),
+
+    # V11 SessionStart hooks（1 个，蒸馏自 V10 session-start.py）
+    ("session-start.py", "session-start", "SessionStart: 6 层知识发现协议 + Article XVII secret 检查"),
+
+    # V11 UserPromptSubmit hooks（1 个，蒸馏自 V10 complexity-guard.py）
+    ("complexity-guard.py", "complexity-guard", "UserPromptSubmit: 复杂度评分 + GitNexus First 提醒 + Article XVII 警告"),
+
+    # V11 PreToolUse hooks（2 个，蒸馏自 V10）
+    ("doc-sync-gate.py", "doc-sync-gate", "PreToolUse: DOC SYNC + spec-purge 历史感知"),
+    ("contract-gate.py", "contract-gate", "PreToolUse: contracts/ + spec-purge 历史区分"),
+
+    # V11 PostToolUse hooks（3 个，蒸馏自 V10）
+    ("spec-validate-hook.py", "spec-validate-hook", "PostToolUse: Delta Spec + Scenario + SHALL + prototypes/"),
+    ("auto-test.py", "auto-test", "PostToolUse: 自动测试 + Article XVII secret 检测 + spec.md Acceptance"),
+    ("drift-detect.py", "drift-detect", "PostToolUse: 契约漂移 + spec-purge 区分"),
+
+    # V11 Stop hooks（1 个，蒸馏自 V10 tasks-integrity.py）
+    ("tasks-integrity.py", "tasks-integrity", "Stop: 任务完成度 + spec-purge 历史上下文"),
 ]
 
 
@@ -64,6 +83,14 @@ def install(project_root: pathlib.Path, force: bool = False) -> dict:
     if not TEMPLATES_HOOKS.exists():
         result["errors"].append(f"V11 templates/hooks 不存在: {TEMPLATES_HOOKS}")
         return result
+
+    # 2.1 复制 fullstack-hooks.json 到项目根 .trae/
+    src_json = TEMPLATES_HOOKS / "fullstack-hooks.json"
+    dst_json = project_root / ".trae" / "hooks.json"
+    if src_json.exists():
+        if not dst_json.exists() or force:
+            shutil.copy2(src_json, dst_json)
+            result["json_installed"] = True
 
     for script_name, display_name, description in HOOK_SCRIPTS:
         src = TEMPLATES_HOOKS / script_name

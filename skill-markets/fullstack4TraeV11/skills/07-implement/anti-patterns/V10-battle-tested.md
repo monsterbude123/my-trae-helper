@@ -4,60 +4,33 @@
 
 ---
 
-## V10 实战反例（5 条）
+## V10 实战反例（5 条：1 独有 + 1 部分 + 3 完全重叠）
 
-### 蒸馏 1：rot #13 Bundle Staleness（V10.4 修复）
+### 蒸馏 1：rot #13 Bundle Staleness（独有蒸馏，无对应反例文件）
 
-**实战场景**（V10.4 蒸馏）:
-- 改 `src/auth/login.ts` → `dist/auth/login.js` 未重生成
-- 部署后用户仍跑旧 bundle → bug
+**实战场景**（V10.4 蒸馏）: 改 `src/auth/login.ts` → `dist/auth/login.js` 未重生成 → 部署后用户跑旧 bundle → bug。
 
 **V11 改进**: 铁律 5（Bundle Staleness）+ depends_on.scripts 含 `dist-hash-check.py`。
 
 **V10 源**: implementer.md 铁律 5（V10.4 4.5 升级命名）。
 
----
+### 蒸馏 2：改实现不改测试（完全重叠）
 
-### 蒸馏 2：改实现不改测试（V10 rot #12）
+→ 见 [03-impl-without-test-sync.md](03-impl-without-test-sync.md)（V10 rot #12，铁律 2 TDD 即时 + orphan-detector.py）。
 
-**实战场景**: 见 anti-patterns/03-impl-without-test-sync.md。
+### 蒸馏 3：DRIFT 静默回流（完全重叠）
 
-**V11 改进**: 铁律 2（TDD 即时）+ 反例 3 + orphan-detector.py。
+→ 见 [04-drift-silent.md](04-drift-silent.md)（铁律 3 漂移必报告 + drift-detect.md）。
 
-**V10 源**: implementer.md 铁律 2（rot #12 修复）。
+### 蒸馏 4：模块文档缺失（部分重叠）
 
----
+**独特差异**: 不同于 01-skip-red.md 聚焦"跳过 TDD RED 阶段"，本条聚焦"基础模块（如 `src/auth/token.ts`）创建后未写 `docs/modules/auth/token.md`"→ 后续 Stage 3 增量任务不知道如何复用 → 重新实现。
 
-### 蒸馏 3：DRIFT 静默回流（V10 实战）
+→ 关联 [01-skip-red.md](01-skip-red.md)（铁律 4 基础模块留文档 + 模块文档模板条件触发）。
 
-**实战场景**: 见 anti-patterns/04-drift-silent.md。
+### 蒸馏 5：编造测试证据（完全重叠）
 
-**V11 改进**: 铁律 3（漂移必报告）+ references/drift-detect.md。
-
-**V10 源**: implementer.md 铁律 3 + drift-detect.md。
-
----
-
-### 蒸馏 4：模块文档缺失（V10 铁律 4 缺失）
-
-**实战场景**（V10 蒸馏）:
-- implementer 创建 `src/auth/token.ts` 作为基础模块
-- 未写 `docs/modules/auth/token.md`
-- 后续 Stage 3 增量任务不知道如何复用 → 重新实现
-
-**V11 改进**: 铁律 4（基础模块留文档）+ 模块文档模板（条件触发）。
-
-**V10 源**: implementer.md 铁律 4 + Step 4 模块接入文档。
-
----
-
-### 蒸馏 5：编造测试证据（V10.12 ANTI-反模式 1+2）
-
-**实战场景**: 见 anti-patterns/02-fabricate-evidence.md。
-
-**V11 改进**: 铁律 10（禁止编造测试证据）+ 反例 2。
-
-**V10 源**: implementer.md V10.12 ANTI-反模式 1+2。
+→ 见 [02-fabricate-evidence.md](02-fabricate-evidence.md)（V10.12 ANTI-反模式 1+2，铁律 10 禁止编造测试证据）。
 
 ---
 

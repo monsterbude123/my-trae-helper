@@ -181,7 +181,7 @@ graph TB
     B --> D[change-start]
     B --> E[bug-fix]
     
-    C --> F[项目级状态卡<br/>.trae/state-card.md]
+    C --> F[项目级状态卡<br/>docs/specs/.state-card.md]
     D --> G[Change级状态卡<br/>docs/specs/changes/{id}/.state-card.md]
     E --> H[Bug单状态卡<br/>docs/bugs/{id}/.state-card.md]
     
@@ -205,7 +205,7 @@ hand_over:
   status: completed
   health: "🟢 on-track"
   artifacts:
-    - path: .trae/state-card.md
+    - path: docs/specs/.state-card.md
       type: file
       evidence: "状态卡初始化 + next_stage 路由"
   gate_result:

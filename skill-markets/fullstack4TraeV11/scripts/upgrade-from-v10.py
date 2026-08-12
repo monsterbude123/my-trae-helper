@@ -43,7 +43,7 @@ def check_v10_markers(project_root: pathlib.Path) -> dict:
     """检测 V10 项目标记"""
     markers = {
         "has_AGENTS_md": (project_root / "AGENTS.md").exists(),
-        "has_state_card": (project_root / ".trae/state-card.md").exists(),
+        "has_state_card": (project_root / "docs/specs/.state-card.md").exists(),
         "has_docs_specs": (project_root / "docs/specs/changes").exists(),
         "has_archive_done": (project_root / "docs/archive/done").exists(),
         "has_trae_rules": (project_root / ".trae/rules").exists(),
@@ -89,7 +89,7 @@ def upgrade_AGENTS_md(project_root: pathlib.Path, dry_run: bool = False) -> tupl
 
 def upgrade_state_card(project_root: pathlib.Path, dry_run: bool = False) -> tuple:
     """升级状态卡 schema"""
-    state_card = project_root / ".trae/state-card.md"
+    state_card = project_root / "docs/specs/.state-card.md"
     if not state_card.exists():
         return True, "无状态卡（跳过）"
 
@@ -214,7 +214,7 @@ def upgrade_hooks_protocol(project_root: pathlib.Path, dry_run: bool = False) ->
 set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-STATE_CARD="${STATE_CARD_PATH:-.trae/state-card.md}"
+STATE_CARD="${STATE_CARD_PATH:-docs/specs/.state-card.md}"
 EXPECTED_STAGE="${EXPECTED_STAGE:-}"
 
 python "${V11_SCRIPTS:-~/.trae-cn/skills/fullstack4TraeV11/scripts}/stage-gate.py" \\
@@ -286,7 +286,7 @@ def fidelity_check(project_root: pathlib.Path) -> dict:
         checks["AGENTS_md_has_V11"] = None  # 无 AGENTS.md
 
     # 2. 状态卡 schema V11 字段
-    state_card = project_root / ".trae/state-card.md"
+    state_card = project_root / "docs/specs/.state-card.md"
     if state_card.exists():
         content = state_card.read_text(encoding="utf-8")
         checks["state_card_has_V11_fields"] = all(

@@ -36,7 +36,7 @@ Stage -1 Intake → Stage 0 Plan（项目级 plan.md）
   → Stage 5 Accept
 ```
 
-**状态卡**: project 级（位置 `{project}/.trae/state-card.md`）
+**状态卡**: project 级（位置 `{project}/docs/specs/.state-card.md`）
 
 **子意图**（可选分类）:
 - `cli-tool` — 命令行工具

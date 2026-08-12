@@ -12,7 +12,7 @@
 ```
 
 **识别信号**:
-- `.trae/state-card.md` 不存在或为空
+- `docs/specs/.state-card.md` 不存在或为空
 - `docs/specs/changes/{id}/.state-card.md` 不存在
 - `docs/bugs/{id}/.state-card.md` 不存在
 - 后续 stage 切换时无法读取 current_stage
@@ -45,7 +45,7 @@
 
 ```
 Step 6: 初始化状态卡（3 类必选其一）
-  ├─ project → {project}/.trae/state-card.md
+  ├─ project → {project}/docs/specs/.state-card.md
   ├─ change → docs/specs/changes/{id}/.state-card.md
   └─ bug → docs/bugs/{id}/.state-card.md + docs/bugs/{id}.md
 ```
@@ -80,7 +80,7 @@ checklist:
 **详细模板**: [../templates/state-card-init.md](../templates/state-card-init.md)
 
 **3 类速查**:
-- project 级 → `{project}/.trae/state-card.md`
+- project 级 → `{project}/docs/specs/.state-card.md`
 - change 级 → `docs/specs/changes/{id}/.state-card.md`
 - bug 级 → `docs/bugs/{id}.md` + `docs/bugs/{id}/.state-card.md`
 

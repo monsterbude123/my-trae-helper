@@ -43,7 +43,7 @@ depends_on:
 6. 代码卫生        — 单文件 ≤ 800 行；函数 ≤ 50 行；禁止魔法数字（V10 铁律 6）
 7. 量化必汇报 + 不量化不验收 — 输出 test: {pass}/{total}, contract_tests: {pass}/{total}, coverage: {X}% （V10 铁律 7）
 8. 禁止虚假绿灯    — 不可修改测试让用例通过；不可跳过 TDD 🔴 阶段（V10 铁律 8）
-9. SKEPTICAL VALIDATION — 实现方案/升级改动走 [constitution.md Article XVI]
+9. SKEPTICAL VALIDATION — 实现方案/升级改动走 [skeptical-validation-protocol.md](../../references/skeptical-validation-protocol.md)
 10. 禁止编造测试证据 — 禁 `tests/foo.test.ts:999` 实际不存在 / 禁 `grep` 充当覆盖（V10.12 ANTI-反模式 1+2）
 ```
 

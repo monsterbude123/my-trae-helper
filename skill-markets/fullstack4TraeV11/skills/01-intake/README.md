@@ -64,7 +64,7 @@ Step 5: 路由决策
         └─ project-health → Stage 7 Project Health（异步自检）
 
 Step 6: 初始化状态卡（3 类选其一）
-        ├─ project 级 → {project}/.trae/state-card.md
+        ├─ project 级 → {project}/docs/specs/.state-card.md
         ├─ change 级 → docs/specs/changes/{id}/.state-card.md
         └─ bug 级 → docs/bugs/{id}.md + .state-card.md
 

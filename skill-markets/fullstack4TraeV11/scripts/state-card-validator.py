@@ -48,102 +48,11 @@ STALENESS_THRESHOLD_MINUTES = 30
 
 
 def parse_state_card(path: pathlib.Path) -> dict:
-    """解析状态卡 frontmatter（委托 PyYAML，未安装时回退手写解析）
-
-    注: 状态卡实际使用嵌套 YAML（gate_result / next_stage 等子对象）。
-    完整支持依赖 PyYAML，未安装时回退手写解析（仅顶层字段）。
-    """
-    # 优先用 PyYAML（精确解析嵌套结构）
-    try:
-        import yaml
-        content = path.read_text(encoding="utf-8")
-        if not content.startswith("---"):
-            return {"error": "状态卡缺 frontmatter 分隔符 ---"}
-        end = content.index("\n---", 3)
-        fm_text = content[3:end]
-        try:
-            return yaml.safe_load(fm_text) or {}
-        except Exception as e:
-            return {"error": f"YAML 解析失败: {e}"}
-    except ImportError:
-        # 回退手写解析（仅顶层字段）
-        return _parse_state_card_fallback(path)
-
-
-def _parse_state_card_fallback(path: pathlib.Path) -> dict:
-    """手写解析回退（仅顶层字段，不支持嵌套）"""
-    if not path.exists():
-        return {"error": f"状态卡文件不存在: {path}"}
-
-    content = path.read_text(encoding="utf-8")
-    if not content.startswith("---"):
-        return {"error": "状态卡缺 frontmatter 分隔符 ---"}
-
-    try:
-        end = content.index("\n---", 3)
-    except ValueError:
-        return {"error": "状态卡 frontmatter 未闭合"}
-
-    fm_text = content[3:end].strip()
-    fields = {}
-    current_key = None
-    current_value_lines = []
-    list_items = []
-    in_list = False
-
-    for line in fm_text.split("\n"):
-        stripped = line.strip()
-
-        # list 项: "  - key: value" 或 "  - text"
-        if line.startswith("  - "):
-            if not in_list:
-                in_list = True
-            item_text = line[4:].strip()
-            list_items.append(item_text)
-            continue
-
-        # list 子项续行: "    key: value"
-        if in_list and line.startswith("    ") and not line.startswith("     "):
-            if list_items:
-                list_items[-1] += " " + stripped
-            continue
-
-        # 退出 list 模式
-        if in_list:
-            fields[current_key] = list_items
-            list_items = []
-            in_list = False
-
-        # 多行 notes 续行: "  text"
-        if line.startswith("  ") and current_key == "notes":
-            current_value_lines.append(stripped)
-            continue
-
-        # 保存上一个字段
-        if current_key and current_key not in fields:
-            if current_key == "notes":
-                fields[current_key] = "\n".join(current_value_lines)
-            else:
-                fields[current_key] = " ".join(current_value_lines)
-            current_value_lines = []
-
-        # 解析新字段 key: value
-        if ":" in line:
-            key, _, value = line.partition(":")
-            current_key = key.strip()
-            value = value.strip()
-            current_value_lines = [value] if value else []
-
-    # 最后一个字段
-    if current_key and current_key not in fields:
-        if in_list:
-            fields[current_key] = list_items
-        elif current_key == "notes":
-            fields[current_key] = "\n".join(current_value_lines)
-        else:
-            fields[current_key] = " ".join(current_value_lines)
-
-    return fields
+    """解析状态卡 frontmatter（委托 _lib_state_card 共用库）"""
+    import sys
+    sys.path.insert(0, str(pathlib.Path(__file__).parent))
+    from _lib_state_card import parse_state_card as _parse
+    return _parse(path)
 
 
 def validate_fields(fields: dict) -> list:

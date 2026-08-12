@@ -37,7 +37,7 @@ mindmap
 ```mermaid
 graph TB
     subgraph 项目级状态卡
-        A[位置: .trae/state-card.md]
+        A[位置: docs/specs/.state-card.md]
         B[作用: 项目整体状态]
         C[生命周期: 项目存在期间]
     end

@@ -2,31 +2,13 @@
 
 > Stage 4.5 Rot Scan 从 V10 agents/rot-detector.md + process-rot-analysis.md + proactive-scan.py 蒸馏。
 
-## V10 实战反例（3 条）
+## V10 实战反例（3 条，均完全重叠于独立反例文件）
 
-### 蒸馏 1：跳过 rot-detector 直接 Accept（Article XIV 违规）
-
-**实战场景**（V10.4 蒸馏）:
-- Stage 4 Review PASS → 直接 Accept
-- 未跑 rot-detector → 上线后状态卡说谎 / 孤儿测试 / Bundle Staleness 累积
-
-**V11 改进**: 铁律 1（rot-detector 必跑）+ 编排器 §1 不可跳过 -1/0/1/3.5/4.5。
-
-### 蒸馏 2：fix-list.json 空（扫完不改）
-
-**实战场景**（V10.4 蒸馏）:
-- proactive-scan.py 跑完 → 输出了 5 项 FAIL
-- fix-list.json 是空的（"等下次"） → Accept 时检查发现
-
-**V11 改进**: 铁律 5（fix-list.json 必产出 + 不可空）+ 编排器 §5 门禁脚本调用规则。
-
-### 蒸馏 3：rot-detector 自身腐烂（rot #15 配置腐烂）
-
-**实战场景**（V10.8 蒸馏）:
-- rot-detector 自身逻辑过时（如 Bundle Staleness 检测失效）
-- self-diagnose.py 未跑 → rot-detector 自己腐烂了都不知道
-
-**V11 改进**: 铁律 3（self-diagnose.py Meta 自我诊断）+ depends_on.scripts 含 self-diagnose.py。
+| # | 蒸馏主题 | 反例文件指针 |
+|---|---------|------------|
+| 蒸馏 1 | 跳过 rot-detector 直接 Accept（Article XIV 违规） | → 见 [01-skip-rot-scan.md](01-skip-rot-scan.md) |
+| 蒸馏 2 | fix-list.json 空（扫完不改） | → 见 [02-fix-list-empty.md](02-fix-list-empty.md) |
+| 蒸馏 3 | rot-detector 自身腐烂（rot #15 配置腐烂，self-diagnose 未跑） | → 见 [03-rot-detector-rotten.md](03-rot-detector-rotten.md) |
 
 ## V10 实战蒸馏经验（3 条）
 

@@ -26,7 +26,28 @@ import yaml
 from datetime import datetime, timezone
 
 
-HOOKS_REQUIRED = ["pre-stage.sh", "post-stage.sh", "pre-accept.sh", "gitnexus-session-check.py", "gitnexus-session-finalize.py"]
+HOOKS_REQUIRED = [
+    # V11 shell hooks (3)
+    "pre-stage.sh",
+    "post-stage.sh",
+    "pre-accept.sh",
+    # V11 GitNexus 双端 (2)
+    "gitnexus-session-check.py",
+    "gitnexus-session-finalize.py",
+    # V11 SessionStart (1)
+    "session-start.py",
+    # V11 UserPromptSubmit (1)
+    "complexity-guard.py",
+    # V11 PreToolUse (2)
+    "doc-sync-gate.py",
+    "contract-gate.py",
+    # V11 PostToolUse (3)
+    "spec-validate-hook.py",
+    "auto-test.py",
+    "drift-detect.py",
+    # V11 Stop (1)
+    "tasks-integrity.py",
+]
 V11_DEFAULT_PATH = pathlib.Path("~/.trae-cn/skills/fullstack4TraeV11/scripts").expanduser()
 
 
@@ -63,16 +84,59 @@ def check_hook_existence(project_root: pathlib.Path) -> dict:
 
 
 def check_hook_invocation(project_root: pathlib.Path) -> dict:
-    """Hook 脚本调用真实 V11 脚本"""
+    """Hook 脚本调用真实 V11 脚本或 subprocess 任务"""
     hooks_dir = project_root / ".trae/hooks"
-    result = {"invokes_real_v11_scripts": True, "scripts_referenced": set()}
+    result = {"invokes_real_v11_scripts": True, "scripts_referenced": set(), "unknown_hooks": []}
 
     if not hooks_dir.exists():
         return result
 
+    # Hook 类别定义（哪些 hook 合法不调用 V11 Python 脚本）
+    hook_categories = {
+        # 5 个 V11 stage shell hook + 2 个 gitnexus 双端必调用 V11 脚本 / gitnexus analyze
+        "pre-stage.sh": "shell_v11",
+        "post-stage.sh": "shell_v11",
+        "pre-accept.sh": "shell_v11",
+        "gitnexus-session-check.py": "gitnexus",
+        "gitnexus-session-finalize.py": "gitnexus",
+        # 8 个 V11 TRAE IDE event hook 用 subprocess 跑外部命令（jest / vitest / pytest / cargo / go / node）
+        # 不直接调用 V11 Python 脚本，但功能合法
+        "session-start.py": "trae_event",
+        "complexity-guard.py": "trae_event",
+        "doc-sync-gate.py": "trae_event",
+        "contract-gate.py": "trae_event",
+        "spec-validate-hook.py": "trae_event",
+        "auto-test.py": "trae_event",
+        "drift-detect.py": "trae_event",
+        "tasks-integrity.py": "trae_event",
+    }
+
     for hook_name in HOOKS_REQUIRED:
         hook_path = hooks_dir / hook_name
         if not hook_path.exists():
+            continue
+
+        category = hook_categories.get(hook_name, "unknown")
+
+        # 类别检查
+        if category == "unknown":
+            result["unknown_hooks"].append(hook_name)
+            continue
+
+        if category == "trae_event":
+            # TRAE IDE event hook：必含 subprocess / TRAE env / print 报告 / 路径检查
+            content = hook_path.read_text(encoding="utf-8")
+            has_legitimate = (
+                "subprocess" in content
+                or "TRAE_FILE_PATH" in content
+                or "TRAE_USER_PROMPT" in content
+                or "print(" in content
+                or ".exists()" in content
+            )
+            if has_legitimate:
+                result["scripts_referenced"].add(f"trae-event:{hook_name}")
+            else:
+                result["invokes_real_v11_scripts"] = False
             continue
 
         content = hook_path.read_text(encoding="utf-8")
@@ -81,17 +145,13 @@ def check_hook_invocation(project_root: pathlib.Path) -> dict:
         if not v11_scripts:
             # Fallback: 任何 *.py 引用
             v11_scripts = re.findall(r"([\w\-]+\.py)", content)
-            # 过滤掉无意义引用（如"*.py" 模式）
             v11_scripts = [s for s in v11_scripts if "stage-gate" in s or "state-card" in s or "phase-gate" in s]
 
-        # gitnexus hooks 用 subprocess 调用 `node run.cjs analyze`，不直接调用 V11 Python 脚本
-        # 但属于 V11 GitNexus 双端 hook（gitnexus-session-check/finalize.py）
-        is_gitnexus_hook = "gitnexus-session" in hook_path.name
+        is_gitnexus_hook = category == "gitnexus"
 
         if not v11_scripts and not is_gitnexus_hook:
             result["invokes_real_v11_scripts"] = False
 
-        # gitnexus hook 标记为合法（subprocess 调用 gitnexus analyze）
         if is_gitnexus_hook:
             v11_scripts = ["gitnexus-analyze"] + v11_scripts
         result["scripts_referenced"].update(v11_scripts)
@@ -117,7 +177,7 @@ def check_v11_script_reachable() -> dict:
 
 def check_state_card_consistency(project_root: pathlib.Path) -> dict:
     """状态卡与文件系统一致性"""
-    state_card = project_root / ".trae/state-card.md"
+    state_card = project_root / "docs/specs/.state-card.md"
     result = {"state_card_exists": state_card.exists()}
 
     if not state_card.exists():

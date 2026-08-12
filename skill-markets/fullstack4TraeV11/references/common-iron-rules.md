@@ -35,6 +35,21 @@
 5.8 GitNexus 不可用 → L4 异常 → 标注风险 + 汇报用户（不静默降级）
 ```
 
+**主旨（V10 Article V 蒸馏）**: 影响面评估用工具不用 grep。
+
+**Rationale**: grep 不理解符号语义，容易漏掉跨模块影响。GitNexus 提供准确的 call graph。
+
+**Enforcement（V11 蒸馏 V10）**:
+- 主上下文改符号前必须调 GitNexus impact()，禁止手动 grep
+- 实施者必读 impact / context / query / detect_changes 4 工具调用清单
+- Reviewer 边际维度必跑 impact + 公共模块 + 全量回归 + 模块文档（4 项检查）
+- 失败时执行 **3 次重试协议**（修参数 → 换工具 → list_repos），仍失败 → 停下汇报用户
+
+### 反例索引
+
+- [02-grep-instead-of-gitnexus.md](02-grep-instead-of-gitnexus.md) — V10 process-rot-analysis.md 反例蒸馏
+- [common-anti-patterns.md](common-anti-patterns.md) — 公共反例库
+
 ## Article VIII — Archive Immutable（Stage 5 强制）
 
 ```
@@ -107,6 +122,23 @@
 16.4 重叠校验（与已有规则是否重叠，差异化论证）
 16.5 修复成本 vs 价值校验（避免低价值修复）
 ```
+
+## Article XVII — Secret Redaction（V11 全 stage 适用，P0 安全）
+
+> **新增**：蒸馏自 V10.12 V11 实战反馈。Agent 把用户提供的密码/token 写到工具调用参数 → 工具调用日志 = 明文泄露。
+
+```
+17.1 用户提供的 secret（密码 / token / API key / cookie）→ 必通过环境变量 / .env 注入，**绝不**写到工具调用参数里
+17.2 工具调用参数中出现 secret → 🛑 REJECT + 立即通知用户改密码
+17.3 .env / secrets/ / credentials/ → forbidden_paths 强制禁读
+17.4 即使"测试用"的 secret 也不写到 commit / tool log / 截图
+17.5 secret 误写 → 立即回滚 + 用户重置 + 写入 audit log
+17.6 shell / script 中出现的 $PASSWORD / $TOKEN → 必用 ${VAR:-} 形式 + 在 audit log 中 redacted
+```
+
+### Article XVII 反例索引
+
+详见 [common-anti-patterns.md](common-anti-patterns.md) §反例索引 P0 §22 secret-in-tool-arg
 
 ---
 

@@ -43,33 +43,11 @@ VALID_STATUS = ["PENDING", "PASS", "FAIL", "N/A"]
 
 
 def parse_state_card(path: pathlib.Path) -> dict:
-    """解析状态卡 frontmatter（委托 PyYAML）"""
-    import yaml
-    if not path.exists():
-        return {"error": f"状态卡文件不存在: {path}"}
-
-    content = path.read_text(encoding="utf-8")
-    if not content.startswith("---"):
-        return {"error": "状态卡缺 frontmatter 分隔符 ---"}
-
-    try:
-        end = content.index("\n---", 3)
-    except ValueError:
-        return {"error": "状态卡 frontmatter 未闭合"}
-
-    fm_text = content[3:end]
-    try:
-        fields = yaml.safe_load(fm_text) or {}
-    except Exception as e:
-        return {"error": f"YAML 解析失败: {e}"}
-
-    # 清理字符串字段的外层引号
-    for k, v in list(fields.items()):
-        if isinstance(v, str):
-            if len(v) >= 2 and v[0] in ('"', "'") and v[-1] == v[0]:
-                fields[k] = v[1:-1]
-
-    return fields
+    """解析状态卡 frontmatter（委托 _lib_state_card 共用库）"""
+    import sys
+    sys.path.insert(0, str(pathlib.Path(__file__).parent))
+    from _lib_state_card import parse_state_card as _parse
+    return _parse(path)
 
 
 def validate_state_card(fields: dict, stage: str = None) -> tuple:
@@ -108,7 +86,9 @@ def validate_state_card(fields: dict, stage: str = None) -> tuple:
     if "blocked_by" in fields and "stage_status" in fields:
         bb = fields["blocked_by"]
         ss = fields["stage_status"]
-        if bb != "null" and ss == "completed":
+        # bb 为 Python None(YAML null 关键字解析结果)才是真无 blocker;
+        # 字符串 "null"(用户显式标注)或 dict/list 都视为"有 blocker"
+        if bb is not None and ss == "completed":
             errors.append(f"blocked_by={bb} 时 stage_status 不能是 completed")
 
     # updated_at 格式

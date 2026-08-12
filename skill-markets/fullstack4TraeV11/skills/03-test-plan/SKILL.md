@@ -4,11 +4,13 @@ description: "Stage 0.5 测试覆盖映射 — 验收维度 → 测试用例，s
 stage: 0.5
 parent: fullstack4traev11
 depends_on:
-  skills: []
+  skills: [gitnexus4Trae]
   stages: [0/plan]
   references:
     - ../../references/state-card-protocol.md
     - ../../references/stage-interaction-protocol.md
+    - ../../references/common-iron-rules.md
+    - ../../references/common-anti-patterns.md
   scripts:
     - ../../scripts/stage-gate.py
 ---

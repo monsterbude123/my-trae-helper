@@ -2,30 +2,21 @@
 
 > Stage 5 Accept 从 V10 artifact-lifecycle.md + prd-integration-workflow.md + spec-purge.py + spec-knowledge-extract.py 蒸馏。
 
-## V10 实战反例（3 条）
+## V10 实战反例（3 条：1 部分 + 2 完全重叠）
 
-### 蒸馏 1：归档前未沉淀知识（rot #12 文档腐烂）
+### 蒸馏 1：归档前未沉淀知识（完全重叠）
 
-**实战场景**（V10 实战）:
-- change Accept → spec-purge 归档
-- API/Domain/Event 未提取到 docs/ → 后续项目无法引用
+→ 见 [01-skip-knowledge-extract.md](01-skip-knowledge-extract.md)（rot #12 文档腐烂，铁律 2 知识沉淀先于归档 + knowledge-extract.md）。
 
-**V11 改进**: 铁律 2（知识沉淀先于归档）+ knowledge-extract.md。
+### 蒸馏 2：归档目录被改（完全重叠）
 
-### 蒸馏 2：归档目录被改（Article VIII 违规）
+→ 见 [02-modify-archive.md](02-modify-archive.md)（Article VIII 违规，铁律 1 归档不可变 + archive-protocol.md 反例 B）。
 
-**实战场景**（V10 实战）:
-- 用户："归档里的 spec 有错" → 主上下文直接 Edit archive/
+### 蒸馏 3：spec-purge 误删有效 change（部分重叠）
 
-**V11 改进**: 铁律 1（归档不可变）+ archive-protocol.md 反例 B（修改归档）。
+**独特差异**: 不同于 03-delete-archive.md 聚焦"删除归档"，本条聚焦 spec-purge.py 误把**活跃 change** 归档 → 状态卡 current_stage 指向已归档目录。V11 改进为 spec-purge.py 必先 dry-run 验证 + 状态卡 validator。
 
-### 蒸馏 3：spec-purge 误删有效 change
-
-**实战场景**（V10 实战）:
-- spec-purge.py 误把活跃 change 归档
-- 状态卡 current_stage 指向已归档
-
-**V11 改进**: spec-purge.py 必先 dry-run 验证 + 状态卡 validator。
+→ 关联 [03-delete-archive.md](03-delete-archive.md)。
 
 ## V10 来源溯源（开发期，部署前可删）
 

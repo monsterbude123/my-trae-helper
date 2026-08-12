@@ -137,8 +137,10 @@ def test_user_login():
 
 ```
 Step 4 跳过 → 直接产 test-plan.md  # ❌ 缺覆盖率数据
-正确: pytest --cov → 生成 coverage.xml → 校验门槛
+正确: 按项目栈跑覆盖率命令（pytest / vitest / jest / cargo test / go test 任选）→ 生成 coverage 报告 → 校验门槛
 ```
+
+> 通用命令模板见 [../references/coverage-rules.md §检测命令](../references/coverage-rules.md)
 
 ---
 

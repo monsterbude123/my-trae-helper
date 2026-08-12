@@ -39,7 +39,7 @@ depends_on:
 7. NO CODE NO CONTRACT    — 无已 approved 契约不写代码
 8. CONTRACT-GATE          — contract-gate.py 必 PASS（4 件套齐全 + 测试骨架）
 9. THREE-WAY SYNC         — 契约修改必同步改 docs/ 文档 + 测试代码（V10 配置治理 D-009）
-10. SKEPTICAL VALIDATION   — P0/P1 修复按 Article XVI 质疑性校验
+10. SKEPTICAL VALIDATION   — P0/P1 修复按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) 质疑性校验
 ```
 
 ## 骨架流程（5 步）
@@ -58,7 +58,7 @@ Step 5: contract-gate.py 验证 → 状态卡更新 + 标记 approved
 |------|------|
 | domain-models.md | `docs/specs/changes/{id}/contracts/domain-models.md` |
 | api-contracts.md | `docs/specs/changes/{id}/contracts/api-contracts.md` |
-| events.md | `docs/specs/changes/{id}/contracts/events.md` |
+| events.md | `docs/specs/changes/{id}/contracts/events.md`(如 INV 含跨服务事件则必填,否则可缺 — 详见 `references/contract-four-suite.md §1.3`) |
 | validation-rules.md | `docs/specs/changes/{id}/contracts/validation-rules.md` |
 | 测试骨架 | `__tests__/contracts/*.test.{ts,py,rs}` |
 

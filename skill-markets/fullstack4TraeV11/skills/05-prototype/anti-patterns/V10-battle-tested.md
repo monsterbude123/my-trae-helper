@@ -4,63 +4,29 @@
 
 ---
 
-## V10 实战反例（4 条）
+## V10 实战反例（4 条：1 独有 + 1 部分 + 2 完全重叠）
 
-### 蒸馏 1：设计稿与代码无关联（V10 prototype-reverse-spec 实战）
+### 蒸馏 1：设计稿与代码无关联（完全重叠）
 
-**实战场景**（V10 蒸馏）:
-- 设计师出 Figma 设计稿
-- 工程师独立写代码原型
-- Stage 4 Review 发现 UI 与设计稿不一致（颜色、间距、交互）→ 大返工
+→ 见 [01-design-code-mismatch.md](01-design-code-mismatch.md)（铁律 1 双源一致 + 铁律 2 prototype-reverse-spec + dual-source-protocol.md）。
 
-**根因**: 双源未建立反向追溯（prototype-reverse-spec）。
+### 蒸馏 2：designer-handoff 缺关键信息（独有蒸馏，无对应反例文件）
 
-**V11 改进**: 铁律 1（双源一致）+ 铁律 2（prototype-reverse-spec）+ 反例 1（设计稿与代码脱节）+ dual-source-protocol.md。
-
-**V10 源**: agents/spec-prototype-enhancer.md + references/prototype-reverse-spec.md + references/prototype.md。
-
----
-
-### 蒸馏 2：designer-handoff 缺关键信息（V10 designer-handoff.md 实战）
-
-**实战场景**（V10 蒸馏）:
-- 设计师只移交 Figma 链接
-- 工程师实现时：hover 状态未定义 / loading 状态缺失 / 错误状态空白
-- Stage 4 Review 大量"边缘状态缺失"问题
-
-**根因**: designer-handoff 清单不全。
+**实战场景**（V10 蒸馏）: 设计师只移交 Figma 链接 → 工程师实现时 hover / loading / 错误状态未定义 → Stage 4 Review 大量"边缘状态缺失"问题。
 
 **V11 改进**: 铁律 3（designer-handoff）+ prototype-code-gap.md "designer-handoff 必含"段（设计稿 + 交互说明 + token + 边缘情况）。
 
 **V10 源**: references/designer-handoff.md。
 
----
+### 蒸馏 3：原型代码混入业务逻辑（完全重叠）
 
-### 蒸馏 3：原型代码混入业务逻辑（V10 prototype-code-gap-analysis.md 实战）
+→ 见 [03-prototype-as-impl.md](03-prototype-as-impl.md)（铁律 4 NEVER 跳过双源 + prototype-template.md "最小可运行 demo"段）。
 
-**实战场景**（V10 蒸馏）:
-- 工程师 prototype 阶段直接写完整 UserService（含 DB / Auth / Token 签发）
-- Stage 3 Implement 时无 prototype 与实施边界 → 重复实施
+### 蒸馏 4：prototype-linkage 缺失（部分重叠）
 
-**根因**: Prototype 阶段越界到 Implementation。
+**独特差异**: 不同于 02-skip-dual-source.md 聚焦"跳过双源协议"，本条聚焦 prototype.md 完成后未建立与 spec.md / Stage 3 Implement 的链接 → Stage 4 Review 无法定位"设计依据"。V11 改进为 prototype-template.md 必含 "spec.md AC 映射"表 + "GAP 列表"。
 
-**V11 改进**: 铁律 4（NEVER 跳过双源）+ 反例 3（prototype 写实现）+ prototype-template.md "最小可运行 demo"段。
-
-**V10 源**: references/prototype-code-gap-analysis.md。
-
----
-
-### 蒸馏 4：prototype-linkage 缺失（V10 实战）
-
-**实战场景**（V10 蒸馏）:
-- Stage 1.5 完成 prototype.md，但未建立与 Stage 1 spec.md / Stage 3 Implement 的链接
-- Stage 4 Review 时无法定位"设计依据"
-
-**根因**: prototype-linkage 未维护。
-
-**V11 改进**: prototype-template.md 必含 "spec.md AC 映射" 表 + "GAP 列表"。
-
-**V10 源**: references/prototype-linkage.md。
+→ 关联 [02-skip-dual-source.md](02-skip-dual-source.md)。
 
 ---
 

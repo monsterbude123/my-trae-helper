@@ -6,13 +6,32 @@
 
 ## 一、状态卡分类
 
+> **核心区分**: V11 有两类状态卡,**职责不同,不可混用**:
+> - `docs/specs/.state-card.md` = **项目级**(全局健康度 + 当前活跃 change 指针)
+> - `docs/specs/changes/{change-id}/.state-card.md` = **change 级**(单个 change 的 stage 进度)
+>
+> **路径设计**: 项目级在 `docs/specs/` 根,change 级在 `docs/specs/changes/{id}/` 子目录。两类状态卡在不同目录,文件系统层无冲突。
+>
+> **类比**: 项目级 = 公司仪表盘 / change 级 = 单个项目任务卡
+
 ### 1.1 项目级状态卡
 
-**位置**: `{project_root}/.trae/state-card.md`
+**位置**: `{project_root}/docs/specs/.state-card.md`
 
-**作用**: 记录项目整体状态（当前 stage + 整体健康度 + 阻塞 + 下一步）
+**作用**: 记录项目整体状态（当前活跃 change + 整体健康度 + 阻塞 + 下一步）
 
-**生命周期**: 项目存在期间持续维护
+**生命周期**: 项目存在期间持续维护（不随 change 归档删除）
+
+**字段重点**:
+```yaml
+current_change: "{change-id}"        # 当前活跃的 change（无则空）
+current_stage: "{stage-name}"        # 当前活跃 change 的 stage
+project_health: "green|yellow|red"   # 项目整体健康度
+active_blockers: []                  # 项目级阻塞列表
+next_action: "..."                   # 下一步行动
+```
+
+**谁维护**: Stage -1 Intake 初始化 / Stage 7 Project Health 更新 / 各 stage post-stage hook 同步指针
 
 ### 1.2 Change 级状态卡
 
@@ -20,13 +39,30 @@
 
 **作用**: 记录单个 change 的状态（当前 stage + 阶段产物 + 阶段门禁）
 
-**生命周期**: change 启动 → Accept 归档
+**生命周期**: change 启动 → Accept 归档（归档后冻结,不可改）
+
+**字段重点**:
+```yaml
+change_id: "{change-id}"
+stage: "{stage-name}"                 # 当前 stage（-1 到 5）
+stage_status: "in_progress|done|blocked"
+artifacts:                            # 本 stage 产物
+  spec: "docs/specs/changes/{change-id}/spec.md"
+  tests: "tests/..."
+gate_result:                          # 本 stage 门禁结果
+  status: "pass|fail"
+  evidence: ["file:line", ...]
+```
+
+**谁维护**: 各 stage 的 post-stage hook 自动更新 / reviewer 验收时更新
 
 ### 1.3 Bug 单状态卡
 
 **位置**: `{project_root}/docs/bugs/{bug-id}/.state-card.md`（可选）
 
 **作用**: 记录 bug 修复进度（OPEN → CLOSED 状态机）
+
+**生命周期**: bug 创建 → CLOSED（修复后归档）
 
 **生命周期**: 用户反馈 → 修复 → 用户确认关闭
 
@@ -198,7 +234,7 @@ gate_result:
   verified_at: null
 next_stage:
   id: 0.5/test-plan
-  skill_name: skills/02-test-plan/SKILL.md
+  skill_name: skills/03-test-plan/SKILL.md
   expected_inputs: [plan.md]
   prerequisites: [plan.md 存在]
 blocked_by: null
@@ -241,7 +277,7 @@ gate_result:
   verified_at: 2026-08-11T14:55:00
 next_stage:
   id: 3.5/real-verify
-  skill_name: skills/04-real-verify/SKILL.md
+  skill_name: skills/08-real-verify/SKILL.md
   expected_inputs: [代码 + tests/ + docs/modules/]
   prerequisites: [TDD GREEN, DRIFT CHECK ✅]
 blocked_by: null
@@ -285,7 +321,7 @@ gate_result:
   verified_at: 2026-08-11T15:30:00
 next_stage:
   id: 6/bug-fix
-  skill_name: skills/07-bug-fix/SKILL.md
+  skill_name: skills/12-bug-fix/SKILL.md
   expected_inputs: [修复代码 + 回归测试 + bug 单更新]
   prerequisites: [e2e 初始 FAIL, 6 层排查完成]
 blocked_by: null
@@ -335,7 +371,119 @@ notes: 涉及 regex 宽松校验，需前后端契约三方同步
 
 ---
 
-## 七、关联引用
+## 七、强制重置协议（Force Reset Protocol）
+
+> **触发场景**: 用户明确要求"重置状态卡到 X 阶段之前 + 删除所有产物"（如 2026-08-12 canvas-asset-folders 实战）。
+> **原则**: 状态卡 + 文档可重置,**代码 + 归档不可逆**(Article VIII)。
+
+### 7.1 重置前必走 3 步
+
+```
+Step 1: 确认归档状态
+  - 检查 docs/archive/done/{change-id}/ 是否有旧归档
+  - 存在 → 不能删(Article VIII),但需在新状态卡 notes 标注归档路径
+  - 不存在 → 跳过此步
+
+Step 2: 确认代码状态(AskUserQuestion 必问)
+  - 代码已合并到 main?
+  - 方案 A: revert 旧代码 + 新 branch 重做
+  - 方案 B: 保留旧代码 + 新 branch 增强
+  - 方案 C: 旧代码不变 + 只重做文档/测试
+  - agent 不能自决 → 用户决策
+
+Step 3: 确认保留产物
+  - 用户明确说"保留 plan.md" → 保留
+  - 用户没说 → agent 用 AskUserQuestion 问
+```
+
+### 7.2 重置操作 5 步
+
+```
+1. 状态卡重置:
+   - current_stage: "<target-stage>"  # 如 -1/intake
+   - stage_status: "pending"
+   - stage_started_at / stage_ended_at: null
+   - gate_result: 清零
+   - next_stage: 清空
+   - artifacts: 仅留用户指定的保留产物
+   - notes: 必含"FORCE RESET" 标记 + 原因 + 日期 + 保留清单 + Git 决策
+
+2. change 级状态卡同步重置(同 change 级 `docs/specs/changes/{change-id}/.state-card.md`)
+
+3. 删除 plan 之后的所有 docs(按用户指定):
+   - test-plan.md / spec.md / prototype.md
+   - contracts/ / prototypes/ / verifications/ 目录
+   - IMPLEMENT_*_REPORT.md / REAL_VERIFY_*_REPORT.md
+   - review-report*.md / rot-scan-report*.md / ACCEPT_REPORT.md
+   - tasks.md
+
+4. 同步清理(仅 docs/ 下的副本,不动代码/归档):
+   - docs/verifications/{change-id}/
+   - docs/prototypes/{change-id}/(如果存在)
+
+5. change README 更新:
+   - Stage 流转复选框全部清空
+   - "当前 Stage" 改回用户指定的目标 stage
+   - 加 "⚠️ FORCE RESET 记录" 章节
+```
+
+### 7.3 不允许操作（红线）
+
+```
+❌ 删 docs/archive/done/{change-id}/    (Article VIII 不可变)
+❌ 删 docs/archive/out/stub-pileup/     (V11 归档不可变)
+❌ revert 已合并到 main 的代码          (agent 不能自决,需用户决策)
+❌ 删 tests/ 下的真实测试代码            (用户没明确说删代码时)
+❌ 跳过 Step 1-3 直接执行重置            (缺确认)
+```
+
+### 7.4 状态卡 reset_history 字段
+
+```yaml
+# 状态卡新增字段(可选,记录重置历史)
+reset_history:
+  - date: "2026-08-12T15:00:00"
+    from_stage: "5/accept"
+    to_stage: "-1/intake"
+    reason: "用户强制重置 + 测试状态重置"
+    preserved_artifacts: ["plan.md"]
+    removed_artifacts: ["test-plan.md", "spec.md", ...]
+    archive_note: "docs/archive/done/2026-08-11-canvas-asset-folders/ (不可变,保留)"
+    git_decision: "方案 B: 保留旧代码,新 branch 增强"
+    reset_by: "user"
+```
+
+### 7.5 重置后从哪开始
+
+```
+状态卡重置到 -1/intake 后,agent 应:
+  1. 不重写 plan.md(用户说保留)
+  2. 直接进入 0.5/test-plan(重新生成测试用例)
+  3. 后续 1/spec / 1.5/prototype / 2/contract / 3/implement 全部重走
+
+状态卡重置到 0/plan 后:
+  1. 重新走 plan.md
+  2. 后续 stage 全部重走
+
+状态卡重置到 N/其他 stage 后:
+  1. 保留之前的产物(spec/contract/...)
+  2. 从 N stage 重新开始
+```
+
+### 7.6 反例（agent 必走 V16 质疑性校验）
+
+```
+❌ 不确认归档状态就删归档目录 → 违反 Article VIII
+❌ 不问用户就自决 revert 代码 → 误删用户工作
+❌ 状态卡重置但 change README 不更新 → 文档不一致(腐烂点)
+❌ 删除 tests/ 下真实测试代码 → 丢失回归保护
+❌ reset_history 字段不写 → 无审计痕迹,违反 Article XII 文档诚实
+❌ agent 嘴上说"重置完成"但没主上下文亲自验证 → 验收盲信(反例 6)
+```
+
+---
+
+## 八、关联引用
 
 - 公共铁律: [common-iron-rules.md](common-iron-rules.md) — Article XII 文档诚实
 - 公共反例: [common-anti-patterns.md](common-anti-patterns.md) — 反例 4 状态卡说谎

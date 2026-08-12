@@ -4,6 +4,40 @@
 
 ---
 
+## GitNexus 影响面三步（V10 NEW — 防 API 契约改动漏下游）
+
+> 来源：V10 references/drift-detect.md §"改 API 契约前 GitNexus impact 三步"。
+> **V11 缺失关键步骤**：原 V11 drift-detect.md 仅含字段级漂移检测，无 API 契约改动的下游影响追踪。
+
+### 三步协议
+
+```
+Step 1 GitNexus impact() 找所有调用点
+  impact({target, direction: "upstream"}) 找上游 / impact({target, direction: "downstream"}) 找下游 / context({name}) 查看 360 度视图
+  禁止: 用 grep/glob 代替 impact() 找调用点
+
+Step 2 评估影响范围
+  ├─ 公共 API（≥10 个调用者）→ 必通知所有下游 + 评估 breaking change
+  ├─ 私有 API（< 10 个调用者）→ 抽样评估 3 个 + 通知作者
+  └─ 内部 API → 改完后跑全量回归
+
+Step 3 写漂移测试
+  ├─ 为每个 changed symbol 加测试
+  ├─ 改 caller 测试（如果签名变化）
+  └─ 必含: 旧行为兼容（如允许）/ 新行为（如有）
+```
+
+### 反例（V11 Article V 必走）
+
+```
+❌ 改 API 契约前不跑 GitNexus impact()
+  现象: implementer 改了 API 签名 → 没跑 impact() → 下游 5 个调用者编译失败
+  根因: 跳过 GitNexus 三步协议
+  教训: 改 API 契约必须 GitNexus impact() 找所有调用点 + 写漂移测试
+```
+
+---
+
 ## DRIFT CHECK 流程
 
 ```
@@ -42,7 +76,11 @@
 
 ```bash
 # 自动检测接口签名漂移
-python ../../scripts/drift-detect.py --contracts contracts/ --src src/
+# 注意: drift-detect.py 是 hook 模板(V11 templates/hooks/),需先通过 init-from-zero.py 安装到项目 .trae/hooks/ 后才能直接调用
+# V11 skill 内调用方式(开发期):
+python ../../templates/hooks/drift-detect.py --contracts contracts/ --src src/
+# 项目实际调用方式(已 init-from-zero 安装后):
+python .trae/hooks/drift-detect.py --contracts contracts/ --src src/
 
 # 输出
 {

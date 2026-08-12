@@ -42,7 +42,7 @@ depends_on:
 7. FUNCTIONAL CHECK        — 用户视角确认功能可用
 8. CROSS-SESSION VERIFY    — 自评=self_attested，主上下文必二次抽检
 9. 质疑式验收 SUITE        — ZERO TRUST + EVIDENCE MANDATORY + ACTIVE FALSIFICATION + REQUIREMENT TRACING（V10.12 SUITE）
-10. 关键门禁套件           — SKEPTICAL VALIDATION + 产品视角 + 自动循环 + Test Plan Gate（V10.12 SUITE）
+10. 关键门禁套件           — SKEPTICAL VALIDATION（[protocol](../../references/skeptical-validation-protocol.md)）+ 产品视角 + 自动循环 + Test Plan Gate
 ```
 
 ## 骨架流程（V10 reviewer 8 步 + V11 编排器门禁）

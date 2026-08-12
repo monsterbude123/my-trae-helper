@@ -230,6 +230,20 @@ def scan_reason_fabrication(project_root: pathlib.Path) -> Tuple[bool, str]:
             "node_modules", "__pycache__", ".git",
             "anti-patterns",
             "research",
+            ".trae",  # V11 工具目录(hooks/logs/scripts 文档不含真实产物)
+            "references",  # V11 references/ 是规则定义,非真实产物
+            "archive",  # 归档(不可变,不会被腐化)
+            "audit-log",  # 历史日志
+            "audit_history.json",  # 自检历史
+            "auto-audit",  # 自检报告(本身就是元数据)
+            "templates",  # 模板(含示例占位符)
+        ]):
+            continue
+        if any(wd in str(md_file) for wd in [
+            "/docs/archive/",  # 文档归档
+            "/docs/bugs/",  # bug 单(已是腐烂记录)
+            "/docs/reports/",  # 周期报告(数据来源不同)
+            "/docs/history/",  # 历史快照
         ]):
             continue
         if md_file.name in filename_whitelist:

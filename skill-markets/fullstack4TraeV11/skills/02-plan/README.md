@@ -29,7 +29,7 @@ plan.md 不写代码、不改文件、不调命令。plan.md 是 Stage 1 Spec �
 
 ```
 Step 0: Cockpit 读取
-        ├─ 读 {project}/.trae/state-card.md
+        ├─ 读 {project}/docs/specs/.state-card.md
         ├─ 识别活跃 change（如有 → 🔴 阻塞则先汇报用户）
         └─ 校验 stage=-1/intake completed（前置 stage PASS）
 

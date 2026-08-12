@@ -1,6 +1,21 @@
-# state-card.md — 状态卡模板
+# 状态卡模板 — V11
 
-> 13 stage 通用状态卡模板。V11 Stage -1 Intake 初始化时使用。
+> V11 三类状态卡通用模板。Stage -1 Intake 初始化时按 `card_type` 选择对应模板。
+>
+> **路径映射**(完整协议见 [state-card-protocol.md](../../references/state-card-protocol.md)):
+>
+> | 类型 | 路径 |
+> |------|------|
+> | **project 级** | `{project}/docs/specs/.state-card.md` |
+> | **change 级** | `{project}/docs/specs/changes/{change-id}/.state-card.md` |
+> | **bug 级** | `{project}/docs/bugs/{bug-id}/.state-card.md` |
+>
+> 三类状态卡在不同目录,文件系统层无冲突(路径区分而非后缀区分)。
+>
+> **⚠️ V11.2 反例 — 蒸馏自 canvas-asset-folders 实战**:
+> - ❌ **绝不能用 `.trae/state-card.md`**（V10 残留路径，V11 已迁移出 `.trae/`）
+> - ❌ **绝不能用 `.state-card.change.md`** 后缀区分（路径区分已足够，后缀是过度设计）
+> - 必须按 [state-card-protocol.md §1.1](../../references/state-card-protocol.md) 协议路径初始化
 
 ---
 
@@ -21,7 +36,7 @@ updated_at: {ISO 8601}
 updated_by: 主上下文
 health: "🟢 on-track"
 artifacts:
-  - path: {project}/.trae/state-card.md
+  - path: {project}/docs/specs/.state-card.md
     type: file
     exists: true
     evidence: "状态卡初始化"

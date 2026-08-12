@@ -4,63 +4,27 @@
 
 ---
 
-## V10 实战反例（4 条）
+## V10 实战反例（4 条：2 部分 + 2 完全重叠）
 
-### 蒸馏 1：Bug 单"先斩后奏"（V10.11 真实失误）
+### 蒸馏 1：Bug 单"先斩后奏"（完全重叠）
 
-**实战场景**（V10.11 蒸馏，2026-08-08）:
-- 用户："报错 token 失效"
-- 主上下文未询问 → 直接创建 bug 单 → 路由到 debugger
-- debugger e2e 先行 → **FAIL → NOT FOUND** → 用户反馈："我只是想问下，不是要修"
+→ 见 [03-force-create-bug.md](03-force-create-bug.md)（V10.11 真实失误，铁律 4 Bug 录入必询问 + 询问模板）。
 
-**根因**: V10 早期 Bug 录入触发词识别后默认创建，未走 AskUserQuestion 询问确认。
+### 蒸馏 2：项目初始化"假装勘察"（完全重叠）
 
-**V11 改进**: 铁律 4（Bug 录入必询问）+ 反例 3（强制创建 bug 单）+ 询问模板（"看起来像 Bug（命中触发词 XXX），是否作为 bug 单录入？...如果只是想咨询或讨论，请告诉我"）。
+→ 见 [04-no-convention-survey.md](04-no-convention-survey.md)（V10.9 §0.5 失误，铁律 2 未勘察不初始化 + 4 类文件 Glob 必走）。
 
-**V10 源**: SKILL.md §1.6 Bug 录入触发条件（V10.11 NEW）+ 反模式 1。
+### 蒸馏 3：状态卡说谎导致跨会话迷路（部分重叠）
 
----
+**独特差异**: 不同于 02-skip-state-card.md 聚焦"跳过状态卡初始化"，本条聚焦状态卡存在但与 stage 完成不同步 → current_stage 仍显示旧值 → 下次会话误判起点 → 重复实施。V11 改进为 state-card-protocol.md + state-card-validator.py（Task 17）同步校验。
 
-### 蒸馏 2：项目初始化"假装勘察"（V10.9 §0.5 失误）
+→ 关联 [02-skip-state-card.md](02-skip-state-card.md)。
 
-**实战场景**（V10.9 蒸馏，2026-08-07）:
-- 主上下文加载 V10 SKILL.md → 直接进入 Plan，未 Glob 项目 docs/ + AGENTS.md
-- 首次产物命名/编号/结构与项目惯例冲突 → 用户 4+ 轮返工
+### 蒸馏 4：AskUserQuestion 反模式（部分重叠）
 
-**根因**: V10 §0.5 Skill 加载协议要求"Glob 1 次项目惯例"，但当时未严格遵循。
+**独特差异**: 不同于 01-no-intent-recognition.md 聚焦"未识别意图类型"，本条聚焦"用户没选 AskUserQuestion 选项 = 可能在质疑流程本身，不是要换选项"——主上下文误读为"换选项"继续给编号，应先读 references/project-structure.md 看项目惯例。
 
-**V11 改进**: Intake Step 2 项目惯例勘察（workflows/project-convention-survey.md）+ 铁律 2（未勘察不初始化）+ 反例 4（未勘察项目惯例）+ 4 类文件 Glob 必走。
-
-**V10 源**: SKILL.md §0.5 Skill 加载协议（V10.9 NEW）+ §0.5.1 同类约定强制清单。
-
----
-
-### 蒸馏 3：状态卡说谎导致跨会话迷路（V10 §6.1 实战）
-
-**实战场景**（V10 蒸馏）:
-- Stage 4 Review 完成后状态卡未更新 → current_stage 还显示 3/Implement
-- 下次会话激活时读状态卡 → 误判起点 → 重复实施
-
-**根因**: V10 状态卡更新与 stage 完成不同步。
-
-**V11 改进**: state-card-protocol.md（公共 references）+ state-card-init.md 模板 + state-card-validator.py（Task 17）+ Intake 状态卡初始化必走。
-
-**V10 源**: SKILL.md §6.1 状态卡 / references/state-card-protocol.md（如有）。
-
----
-
-### 蒸馏 4：AskUserQuestion 反模式（V10.9 §7.5 实战）
-
-**实战场景**（V10.9 蒸馏，2026-08-07）:
-- 第 3 轮用户："为啥没有编号了，这个是全栈流程没有指导你这么做吗"
-- 主上下文："加编号 L1-01"
-- 应答（反事实）："我应先读 references/project-structure.md 看项目惯例 + 写蒸馏报告给技能开发者"
-
-**根因**: 用户没选 AskUserQuestion 选项 = 可能在质疑流程本身，不是要换选项。
-
-**V11 改进**: ask-question-anti-patterns.md（公共 references）+ Intake 反模式链路（反例 1 经验主义臆断）。
-
-**V10 源**: SKILL.md §7.5 AskUserQuestion 反模式（V10.9 NEW）。
+→ 关联 [01-no-intent-recognition.md](01-no-intent-recognition.md)（ask-question-anti-patterns.md 公共 references + 反例 1 经验主义臆断）。
 
 ---
 

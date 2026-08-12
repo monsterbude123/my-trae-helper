@@ -4,57 +4,31 @@
 
 ---
 
-## V10 实战反例（5 条）
+## V10 实战反例（5 条：1 独有 + 2 部分 + 2 完全重叠）
 
-### 蒸馏 1：盖章者思维（V10.8 反思）
+### 蒸馏 1：盖章者思维（部分重叠）
 
-**实战场景**（V10.8 蒸馏）:
-- reviewer 默认"已完成" → 找证据确认 → 找不到放过
-- 实际有 3 处关键 FAIL 未检出
+**独特差异**: 不同于 01-non-blocking-fail.md 聚焦"不拦截 FAIL"，本条聚焦 reviewer 默认立场——"默认已完成 → 找证据确认 → 找不到放过"，V11 改进为立场反转：质疑式验收官（默认未完成/有隐瞒 → 索要证据 → 不全拦截）。
 
-**V11 改进**: 立场反转 — 质疑式验收官（默认未完成/有隐瞒 → 索要证据 → 不全拦截）。
+→ 关联 [01-non-blocking-fail.md](01-non-blocking-fail.md)（reviewer.md §立场 + 铁律 9 ZERO TRUST）。
 
-**V10 源**: reviewer.md §立场 + 铁律 9 ZERO TRUST。
+### 蒸馏 2：自评=self_attested 失真（部分重叠）
 
----
+**独特差异**: 不同于 02-reviewer-fix-code.md 聚焦"reviewer 亲自改代码"，本条聚焦 sub-agent 自评"已通过全部测试" → 主上下文未二次抽检 → 实际有测试 skip 标记未发现。V11 改进为铁律 8 CROSS-SESSION VERIFY + acceptance-audit.py。
 
-### 蒸馏 2：自评=self_attested 失真（V10.4 修复）
+→ 关联 [02-reviewer-fix-code.md](02-reviewer-fix-code.md)。
 
-**实战场景**（V10.4 蒸馏）:
-- sub-agent "已通过全部测试" → 主上下文未二次抽检
-- 实际有测试 skip 标记未发现
+### 蒸馏 3：编造测试覆盖（完全重叠）
 
-**V11 改进**: 铁律 8 CROSS-SESSION VERIFY + acceptance-audit.py。
+→ 见 [03-fabricate-coverage.md](03-fabricate-coverage.md)（reviewer 亲自跑 coverage 命令 + 关键门禁套件铁律 10）。
 
-**V10 源**: reviewer.md 铁律 8 + acceptance-gates-v10.md。
+### 蒸馏 4：反复反馈升级（完全重叠）
 
----
+→ 见 [04-round-keep-trying.md](04-round-keep-trying.md)（Round 3+ rescue hatch 自动触发 → 回退 Phase 0）。
 
-### 蒸馏 3：编造测试覆盖（V10.12 关键门禁套件）
+### 蒸馏 5：抽象理由放水（独有蒸馏，无对应反例文件）
 
-**实战场景**: 见 anti-patterns/03-fabricate-coverage.md。
-
-**V11 改进**: reviewer 亲自跑 coverage 命令 + 关键门禁套件（铁律 10）。
-
-**V10 源**: reviewer-templates.md §Step 2.4 Test Plan 前置门禁。
-
----
-
-### 蒸馏 4：反复反馈升级（V10.8 §6 实战）
-
-**实战场景**: 见 references/multi-round-revision.md。
-
-**V11 改进**: Round 3+ rescue hatch 自动触发 → 回退 Phase 0。
-
-**V10 源**: scenarios.md §6 审核不通过返工 + reviewer.md Step 2.6。
-
----
-
-### 蒸馏 5：抽象理由放水（V10.10 Article XVI）
-
-**实战场景**（V10.10 蒸馏）:
-- reviewer 接受 "基本通过" / "大致完成" 灰色术语
-- 实际未达满分硬门禁
+**实战场景**（V10.10 蒸馏）: reviewer 接受 "基本通过" / "大致完成" 灰色术语 → 实际未达满分硬门禁。
 
 **V11 改进**: 铁律 2 SCORING IS DERIVED + 四维度 4 反例 A（凑分）+ 四维度反例 B（N/A 充数）。
 

@@ -13,4 +13,5 @@
 - [ ] 每个 UI 元素标注 AC ID？
 - [ ] GAP 已列出？
 - [ ] prototype 文档产出？
+- [ ] 边缘状态(hover / loading / error / empty)已定义？   # V11.2 NEW(蒸馏自 05-prototype 自检报告 §问题 2)
 ```

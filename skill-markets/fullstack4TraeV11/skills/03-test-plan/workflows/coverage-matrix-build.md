@@ -84,9 +84,12 @@ test_coverage_matrix:
 ## 4. 验证命令
 
 ```bash
-pytest tests/e2e/ -v
-pytest tests/integration/ -v
-pytest tests/unit/ -v
+# 按项目栈选择（V11.2 栈无关编排器）
+pytest tests/{e2e,integration,unit}/ -v          # Python
+vitest run tests/{e2e,integration,unit}/ -v      # TypeScript
+jest --testPathPattern='e2e|integration|unit'   # JavaScript
+cargo test --test {e2e,integration,unit}        # Rust
+go test ./tests/{e2e,integration,unit}/...      # Go
 ```
 ```
 

@@ -34,21 +34,11 @@ REQUIRED_ARTIFACTS = [
 
 
 def read_state_card(state_card_path: pathlib.Path) -> dict:
-    """读取状态卡"""
-    if not state_card_path.exists():
-        return {"error": f"状态卡不存在: {state_card_path}"}
-
-    content = state_card_path.read_text(encoding="utf-8")
-    if not content.startswith("---"):
-        return {"error": "状态卡缺 frontmatter"}
-
-    end = content.index("\n---", 3)
-    fm = content[3:end]
-
-    try:
-        return yaml.safe_load(fm) or {}
-    except Exception as e:
-        return {"error": f"YAML 解析失败: {e}"}
+    """读取状态卡（委托 _lib_state_card 共用库）"""
+    import sys
+    sys.path.insert(0, str(pathlib.Path(__file__).parent))
+    from _lib_state_card import parse_state_card as _parse
+    return _parse(state_card_path)
 
 
 def check_artifacts(change_dir: pathlib.Path) -> dict:

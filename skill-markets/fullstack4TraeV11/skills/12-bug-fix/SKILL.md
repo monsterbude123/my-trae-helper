@@ -20,7 +20,7 @@ depends_on:
 
 > 第一性原则：**根因不明不修复，e2e 先行证明 bug 真实存在**。
 
-## 铁律（8 条 — V10 debugger.md 蒸馏）
+## 铁律（9 条 — V10 debugger.md 蒸馏）
 
 ```
 1. 根因不明不修复     — 必 6 层排查 + GitNexus impact
@@ -31,6 +31,7 @@ depends_on:
 6. 跨层修复最小化     — Ponytail bug 修复决策阶梯
 7. 修复回写 bug 单    — Bug 单状态 OPEN → CLOSED
 8. 障碍诚实           — 5 字段阻塞报告（V10 Article XV）
+9. SKEPTICAL VALIDATION — P0/P1 bug 修复按 [skeptical-validation-protocol.md](../../references/skeptical-validation-protocol.md) 质疑性校验
 ```
 
 ## 5 步精简流程（V10 debugger-methodology.md）

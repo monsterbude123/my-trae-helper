@@ -4,49 +4,13 @@
 
 ---
 
-## V10 实战反例（3 条）
+## V10 实战反例（3 条，均完全重叠于独立反例文件）
 
-### 蒸馏 1：验收维度无 INV（V10 acceptance-gates-v10.md 实战）
-
-**实战场景**（V10 蒸馏）:
-- planner 出 plan.md：3 个 Capability
-- 测试人员直接写 UNIT 测试，无 INV（数据一致性 / 安全约束）
-- Stage 4 Review 时 reviewer 发现"事务回滚无测试" → 返工
-
-**根因**: Test Plan 未明确 INV 测试层级（与 UNIT/E2E 平级的独立维度）。
-
-**V11 改进**: 铁律 3（INV ≥ 1）+ 测试层级最低组合（E2E ≥ 2 / INV ≥ 1 / UNIT ≥ 5）+ coverage-mapping.md 验收维度类型表。
-
-**V10 源**: acceptance-gates-v10.md §验收维度 + INV。
-
----
-
-### 蒸馏 2：测试覆盖率被"放宽"（V10 实战）
-
-**实战场景**（V10 蒸馏）:
-- Stage 0.5 test-plan.md 标注"行覆盖率 ≥ 70%"
-- Stage 4 Review 时 reviewer 不质疑（"70% 也行"）
-- Stage 3 Implement 后实际覆盖率 65% → 上线后 bug
-
-**根因**: V10 早期测试覆盖率门槛"可商量"。
-
-**V11 改进**: 铁律 2（覆盖率门槛 ≥ 90% 硬门槛）+ 反例 3（覆盖率门槛宽松）+ coverage-rules.md 硬门槛表（不可豁免）。
-
-**V10 源**: acceptance-gates-v10.md Article II 满分硬门禁。
-
----
-
-### 蒸馏 3：测试与 Capability 脱节（V10 实战）
-
-**实战场景**（V10 蒸馏）:
-- 测试人员写 50 个 UNIT 测试，但未标注对应 Capability
-- 测试失败时 reviewer 无法定位"哪个能力未实现"
-
-**根因**: 无 test_to_capability 映射表。
-
-**V11 改进**: 铁律 4（测试用例可追溯）+ 反例 2（测试不可追溯）+ coverage-mapping.md Step 3 模板。
-
-**V10 源**: acceptance-gates-v10.md §通过依据 3 类分层 + sub-agent-rules.md。
+| # | 蒸馏主题 | 反例文件指针 |
+|---|---------|------------|
+| 蒸馏 1 | 验收维度无 INV（INV 测试层级缺失，与 UNIT/E2E 平级） | → 见 [01-no-acceptance-dimension.md](01-no-acceptance-dimension.md) |
+| 蒸馏 2 | 测试覆盖率被"放宽"（70% 门槛可商量） | → 见 [03-coverage-too-low.md](03-coverage-too-low.md) |
+| 蒸馏 3 | 测试与 Capability 脱节（无 test_to_capability 映射） | → 见 [02-test-not-traceable.md](02-test-not-traceable.md) |
 
 ---
 

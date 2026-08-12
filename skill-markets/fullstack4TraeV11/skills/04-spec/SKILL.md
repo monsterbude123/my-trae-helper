@@ -39,7 +39,7 @@ depends_on:
 7. NEVER 写实施       — spec.md 不写代码细节
 8. DRIFT → SPEC FIRST — 代码与 spec 漂移时先改 spec
 9. DOC HONEST         — spec.md INV 必在 Stage 4 落地
-10. SKEPTICAL          — P0/P1 spec 按 Article XVI 质疑性校验
+10. SKEPTICAL          — P0/P1 spec 按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) 质疑性校验
 ```
 
 ## 委派触发词
@@ -57,7 +57,7 @@ Step 2: Enhanced Acceptance — 每个 Capability 拆 ≥ 3 验收维度（E2E �
 Step 3: INV 定义 — ≥ 1 不变量（数据 / 安全 / 业务）
 Step 4: Clarify ≥ 2 轮 — AskUserQuestion 澄清模糊点
 Step 5: spec.md 产出 — Why / Acceptance / INV / Non-Goals / Clarify History
-Step 6: 状态卡更新 + validator PASS
+Step 6: 状态卡更新 + validator PASS + **updated_at 必刷新**(腐烂点 16 阈值 24h,详见 [references/state-card-stage1-fields.md](references/state-card-stage1-fields.md))
 ```
 
 ## 关键产物
@@ -65,7 +65,9 @@ Step 6: 状态卡更新 + validator PASS
 | 产物 | 路径 | 模板 |
 |------|------|------|
 | spec.md | `docs/specs/changes/{id}/spec.md` | [templates/spec-template.md](templates/spec-template.md) |
-| 状态卡 | `docs/specs/changes/{id}/.state-card.md` | — |
+| ac_list.md | `docs/specs/changes/{id}/ac_list.md` | 从 spec.md §Capabilities §Acceptance Criteria 提取(纯 AC 列表,结构化移交下游) |
+| edge_cases.md | `docs/specs/changes/{id}/edge_cases.md` | 从 spec.md §INV 边界提取(供 Stage 1.5 Prototype + Stage 2 Contract 引用) |
+| 状态卡 | `docs/specs/changes/{id}/.state-card.md` | [references/state-card-stage1-fields.md](references/state-card-stage1-fields.md) |
 
 ## Enhanced Acceptance 规则
 

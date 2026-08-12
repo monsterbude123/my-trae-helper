@@ -21,9 +21,27 @@
 > 本文件由 AI Agent 根据 V11 skill 模板 + 项目实际情况生成。
 > 编排器已部署在 `~/.trae-cn/skills/fullstack4TraeV11/`（独立部署）。
 
-## 1. V11 入口
+## 1. V11 入口 + 加载协议
 
 使用 Skill: **fullstack4traev11**（V11）。
+
+**V11 §0.5 加载协议（9 步必走）**：
+
+```
+Step 1: 加载 V11 SKILL.md（含 frontmatter stage_config）
+Step 2: 必读 12 个公共 references
+Step 3: 强制调 Skill(name="project-rules")（如项目已有 .trae/skills/project_rules_skills/）
+Step 4: Glob 1 次 AGENTS.md / docs/ / .trae/rules/ / config.yaml
+Step 5: 核对 V11 标准路径 — 状态卡在 docs/specs/.state-card.md（项目级）
+Step 6: 按 3 层优先级合并项目级覆盖
+Step 7: 列"我能踩的雷"清单（反例 §19-22）
+Step 8: Bug 录入触发词识别
+Step 9: 进入 Stage -1 Intake 工作模式
+```
+
+**反例（V11.2 NEW — 蒸馏自 canvas-asset-folders 实战）**：
+- ❌ 跳过 Step 3 Skill(name="project-rules") 而用 grep/Glob 搜项目 rules
+- ❌ 把状态卡写到 `.trae/state-card.md`（V10 残留路径）
 
 V11 入口加载协议、stage 流水线、16 Articles 宪法、铁律、反模式库 → 全部在 `~/.trae-cn/skills/fullstack4TraeV11/SKILL.md` + `references/`。
 
@@ -47,6 +65,9 @@ V11 入口加载协议、stage 流水线、16 Articles 宪法、铁律、反模�
 
 ## 4. 项目级 rules（独立于 V11 skill）
 
+> **加载协议**: 任何 agent（主 / sub-agent）必须先调 `Skill(name="project-rules")` 获取本任务所需 rules，**禁止**直接 Read `.trae/rules/*.md` 中除 README.md 外的其他文件。
+> 详见 [.trae/rules/README.md](.trae/rules/README.md)（强制入口说明）。
+
 - [.trae/rules/stack.md](.trae/rules/stack.md) — 构建/测试/lint 命令
 - [.trae/rules/paths.md](.trae/rules/paths.md) — 项目级禁读路径
 - [.trae/rules/git.md](.trae/rules/git.md) — Git 工作流
@@ -64,7 +85,7 @@ V11 默认 3 个 hook（pre-stage / post-stage / pre-accept）由 init-from-zero
 # V11 hooks 必跑 + Fresh 验证
 python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-root .
 python ~/.trae-cn/skills/fullstack4TraeV11/scripts/upgrade-from-v10.py --project-root . --fidelity-check-only
-python ~/.trae-cn/skills/fullstack4TraeV11/scripts/state-card-validator.py .trae/state-card.md
+python ~/.trae-cn/skills/fullstack4TraeV11/scripts/state-card-validator.py docs/specs/.state-card.md
 ```
 
 ## 7. 紧急通道（5 字段阻塞报告）

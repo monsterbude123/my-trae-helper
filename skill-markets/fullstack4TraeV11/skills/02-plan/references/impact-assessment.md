@@ -135,33 +135,7 @@ Step 5: detect_changes({scope="compare"}) → 冲突检测
 
 ## 反模式
 
-### 反例 A：GitNexus 可用却用 grep
-
-```
-主上下文: grep -r "authenticate" src/  # ❌ 违反 Article V
-正确: mcp__gitnexus__impact(target="UserService.authenticate")
-```
-
-### 反例 B：跳过 detect_changes
-
-```
-主上下文: 只跑 impact → 输出影响面  # ❌ 漏了冲突检测
-正确: impact + context + query + detect_changes（4 工具全跑）
-```
-
-### 反例 C：风险等级凭经验判断
-
-```
-主上下文: "我觉得这个改动风险低"  # ❌ 主观
-正确: 用风险等级判定矩阵（基于 impact 数据）
-```
-
-### 反例 D：未记录 critical path
-
-```
-影响面报告: risk_level: MEDIUM  # ❌ 漏标注 critical path
-正确: critical_paths: ["涉及 Token 签发"]
-```
+> 完整反例见 [anti-patterns/02-grep-instead-of-gitnexus.md](../../anti-patterns/02-grep-instead-of-gitnexus.md),本节不再展开(防冗余)。
 
 ---
 
@@ -171,4 +145,5 @@ Step 5: detect_changes({scope="compare"}) → 冲突检测
 - [README.md §完整骨架 Step 3](../README.md) — 3 路并行探索
 - [three-path-exploration.md](../workflows/three-path-exploration.md) — 3 路探索工作流
 - 公共铁律 Article V: [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)
-- GitNexus MCP: [gitnexus-guide](file:///.claude/skills/gitnexus/gitnexus-guide/SKILL.md)
+- 公共反例 §23: [../../../references/common-anti-patterns.md](../../../references/common-anti-patterns.md)
+- GitNexus MCP 资源: `gitnexus://repo/my-trae-helper`（V11 已用 MCP 资源取代 V10 残留路径 `.claude/skills/gitnexus-guide`）

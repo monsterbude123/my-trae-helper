@@ -96,7 +96,7 @@ Step 7: 交接给下一 stage（更新 next_stage 字段）
 
 | 产物 | 路径 | 模板 |
 |------|------|------|
-| 状态卡（project） | `{project}/.trae/state-card.md` | [templates/state-card-init.md](templates/state-card-init.md) |
+| 状态卡（project） | `{project}/docs/specs/.state-card.md` | [templates/state-card-init.md](templates/state-card-init.md) |
 | 状态卡（change） | `docs/specs/changes/{id}/.state-card.md` | [templates/state-card-init.md](templates/state-card-init.md) |
 | 状态卡（bug） | `docs/bugs/{id}/.state-card.md` | [templates/state-card-init.md](templates/state-card-init.md) |
 | Bug 单 | `docs/bugs/{id}.md` | [templates/bug-template.md](templates/bug-template.md) |
@@ -110,7 +110,7 @@ hand_over:
   status: completed
   health: "🟢 on-track"
   artifacts:
-    - path: .trae/state-card.md / docs/specs/changes/{id}/.state-card.md
+    - path: docs/specs/.state-card.md / docs/specs/changes/{id}/.state-card.md
       type: file
       evidence: "状态卡初始化 + next_stage 路由"
     - path: docs/bugs/{id}.md（仅 bug-fix 路由）

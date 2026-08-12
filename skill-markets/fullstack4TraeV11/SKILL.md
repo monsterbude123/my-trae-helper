@@ -88,13 +88,51 @@ stage_config:
 主上下文收到 "Use Skill: fullstack4traev11" 后，**必须**按顺序执行：
 
 1. 加载本 SKILL.md（含 frontmatter `stage_config`）
-2. **必读** 7 个公共 references：constitution / common-iron-rules / common-anti-patterns / stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns
-3. **Glob 1 次** 项目自身约定：`AGENTS.md` / `docs/` / `.trae/rules/` / `.trae/fullstack4traev11.config.yaml`
-4. **如有项目级覆盖** → 按 3 层优先级合并（项目级 > 编排器 stage_config > stage skill depends_on）
-5. **Bug 录入触发词识别**（见 §10）→ 询问用户是否录入 bug 单
-6. 然后才进入 Stage -1 Intake 工作模式
+2. **必读** 7 个公共 references：constitution / common-iron-rules（含 Article XVII Secret Redaction）/ common-anti-patterns（含 §19-22 反例）/ stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns / **agent-error-diagnosis** / **sub-agent-rules** / **project-structure**
+3. **强制调 Skill(name="project-rules")**（如项目已有 `.trae/skills/project_rules_skills/`）— 拿项目级 rules 路由表，按需加载项目惯例（V11 NEW — 防违反项目级 rules 协议）
+4. **Glob 1 次** 项目自身约定：`AGENTS.md` / `docs/` / `.trae/rules/` / `.trae/fullstack4traev11.config.yaml` + **项目目录结构**（见 §0.5.1）
+5. **核对 V11 标准路径** — 状态卡应在 `docs/specs/.state-card.md`（项目级）/ `docs/specs/changes/{id}/.state-card.md`（change 级）/ `docs/bugs/{id}/.state-card.md`（bug 级）。**禁止用 `.trae/state-card.md`**（V10 残留，已迁移出 `.trae/`）
+6. **如有项目级覆盖** → 按 3 层优先级合并（项目级 > 编排器 stage_config > stage skill depends_on）
+7. **列出"我能踩的雷"清单**（反例 §19-22 + 现有 Article V/IX/XI 必逐项）— 必走（V11.1 NEW）
+8. **Bug 录入触发词识别**（见 §10）→ 询问用户是否录入 bug 单
+9. 然后才进入 Stage -1 Intake 工作模式
 
 **反例**：只加载 SKILL.md 主文件就立即进入 stage → 不知项目惯例 → 命名/编号/结构偏离 → 用户 4+ 轮返工。
+
+**反例（V11.1 NEW）**：未列"我能踩的雷"清单就直接做工作 → 反复踩同一雷 → 见 [references/unread-rule-pass.md](references/unread-rule-pass.md) §21
+
+**反例（V11.2 NEW — 蒸馏自 canvas-asset-folders 实战）**：
+- ❌ 跳过 Skill(name="project-rules") 而用 grep/Glob 搜项目 rules → 违反项目级 rules 协议
+- ❌ 把状态卡写到 `.trae/state-card.md`（V10 残留路径）→ 未核对 [state-card-protocol.md §1.1](references/state-card-protocol.md) 必走协议
+
+### §0.5.1 同类约定强制清单（V11.1 NEW — 蒸馏自 V10.12）
+
+**第 3 步"Glob 1 次"具体 Glob 哪些目录**——按任务类型激活强制清单（不分类型 = 漏 Glob = 🛑 FAIL）：
+
+| # | 类别 | 必 Glob 目录 / skill | 触发关键词 |
+|:--:|------|---------------------|-----------|
+| 1 | **截屏** | `.trae/skills/screenshot/` 或 `.trae-cn/skills/screenshot/` | screenshot / 截图 / 视觉证据 |
+| 2 | **视觉验证** | `.trae/skills/visual-evidence-discipline/` 或 `.trae-cn/skills/visual-evidence-discipline/` | UI 验收 / 像素验证 / 通过依据 |
+| 3 | **浏览器自动化** | `.trae/skills/browser-use-cloud/` 或 `.trae-cn/skills/browser-use-cloud/` | browser-use / 网页抓取 / 表单填写 |
+| 4 | **UI 测试** | `.trae/skills/playwright-best-practices/` 或 `.trae-cn/skills/playwright-best-practices/` | Playwright / E2E / page object |
+| 5 | **E2E 框架** | `.trae/skills/e2e-module-audit/` 或 `.trae-cn/skills/e2e-module-audit/` | e2e / 端到端回归 / 视觉审计 |
+| 6 | **录屏** | `.trae/skills/screenshot/` §录屏模式 + `.trae-cn/skills/screenshot/` | 录屏 / 操作回放 / 失败重演 |
+| 7 | **a11y** | `.trae/skills/ui-ux-pro-max/` + 项目 `docs/a11y/` | 可访问性 / WCAG / a11y |
+| 8 | **性能** | `.trae/skills/ui-ux-pro-max/` + 项目 `docs/perf-budget.md` | 性能 / 帧率 / FCP / Web Vitals |
+| 9 | **契约对齐** | `.trae/skills/frontend-backend-contract-alignment/` 或 `.trae-cn/skills/frontend-backend-contract-alignment/` | 前后端契约 / SSE / datetime 格式 |
+| 10 | **时间/时区** | `.trae-cn/skills/` 内含 datetime / tz 的 skill | datetime / 时区 / IANA / 时间戳 |
+
+**强制声明格式**（加载协议第 3 步完成后，主上下文回复必须含）：
+
+```markdown
+§0.5 Step 3 同类清单激活情况:
+  - [1] 截屏: ✅/⚠️/N/A — 理由
+  - [2] 视觉验证: ✅/⚠️/N/A — 理由
+  - [3] 浏览器自动化: ✅/⚠️/N/A — 理由
+  - ... (10 项全列)
+```
+
+**反模式（V11.1 禁止）**: "我只 Glob 1-2 项就够了" / "同类理解见仁见智" / "清单太长记不住"。
 
 ---
 
@@ -121,6 +159,7 @@ stage_config:
 ## §1 委派速查
 
 > 完整 stage_config 见 frontmatter。项目级覆盖规则见 [references/dependency-config.md](references/dependency-config.md)。
+> **Agent 使用 stage skill 必读**: [references/stage-skill-agent-protocol.md](references/stage-skill-agent-protocol.md)
 
 | Stage | 加载 stage skill | 外部 skill 依赖 | 产出 |
 |:---:|------------------|------------------|------|
@@ -140,6 +179,22 @@ stage_config:
 [TASK] {≤200 chars}
 [OUTPUT] 4 字段: status / evidence / pass_count / next_hook
 ```
+
+### §1.6 主上下文自律条款（V11.1 NEW — 蒸馏自 V10.11）
+
+当主上下文决定**不委派** coding-task agent 时，**必须**在 Completion Report 中显式声明：
+
+| 字段 | 内容 |
+|------|------|
+| `delegation_skipped_reason` | "小任务流线化: ≤6 Task + LOW + 无新 API" 或其他合理理由 |
+| `skipped_agents` | 列出跳过的 agent 名称（如 `[planner, spec-enhancer, rot-detector]`）|
+
+任一条款触发时必须声明：
+- Article IV 委派纪律
+- §0 流水线必走阶段
+- Phase 4.5 rot-detector 必跑
+
+跳过且不声明 = 🛑 流程违规。
 
 ---
 
@@ -172,7 +227,7 @@ stage_config:
 
 **核心原则**（不外置）:
 - 状态卡是任务真相源之一（Article XII 文档诚实）
-- 新会话激活先读 `.trae/state-card.md` → 验证文件系统 vs 状态卡 → 30 分钟未产 = 疑似假性完成
+- 新会话激活先读 `docs/specs/.state-card.md` → 验证文件系统 vs 状态卡 → 30 分钟未产 = 疑似假性完成
 - Checkpoint = 每个 stage 门禁 PASS 一次
 - 同一 stage 连续回退 3 次 → 升级用户决策
 
@@ -182,23 +237,38 @@ stage_config:
 
 > 每个 stage 的关键动作有前后验证。Hook 失败 = 阻断，不得跳过。
 
+**V11 Hook 清单（13 个，覆盖 5 种 TRAE IDE event + 3 个 V11 shell hook）**:
+- 详见 [templates/hooks/README.md](templates/hooks/README.md)
+- 安装: `python scripts/install-hooks.py --project-root .`
+- 验证: `python scripts/hooks-fidelity.py --project-root .`
+
 **通用 Hook（所有 stage）**:
-- Stage 切换前 → 当前 stage 门禁 → 产出门禁报告 → **阻塞**
+- Stage 切换前 → 当前 stage 门禁 → 产出门禁报告 → **阻塞**（shell pre-stage.sh）
 - Stage 启动 → 加载 stage skill + 解析 depends_on + 检查前置 → **阻塞**
-- Stage 结束 → 更新状态卡 + 交接物 4 件套 → 非阻塞
+- Stage 结束 → 更新状态卡 + 交接物 4 件套 → 非阻塞（shell post-stage.sh）
+
+**TRAE IDE event Hook**:
+- **SessionStart**: gitnexus-session-check.py（双端读）+ session-start.py（6 层知识发现）
+- **UserPromptSubmit**: complexity-guard.py（复杂度 + GitNexus First 提醒 + Article XVII secret）
+- **PreToolUse**: doc-sync-gate.py + contract-gate.py（写代码前门禁）
+- **PostToolUse**: spec-validate-hook.py + auto-test.py + drift-detect.py（写代码后验证）
+- **Stop**: tasks-integrity.py + gitnexus-session-finalize.py（双端写）
+
+**V11 Shell hook（stage 切换专用）**:
+- pre-stage.sh / post-stage.sh / pre-accept.sh（不在 TRAE IDE event 中，由 agent 调用）
 
 **各 stage 完成 Hook（必阻塞）**:
 - **-1 Intake**: 状态卡初始化 + 路由决策表 + Bug 录入判断
 - **0 Plan**: 3 路并行探索 + GitNexus impact + 追问点
 - **0.5 Test Plan**: 验收维度 → 测试用例映射（覆盖率门槛）
-- **1 Spec**: Enhanced Acceptance + INV ≥1 + clarify ≥2 轮
+- **1 Spec**: Enhanced Acceptance + INV ≥1 + clarify ≥2 轮 + spec-validate-hook.py
 - **1.5 Prototype**: 双源兼容校验（设计稿 vs 代码原型）
 - **2 Contract**: contract-gate.py 验证四件套 + 测试骨架
-- **3 Implement**: TDD GREEN + DRIFT CHECK + code-hygiene.py
-- **3.5 Real Verify**: 5 项必跑 + 启动可见产物
+- **3 Implement**: TDD GREEN + DRIFT CHECK + code-hygiene.py + auto-test.py + drift-detect.py
+- **3.5 Real Verify**: 5 项必跑 + 启动可见产物 + visual-content-check.py
 - **4 Review**: 4 维评分 + 证据链 3 层 + DOC SYNC
 - **4.5 Rot Scan**: proactive-scan.py 8 项 + self-diagnose.py
-- **5 Accept**: 归档前检查 + spec-purge.py + spec-knowledge-extract.py
+- **5 Accept**: 归档前检查 + spec-purge.py + spec-knowledge-extract.py + pre-accept.sh
 - **6 Bug Fix**: e2e 先行 FAIL + 6 层排查 + 全量回归 + bug 单 CLOSED
 - **7 Project Health**: 4 维度检查 + 优先级分级（**非阻塞**，异步）
 
@@ -208,25 +278,10 @@ stage_config:
 
 ## §5 确定性脚本使用时机
 
-> 14 个公共脚本 + 各 stage 内部脚本。脚本失败 = 🛑 REJECT，不接受 AI 自评字符串。
-> 主上下文亲自调用脚本（不委派给子代理，Article IV）。
+> 完整脚本清单 + 用途 + 使用 stage 详见 [scripts/README.md](scripts/README.md)。
+> 脚本失败 = 🛑 REJECT，不接受 AI 自评字符串。主上下文亲自调用（不委派给子代理，Article IV）。
 
-### 5.1 公共脚本（scripts/）
-
-| 脚本 | 用途 | 使用 stage |
-|------|------|-----------|
-| `stage-gate.py` | V11 阶段门禁（13 stage 统一） | 所有 stage 切换前 |
-| `state-card-validator.py` | 状态卡字段 + 文件系统交叉验证 | 所有 stage 状态卡更新后 |
-| `setup-feature.py` / `change-status.py` | 创建 change 骨架 / 读取 change 真实状态 | Stage -1 / 0 |
-| `code-hygiene.py` / `orphan-detector.py` | 代码卫生 / 孤儿测试 | Stage 3 / 4 / 4.5 |
-| `dist-hash-check.py` / `visual-content-check.py` | Bundle 一致性 / 视觉内容校验 | Stage 3.5 / 4 |
-| `acceptance-audit.py` | 4 维验收审计 | Stage 4 |
-| `proactive-scan.py` / `self-diagnose.py` | 5 项腐化扫描包 / Meta 自我诊断 | Stage 4.5 |
-| `spec-purge.py` / `spec-knowledge-extract.py` | Spec 清除归档 / 知识沉淀 | Stage 5 |
-| `reason-classifier.py` | 抽象理由分类器（6 类） | 所有 stage（被质疑时） |
-
-### 5.2 脚本调用规则
-
+**核心规则**:
 - 主上下文亲自调用（不委派给子代理）
 - 脚本输出必须真实保存（不接受口头宣称 PASS）
 - 脚本失败 = 🛑 REJECT → 走 Article XV 阻塞报告
@@ -323,6 +378,24 @@ stage_config:
 - 障碍隐瞒 / 编造抽象理由（"理解偏差"等不可证伪理由）
 - 状态卡说谎 / 文档与代码漂移静默迁就
 - 跳过 Stage 4.5 Rot Scan
+
+### §3.7 反虚假交付禁止项（V11.1 NEW — 蒸馏自 V10.10）
+
+> **核心**: 任何"PASS"必附真实证据（command + output + file:line），禁止"看到进程即通过"。
+
+**9 项禁止**：
+
+1. **障碍隐瞒**: 容器未启 / 迁移失败 / 测试 FAIL 不汇报，声称"完成"
+2. **跳过测试**: 跳过 `npm run test:all` / `pytest` / `vitest` 声称"完成"
+3. **文档验收自我满足**: 文档验收 100% PASS 但未实际跑验证
+4. **编造抽象理由**: "理解偏差" / "流程裁剪" / "心理障碍" / "概念漂移" 等不可证伪理由（Article XVI）
+5. **二次再犯抽象理由**: 二次被质问仍编造不可证伪理由 → REJECT
+6. **AI 描述当成真实像素**: Read PNG 工具返回 AI 描述，编造"截图显示 XXX" → 主上下文必亲自 Read 对比（Article IX）
+7. **盲信子代理"已完成"**: 不抽检 evidence / 不跑 pass_count 命令 / 不 Glob 产物（Article IX）
+8. **Visual = API PASS**: 用 vitest PASS 充作 UI 任务"完成"（V10.12 教训）
+9. **"启动 = 完成"软指标**: 启动进程即声称"完成"，无可见产物（V10 §0.10 启动验证）
+
+**修正路径**: 必走 [references/sub-agent-rules.md §8 三层验证](references/sub-agent-rules.md) + [references/agent-error-diagnosis.md](references/agent-error-diagnosis.md) 5 模式诊断 + [Stage 3.5 Real Verify](../skills/08-real-verify/SKILL.md) 5 类项目启动验证。
 - 主上下文直接 Edit/Write 代码（Article IV 委派纪律）
 
 ---
@@ -367,5 +440,6 @@ skills/{NN}-{name}/
 
 ## §13 参考索引
 
-- **references/**: constitution / common-iron-rules / common-anti-patterns / stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns（详见各节指针）
-- **templates/**（待编写）: project-agents-example / project-rules-example / state-card
+- **references/**: constitution / common-iron-rules / common-anti-patterns / **skeptical-validation-protocol**（7 stage 永久激活）/ stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns / agent-error-diagnosis / sub-agent-rules / project-structure / gitnexus-tools / gitnexus-retry-protocol / V10-distillation-source-map（详见各节指针）
+- **glossary.md** — 术语表(V10 完整继承 + V11 新增 5 大类 100+ 术语)
+- **templates/**: project-agents-example / project-rules-example / state-card / hooks/ / constitution-template

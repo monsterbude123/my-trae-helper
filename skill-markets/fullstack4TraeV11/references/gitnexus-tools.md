@@ -109,7 +109,27 @@ implementer: 看一眼代码 → 改 → 提交  # 违反 Article V
 
 # ❌ 反例 3: 不跑双端 hook
 project: 无 .gitnexus/ 目录 → 索引永远过期 → 后续会话用错图谱
+
+# ❌ 反例 4: GitNexus 失败不重试直接降级
+debugger: impact() 失败 → 直接 grep  # 违反 3 次重试协议
+正确: 必走 3 次重试协议（修参数 → 换工具 → list_repos）→ 仍失败 → 5 字段阻塞报告
 ```
+
+## 失败处理（3 次重试协议 — V10.8 蒸馏）
+
+详见 [gitnexus-retry-protocol.md](gitnexus-retry-protocol.md)。
+
+```
+MUST: GitNexus 调用失败时必走 3 次重试协议
+NEVER: 直接降级为 grep/glob（违反 Article V.5 不可降级）
+NEVER: 跳过重试直接静默继续
+```
+
+**3 次重试**:
+1. 修参数（target / name / scope / base_ref）
+2. 换工具（impact ↔ context ↔ query）
+3. list_repos（看索引状态）
+4. 仍失败 → 5 字段阻塞报告
 
 ---
 

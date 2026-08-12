@@ -6,12 +6,14 @@
 
 ## 覆盖率层级
 
-| 层级 | 门槛 | 测量方式 |
+| 层级 | 门槛 | 测量方式（按项目栈选择） |
 |------|:---:|---------|
-| 行覆盖率（line） | ≥ 90% | pytest --cov |
-| 分支覆盖率（branch） | ≥ 85% | pytest --cov-branch |
-| 函数覆盖率（function） | ≥ 95% | pytest --cov |
-| 关键路径（critical path） | 100% | E2E 覆盖 |
+| 行覆盖率（line） | ≥ 90% | pytest --cov (Python) / vitest --coverage (TS) / jest --coverage (JS) / cargo tarpaulin (Rust) / go tool cover (Go) |
+| 分支覆盖率（branch） | ≥ 85% | pytest --cov-branch (Python) / vitest --coverage (TS) / jest --coverage (JS) / cargo tarpaulin (Rust) / go tool cover -func (Go) |
+| 函数覆盖率（function） | ≥ 95% | pytest --cov (Python) / vitest --coverage (TS) / jest --coverage (JS) / cargo tarpaulin (Rust) / go tool cover (Go) |
+| 关键路径（critical path） | 100% | E2E 覆盖（栈无关，按项目栈选对应 E2E 框架） |
+
+> **V11.2 适配**: 表格第 3 列列出 5 种栈的等价命令,按项目实际栈选择。完整命令模板见下文 §检测命令。
 
 ---
 
@@ -69,15 +71,29 @@ Stage 3 Implement 必补（不可豁免）
 ## 检测命令
 
 ```bash
-# 行覆盖率
-pytest --cov=src --cov-report=term-missing
+# 行覆盖率（按项目栈选择）
+pytest --cov=src --cov-report=term-missing                                              # Python (pytest)
+vitest run --coverage                                                                   # TypeScript (vitest)
+jest --coverage                                                                         # JavaScript (jest)
+cargo test --coverage                                                                   # Rust (cargo-tarpaulin)
+go test -coverprofile=coverage.out && go tool cover -func=coverage.out                  # Go
 
-# 分支覆盖率
-pytest --cov=src --cov-branch --cov-report=term-missing
+# 分支覆盖率（按项目栈选择）
+pytest --cov=src --cov-branch --cov-report=term-missing                                 # Python
+vitest run --coverage --coverage.include='src/**'                                       # TypeScript
+jest --coverage --coverageReporters=text --coverageThreshold='{"global":{"branches":85}}'  # JavaScript
+cargo test --lib -- --cfg=tarpaulin                                                     # Rust
+go test -cover -covermode=count                                                         # Go
 
-# 关键路径 E2E 覆盖
-pytest tests/e2e/ --cov=src --cov-report=term
+# 关键路径 E2E 覆盖（按项目栈选择）
+pytest tests/e2e/ --cov=src --cov-report=term                                           # Python
+vitest run tests/e2e/ --coverage                                                        # TypeScript
+jest --testPathPattern=e2e --coverage                                                   # JavaScript
+cargo test --test e2e                                                                   # Rust
+go test ./tests/e2e/...                                                                 # Go
 ```
+
+> **V11.2 适配原则**: 03-test-plan 是栈无关编排器,**命令按项目实际栈选择**。在 `.trae/rules/stack.md` 必查项目主测试框架,然后用对应命令。禁止硬编码 `pytest` 假设 Python 栈。
 
 ---
 

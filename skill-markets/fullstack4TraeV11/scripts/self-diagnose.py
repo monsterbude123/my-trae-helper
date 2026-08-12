@@ -28,11 +28,17 @@ META_CHECKS = {
 
 
 def check_rot_detector_logic(project_root: pathlib.Path) -> tuple:
-    """检查 rot-detector 自身逻辑是否腐化"""
-    scripts = project_root / "scripts"
-    rot_scan = scripts / "proactive-scan.py"
+    """检查 rot-detector 自身逻辑是否腐化
+
+    注意: self-diagnose.py 检测的是 V11 自身 scripts/,不是用户项目 scripts/。
+    V11 自身的 proactive-scan.py 在 V11_SCRIPTS 下(本脚本同目录),
+    用户项目的 proactive-scan.py 由 orchestrator 单独检测。
+    """
+    # V11 自身的 scripts 目录 = 本脚本同目录
+    v11_scripts = pathlib.Path(__file__).resolve().parent
+    rot_scan = v11_scripts / "proactive-scan.py"
     if not rot_scan.exists():
-        return False, "缺失proactive-scan.py"
+        return False, f"缺失 V11 自身 proactive-scan.py(应在 {rot_scan})"
 
     content = rot_scan.read_text(encoding="utf-8")
     # 检测 10 项扫描是否齐全

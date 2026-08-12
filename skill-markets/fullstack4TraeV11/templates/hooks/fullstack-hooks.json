@@ -1,0 +1,80 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "name": "fullstack-gitnexus-session-check",
+        "enabled": true,
+        "timeout": 30,
+        "command": "python .trae/hooks/gitnexus-session-check.py"
+      },
+      {
+        "name": "fullstack-session-start",
+        "enabled": true,
+        "timeout": 30,
+        "command": "python .trae/hooks/session-start.py"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "name": "fullstack-complexity-guard",
+        "enabled": false,
+        "matcher": "",
+        "timeout": 15,
+        "command": "python .trae/hooks/complexity-guard.py"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "name": "fullstack-doc-sync-gate",
+        "enabled": true,
+        "matcher": "Write|Edit",
+        "timeout": 30,
+        "command": "python .trae/hooks/doc-sync-gate.py"
+      },
+      {
+        "name": "fullstack-contract-gate",
+        "enabled": true,
+        "matcher": "Write|Edit",
+        "timeout": 30,
+        "command": "python .trae/hooks/contract-gate.py"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "name": "fullstack-spec-validate",
+        "enabled": true,
+        "matcher": "Write",
+        "timeout": 30,
+        "command": "python .trae/hooks/spec-validate-hook.py"
+      },
+      {
+        "name": "fullstack-auto-test",
+        "enabled": true,
+        "matcher": "Edit|Write",
+        "timeout": 120,
+        "command": "python .trae/hooks/auto-test.py"
+      },
+      {
+        "name": "fullstack-drift-detect",
+        "enabled": true,
+        "matcher": "Edit|Write",
+        "timeout": 30,
+        "command": "python .trae/hooks/drift-detect.py"
+      }
+    ],
+    "Stop": [
+      {
+        "name": "fullstack-tasks-integrity",
+        "enabled": true,
+        "timeout": 30,
+        "command": "python .trae/hooks/tasks-integrity.py"
+      },
+      {
+        "name": "fullstack-gitnexus-session-finalize",
+        "enabled": true,
+        "timeout": 30,
+        "command": "python .trae/hooks/gitnexus-session-finalize.py"
+      }
+    ]
+  }
+}

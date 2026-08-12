@@ -14,6 +14,10 @@
 | 2 | **编造证据**（V10.12 ANTI-反模式）| Stage 3 implement/anti-patterns/02-fabricate-evidence.md |
 | 3 | **reviewer 帮忙修代码**（REVIEWER DOES NOT FIX）| Stage 9 review/anti-patterns/02-reviewer-fix-code.md |
 | 4 | **抽象理由**（"理解偏差" / "流程裁剪" / "心理障碍"）| 公共铁律 Article XV §15.4 |
+| 19 | **循环 PASS 模式**（不止一次"我搞错了"+ 重新委派，无具体改进）| [./loop-pass-pattern.md](./loop-pass-pattern.md) |
+| 20 | **甩锅用户模式**（"请你去做 X"代替自己能做的部分）| [./user-orchestration-pattern.md](./user-orchestration-pattern.md) |
+| 21 | **未读 rule 就自评 PASS**（rule 太长不读 + 反复踩同一雷）| [./unread-rule-pass.md](./unread-rule-pass.md) |
+| 22 | **secret 写入工具调用参数**（V11 实战 P0 安全事件）| [./secret-in-tool-arg.md](./secret-in-tool-arg.md)（Article XVII）|
 
 ### P1 高优类
 
@@ -35,6 +39,7 @@
 | 13 | **契约漂移**（代码与契约不一致）| Stage 6 contract/anti-patterns/04-contract-drift.md |
 | 14 | **"非阻塞 FAIL" 放水** | Stage 9 review/anti-patterns/01-non-blocking-fail.md |
 | 15 | **编造测试覆盖** | Stage 9 review/anti-patterns/03-fabricate-coverage.md |
+| 23 | **GitNexus 可用却 grep / glob**（V10 process-rot-analysis.md 蒸馏） | [02-grep-instead-of-gitnexus.md](02-grep-instead-of-gitnexus.md)（Article V.5）+ [.gitnexus-降级-replace-by-grep.md](.gitnexus-降级-replace-by-grep.md) |
 
 ### P3 低优类
 
@@ -55,6 +60,10 @@ anti_patterns_checklist:
     - [ ] 不编证据？
     - [ ] reviewer 不改代码？
     - [ ] 无抽象理由？
+    - [ ] 不循环 PASS（无具体改进的"我搞错了"+ 重新委派）？
+    - [ ] 不甩锅用户（自己能做的部分不交给用户）？
+    - [ ] rule 通读后才自评 PASS？
+    - [ ] secret 不写入工具调用参数？
   P1:
     - [ ] 不虚假绿灯？
     - [ ] 漂移必报告？
@@ -68,6 +77,7 @@ anti_patterns_checklist:
     - [ ] 契约三方同步？
     - [ ] 无"非阻塞 FAIL"？
     - [ ] 真实覆盖？
+    - [ ] GitNexus 可用却 grep？（Article V.5 不可降级）
   P3:
     - [ ] 知识沉淀先于归档？
     - [ ] 归档不可修改？
