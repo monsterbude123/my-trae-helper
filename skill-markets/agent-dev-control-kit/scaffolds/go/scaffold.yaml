@@ -7,6 +7,18 @@ post_actions:
 - description: 初始化项目
   path: scripts/init.sh
   type: script
+required_scripts:
+  pre_commit:
+  - go
+  - golangci-lint
+  pre_push:
+  - go
+  required_files:
+    - go.mod
+  required_dirs:
+    - tests/integration
+  build_targets:
+    - cmd/app
 tags:
 - go
 - golang

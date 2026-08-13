@@ -7,6 +7,17 @@ post_actions:
 - description: 初始化项目
   path: scripts/init.sh
   type: script
+required_scripts:
+  pre_commit:
+  - ruff
+  - mypy
+  - pytest
+  pre_push:
+  - pytest
+  - build
+  required_files:
+    - pyproject.toml
+  build_backend: true
 tags:
 - python
 - fastapi

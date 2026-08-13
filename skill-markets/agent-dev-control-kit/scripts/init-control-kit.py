@@ -229,20 +229,21 @@ def render_templates(target_dir: Path, metadata: Dict[str, Any], verbose: bool =
     return rendered
 
 
-def apply_stack_preset(stack_id: str, target_dir: Path, 
+def apply_stack_preset(stack_id: str, target_dir: Path,
                        scaffold_dir: Optional[Path] = None,
                        force: bool = False, verbose: bool = False) -> bool:
     """
     根据选型应用脚手架到目标目录。
-    
+
     步骤：
     1. 查找脚手架（三层优先级）
     2. 读取 scaffold.yaml 获取元数据
     3. 复制 files/ 目录内容
     4. 渲染模板变量
+    5. 注入必需的脚本（绝不使用 echo-skip 占位）
     """
     scaffold_path = find_scaffold(stack_id, scaffold_dir)
-    
+
     if not scaffold_path:
         print(f"🛑 未找到脚手架 '{stack_id}'")
         print("  搜索路径：")
@@ -251,31 +252,164 @@ def apply_stack_preset(stack_id: str, target_dir: Path,
         builtin_scaffolds = Path(__file__).resolve().parent.parent / 'scaffolds'
         print(f"    - 内置:   {builtin_scaffolds / stack_id}")
         return False
-    
+
     print(f"📦 使用脚手架: {scaffold_path}")
-    
+
     metadata = load_scaffold_metadata(scaffold_path)
     print(f"📋 选型名称: {metadata.get('name', stack_id)}")
     if metadata.get('description'):
         print(f"   {metadata['description']}")
-    
+
     files_dir = scaffold_path / 'files'
     if not files_dir.exists() or not files_dir.is_dir():
         print(f"⚠️  脚手架无 files/ 目录: {scaffold_path}")
         return True
-    
+
     print(f"\n📁 复制脚手架文件...")
     copied, skipped = copy_scaffold_files(files_dir, target_dir, force, verbose)
-    
+
     print(f"\n🔧 渲染模板变量...")
     rendered = render_templates(target_dir, metadata, verbose)
-    
+
+    print(f"\n📋 检查必需脚本清单...")
+    injected = ensure_required_scripts(target_dir, metadata, force=force, verbose=verbose)
+
     print(f"\n📊 脚手架应用摘要:")
     print(f"   - 复制文件: {copied}")
     print(f"   - 跳过文件: {skipped}")
     print(f"   - 渲染变量: {rendered}")
-    
+    print(f"   - 注入脚本: {injected}")
+
     return True
+
+
+# Patterns that mark a script body as an echo-skip placeholder
+_ECHO_SKIP_RE = re.compile(
+    r"^\s*echo\s+['\"]?(?:skip|not\s+config|skipping|no\s+\w+\s+configured)",
+    re.IGNORECASE,
+)
+
+
+def _is_echo_skip(body: str) -> bool:
+    """True if the script body is a no-op echo placeholder."""
+    if not body:
+        return True
+    s = body.strip()
+    if s in (':', 'true', 'false'):
+        return True
+    return bool(_ECHO_SKIP_RE.match(s))
+
+
+# Real (non-skip) implementations for placeholder injection
+_NODEJS_PLACEHOLDERS = {
+    'lint':          "eslint src/ tests/",
+    'typecheck':     "node --check src/index.js",
+    'test:unit':     "node --test tests/unit",
+    'test':          "node --test tests/unit tests/integration",
+    'test:integration': "node --test tests/integration",
+    'test:coverage': "node --test --experimental-test-coverage tests/",
+    'build':         "node src/index.js --version",
+}
+
+_PYTHON_REQUIRED_FILES_HINTS = {
+    'pyproject.toml': "Add [build-system] + [project.scripts] sections.",
+    'ruff.toml':      "Configure ruff linter rules.",
+    'mypy.ini':       "Configure mypy strict mode for src/.",
+}
+
+
+def _ensure_nodejs_scripts(target_dir: Path, required: Dict[str, List[str]], force: bool, verbose: bool) -> int:
+    """Inject missing required scripts into package.json without echo-skip bodies."""
+    pkg = target_dir / 'package.json'
+    if not pkg.exists():
+        print("    ⚠️  package.json missing — skipping npm script injection")
+        return 0
+    try:
+        with pkg.open('r', encoding='utf-8') as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"    🛑 parse package.json failed: {e}")
+        return 0
+
+    scripts = data.setdefault('scripts', {})
+    injected = 0
+
+    for phase in ('pre_commit', 'pre_push'):
+        for name in (required.get(phase) or []):
+            if name in scripts and not _is_echo_skip(scripts[name]):
+                continue
+            placeholder = _NODEJS_PLACEHOLDERS.get(name)
+            if placeholder is None:
+                print(f"    ⚠️  no safe placeholder for required script '{name}' — leave manual")
+                continue
+            old = scripts.get(name)
+            if old is not None and _is_echo_skip(old):
+                print(f"    🔁 replace echo-skip: scripts.{name} -> {placeholder!r}")
+            else:
+                print(f"    ➕ inject required script: scripts.{name} -> {placeholder!r}")
+                if verbose:
+                    print(f"          (was missing)")
+            scripts[name] = placeholder
+            injected += 1
+
+    if injected > 0:
+        with pkg.open('w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+            f.write('\n')
+    return injected
+
+
+def _ensure_python_files(target_dir: Path, required_files: List[str], verbose: bool) -> int:
+    """Ensure required Python project files exist (with safe starter content, never echo-skip)."""
+    injected = 0
+    for fname in required_files:
+        path = target_dir / fname
+        if path.exists():
+            continue
+        hint = _PYTHON_REQUIRED_FILES_HINTS.get(fname, '')
+        print(f"    ➕ create stub: {fname}  ({hint})")
+        if fname == 'pyproject.toml':
+            path.write_text(
+                '[build-system]\nrequires = ["hatchling"]\nbuild-backend = "hatchling.build"\n\n'
+                '[project]\nname = "placeholder"\nversion = "0.0.0"\nrequires-python = ">=3.10"\n\n'
+                '[tool.ruff]\nline-length = 100\ntarget-version = "py310"\n\n'
+                '[tool.pytest.ini_options]\ntestpaths = ["tests"]\n',
+                encoding='utf-8',
+            )
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(f"# {fname} — placeholder, replace with real config\n", encoding='utf-8')
+        injected += 1
+    return injected
+
+
+def ensure_required_scripts(target_dir: Path, metadata: Dict[str, Any], force: bool = False, verbose: bool = False) -> int:
+    """
+    确保 target_dir 中所有必需的脚本 / 文件存在；缺失则注入合理占位（绝不用 echo 跳过）。
+
+    Returns: number of injected/fixed items.
+    """
+    required = metadata.get('required_scripts') or {}
+    if not isinstance(required, dict):
+        return 0
+
+    injected = 0
+    sid = (metadata.get('id') or '').lower()
+
+    if sid == 'nodejs':
+        injected += _ensure_nodejs_scripts(target_dir, required, force=force, verbose=verbose)
+    elif sid == 'python':
+        required_files = (metadata.get('required_files') or [])
+        injected += _ensure_python_files(target_dir, required_files, verbose=verbose)
+    elif sid in ('go', 'java-maven'):
+        # Toolchain-based: report missing required files but don't inject.
+        for f in (metadata.get('required_files') or []):
+            if not (target_dir / f).exists():
+                print(f"    ⚠️  required file missing: {f} (user must create)")
+
+    if injected == 0:
+        print("    ✓ all required scripts already present (no echo-skip detected)")
+    return injected
 
 
 def load_preset(preset_dir: Path, source_label: str) -> Optional[Dict]:

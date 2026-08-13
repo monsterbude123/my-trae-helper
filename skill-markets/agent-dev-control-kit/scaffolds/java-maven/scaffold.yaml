@@ -7,6 +7,16 @@ post_actions:
 - description: 初始化项目
   path: scripts/init.sh
   type: script
+required_scripts:
+  pre_commit:
+  - mvn
+  pre_push:
+  - mvn
+  required_files:
+    - pom.xml
+  pom_must_contain:
+    - maven-checkstyle-plugin
+    - jacoco-maven-plugin
 tags:
 - java
 - maven
