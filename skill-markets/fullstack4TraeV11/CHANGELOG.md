@@ -1,10 +1,34 @@
-# Changelog — V11.0
+# Changelog - V11
 
-> V11 独立 skill 版本 changelog。V10 → V11 蒸馏 + 架构升级。
+> V11 独立 skill 版本 changelog。V10 -> V11 蒸馏 + 架构升级。
 
 ---
 
-## [V11.0.0] — 2026-08-11
+## [V11.3.0] - 2026-08-13
+
+### ✨ 新增（V11.3 opt-in 三件套）
+
+- **stage-gate-pre-stage.sh**: husky 式硬阻断门禁（exit 0/1），stage 切换前必跑 stage-gate.py + state-card-validator.py
+- **references/stage-physical-isolation.md**: 物理隔离规范（fact/ + stage/ 双目录布局，借鉴 Docker 镜像层）
+- **docs/给验收角色的一封信.md**: 验收瘦身操作手册（像产品经理验收，不读代码细节）
+
+### 🗑️ 革命性瘦身（-50%，44 文件删除）
+
+- 删除 `references/V10-distillation-source-map.md`（V10 蒸馏溯源，过渡产物）
+- 删除 13 份 `skills/*/anti-patterns/V10-battle-tested.md`（V10 过渡引用）
+- 删除 `research/` 整个目录（30 文件，V10->V11 升级期工作笔记）
+- 精简 CHANGELOG V11.0 段（移除 scripts 实装清单 + stage 文件清单）
+
+### 🎯 V11.3 vs V11.0 差异
+
+- 新增 opt-in 门禁硬化（stage-gate-pre-stage.sh），不破坏现有 pre-stage.sh
+- 新增物理隔离 + 验收瘦身设计文档（opt-in，不改现有 stage 流程）
+- 删除 44 个 V10 过渡产物，体积 -50%
+- 不改任何 13 stage SKILL.md / 24 scripts / frontmatter version
+
+---
+
+## [V11.0.0] - 2026-08-11
 
 ### ✨新增（V11 架构升级）
 
