@@ -76,6 +76,7 @@
 | **trae-security-review** | 1 md + 2 agent + 3 ref + 1 py | 2 | 3 | 2 | **3.9** | 🟡 | 2 个 HIGH 和 3 个 MEDIUM 均为 risk-patterns.md 和 skill-scanner.md 中的风险模式文档引用（非可执行） |
 | **skills-security**（外部） | 1 md + 1 py + 1 json | 0 | 1 | 0 | **4.8** | 🟢 | 1 个 MEDIUM：main.py 中的 HTTP 引用 |
 | **trae-local-data-export** | 1 md + 4 ref + 7 py | 0 | 1 | 0 | **4.8** | 🟢 | 1 MEDIUM 为 db-location.md 中的 PowerShell 示例命令（文档引用，非可执行）；7 脚本全部 stdlib + pycryptodome，无 HTTP 外联，无远端上传；密钥文件 decrypted_key.json 默认 gitignore |
+| **agent-dev-control-kit** | 1 md + 9 skill + 9 tpl + 11 ref + 19 py + 2 wf + 9 scaffold | 0 | 3 | 4 | **3.4** | 🟢 | **实跑扫描（2026-08-13 23:58，最新）**：trae-security-review scan_skills_dir.py V2.1 → **HIGH 0 + MEDIUM 3 + LOW 4 → PASS**（决策矩阵：HIGH 0 + MEDIUM ≤ 3）。3 MEDIUM = release-process-control/SKILL.md ×1 + release-process-template.md ×1 `HTTP_INSECURE`（文档 HTTP 示例）+ scaffolds/python/files/guards/test-coverage-guard.py ×1 `SHELL_EXEC`（子进程 pytest 调用，参数化命令）；4 LOW = init-control-kit.py ×3 `STACK_LEAK`（DEBUG 栈追踪示例）+ asset-management-control/SKILL.md ×1 `WEAK_CRYPTO`（SHA-256 升级建议文档引用）。**本子代理 V0.5 升级**：(a) 改 3 文件：presets/README.md（4 处 `_index.json` → `_index.yaml`）+ registry/gates.yaml（+2 条 pre-merge/pre-release gate）+ pre-commit-template.sh（opt-in 化）；(b) 新增 6 文件：templates/changed-file-impact-guard-template.yaml + scaffolds/nodejs/files/guards/changed-file-impact-guard.mjs + skills/guard-control/templates/changed-file-impact-guard-template.yaml + scripts/install-husky.py + scripts/install-husky.test.py + guard 同步模板。**网络面**：全部 stdlib（argparse / pathlib / subprocess + 命令白名单 / yaml），无外联；HTTP 仅出现在 SKILL.md 文档示例中。**安全锚点**：opt-in 化的 pre-commit 默认不安装（用户显式 opt-in 才装 husky 钩子，避免强改 .git/hooks）；新增的 changed-file-impact-guard 是只读扫描（不写文件），失败仅警告不阻断（per AGENTS.md §7.1 R-1） |
 
 ---
 
@@ -115,6 +116,12 @@
 | `scripts/serve.ps1` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行（Start-Process 启动 docsify serve）+ localhost 浏览器唤起 |
 | `scripts/init-docs.sh` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行 + localhost 浏览器唤起 |
 | `scripts/serve.sh` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行 + localhost 浏览器唤起 |
+| `src/execution/skill-change-control.mjs` | CLI | 🟢 LOW | 纯文件 IO（existsSync/mkdirSync/cpSync/rmSync/writeFileSync）+ 风险分级 + 备份/回滚；无 subprocess / 无网络 / 无 eval-exec |
+| `src/execution/skill-install-control.mjs` | CLI | 🟢 LOW | 纯文件 IO + symlink/copy + 审计日志；无 subprocess / 无 HTTP；依赖解析为本地 IO |
+| `scripts/skill-security-guard.py` | CLI | 🟡 MEDIUM | subprocess 调用 trae-security-review/scan_skills_dir.py（业务必需，参数化命令白名单 scan_skills_dir.py）；纯文件扫描，无网络 |
+| `scripts/skill-structure-guard.py` | CLI | 🟢 LOW | 纯文件读取 + 正则匹配；无 subprocess / 无网络 |
+| `src/guards/skill-dependency-guard.mjs` | CLI | 🟢 LOW | 纯文件 IO + YAML 解析；无 subprocess / 无网络 |
+| `scripts/skill-capability-guard.py` | CLI | 🟢 LOW | 纯文件读取 + 正则匹配；无 subprocess / 无网络 |
 
 ### 安全脚本（纯本地/无外联）
 
@@ -156,5 +163,5 @@ code auto_reports\{package_name}_{timestamp}.md
 
 ---
 
-*生成日期: 2026-08-12 | 扫描引擎: trae-security-review/scan_skills_dir.py v2.1*
-*本次更新: project-rules-gate v0.1 → v0.2 升级（加 --move + frontmatter 自动注入）。**实跑扫描结果：HIGH 0 + MEDIUM 0 + LOW 0 → PASS**（白名单 15 行）。agent 反馈 2 条已采纳：(a) 原 rules 没移走 → 加 --move 物理移走到 .trae/rules/_archived/；(b) 没主动建 rule 的 README → 改 frontmatter 注入（不发明 README 文件，元信息内嵌）。下一轮升级前 backlog: 无（已满分）*
+*生成日期: 2026-08-13 | 扫描引擎: trae-security-review/scan_skills_dir.py v2.1*
+*本次更新: agent-dev-control-kit 首次登记（独立群岛表新增一行）。**实跑扫描（2026-08-13 23:58）**：HIGH 0 + MEDIUM 3 + LOW 4 → **PASS**（决策矩阵 HIGH 0 + MEDIUM ≤ 3）。3 MEDIUM = release-process-control/SKILL.md ×1 + release-process-template.md ×1 HTTP_INSECURE（文档 HTTP 示例）+ scaffolds/python/files/guards/test-coverage-guard.py ×1 SHELL_EXEC（子进程 pytest 调用，参数化命令）；4 LOW = init-control-kit.py ×3 STACK_LEAK（DEBUG 栈追踪示例）+ asset-management-control/SKILL.md ×1 WEAK_CRYPTO（SHA-256 升级建议文档引用）。本子代理 V0.5 升级：改 3 文件（presets/README.md + registry/gates.yaml + pre-commit-template.sh opt-in 化）+ 新增 6 文件（changed-file-impact-guard 模板/脚本 ×3 + install-husky.py/.test.py ×2 + guard 同步模板 ×1）。下一轮升级前 backlog: 无（已 PASS）*

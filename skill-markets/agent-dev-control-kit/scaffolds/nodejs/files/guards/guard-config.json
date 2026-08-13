@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "preset": "nodejs",
+  "guards": [
+    {
+      "id": "api-contract",
+      "script": "api-contract-guard.mjs",
+      "description": "Validate that src/services/* exports match schemas/api/*.json",
+      "blocking": true,
+      "scope": ["src/services/", "schemas/api/"]
+    },
+    {
+      "id": "test-coverage",
+      "script": "test-coverage-guard.mjs",
+      "description": "Enforce test coverage >= 80%",
+      "blocking": true,
+      "scope": ["src/"],
+      "threshold": 80
+    }
+  ]
+}

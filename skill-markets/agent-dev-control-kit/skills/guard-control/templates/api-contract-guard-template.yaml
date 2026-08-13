@@ -1,0 +1,69 @@
+# API 契约 Guard 配置模板
+
+# Guard 配置文件
+version: "1.0"
+
+# 禁止规则
+forbidden:
+  - id: no-schema-endpoint
+    description: 添加无 Schema 的 API 端点
+    severity: HIGH
+  
+  - id: breaking-change
+    description: 修改已发布 API 的响应结构（破坏性变更）
+    severity: HIGH
+  
+  - id: skip-version
+    description: 跳过版本号递增
+    severity: MEDIUM
+  
+  - id: remove-required-field
+    description: 移除必需字段而不升级版本
+    severity: HIGH
+  
+  - id: mock-in-prod
+    description: 在生产端点使用 mock 数据
+    severity: HIGH
+  
+  - id: dynamic-segments
+    description: 端点命名含动态片段多于 2 个
+    severity: MEDIUM
+
+# 白名单
+whitelist:
+  - path: "/health"
+    reason: "健康检查端点，无需认证"
+    expires: "永久"
+  
+  - path: "/internal/*"
+    reason: "内部调试端点，仅限开发环境"
+    expires: "按需"
+    conditions:
+      - environment: "development"
+  
+  - path: "/legacy/v1/*"
+    reason: "遗留系统兼容，维护期内保留"
+    expires: "2025-12-31"
+    deprecation_notice: "计划下线，请迁移到 v2"
+
+# 检查项配置
+checks:
+  - name: endpoint-naming
+    enabled: true
+    severity: HIGH
+  
+  - name: schema-completeness
+    enabled: true
+    severity: HIGH
+  
+  - name: version-management
+    enabled: true
+    severity: MEDIUM
+  
+  - name: deprecation-marking
+    enabled: true
+    severity: LOW
+  
+  - name: auth-requirement
+    enabled: true
+    severity: HIGH

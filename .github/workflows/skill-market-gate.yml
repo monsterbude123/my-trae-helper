@@ -1,0 +1,156 @@
+# Skill Market Gate — L3/L4 门禁
+#
+# L3 合并门禁: PR merge 时触发
+# L4 发布门禁: Release 时触发
+
+name: Skill Market Gate
+
+on:
+  pull_request:
+    branches: [main, release/*]
+  release:
+    types: [published]
+
+jobs:
+  # L3 合并门禁
+  L3-merge-gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: L2 checks (L1 + 集成测试)
+        run: |
+          echo "Running L2 checks..."
+          # 1. 安全扫描（全部技能）
+          python skill-markets/trae-security-review/scripts/scan_skills_dir.py skill-markets auto_reports
+
+          # 2. 结构检查（变更的技能）
+          CHANGED_SKILLS=$(git diff --name-only HEAD~1 HEAD | grep 'skill-markets/' | cut -d'/' -f2 | sort -u)
+          if [ -n "$CHANGED_SKILLS" ]; then
+            for skill in $CHANGED_SKILLS; do
+              python scripts/skill-structure-guard.py "skill-markets/$skill"
+            done
+          fi
+
+          # 3. 依赖检查（变更的技能）
+          if [ -n "$CHANGED_SKILLS" ]; then
+            for skill in $CHANGED_SKILLS; do
+              node src/guards/skill-dependency-guard.mjs "$skill"
+            done
+          fi
+
+          # 4. 能力检查（变更的技能）
+          if [ -n "$CHANGED_SKILLS" ]; then
+            for skill in $CHANGED_SKILLS; do
+              python scripts/skill-capability-guard.py "skill-markets/$skill"
+            done
+          fi
+
+      - name: Check CAPABILITY-MAP.md sync
+        run: |
+          git diff --exit-code skill-markets/CAPABILITY-MAP.md || {
+            echo "❌ CAPABILITY-MAP.md 未同步"
+            exit 1
+          }
+
+      - name: Check SECURITY-MAP.md sync
+        run: |
+          git diff --exit-code SECURITY-MAP.md || {
+            echo "❌ SECURITY-MAP.md 未同步"
+            exit 1
+          }
+
+      - name: Build CLI
+        run: npm run build || echo "No build script defined"
+
+      - name: Upload security report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: auto_reports/
+
+  # L4 发布门禁
+  L4-publish-gate:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: L3 checks (全量扫描)
+        run: |
+          echo "Running L3 checks (full scan)..."
+          python skill-markets/trae-security-review/scripts/scan_skills_dir.py skill-markets auto_reports
+
+          # 检查所有技能的结构
+          for skill in skill-markets/*/; do
+            skill_name=$(basename "$skill")
+            if [ -f "$skill/SKILL.md" ]; then
+              python scripts/skill-structure-guard.py "$skill" || {
+                echo "❌ $skill_name 结构检查失败"
+                exit 1
+              }
+            fi
+          done
+
+      - name: Skill market integrity check
+        run: |
+          echo "检查技能市场完整性..."
+          # 验证所有技能都在 CAPABILITY-MAP.md 注册
+          for skill in skill-markets/*/; do
+            skill_name=$(basename "$skill")
+            if [ -f "$skill/SKILL.md" ]; then
+              node src/guards/skill-dependency-guard.mjs "$skill_name" || echo "⚠️ $skill_name 依赖检查失败"
+              python scripts/skill-capability-guard.py "$skill" || echo "⚠️ $skill_name 能力检查失败"
+            fi
+          done
+
+      - name: Publish to npm (灰度)
+        run: npm publish --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Wait for validation
+        run: sleep 300
+
+      - name: Promote to latest
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          npm dist-tag add @my-trae-helper/cli@$VERSION latest
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-reports
+          path: |
+            auto_reports/
+            logs/

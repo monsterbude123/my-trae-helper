@@ -1,0 +1,23 @@
+category: language
+description: Node.js + JavaScript/TypeScript 项目
+files: files/
+id: nodejs
+name: Node.js
+post_actions:
+- description: 初始化项目
+  path: scripts/init.sh
+  type: script
+tags:
+- javascript
+- typescript
+- node
+variables:
+- default: my-project
+  description: 项目名称
+  name: project_name
+  required: true
+- default: ''
+  description: 作者
+  name: author
+  required: false
+version: 1.0.0

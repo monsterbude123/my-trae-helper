@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "preset": "python",
+  "guards": [
+    {
+      "id": "api-contract",
+      "script": "api-contract-guard.py",
+      "description": "Validate that src/services/*.py exports match schemas/api/*.json",
+      "blocking": true,
+      "scope": ["src/services/", "schemas/api/"]
+    },
+    {
+      "id": "test-coverage",
+      "script": "test-coverage-guard.py",
+      "description": "Enforce test coverage >= 80%",
+      "blocking": true,
+      "scope": ["src/"],
+      "threshold": 80
+    },
+    {
+      "id": "import-boundary",
+      "script": "import-boundary-guard.py",
+      "description": "Forbid src/services/ from importing from src/api/ or src/db/ (layered architecture)",
+      "blocking": true,
+      "scope": ["src/"],
+      "forbidden_patterns": [
+        {"from": "src/services/", "to": "src/api/"},
+        {"from": "src/services/", "to": "src/db/"}
+      ]
+    }
+  ]
+}

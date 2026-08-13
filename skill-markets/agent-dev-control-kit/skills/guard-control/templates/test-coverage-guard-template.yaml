@@ -1,0 +1,68 @@
+# 测试覆盖率 Guard 配置模板
+
+# Coverage Guard 配置文件
+version: "1.0"
+
+# 全局覆盖率阈值
+global:
+  branches: 80
+  functions: 80
+  lines: 80
+  statements: 80
+
+# 关键路径配置
+critical_paths:
+  enabled: true
+  threshold: 100
+  paths:
+    - "src/api/**/*.ts"
+    - "src/core/**/*.ts"
+    - "src/auth/**/*.ts"
+
+# 新增代码覆盖率
+new_code:
+  enabled: true
+  threshold: 100
+
+# 排除路径
+exclude:
+  - "src/**/*.test.ts"
+  - "src/**/*.spec.ts"
+  - "src/mocks/**"
+  - "src/types/**"
+
+# 报告配置
+report:
+  format: [html, lcov, text]
+  output_dir: coverage/
+
+# 失败处理
+on_failure:
+  action: block
+  message: |
+    🛑 测试覆盖率 Guard 阻断
+    
+    当前覆盖率:
+    - 分支: {branches}%
+    - 函数: {functions}%
+    - 行数: {lines}%
+    - 语句: {statements}%
+    
+    阈值要求:
+    - 分支: {threshold_branches}%
+    - 函数: {threshold_functions}%
+    - 行数: {threshold_lines}%
+    - 语句: {threshold_statements}%
+    
+    修复建议:
+    1. 为未覆盖代码添加测试
+    2. 检查是否有遗漏的边界条件
+    3. 确保关键路径有完整测试
+
+# 白名单（临时豁免）
+whitelist:
+  - path: "src/legacy/**/*.ts"
+    reason: "遗留代码，计划重构"
+    expires: "2025-06-30"
+    threshold_override:
+      lines: 50

@@ -8,6 +8,8 @@
  *   trae-skills remove <skill-name>    Remove a skill
  *   trae-skills update [skill-name]    Update skills
  *   trae-skills init <skill-name>      Create a new SKILL.md template
+ *   trae-skills create <name>          Create a new skill package (三层控制)
+ *   trae-skills verify <name>          Verify a skill (执行所有守卫)
  *
  * Entry point — only routes commands. Logic lives in src/*.mjs.
  */
@@ -17,6 +19,8 @@ import { runList } from '../src/list.mjs';
 import { runRemove } from '../src/remove.mjs';
 import { runUpdate } from '../src/update.mjs';
 import { runInit } from '../src/init.mjs';
+import { runCreate } from '../src/create.mjs';
+import { runVerify } from '../src/verify.mjs';
 
 const commands = {
   add: { run: runAdd, desc: 'Install a skill from skill-markets' },
@@ -27,6 +31,8 @@ const commands = {
   update: { run: runUpdate, desc: 'Update installed skills' },
   up: { run: runUpdate, desc: 'Alias for update' },
   init: { run: runInit, desc: 'Create a new SKILL.md template' },
+  create: { run: runCreate, desc: 'Create a new skill package (三层控制)' },
+  verify: { run: runVerify, desc: 'Verify a skill (执行所有守卫)' },
 };
 
 async function main() {

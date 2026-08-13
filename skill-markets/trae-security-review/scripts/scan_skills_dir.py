@@ -106,7 +106,7 @@ CHECK_ITEMS = [
 ]
 
 TEXT_FILE_EXTS = {
-    ".md", ".txt", ".json", ".js", ".ts", ".py", ".sh",
+    ".md", ".txt", ".json", ".js", ".mjs", ".ts", ".py", ".sh",
     ".ps1", ".yaml", ".yml", ".toml", ".cfg", ".conf",
 }
 

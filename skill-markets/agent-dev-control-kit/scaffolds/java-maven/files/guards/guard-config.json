@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "preset": "java-maven",
+  "guards": [
+    {
+      "id": "api-contract",
+      "script": "api-contract-guard.sh",
+      "description": "Validate that services classes expose public methods matching schemas/api/*.json",
+      "blocking": true,
+      "scope": ["src/main/java/", "schemas/api/"]
+    },
+    {
+      "id": "test-coverage",
+      "script": "test-coverage-guard.sh",
+      "description": "Enforce test coverage >= 80% (jacoco)",
+      "blocking": true,
+      "scope": ["src/main/java/"],
+      "threshold": 80
+    },
+    {
+      "id": "package-boundary",
+      "script": "package-boundary-guard.sh",
+      "description": "Forbid com.example.app.services from importing com.example.app.api or com.example.app.db",
+      "blocking": true,
+      "scope": ["src/main/java/"],
+      "forbidden_patterns": [
+        {"from": "com.example.app.services", "to": "com.example.app.api"},
+        {"from": "com.example.app.services", "to": "com.example.app.db"}
+      ]
+    }
+  ]
+}

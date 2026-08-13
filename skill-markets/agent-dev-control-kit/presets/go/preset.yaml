@@ -1,0 +1,77 @@
+# 选型元数据
+id: go
+name: Go
+version: "1.0.0"
+description: Go 项目（支持 Gin/Echo/标准库）
+
+# 检测特征（用于自动识别）
+detection:
+  files:
+    - go.mod
+  primary: go.mod
+
+# 工具链配置
+toolchain:
+  package_manager: go modules  # go modules
+  runtime: go                   # node/python/go/java
+  runtime_version: ">=1.21"
+
+# 命令映射
+commands:
+  lint:
+    default: "golangci-lint run"
+    alternatives:
+      - "go vet ./..."
+      - "gofmt -l ."
+  typecheck:
+    default: "go build ./..."
+    alternatives: []
+    optional: false   # Go 编译自带类型检查
+  test:
+    unit: "go test ./internal/... -short"
+    integration: "go test ./tests/integration/... -tags=integration"
+    coverage: "go test ./... -coverprofile=coverage.out -covermode=atomic"
+    all: "go test ./..."
+  build:
+    default: "go build -o bin/app ./cmd/app"
+    optional: false
+
+# 文件路径约定
+paths:
+  source: internal/    # 私有逻辑
+  cmd: cmd/            # 二进制入口
+  tests: tests/        # 集成/E2E
+  config: config/
+  docs: docs/
+
+# 脚手架模板
+template_path: template/
+
+# 默认依赖
+dependencies:
+  test_runner: go test     # go test
+  linter: golangci-lint    # golangci-lint / go vet / gofmt
+  formatter: gofmt         # gofmt / goimports
+
+# Guard 配置
+guards:
+  default:
+    - api-contract
+    - test-coverage
+  language_specific:
+    - module-boundary   # Go 特有：禁止 internal/ 被外部引用
+
+# Gate 配置
+gates:
+  default:
+    - L1: [lint, typecheck, test:unit]
+    - L2: [test:integration, test:coverage, build]
+    - L3: [test:e2e]
+    - L4: [test:all, security-scan]
+
+# 变量（可被用户覆写）
+variables:
+  author: ""
+  license: "MIT"
+  port: 8080
+  module_path: "github.com/example/my-go-app"

@@ -1,111 +1,66 @@
-#!/usr/bin/env sh
-# .husky/pre-commit — 安全扫描门禁
+#!/bin/bash
+# Skill Market L1 Commit Gate
 #
-# 触发条件：每次 git commit
-# 行为：
-#   1. 扫描本次变更涉及到的 .py/.sh/.ps1/.js/.ts/.md/.yaml/.yml 文本文件
-#   2. 跑 scan_skills_dir.py（技术安全）+ scan_rigor.py（严谨用词）
-#   3. 任一 HIGH 命中 → 阻断 commit
-#   4. MEDIUM/LOW 仅警告，不阻断
-#
-# 退出码：
-#   0 = 全部通过
-#   1 = 发现 HIGH 风险，commit 阻断
-#   2 = 脚本错误
+# 触发时机: git commit
+# 检查项:
+#   - Lint
+#   - TypeCheck
+#   - Unit Tests
+#   - 技能安全守卫（仅变更的技能）
+#   - 技能结构守卫（仅新建技能）
 
 set -e
 
-# 锁定仓库根
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-cd "$REPO_ROOT"
+echo "🔍 执行 L1 Commit Gate..."
 
-# 自动检测 Python 解释器（Windows / Git Bash / Linux 三处兼容）
-PY=""
-for cand in python python3 py; do
-  if command -v "$cand" >/dev/null 2>&1; then
-    PY="$cand"
-    break
-  fi
-done
-if [ -z "$PY" ]; then
-  echo "[husky] 未找到 Python 解释器，跳过安全扫描"
-  exit 0
+# 1. Lint
+if command -v npm &> /dev/null && grep -q '"lint"' package.json; then
+  echo "1️⃣ 执行 Lint..."
+  npm run lint
 fi
 
-# 工具路径
-SCAN_SEC="skill-markets/trae-security-review/scripts/scan_skills_dir.py"
-SCAN_RIG="skill-markets/trae-security-review/scripts/scan_rigor.py"
-
-# 报告目录
-mkdir -p audit_reports
-
-# 收集本次变更涉及的文件
-CHANGED=$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null || true)
-if [ -z "$CHANGED" ]; then
-  echo "[husky] 检测到合并 commit，跳过扫描"
-  exit 0
+# 2. TypeCheck
+if command -v npm &> /dev/null && grep -q '"typecheck"' package.json; then
+  echo "2️⃣ 执行 TypeCheck..."
+  npm run typecheck
 fi
 
-# 提取本次涉及的安全相关 / 严谨相关文件
-# 规则：任何 *.py / *.sh / *.ps1 / *.js / *.ts / *.md / *.yaml / *.yml / *.json / *.toml
-# 落在 skill-markets/ 或 bin/ 或 src/ 或 scripts/ 或根目录配置
-TARGETS=$(printf "%s\n" "$CHANGED" | awk '
-  /^(skill-markets|bin|src|scripts|package\.json|package\.yaml|AGENTS\.md|README\.md|SECURITY-MAP\.md|\.github|\.husky)\// ||
-  /\.ya?ml$/ || /\.json$/ || /\.md$/ || /\.py$/ || /\.sh$/ || /\.ps1$/ || /\.js$/ || /\.ts$/ {
-    print
-  }
-' | sort -u)
-
-if [ -z "$TARGETS" ]; then
-  echo "[husky] 本次无扫描目标，跳过"
-  exit 0
+# 3. Unit Tests
+if command -v npm &> /dev/null && grep -q '"test:unit"' package.json; then
+  echo "3️⃣ 执行 Unit Tests..."
+  npm run test:unit
 fi
 
-# 临时目录：把本次变更拷贝成虚拟 skill 目录
-TMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t "husky-scan")
-trap "rm -rf $TMP_DIR" EXIT
-
-for f in $TARGETS; do
-  if [ -f "$f" ]; then
-    mkdir -p "$TMP_DIR/$(dirname "$f")"
-    cp "$f" "$TMP_DIR/$f"
-  fi
-done
-
-echo "[husky] 扫描 $(echo "$TARGETS" | wc -l) 个变更文件"
-echo "[husky] 临时扫描目录: $TMP_DIR"
-
-# 1. 技术安全扫描
-echo ""
-echo "━━━ [1/2] 技术安全扫描 (scan_skills_dir.py) ━━━"
-SEC_JSON=$("$PY" "$SCAN_SEC" "$TMP_DIR" audit_reports --quiet 2>&1 | tail -n 1)
-echo "$SEC_JSON"
-SEC_VERDICT=$(echo "$SEC_JSON" | "$PY" -c "import json,sys; print(json.load(sys.stdin).get('verdict','ERROR'))" 2>/dev/null || echo "ERROR")
-
-if [ "$SEC_VERDICT" = "BLOCKED" ]; then
-  echo ""
-  echo "�� [husky] 技术安全扫描 BLOCKED：检测到 HIGH 风险"
-  echo "报告: audit_reports/"
-  exit 1
+# 4. 技能安全守卫（仅变更的技能）
+# 取 skill-markets/<dir>/<file> 中 <dir> 部分,排除 .md 单文件(如 CAPABILITY-MAP.md)
+CHANGED_SKILLS=$(git diff --name-only --cached | grep '^skill-markets/' | awk -F/ '$2 && $2 !~ /\.md$/ {print $2}' | sort -u)
+if [ -n "$CHANGED_SKILLS" ]; then
+  echo "4️⃣ 执行技能安全守卫..."
+  for skill in $CHANGED_SKILLS; do
+    if [ -d "skill-markets/$skill" ]; then
+      echo "  - 检查 $skill..."
+      python scripts/skill-security-guard.py "skill-markets/$skill" || {
+        echo "❌ 安全守卫失败: $skill"
+        exit 1
+      }
+    fi
+  done
 fi
 
-# 2. 严谨用词扫描（仅对 .md 文件）
-echo ""
-echo "━━━ [2/2] 严谨用词扫描 (scan_rigor.py) ━━━"
-RIG_TARGETS=$(echo "$TARGETS" | grep -E '\.md$' || true)
-if [ -n "$RIG_TARGETS" ]; then
-  RIG_JSON=$(cd "$REPO_ROOT/skill-markets/trae-security-review/scripts" && "$PY" ./scan_rigor.py "$TMP_DIR" audit_reports --quiet 2>&1 | tail -n 1)
-  echo "$RIG_JSON"
-  RIG_VERDICT=$(echo "$RIG_JSON" | "$PY" -c "import json,sys; print(json.load(sys.stdin).get('verdict','ERROR'))" 2>/dev/null || echo "ERROR")
-  if [ "$RIG_VERDICT" = "WARNING" ]; then
-    echo ""
-    echo "⚠️ [husky] 严谨用词扫描 WARNING：建议人工复核"
-    echo "（不阻断 commit，但请打开 audit_reports/ 复查）"
-  fi
-else
-  echo "[husky] 本次无 .md 变更，跳过严谨用词扫描"
+# 5. 技能结构守卫（仅新建技能）
+# 只匹配 skill-markets/<dir>/SKILL.md,排除 CAPABILITY-MAP.md 等单文件
+NEW_SKILLS=$(git diff --name-only --cached --diff-filter=A | grep '^skill-markets/[^/]*/SKILL\.md$' | awk -F/ '{print $2}' | sort -u)
+if [ -n "$NEW_SKILLS" ]; then
+  echo "5️⃣ 执行技能结构守卫..."
+  for skill in $NEW_SKILLS; do
+    if [ -d "skill-markets/$skill" ]; then
+      echo "  - 检查 $skill..."
+      python scripts/skill-structure-guard.py "skill-markets/$skill" || {
+        echo "❌ 结构守卫失败: $skill"
+        exit 1
+      }
+    fi
+  done
 fi
 
-echo ""
-echo "✅ [husky] 安全扫描通过"
-exit 0
+echo "✅ L1 Commit Gate 通过"

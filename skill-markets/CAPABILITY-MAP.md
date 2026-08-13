@@ -3,6 +3,8 @@
 > 单一事实来源。新增技能前先查此地图，确认不重复。脚本复用前先查共享注册表。
 > 
 > 维护规则：新增/删除/改依赖 → 同步更新此文件。地图与 SKILL.md 不一致时，以地图为准。
+> 
+> **Last Updated**: 2026-08-14
 
 ---
 
@@ -33,6 +35,7 @@
 | [skill-optimization-method](skill-optimization-method/SKILL.md) | 纯Skill | 技能包优化升级方法论 — 体积诊断 + 外部对标 + 缺口对照 + 最小修复（项目级） | 无 |
 | [session-distiller](session-distiller/SKILL.md) | 纯Skill | 会话蒸馏器 — 从完整会话历史中提炼高质量方法论、最佳实践和可复用技能包 | 无 |
 | [trae-local-data-export](trae-local-data-export/SKILL.md) | 纯Skill | Trae IDE 本地数据导出 — 整合 ZedeX/trae-chat-decrypt + cgint/ai-data-extraction，产出 JSON/TXT/SQLite 三大产物 | 7 脚本（extract_key ×2 / decrypt_db / verify / export_sessions / extract_trae_jsonl / sanitize_export） |
+| [agent-dev-control-kit](agent-dev-control-kit/SKILL.md) | 纯Skill | Agent 开发控制体系 — 三层控制(Execution+Guard+Gate) + 快速失败 + 标准模板 | 无（模板文件在 templates/） |
 
 ### L1 集成层（整合 L0 能力）
 
@@ -90,6 +93,12 @@
 | ComfyUI 知识库 | `comfyui-api-skills/scripts/lib/web_kb.py` | model_kb.py | Python 库 | Web 知识库爬取 |
 | 文档索引构建 | `doc-map-manager/scripts/build-index.py` | fullstack4TraeV7（doc-updater + reviewer） | Python 脚本 | 文档增量索引 + DOC SYNC 缺口检测 + --git-diff |
 | 文档索引查询 | `doc-map-manager/scripts/query-index.py` | fullstack4TraeV7（全部 6 agent） | Python 脚本 | --grab/--lookup/--fuzzy/--semantic/--file 五模式查询 |
+| 技能变更控制 | `src/execution/skill-change-control.mjs` | create/init 命令 | Node.js 模块 | 新建/修改/删除技能（CP1~CP6 风险判定+备份+回滚+审计） |
+| 技能安装控制 | `src/execution/skill-install-control.mjs` | add/remove/update 命令 | Node.js 模块 | 安装/卸载技能（CP1~CP6 依赖验证+冲突检查+备份+审计） |
+| 技能安全守卫 | `scripts/skill-security-guard.py` | verify 命令 + Git hooks | Python 脚本 | 调用 trae-security-review/scan_skills_dir.py + 真实风险检测 |
+| 技能结构守卫 | `scripts/skill-structure-guard.py` | verify 命令 + Git hooks | Python 脚本 | 目录命名 + SKILL.md frontmatter + 铁律数量 |
+| 技能依赖守卫 | `src/guards/skill-dependency-guard.mjs` | verify 命令 + Git hooks | Node.js 模块 | 硬依赖完整性 + 软依赖降级影响 |
+| 技能能力守卫 | `scripts/skill-capability-guard.py` | verify 命令 + Git hooks | Python 脚本 | 脚本去重 + CAPABILITY-MAP.md 同步 |
 
 ---
 
@@ -102,7 +111,7 @@ L0 基座（独立可用，无外部依赖）
 │ browser-use-cloud   openapi-doc-exporter   trae-professional  │
 │ product-teardown   vision-audit   shuxia-novel-engine        │
 │ Voice-Acting-Script-Skill   modelscope-assistant             │
-│ doc-map-manager                                              │
+│ doc-map-manager   agent-dev-control-kit                      │
 │ ⚠ test-experience  ⚠ test-partition-runner  ⚠ e2e-module-audit │
 └──────────────────────────────────────────────────────────────┘
         │                    │                    │

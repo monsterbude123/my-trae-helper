@@ -1,0 +1,79 @@
+# 选型元数据
+id: python
+name: Python
+version: "1.0.0"
+description: Python 项目（支持 FastAPI/Django/Flask）
+
+# 检测特征（用于自动识别）
+detection:
+  files:
+    - pyproject.toml
+    - setup.py
+    - requirements.txt
+  primary: pyproject.toml
+
+# 工具链配置
+toolchain:
+  package_manager: uv      # uv/pip/poetry/pdm
+  runtime: python          # node/python/go/java
+  runtime_version: ">=3.10"
+
+# 命令映射
+commands:
+  lint:
+    default: "ruff check ."
+    alternatives:
+      - "flake8 ."
+      - "pylint src/"
+  typecheck:
+    default: "mypy src/"
+    alternatives:
+      - "pyright src/"
+    optional: true
+  test:
+    unit: "pytest tests/unit -v"
+    integration: "pytest tests/integration -v"
+    coverage: "pytest --cov=src --cov-report=term-missing"
+    all: "pytest"
+  build:
+    default: "python -m build"
+    optional: true
+
+# 文件路径约定
+paths:
+  source: src/
+  tests: tests/
+  config: config/      # 可选
+  docs: docs/
+
+# 脚手架模板
+template_path: template/
+
+# 默认依赖
+dependencies:
+  test_runner: pytest   # pytest/unittest
+  linter: ruff          # ruff/flake8/pylint
+  formatter: ruff       # ruff/black
+  typechecker: mypy     # mypy/pyright（可选）
+
+# Guard 配置
+guards:
+  default:
+    - api-contract
+    - test-coverage
+  language_specific:
+    - import-boundary     # Python 特有：禁止跨层 import
+
+# Gate 配置
+gates:
+  default:
+    - L1: [lint, typecheck, test:unit]
+    - L2: [test:integration, test:coverage, build]
+    - L3: [test:e2e]
+    - L4: [test:all, security-scan]
+
+# 变量（可被用户覆写）
+variables:
+  author: ""
+  license: "MIT"
+  port: 8000

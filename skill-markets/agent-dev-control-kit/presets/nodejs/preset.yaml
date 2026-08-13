@@ -1,0 +1,75 @@
+# 选型元数据
+id: nodejs
+name: Node.js
+version: "1.0.0"
+description: Node.js + JavaScript/TypeScript 项目
+
+# 检测特征（用于自动识别）
+detection:
+  files:
+    - package.json
+  primary: package.json
+
+# 工具链配置
+toolchain:
+  package_manager: npm  # npm/yarn/pnpm/bun
+  runtime: node          # node/python/go/java
+  runtime_version: ">=18"
+
+# 命令映射
+commands:
+  lint:
+    default: "npm run lint"
+    alternatives:
+      - "npx eslint ."
+      - "npx biome check"
+  typecheck:
+    default: "npm run typecheck"
+    alternatives:
+      - "tsc --noEmit"
+    optional: true        # 纯 JS 项目可能没有类型检查
+  test:
+    unit: "npm run test:unit"
+    integration: "npm run test:integration"
+    coverage: "npm run test:coverage"
+    all: "npm test"
+  build:
+    default: "npm run build"
+    optional: true
+
+# 文件路径约定
+paths:
+  source: src/
+  tests: tests/
+  config: config/      # 可选
+  docs: docs/
+
+# 脚手架模板
+template_path: template/
+
+# 默认依赖
+dependencies:
+  test_runner: node:test  # node:test/vitest/jest
+  linter: eslint          # eslint/biome
+  formatter: prettier     # prettier/biome
+
+# Guard 配置
+guards:
+  default:
+    - api-contract
+    - test-coverage
+  language_specific: []
+
+# Gate 配置
+gates:
+  default:
+    - L1: [lint, typecheck, test:unit]
+    - L2: [test:integration, test:coverage, build]
+    - L3: [test:e2e]
+    - L4: [test:all, security-scan]
+
+# 变量（可被用户覆写）
+variables:
+  author: ""
+  license: "MIT"
+  port: 3000

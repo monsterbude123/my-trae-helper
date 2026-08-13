@@ -1,0 +1,23 @@
+description: agent-dev-control-kit 技术栈元数据索引
+presets:
+- description: Node.js + JavaScript/TypeScript 项目
+  id: nodejs
+  name: Node.js
+  registry: registry/stacks.yaml
+  scaffold: scaffolds/nodejs
+- description: Python 项目（支持 FastAPI/Django/Flask）
+  id: python
+  name: Python
+  registry: registry/stacks.yaml
+  scaffold: scaffolds/python
+- description: Go 项目（支持 Gin/Echo/标准库）
+  id: go
+  name: Go
+  registry: registry/stacks.yaml
+  scaffold: scaffolds/go
+- description: Java 项目，使用 Maven 构建
+  id: java-maven
+  name: Java (Maven)
+  registry: registry/stacks.yaml
+  scaffold: scaffolds/java-maven
+version: 1.0.0

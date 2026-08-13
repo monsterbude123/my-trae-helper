@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "preset": "go",
+  "guards": [
+    {
+      "id": "api-contract",
+      "script": "api-contract-guard.sh",
+      "description": "Validate that internal/services/*.go export matching types in schemas/api/*.json",
+      "blocking": true,
+      "scope": ["internal/services/", "schemas/api/"]
+    },
+    {
+      "id": "test-coverage",
+      "script": "test-coverage-guard.sh",
+      "description": "Enforce test coverage >= 80%",
+      "blocking": true,
+      "scope": ["internal/"],
+      "threshold": 80
+    },
+    {
+      "id": "module-boundary",
+      "script": "module-boundary-guard.sh",
+      "description": "Forbid imports from outside the module into internal/",
+      "blocking": true,
+      "scope": ["internal/"]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "preset": "nodejs",
+  "levels": {
+    "L1": {
+      "description": "Pre-commit — fast feedback loop",
+      "checks": ["lint", "typecheck", "test:unit"],
+      "timeout_seconds": 120,
+      "blocking": true
+    },
+    "L2": {
+      "description": "Pre-push — integration confidence",
+      "checks": ["test:integration", "test:coverage", "build"],
+      "timeout_seconds": 600,
+      "blocking": true
+    },
+    "L3": {
+      "description": "Pre-release — full E2E",
+      "checks": ["test:e2e"],
+      "timeout_seconds": 1800,
+      "blocking": true
+    },
+    "L4": {
+      "description": "Release — full security audit",
+      "checks": ["test:all", "security-scan"],
+      "timeout_seconds": 3600,
+      "blocking": true
+    }
+  }
+}

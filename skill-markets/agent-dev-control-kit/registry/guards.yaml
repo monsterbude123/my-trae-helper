@@ -1,0 +1,23 @@
+description: 守卫注册表
+guards:
+- category: quality
+  config_schema: schemas/guards/test-coverage.json
+  description: 确保测试覆盖率达标
+  id: test-coverage
+  name: 测试覆盖率守卫
+- category: quality
+  config_schema: schemas/guards/api-contract.json
+  description: 验证 API 契约一致性
+  id: api-contract
+  name: API 契约守卫
+- category: architecture
+  config_schema: schemas/guards/module-boundary.json
+  description: 检查模块依赖关系
+  id: module-boundary
+  name: 模块边界守卫
+- category: quality
+  config_schema: schemas/guards/changed-file-impact.json
+  description: 改源码区必须同时改对应测试区（变更影响强制）
+  id: changed-file-impact
+  name: 改动影响守卫
+version: 1.0.0

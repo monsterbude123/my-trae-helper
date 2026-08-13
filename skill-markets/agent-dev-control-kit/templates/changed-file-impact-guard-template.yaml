@@ -1,0 +1,89 @@
+# 改动影响 Guard 配置模板
+# 强制改源码区必须同时改对应测试区（变更影响强制）
+
+# Guard 配置文件
+version: "1.0"
+
+# 改-测成组规则（复数 rules 列表）
+rules:
+  - id: api-contract-change
+    source: "^src/app/api/"
+    tests:
+      - "^tests/integration/api/contract/"
+      - "^tests/system/"
+      - "^tests/regression/"
+    message: "改 src/app/api/** 必须同批改 tests/integration/api/contract/** 或 tests/system/** 或 tests/regression/**"
+    enabled: true
+
+  - id: worker-change
+    source: "^src/lib/workers/"
+    tests:
+      - "^tests/unit/worker/"
+      - "^tests/system/"
+      - "^tests/regression/"
+    message: "改 src/lib/workers/** 必须同批改 tests/unit/worker/** 或 tests/system/** 或 tests/regression/**"
+    enabled: true
+
+  - id: task-change
+    source: "^src/lib/task/"
+    tests:
+      - "^tests/unit/task/"
+      - "^tests/system/"
+      - "^tests/regression/"
+    message: "改 src/lib/task/** 必须同批改 tests/unit/task/** 或 tests/system/** 或 tests/regression/**"
+    enabled: true
+
+  - id: media-change
+    source: "^src/lib/media/"
+    tests:
+      - "^tests/unit/"
+      - "^tests/system/"
+      - "^tests/regression/"
+    message: "改 src/lib/media/** 必须同批改 tests/unit/** 或 tests/system/** 或 tests/regression/**"
+    enabled: true
+
+  - id: provider-change
+    source: "^src/lib/(generator-api|generators|model-gateway|lipsync|providers)/"
+    tests:
+      - "^tests/unit/(providers|model-gateway|llm)/"
+      - "^tests/integration/provider/"
+      - "^tests/system/"
+      - "^tests/regression/"
+    message: "改 provider/gateway 代码必须同批改 tests/unit/{providers,model-gateway,llm}/** 或 tests/integration/provider/** 或 tests/system/** 或 tests/regression/**"
+    enabled: true
+
+# 项目级禁用某条规则（按需开启/关闭）
+allowed_overrides:
+  - id: media-change
+    action: disable
+    reason: "媒体模块暂无测试覆盖要求，纯 UI 层"
+    expires: "2026-12-31"
+  - id: task-change
+    action: disable
+    reason: "任务运行时正在重构中，临时豁免"
+    expires: "2026-09-30"
+
+# 数据源
+source:
+  # 优先读 CHANGED_FILES 环境变量；其次从 git diff --name-only --cached 拉
+  env: CHANGED_FILES
+  git_command: "git diff --name-only --cached"
+
+# 失败处理
+on_failure:
+  action: block
+  message: |
+    🛑 改动影响 Guard 阻断
+
+    改动了源码区，但同一 commit 没有改对应的测试区。
+    请在 tests/ 对应目录下补齐测试后重新提交。
+
+  skip_when_empty: true  # 没有任何改动时跳过
+
+# 白名单（临时豁免）
+whitelist:
+  - rule: media-change
+    files:
+      - "src/lib/media/icon-svg/**"
+    reason: "纯静态资源"
+    expires: "永久"

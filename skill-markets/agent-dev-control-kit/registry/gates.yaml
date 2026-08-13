@@ -1,0 +1,40 @@
+description: 门禁注册表
+gates:
+- description: 执行提交前检查
+  guards:
+  - test-coverage
+  - api-contract
+  id: pre-commit
+  name: 提交前门禁
+  triggers:
+  - git commit
+- description: 执行推送前检查
+  guards:
+  - test-coverage
+  - api-contract
+  - module-boundary
+  id: pre-push
+  name: 推送前门禁
+  triggers:
+  - git push
+- description: 执行 PR 合并前检查（CI 触发）
+  guards:
+  - api-contract
+  - test-coverage
+  - module-boundary
+  id: pre-merge
+  name: 合并前门禁
+  triggers:
+  - pr merge
+  - pull_request
+- description: 执行发布前完整检查（CI 触发）
+  guards:
+  - api-contract
+  - test-coverage
+  - security-scan
+  id: pre-release
+  name: 发布前门禁
+  triggers:
+  - release
+  - tag push
+version: 1.0.0

@@ -1,0 +1,65 @@
+description: agent-dev-control-kit 技术栈注册表
+stacks:
+- category: language
+  description: Node.js + JavaScript/TypeScript 项目
+  gates:
+  - pre-commit
+  - pre-push
+  guards:
+  - test-coverage
+  - api-contract
+  id: nodejs
+  name: Node.js
+  scaffold: scaffolds/nodejs
+  tags:
+  - javascript
+  - typescript
+  - node
+- category: language
+  description: Python 项目（支持 FastAPI/Django/Flask）
+  gates:
+  - pre-commit
+  - pre-push
+  guards:
+  - test-coverage
+  - api-contract
+  id: python
+  name: Python
+  scaffold: scaffolds/python
+  tags:
+  - python
+  - fastapi
+  - django
+  - flask
+- category: language
+  description: Go 项目（支持 Gin/Echo/标准库）
+  gates:
+  - pre-commit
+  - pre-push
+  guards:
+  - test-coverage
+  - api-contract
+  id: go
+  name: Go
+  scaffold: scaffolds/go
+  tags:
+  - go
+  - golang
+  - gin
+  - echo
+- category: language
+  description: Java 项目，使用 Maven 构建
+  gates:
+  - pre-commit
+  - pre-push
+  guards:
+  - test-coverage
+  - api-contract
+  id: java-maven
+  name: Java (Maven)
+  scaffold: scaffolds/java-maven
+  tags:
+  - java
+  - maven
+  - spring
+version: 1.0.0

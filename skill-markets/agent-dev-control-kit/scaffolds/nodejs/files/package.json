@@ -1,0 +1,28 @@
+{
+  "name": "my-nodejs-app",
+  "version": "1.0.0",
+  "description": "Node.js project initialized from agent-dev-control-kit/nodejs preset",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "lint": "eslint src/ tests/",
+    "format": "prettier --write src/ tests/",
+    "typecheck": "echo 'No TS configured; skipping typecheck'",
+    "test": "node --test tests/unit tests/integration",
+    "test:unit": "node --test tests/unit",
+    "test:integration": "node --test tests/integration",
+    "test:coverage": "node --test --experimental-test-coverage tests/",
+    "build": "echo 'No build step required for plain Node.js'",
+    "validate": "node scripts/validate-config.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0"
+  }
+}

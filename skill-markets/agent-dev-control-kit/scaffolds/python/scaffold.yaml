@@ -1,0 +1,24 @@
+category: language
+description: Python 项目（支持 FastAPI/Django/Flask）
+files: files/
+id: python
+name: Python
+post_actions:
+- description: 初始化项目
+  path: scripts/init.sh
+  type: script
+tags:
+- python
+- fastapi
+- django
+- flask
+variables:
+- default: my-project
+  description: 项目名称
+  name: project_name
+  required: true
+- default: ''
+  description: 作者
+  name: author
+  required: false
+version: 1.0.0

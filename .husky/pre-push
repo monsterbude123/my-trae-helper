@@ -1,0 +1,48 @@
+#!/bin/bash
+# Skill Market L2 Push Gate
+#
+# 触发时机: git push
+# 检查项:
+#   - L1 全部
+#   - Integration Tests
+#   - Coverage
+#   - 技能依赖守卫（全部技能）
+#   - Build
+
+set -e
+
+echo "🔍 执行 L2 Push Gate..."
+
+# 1. Integration Tests
+if command -v npm &> /dev/null && grep -q '"test:integration"' package.json; then
+  echo "1️⃣ 执行 Integration Tests..."
+  npm run test:integration
+fi
+
+# 2. Coverage
+if command -v npm &> /dev/null && grep -q '"test:coverage"' package.json; then
+  echo "2️⃣ 执行 Coverage..."
+  npm run test:coverage
+fi
+
+# 3. 依赖检查（全部技能）
+if [ -d "skill-markets" ]; then
+  echo "3️⃣ 执行技能依赖守卫..."
+  for skill in skill-markets/*/; do
+    skill_name=$(basename "$skill")
+    if [ -f "$skill/SKILL.md" ]; then
+      echo "  - 检查 $skill_name..."
+      node src/guards/skill-dependency-guard.mjs "$skill_name" || {
+        echo "⚠️ 依赖检查失败: $skill_name（继续推送，但请关注）"
+      }
+    fi
+  done
+fi
+
+# 4. Build
+if command -v npm &> /dev/null && grep -q '"build"' package.json; then
+  echo "4️⃣ 执行 Build..."
+  npm run build
+fi
+
+echo "✅ L2 Push Gate 通过"

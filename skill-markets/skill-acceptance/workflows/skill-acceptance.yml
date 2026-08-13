@@ -1,0 +1,172 @@
+name: skill-acceptance
+
+# skill-acceptance CI workflow
+#   - 任意 tag 推送（v*）
+#   - PR 修改了 skill-markets/**
+#   - 手动触发（workflow_dispatch）
+#
+# 行为：
+#   1. 用 dorny/paths-filter 识别 PR 修改了哪些 skill
+#   2. 矩阵并发跑每个被识别 skill 的 verify.py
+#   3. 任何 skill exit>=3(BLOCK) → fail 整个 workflow
+#   4. 累积 WARN(1~2) → ::warning:: 但不 fail
+#   5. 上传 JSON 报告为 artifact
+
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    paths:
+      - 'skill-markets/**'
+      - '.github/workflows/skill-acceptance.yml'
+  workflow_dispatch:
+
+# 避免重复 run（同一 ref 取消旧 run）
+concurrency:
+  group: skill-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------- 第一步：识别 changed skills ----------
+  detect-changes:
+    name: detect-changed-skills
+    runs-on: ubuntu-latest
+    outputs:
+      skills_json: ${{ steps.derive.outputs.skills }}
+      any: ${{ steps.any.outputs.any }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: detect changed skill packages
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          # PR 用 base sha；push/tag 用 HEAD~1
+          base: ${{ github.event.pull_request.base.sha || 'HEAD~1' }}
+          predicate-quantifier: some
+          filters: |
+            # 每个 skill 包一个 filter，changed= true → 该 filter 被命中
+            # filter 名即 skill 名（matrix 用）
+            cmd-bash:
+              - 'skill-markets/cmd-bash/**'
+            marketing-automation:
+              - 'skill-markets/marketing-automation/**'
+            prose-pipeline:
+              - 'skill-markets/prose-pipeline/**'
+
+      - name: derive skill list
+        id: derive
+        env:
+          CHANGES_JSON: ${{ steps.filter.outputs.changes }}
+        run: |
+          # CHANGES_JSON 形如 {"cmd-bash":true,"marketing-automation":false,...}
+          # 抽出 true 的 key → JSON array 字符串
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          changes = json.loads(os.environ.get("CHANGES_JSON") or "{}")
+          triggered = [k for k, v in changes.items() if v]
+          # 兜底：若全 false 仍跑至少一个占位（空矩阵会让 job skip）
+          if not triggered:
+              triggered = ["__none__"]
+          print(f"skills={json.dumps(triggered)}")
+          PY
+
+      - name: emit any_changes
+        id: any
+        run: |
+          if echo "${{ steps.derive.outputs.skills }}" | grep -qv '__none__'; then
+            echo "any=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "any=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ---------- 第二步：矩阵跑 verify.py ----------
+  verify:
+    name: verify (${{ matrix.skill }})
+    needs: detect-changes
+    if: needs.detect-changes.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # derive step 已把 true 的 filter key 抽成 JSON 数组
+        skill: ${{ fromJSON(needs.detect-changes.outputs.skills_json) }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: install pyyaml
+        # verify.py 调 subprocess 解析 frontmatter 时需要 yaml
+        run: pip install pyyaml
+
+      - name: locate skill
+        id: locate
+        run: |
+          if [ -d "skill-markets/${{ matrix.skill }}" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "path=skill-markets/${{ matrix.skill }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::skill '${{ matrix.skill }}' directory missing, skipping"
+          fi
+
+      - name: run verify.py
+        id: verify
+        if: steps.locate.outputs.exists == 'true'
+        run: |
+          REPORT="skill-acceptance/.reports/${{ matrix.skill }}-${GITHUB_SHA::8}.json"
+          mkdir -p "$(dirname "$REPORT")"
+          echo "::group::verify.py ${{ matrix.skill }}"
+          set +e
+          python3 skill-markets/skill-acceptance/scripts/verify.py \
+            --target "${{ matrix.skill }}" \
+            --json \
+            --report "$REPORT" \
+            --project-root "$GITHUB_WORKSPACE"
+          rc=$?
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          echo "report=$REPORT" >> "$GITHUB_OUTPUT"
+          echo "::endgroup::"
+
+          # 退出码语义（与钩子镜像）:
+          #   0 = PASS / 1-2 = WARN / 3+ = BLOCK（必须 fail）
+          if [ "$rc" -ge 3 ]; then
+            echo "::error title=BLOCK::skill '${{ matrix.skill }}' 验收失败 (exit=$rc)"
+            cat "$REPORT" 2>/dev/null || true
+            exit 1
+          elif [ "$rc" -ge 1 ]; then
+            echo "::warning title=WARN::skill '${{ matrix.skill }}' 有警告 (exit=$rc)"
+          else
+            echo "::notice title=PASS::skill '${{ matrix.skill }}' 全部通过"
+          fi
+
+      - name: upload json report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-acceptance-report-${{ matrix.skill }}
+          path: skill-acceptance/.reports/${{ matrix.skill }}-*.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: fail if blocked
+        if: steps.verify.outputs.rc != '' && fromJSON(steps.verify.outputs.rc) >= 3
+        run: |
+          echo "::error::skill '${{ matrix.skill }}' BLOCK (exit=${{ steps.verify.outputs.rc }})"
+          echo "report=${{ steps.verify.outputs.report }}"
+          exit 1

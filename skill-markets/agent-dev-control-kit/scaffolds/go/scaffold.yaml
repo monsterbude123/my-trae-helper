@@ -1,0 +1,24 @@
+category: language
+description: Go 项目（支持 Gin/Echo/标准库）
+files: files/
+id: go
+name: Go
+post_actions:
+- description: 初始化项目
+  path: scripts/init.sh
+  type: script
+tags:
+- go
+- golang
+- gin
+- echo
+variables:
+- default: my-project
+  description: 项目名称
+  name: project_name
+  required: true
+- default: ''
+  description: 作者
+  name: author
+  required: false
+version: 1.0.0

@@ -1,0 +1,79 @@
+# 选型元数据
+id: java-maven
+name: Java (Maven)
+version: "1.0.0"
+description: Java 项目，使用 Maven 构建
+
+# 检测特征（用于自动识别）
+detection:
+  files:
+    - pom.xml
+  primary: pom.xml
+
+# 工具链配置
+toolchain:
+  package_manager: maven       # maven / gradle
+  runtime: java                # node/python/go/java
+  runtime_version: ">=17"
+
+# 命令映射
+commands:
+  lint:
+    default: "mvn -B checkstyle:check"
+    alternatives:
+      - "mvn -B spotless:check"
+      - "mvn -B pmd:check"
+  typecheck:
+    default: "mvn -B compile"
+    alternatives: []
+    optional: false   # Java 编译自带类型检查
+  test:
+    unit: "mvn -B test -Dtest=*Test -DfailIfNoTests=false"
+    integration: "mvn -B verify -DskipUnitTests"
+    coverage: "mvn -B jacoco:report"
+    all: "mvn -B test"
+  build:
+    default: "mvn -B package -DskipTests"
+    optional: false
+
+# 文件路径约定
+paths:
+  source: src/main/java/
+  resources: src/main/resources/
+  tests: src/test/java/
+  config: config/
+  docs: docs/
+
+# 脚手架模板
+template_path: template/
+
+# 默认依赖
+dependencies:
+  test_runner: junit5          # junit5 / testng / spock
+  linter: checkstyle           # checkstyle / spotless / pmd
+  formatter: spotless          # spotless / google-java-format
+  coverage: jacoco
+
+# Guard 配置
+guards:
+  default:
+    - api-contract
+    - test-coverage
+  language_specific:
+    - package-boundary   # Java 特有：禁止跨包依赖
+
+# Gate 配置
+gates:
+  default:
+    - L1: [lint, typecheck, test:unit]
+    - L2: [test:integration, test:coverage, build]
+    - L3: [test:e2e]
+    - L4: [test:all, security-scan]
+
+# 变量（可被用户覆写）
+variables:
+  author: ""
+  license: "MIT"
+  group_id: "com.example"
+  artifact_id: "my-java-app"
+  java_version: "17"

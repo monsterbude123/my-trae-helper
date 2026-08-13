@@ -1,0 +1,100 @@
+{
+  "version": "1.0",
+  "gates": {
+    "commit": {
+      "enabled": true,
+      "checks": [
+        "lint",
+        "typecheck",
+        "test:unit"
+      ],
+      "timeout": 300,
+      "on_failure": "block"
+    },
+    "push": {
+      "enabled": true,
+      "checks": [
+        "test:integration",
+        "test:coverage",
+        "build"
+      ],
+      "timeout": 600,
+      "on_failure": "block"
+    },
+    "merge": {
+      "enabled": true,
+      "checks": [
+        "test:e2e",
+        "code-review"
+      ],
+      "timeout": 1800,
+      "on_failure": "block"
+    },
+    "release": {
+      "enabled": true,
+      "checks": [
+        "test:all",
+        "benchmark",
+        "security-scan"
+      ],
+      "timeout": 3600,
+      "on_failure": "block"
+    }
+  },
+  "checks": {
+    "lint": {
+      "command": "npm run lint",
+      "expected": "zero_errors"
+    },
+    "typecheck": {
+      "command": "npm run typecheck",
+      "expected": "zero_errors"
+    },
+    "test:unit": {
+      "command": "npm run test:unit",
+      "expected": "zero_failures"
+    },
+    "test:integration": {
+      "command": "npm run test:integration",
+      "expected": "zero_failures"
+    },
+    "test:coverage": {
+      "command": "npm run test:coverage",
+      "expected": "threshold_met",
+      "threshold": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80
+      }
+    },
+    "build": {
+      "command": "npm run build",
+      "expected": "success"
+    },
+    "test:e2e": {
+      "command": "npm run test:e2e",
+      "expected": "all_pass"
+    },
+    "test:all": {
+      "command": "npm run test:all",
+      "expected": "all_pass"
+    },
+    "benchmark": {
+      "command": "npm run benchmark",
+      "expected": "threshold_met"
+    },
+    "security-scan": {
+      "command": "npm audit",
+      "expected": "no_vulnerabilities"
+    }
+  },
+  "whitelist": {
+    "branches": ["main", "release/*"],
+    "paths": ["docs/**", "*.md", "*.txt"],
+    "authors": []
+  },
+  "notifications": {
+    "on_block": true,
+    "channels": ["console", "slack"]
+  }
+}
