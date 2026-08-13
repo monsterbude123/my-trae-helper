@@ -7,6 +7,11 @@ Skill Capability Guard — 技能能力守卫
 
 Usage:
     python scripts/skill-capability-guard.py skill-markets/<skill_name> [script_name]
+
+注意: 与 skill-acceptance/scripts/verify.py 的关系
+  - verify.py: check_capability_map(完整路径匹配,边界更严)
+  - 本脚本: 单脚本参数 + basename 匹配(增量场景更灵活)
+  - 互补,非冗余
 """
 
 import re

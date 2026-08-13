@@ -51,6 +51,22 @@ my-trae-helper/
 
 **§1.2 CLI 多文件拆分**：≥ 3 个职责的脚本必拆 `src/<module>.mjs`；只允许 `bin/cli.mjs` 做路由。
 
+**§1.3 会话启动加载协议（强制）**：
+
+```
+1. Skill(name="project-rule-skill")  → 输出 needed_rules
+2. 按场景关键词自动加载相关 skill：
+   ├─ 测试/验收 → acceptance-discipline + test-experience
+   ├─ 安全扫描 → trae-security-review
+   ├─ 新建/验收技能 → skill-acceptance §7
+   ├─ Gate/CI 配置 → skill-acceptance §7 + agent-dev-control-kit §11
+   └─ 重构/升级 → fullstack-skill-architect
+3. 只 Read needed_rules + 加载的 skill 列出的文件
+4. 委派 sub-agent → 头部注入 [PROJECT-RULE-GATE]
+```
+
+详见 [project-rule-skill/SKILL.md](.trae/skills/project-rule-skill/SKILL.md) §1 Step 5。
+
 ---
 
 ## §2 三层控制体系（技能市场管理）
@@ -85,6 +101,28 @@ my-trae-helper/
 - **L2 Push** (`git push`)：integration + coverage + dependency + build
 - **L3 Merge** (PR merge)：L2 + CAPABILITY-MAP 同步 + SECURITY-MAP 同步
 - **L4 Publish** (Release)：L3 + 全量扫描 + 灰度发布 + 自动升级 tag
+
+### 2.4 Gate 自验收强制（防止"假通过"）
+
+```
+MUST: 写完任何 Gate / Guard 脚本后必须用真反例跑自验收
+触发:
+  - .husky/pre-commit / pre-push
+  - *.guard.{py,mjs}
+  - package.json scripts.* (lint/test:unit/build 等)
+  - GitHub Actions workflow
+验证:
+  - tmp 目录造违规样本 → 跑 Gate → 期望 exit ≠ 0
+  - PASS 态 / BLOCK 态 / 边界态 三态必跑
+固化:
+  - 反例样本必须写进 tests/unit/test_*.py
+  - 不能跑一次就丢
+辅助工具:
+  - python skill-markets/agent-dev-control-kit/scripts/validate-gate-integrity.py --target .
+    → 自动检测 package.json scripts / pre-commit/pre-push 是否"假通过"
+```
+
+详见 [skill-acceptance §7](skill-markets/skill-acceptance/SKILL.md) + [agent-dev-control-kit §11](skill-markets/agent-dev-control-kit/SKILL.md) + [references/traps.md](skill-markets/agent-dev-control-kit/references/traps.md)（含 7 个反例）。
 
 ---
 

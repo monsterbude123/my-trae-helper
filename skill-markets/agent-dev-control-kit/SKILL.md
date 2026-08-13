@@ -548,6 +548,64 @@ INIT → GATE_CHECKING → GUARD_PRE → EXECUTING → GUARD_POST → GATE_FINAL
 
 ---
 
+## §11 Gate 自验收强制(V1.2 新增 — 2026-08-14)
+
+> **本节由 my-trae-helper 会话蒸馏补充。原始三层控制 SKILL.md 缺"Gate 自验收"约束,导致本次会话首次集成时 4 次"假通过"被用户反复纠正**。
+
+### 11.1 强制铁律(对 §1 三层控制体系的补充)
+
+```
+MUST 11.1.1: Gate / Guard 脚本写完后,必须用真反例跑自验收
+  触发: 任何 pre-commit / pre-push / *.guard.{py,mjs} / workflow yml 写完后
+  验证: tmp 目录造违规样本 → 跑 Gate → 期望 exit ≠ 0 + 错误信息
+  反例: 见 [references/traps.md §AP-2 Gate 静默跳过](references/traps.md)
+
+MUST 11.1.2: Gate 配置三件套必须同步维护
+  ├─ package.json scripts.{lint,test:unit,test:integration,test:coverage,build} 必须存在
+  ├─ .husky/{pre-commit,pre-push} 必须 grep -q 校验 scripts 存在
+  └─ GitHub Actions workflow 必须独立跑一遍
+  缺失任意一项 → Gate 在该层静默跳过
+
+MUST 11.1.3: 反例样本必须固化进 tests/unit/test_*.py
+  反例跑一次就丢 → 下次再写 Gate 重复犯错
+  固化模板: 见 skill-acceptance §7.3
+
+MUST 11.1.4: Gate 失败必须报告,不能"自动回滚"却无日志
+  本会话踩坑: Gate 失败 → user 看 commit "成功" → 实际 Gate 没跑
+  解决: Gate 失败时 exit ≠ 0 + stderr 打印失败项 + 必要时 commit --amend
+```
+
+### 11.2 触发场景(参考 skill-acceptance §7.1)
+
+| Gate 类型 | 验证责任 |
+|----------|---------|
+| `.husky/pre-commit` | 故意加违规 commit,验证 exit ≠ 0 |
+| `.husky/pre-push` | 故意加违规 push,验证 exit ≠ 0 |
+| `*.guard.py` / `*.guard.mjs` | tmp 目录造反例,验证 BLOCK |
+| `package.json scripts.*` | 删除脚本名,验证 Gate 报错 |
+| GitHub Actions workflow | 故意 push 失败,验证 CI 阻断 |
+
+### 11.3 反例来源(本会话真实发生)
+
+- [references/traps.md §AP-2 Gate 静默跳过](references/traps.md)
+- [references/traps.md §AP-3 Guard 缺 CLI 入口](references/traps.md)
+- [references/traps.md §AP-4 Lint 硬编码文件列表](references/traps.md)
+
+### 11.4 与已有技能的关系
+
+```
+依赖:
+  skill-acceptance        ── 提供 Gate 自验收协议(§7) + 反例模板
+  trae-security-review   ── 提供 scan_skills_dir.py 作为 Guard 的子调用
+
+不重复:
+  acceptance-discipline  ── 通用项目交付验收
+  test-experience        ── 测试反模式(写测试时加载)
+  skill-acceptance §7    ── 本节是其上层协议在本技能的具体化
+```
+
+---
+
 ## 附录
 
 ### A. 快速参考

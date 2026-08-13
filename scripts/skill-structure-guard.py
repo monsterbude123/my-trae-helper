@@ -2,11 +2,16 @@
 """
 Skill Structure Guard — 技能结构守卫
 
-检查维度: 目录结构 / 命名规范 / YAML frontmatter
+检查维度: 目录结构 / 命名规范 / YAML frontmatter / 铁律数量
 触发时机: pre-create (新建技能时)
 
 Usage:
     python scripts/skill-structure-guard.py skill-markets/<skill_name>
+
+注意: 与 skill-acceptance/scripts/verify.py 的关系
+  - verify.py: check_frontmatter / check_scripts_boundary(轻量)
+  - 本脚本: 行数 + 铁律数量(更细)
+  - 互补,非冗余
 """
 
 import re

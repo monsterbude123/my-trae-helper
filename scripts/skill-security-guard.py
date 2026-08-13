@@ -9,6 +9,11 @@ Skill Security Guard — 技能安全守卫
 
 Usage:
     python scripts/skill-security-guard.py skill-markets/<skill_name>
+
+注意: 与 skill-acceptance/scripts/verify.py 的关系
+  - verify.py: 6 项检查的元数据合规准入(含 security 子调用)
+  - 本脚本: 纯安全单点检查(更细的硬编码密钥判定)
+  - 互补,非冗余
 """
 
 import subprocess

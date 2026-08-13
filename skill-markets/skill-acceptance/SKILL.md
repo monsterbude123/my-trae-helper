@@ -178,3 +178,109 @@ verify.py
 - 默认：`stdout`（人读）+ 可选 `--report` 落盘
 - 落盘约定：`.trae/tmp/sa-<skill-name>-<timestamp>.json`
 - 报告 24h 后由 `prepare-publish.mjs` 清理
+
+---
+
+## §7 Gate 自验收协议(V2.2 新增 — 2026-08-14)
+
+> **核心命题**:写完任何 Gate / Guard 脚本后,必须用**真反例**验证其能真阻断,否则 Gate 是"演戏"。
+
+### 7.1 触发场景
+
+写完以下任一脚本后必须执行本协议:
+
+| 触发项 | 验证责任 |
+|--------|---------|
+| `.husky/pre-commit` / `pre-push` | 故意加违规 commit,验证 exit ≠ 0 |
+| `scripts/*-guard.py`(security/structure/capability/dependency)| 造 tmp 违规样本,验证 BLOCK |
+| `package.json scripts.lint / test:unit / build` | 删除脚本名,验证 Gate 报错 |
+| GitHub Actions workflow | 故意 push 失败,验证 CI 阻断 |
+| 新增 `node --check` 文件列表 | 加 TS 语法错误文件,验证发现 |
+
+### 7.2 自验收三态验证
+
+```
+PASS  态: 干净样本        → 期望 exit=0
+BLOCK 态: 违规样本(反例) → 期望 exit≠0 + 错误信息
+边界态: 边界样本(如 .md 单文件 / 空目录 / tmp 名含特殊字符)
+```
+
+### 7.3 自验收脚本模板
+
+```python
+import subprocess, tempfile
+from pathlib import Path
+
+GUARD = Path("scripts/skill-structure-guard.py")
+
+passed = failed = 0
+
+def test(name, fn):
+    global passed, failed
+    try: fn(); passed += 1
+    except AssertionError as e: failed += 1
+
+# ❶ PASS 态
+def t_pass_clean():
+    with tempfile.TemporaryDirectory() as tmp:
+        (Path(tmp) / "SKILL.md").write_text("---\nname: ok\n---\n")
+        code, _, _ = run(GUARD, tmp)
+        assert code == 0
+
+# ❷ BLOCK 态(反例)
+def t_block_bad_name():
+    bad = Path(tmpfile) / "BadName_2026"
+    bad.mkdir()
+    (bad / "SKILL.md").write_text("---\nname: x\n---\n")
+    code, out, _ = run(GUARD, bad)
+    assert code != 0
+    assert "目录名不合规" in out
+
+test("干净技能 → PASS", t_pass_clean)
+test("大写目录名 → BLOCK", t_block_bad_name)
+```
+
+### 7.4 反例样本库(必跑清单)
+
+写完任何新 Gate 后,**至少跑 3 个反例**:
+
+| Gate 类型 | 必跑反例 |
+|----------|---------|
+| 安全守卫 | 硬编码 `api_key = "sk-..."` / 硬编码 `password = "..."` |
+| 结构守卫 | 缺 YAML frontmatter / 铁律 > 10 条 / 目录名大写 |
+| 能力守卫 | 与已注册脚本 basename 重复 / 不存在的脚本名参数 |
+| 依赖守卫 | 不存在的技能名 / 缺硬依赖 |
+| Lint | TS 类型注解混入 JS / 未声明导出 |
+| Build | 缺 bin/cli.mjs / package.json 缺 scripts |
+
+### 7.5 失败处理
+
+```
+Gate 自验收失败时:
+  1. 不能直接修 Gate,先识别失败模式:
+     ├─ "反例未被检测"  → Guard 缺检查项(本会话 capability guard bug)
+     ├─ "exit code 错"   → main 块未触发(本会话 dependency guard bug)
+     ├─ "脚本静默跳过"  → if grep -q 包住 npm run(本会话 pre-commit bug)
+     └─ "硬编码文件列表" → lint 未 glob 扫描(本会话 lint bug)
+  2. 修复后重跑全部反例,直到 100% 通过
+  3. 把反例样本固化进 tests/unit/test_*.py(不能跑一次就丢)
+```
+
+### 7.6 已固化的反例样本
+
+本项目已落地(参考,不复制):
+
+- `tests/unit/test_skill_acceptance.py` — 13 用例(4 守卫 × 多反例)
+- `tests/unit/test_structure_guard.py` — 4 用例
+- `tests/unit/test_security_guard.py` — 4 用例
+
+详见 [references/gate-self-check.md](references/gate-self-check.md)
+
+---
+
+## §8 版本历史
+
+| 版本 | 日期 | 变更 |
+|------|------|------|
+| 0.1.0 | 2026-08-XX | 初始版本:6 项检查 + verify.py |
+| 0.2.0 | 2026-08-14 | **新增 §7 Gate 自验收协议**(本会话蒸馏) |
