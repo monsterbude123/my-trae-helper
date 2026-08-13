@@ -1,5 +1,5 @@
 ---
-name: accept
+name: fullstack-11-accept
 description: "Stage 5 归档门禁 — 归档不可变 + 知识沉淀 + INDEX 更新。归档前必走 spec-purge + spec-knowledge-extract。触发词：accept / 归档 / archive / knowledge extract / 知识沉淀。"
 stage: 5
 parent: fullstack4traev11
@@ -67,4 +67,3 @@ Step 5: 状态卡 stage_status=archived + health=🟢
 - [knowledge-extract.md](references/knowledge-extract.md)
 - V10 artifact-lifecycle.md: `V10 来源` (已蒸馏到本文档)
 - V10 prd-integration-workflow.md: `V10 来源` (已蒸馏到本文档)
-- V10 实战蒸馏: [anti-patterns/V10-battle-tested.md](anti-patterns/V10-battle-tested.md)

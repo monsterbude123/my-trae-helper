@@ -8,7 +8,6 @@
 | 2 | 编造测试证据 | V10.12 ANTI-反模式 1+2 |
 | 3 | 改实现不改测试（rot #12）| implementer 铁律 2 |
 | 4 | 漂移静默（不报告回流）| implementer 铁律 3 |
-| 5 | V10 实战蒸馏 | [V10-battle-tested.md](V10-battle-tested.md) |
 
 ## 自检清单
 

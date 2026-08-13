@@ -1,5 +1,5 @@
 ---
-name: contract
+name: fullstack-06-contract
 description: "Stage 2 契约四件套 — 契约是不可变的接口真相，先于实现。DOMAIN FIRST + ADDITIVE/BREAKING 变更流程 + 孤儿契约测试清理。触发词：contract / 契约 / API / 接口 / 领域模型 / schema / validation。"
 stage: 2
 parent: fullstack4traev11
@@ -87,4 +87,3 @@ Step 5: contract-gate.py 验证 → 状态卡更新 + 标记 approved
 - [orphan-test-sweep.md](references/orphan-test-sweep.md) — 孤儿测试扫描
 - 4 个契约模板: [templates/](templates/)
 - 公共铁律 Article VIII: [../../references/common-iron-rules.md](../../references/common-iron-rules.md)
-- V10 实战参考: [anti-patterns/V10-battle-tested.md](anti-patterns/V10-battle-tested.md)

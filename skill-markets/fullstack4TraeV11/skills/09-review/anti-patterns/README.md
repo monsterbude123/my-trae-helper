@@ -6,7 +6,6 @@
 | 2 | reviewer 帮忙修代码 | reviewer 铁律 6 |
 | 3 | 编造测试覆盖 | V10.12 关键门禁套件 |
 | 4 | 自动循环 Round 3+ 继续绕 | V10.12 Step 2.6 |
-| 5 | V10 实战蒸馏 | [V10-battle-tested.md](V10-battle-tested.md) |
 
 ## 自检清单
 

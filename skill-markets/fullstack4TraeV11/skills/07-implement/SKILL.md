@@ -1,5 +1,5 @@
 ---
-name: implement
+name: fullstack-07-implement
 description: "Stage 3 TDD RED→GREEN — 契约驱动 + 深度业务理解 + TDD 三步循环 + 漂移检测。触发词：implement / 开发 / 写代码 / TDD / 测试 / code。"
 stage: 3
 parent: fullstack4traev11
@@ -94,4 +94,3 @@ Step 4: 模块接入文档（条件触发）+ 量化汇报
 - [code-hygiene.md](references/code-hygiene.md) — 代码卫生
 - [drift-detect.md](references/drift-detect.md) — 漂移检测
 - 公共铁律 Article I/VI/IX: [../../references/common-iron-rules.md](../../references/common-iron-rules.md)
-- V10 实战蒸馏: [anti-patterns/V10-battle-tested.md](anti-patterns/V10-battle-tested.md)

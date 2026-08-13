@@ -1,6 +1,6 @@
 # V11 — Fullstack4TraeV11（高内聚专家架构）
 
-> 全栈文档驱动开发技能包 V11.0。V10 思想传承 + 架构升级。
+> 全栈文档驱动开发技能包 V11。V10 思想传承 + 架构升级。
 
 ---
 
@@ -20,15 +20,15 @@ fullstack4TraeV11/
 ├── SKILL.md              # 总编排器（必读）
 ├── README.md             # 本文件
 ├── CHANGELOG.md          # 版本变更
-├── references/           # 公共 references（10 个）
-├── templates/            # 公共 templates（8 个）
-├── scripts/              # 公共脚本（13 个 Python，全部实装）
+├── references/           # 公共 references
+├── templates/            # 公共 templates
+├── scripts/              # 公共脚本（Python，全部实装）
 ├── skills/               # 13 stage skill（高内聚）
 │   ├── 01-intake/
 │   ├── 02-plan/
 │   ├── ...
 │   └── 13-project-health/
-└── V10-distillation-source-map.md  # V10 → V11 蒸馏溯源（开发期）
+└── stage-physical-isolation.md  # 物理隔离规范（V11.3 NEW）
 ```
 
 ---
@@ -60,7 +60,7 @@ fullstack4TraeV11/
 主上下文收到 "Use Skill: fullstack4traev11" 后必走 §0.5 加载协议：
 
 1. 加载 SKILL.md（含 stage_config）
-2. 必读 9 个公共 references（constitution / common-iron-rules / common-anti-patterns / stage-card-protocol / stage-interaction-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns）
+2. 必读公共 references（constitution / common-iron-rules / common-anti-patterns / stage-card-protocol / stage-interaction-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns）
 3. Glob 项目级约定（AGENTS.md / docs/ / .trae/rules/）
 4. 3 层依赖合并（项目 > V11 > 全局）
 5. 进入 Stage -1 Intake 工作模式
@@ -82,7 +82,7 @@ fullstack4TraeV11/
 # 状态卡门禁
 python scripts/stage-gate.py --state-card docs/specs/changes/{id}/.state-card.md
 
-# 全局阶段门禁（V10.11 NEW 含 verify-rot-scan）
+# 全局阶段门禁（含 verify-rot-scan）
 python scripts/phase-gate.py --state-card docs/specs/.state-card.md --verify-rot-scan --change-id {id}
 
 # 腐化扫描
@@ -97,11 +97,11 @@ python scripts/acceptance-audit.py --review-report docs/specs/changes/{id}/revie
 
 ---
 
-## 与 V10 关系
+## V11.3 增强（opt-in）
 
-V11 是**独立版本**，部署时不依赖 V10 目录。V10 内容已蒸馏进 V11 references/。
-
-V10 → V11 蒸馏溯源见 [references/V10-distillation-source-map.md](references/V10-distillation-source-map.md)。
+- **stage-gate-pre-stage.sh**: husky 式硬阻断门禁（templates/hooks/，独立于 pre-stage.sh）
+- **stage-physical-isolation.md**: fact/ + stage/ 物理隔离规范
+- 见 [CHANGELOG.md](CHANGELOG.md) 详情
 
 ---
 
@@ -114,18 +114,14 @@ cp -r skill-markets/fullstack4TraeV11/* ~/.trae-cn/skills/fullstack4TraeV11/
 # 验证
 ls ~/.trae-cn/skills/fullstack4TraeV11/skills/
 ls ~/.trae-cn/skills/fullstack4TraeV11/scripts/
-
-# 部署前可清理（开发期 reference，不依赖运行时）：
-rm -rf ~/.trae-cn/skills/fullstack4TraeV11/references/V10-distillation-source-map.md
-rm -rf ~/.trae-cn/skills/fullstack4TraeV11/skills/*/anti-patterns/V10-battle-tested.md
 ```
 
 ---
 
 ## 关联引用
 
-- [SKILL.md](SKILL.md) — V11 总编排器（V11 入口）
-- [CHANGELOG.md](CHANGELOG.md) — 版本变更
-- [references/constitution.md](references/constitution.md) — 17 Articles 宪法
-- [references/common-iron-rules.md](references/common-iron-rules.md) — 公共铁律
-- [references/V10-distillation-source-map.md](references/V10-distillation-source-map.md) — V10 蒸馏溯源
+- [SKILL.md](SKILL.md) - V11 总编排器（V11 入口）
+- [CHANGELOG.md](CHANGELOG.md) - 版本变更
+- [references/constitution.md](references/constitution.md) - 17 Articles 宪法
+- [references/common-iron-rules.md](references/common-iron-rules.md) - 公共铁律
+- [references/stage-physical-isolation.md](references/stage-physical-isolation.md) - 物理隔离规范

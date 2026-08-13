@@ -1,5 +1,5 @@
 ---
-name: bug-fix
+name: fullstack-12-bug-fix
 description: "Stage 6 独立专精流程 — 根因不明不修复 + e2e 先行 + 6 层排查 + TDD 修复。触发词：bug / 修复 / e2e 先行 / 6 层排查 / debugger。"
 stage: 6
 parent: fullstack4traev11
@@ -14,6 +14,8 @@ depends_on:
     - ../../references/common-iron-rules.md
   scripts:
     - ../../scripts/stage-gate.py
+    - ../../scripts/code-hygiene.py
+    - ../../scripts/state-card-validator.py
 ---
 
 # Stage 6 Bug Fix — 独立专精流程
@@ -83,4 +85,4 @@ Step 5: 验收（回归测试 + bug 单 CLOSED）
 - V10 debugger.md: `V10 来源` (已蒸馏到本文档)
 - V10 debugger-methodology.md: `V10 来源` (已蒸馏到本文档)
 - V10 bug-workflow.md: `V10 来源` (已蒸馏到本文档)
-- V10 实战蒸馏: [anti-patterns/V10-battle-tested.md](anti-patterns/V10-battle-tested.md)
+

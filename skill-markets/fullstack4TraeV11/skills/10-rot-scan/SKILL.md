@@ -1,5 +1,5 @@
 ---
-name: rot-scan
+name: fullstack-10-rot-scan
 description: "Stage 4.5 腐化扫描 — proactive-scan.py 10 项必跑 + 元检测 + 修复。NO ROT NO ACCEPT。触发词：rot scan / 腐化扫描 / proactive-scan / 5 维度扫描。"
 stage: 4.5
 parent: fullstack4traev11
@@ -78,7 +78,6 @@ Step 4: 全部 PASS → 进入 Stage 5 Accept；任一 FAIL → 🛑 REJECT
 - [scan-protocol.md](references/scan-protocol.md) — 10 项扫描协议
 - V10 rot-detector.md: `V10 来源` (已蒸馏到本文档)
 - V10 process-rot-analysis.md: `V10 来源` (已蒸馏到本文档)
-- V10 实战蒸馏: [anti-patterns/V10-battle-tested.md](anti-patterns/V10-battle-tested.md)
 
 
 
