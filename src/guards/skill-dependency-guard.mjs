@@ -172,3 +172,9 @@ export async function runDependencyGuard(args) {
   console.log('\n✅ 依赖检查通过');
   process.exit(0);
 }
+
+// CLI 自执行入口
+const isMain = import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`;
+if (isMain) {
+  runDependencyGuard(process.argv.slice(2));
+}

@@ -450,7 +450,6 @@ INIT → GATE_CHECKING → GUARD_PRE → EXECUTING → GUARD_POST → GATE_FINAL
 | **project-rule-skill** | 加载协议 | 任何控制操作前先加载项目规则 |
 | **acceptance-discipline** | 验收门禁 | Execution 执行后走验收门禁 |
 | **goal-mode** | 目标追踪 | 复杂控制流程配合目标追逐模式 |
-| **fullstack4TraeV11** | 全栈流程 | 嵌入 13 stage 流水线作为质量层 |
 | **trae-security-review** | 安全审查 | Guard 安全约束调用其扫描能力 |
 
 **联动协议**：
@@ -556,7 +555,6 @@ INIT → GATE_CHECKING → GUARD_PRE → EXECUTING → GUARD_POST → GATE_FINAL
 - **Execution Skills 决策树**：[references/execution-skills-guide.md §9.1](references/execution-skills-guide.md)
 - **Guard 失败处理模板**：[references/guard-skills-guide.md §1.1](references/guard-skills-guide.md)
 - **Gate 层级详解**：[references/gate-skills-guide.md §1.1](references/gate-skills-guide.md)
-- **相关技能**：`project-rule-skill`(强制前置) / `acceptance-discipline` / `goal-mode` / `fullstack4TraeV11` / `trae-security-review`
 - **工具脚本**：`mysqldump` / `config-validate` / `asset-check-duplicate` / `deploy --strategy=canary`
 - **当前版本**：1.1.0 | 详细变更：[CHANGELOG.md](CHANGELOG.md) | 升级指南：[CHANGELOG.md §Migration Guide](CHANGELOG.md)
 

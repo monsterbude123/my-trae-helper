@@ -47,18 +47,19 @@ def check_capability_duplicate(skill_path: str, script_name: Optional[str] = Non
 
     capability_content = CAPABILITY_MAP.read_text()
 
-    shared_scripts = extract_shared_scripts(capability_content)
+    shared_full, shared_basename = extract_shared_scripts(capability_content)
 
     if script_name:
-        if script_name in shared_scripts:
+        if script_name in shared_full or script_name in shared_basename:
             errors.append(f'脚本 {script_name} 已存在于共享能力注册表，请复用')
     else:
         scripts_dir = skill_dir / 'scripts'
         if scripts_dir.exists():
             for script_file in scripts_dir.glob('*'):
-                if script_file.is_file() and script_file.name != 'README.md':
-                    if script_file.name in shared_scripts:
-                        errors.append(f'脚本 {script_file.name} 已存在于共享能力注册表，请复用')
+                if not script_file.is_file() or script_file.name == 'README.md':
+                    continue
+                if script_file.name in shared_basename:
+                    errors.append(f'脚本 {script_file.name} 已存在于共享能力注册表，请复用')
 
     return {
         'passed': len(errors) == 0,
@@ -130,21 +131,36 @@ def check_capability_map_sync(skill_path: str) -> Dict:
 
 
 def extract_shared_scripts(capability_content: str) -> List[str]:
-    """从 CAPABILITY-MAP.md 提取共享脚本"""
-    scripts = []
+    """从 CAPABILITY-MAP.md 提取已注册脚本(完整路径 + basename)
 
+    返回:
+        - shared_full: 完整相对路径列表,如 ['vision-audit/scripts/vision-audit.mjs']
+        - shared_basename: 仅 basename 列表,如 ['vision-audit.mjs']
+    """
+    shared_full = []
+    shared_basename = []
+
+    # 找「共享能力注册表」章节
     shared_section = re.search(r'## 二、共享能力注册表(.*?)##', capability_content, re.DOTALL)
     if not shared_section:
         shared_section = re.search(r'## 二、共享能力注册表(.*)', capability_content, re.DOTALL)
 
-    if shared_section:
-        section_content = shared_section.group(1)
+    if not shared_section:
+        return [], []
 
-        script_matches = re.findall(r'`scripts/([^`]+)`', section_content)
+    section_content = shared_section.group(1)
 
-        scripts.extend(script_matches)
+    # 提取 `` `path/to/script.py` `` 形式的反引号引用
+    script_matches = re.findall(r'`([^`]*\.(?:py|mjs|sh|ps1))`', section_content)
 
-    return list(set(scripts))
+    for full_path in script_matches:
+        # 过滤掉 examples/ logs/ 等非共享脚本
+        if any(p in full_path for p in ['logs/', 'examples/', 'auto_reports/']):
+            continue
+        shared_full.append(full_path)
+        shared_basename.append(Path(full_path).name)
+
+    return shared_full, shared_basename
 
 
 def parse_yaml_frontmatter(content: str) -> Dict:
