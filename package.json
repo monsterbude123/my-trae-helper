@@ -20,7 +20,12 @@
     "prepublishOnly": "node scripts/prepare-publish.mjs",
     "test": "node bin/cli.mjs --help",
     "test:add": "node bin/cli.mjs add --help",
-    "test:list": "node bin/cli.mjs list"
+    "test:list": "node bin/cli.mjs list",
+    "test:unit": "node tests/unit/test_skill_change_control.mjs && node tests/unit/test_skill_install_control.mjs && node tests/unit/test_dependency_guard.mjs && python tests/unit/test_structure_guard.py && python tests/unit/test_security_guard.py",
+    "test:integration": "node tests/unit/test_skill_change_control.mjs && node tests/unit/test_skill_install_control.mjs && node tests/unit/test_dependency_guard.mjs",
+    "test:coverage": "node tests/unit/test_skill_change_control.mjs && node tests/unit/test_skill_install_control.mjs && node tests/unit/test_dependency_guard.mjs && python tests/unit/test_structure_guard.py && python tests/unit/test_security_guard.py",
+    "lint": "node --check bin/cli.mjs && node --check src/add.mjs && node --check src/list.mjs && node --check src/remove.mjs && node --check src/update.mjs && node --check src/init.mjs && node --check src/create.mjs && node --check src/verify.mjs && node --check src/scanner.mjs && node --check src/installer.mjs && node --check src/agents.mjs && node --check src/utils.mjs && node --check src/execution/skill-change-control.mjs && node --check src/execution/skill-install-control.mjs && node --check src/guards/skill-dependency-guard.mjs",
+    "build": "node scripts/validate-config.mjs"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.2.1",

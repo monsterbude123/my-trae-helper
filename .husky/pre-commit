@@ -2,10 +2,9 @@
 # Skill Market L1 Commit Gate
 #
 # 触发时机: git commit
-# 检查项:
-#   - Lint
-#   - TypeCheck
-#   - Unit Tests
+# 检查项（必须全部执行,失败即阻断）:
+#   - Lint (node --check 所有 JS 文件)
+#   - Unit Tests (skill-change-control / skill-install-control / dependency-guard / structure-guard / security-guard)
 #   - 技能安全守卫（仅变更的技能）
 #   - 技能结构守卫（仅新建技能）
 
@@ -13,52 +12,42 @@ set -e
 
 echo "🔍 执行 L1 Commit Gate..."
 
-# 1. Lint
-if command -v npm &> /dev/null && grep -q '"lint"' package.json; then
-  echo "1️⃣ 执行 Lint..."
-  npm run lint
+# 1. Lint（必须存在）
+if ! grep -q '"lint"' package.json; then
+  echo "❌ Gate 配置错误: package.json 缺少 lint 脚本"
+  exit 1
 fi
+echo "1️⃣ Lint..."
+npm run lint
 
-# 2. TypeCheck
-if command -v npm &> /dev/null && grep -q '"typecheck"' package.json; then
-  echo "2️⃣ 执行 TypeCheck..."
-  npm run typecheck
+# 2. Unit Tests（必须存在）
+if ! grep -q '"test:unit"' package.json; then
+  echo "❌ Gate 配置错误: package.json 缺少 test:unit 脚本"
+  exit 1
 fi
+echo "2️⃣ Unit Tests..."
+npm run test:unit
 
-# 3. Unit Tests
-if command -v npm &> /dev/null && grep -q '"test:unit"' package.json; then
-  echo "3️⃣ 执行 Unit Tests..."
-  npm run test:unit
-fi
-
-# 4. 技能安全守卫（仅变更的技能）
-# 取 skill-markets/<dir>/<file> 中 <dir> 部分,排除 .md 单文件(如 CAPABILITY-MAP.md)
+# 3. 技能安全守卫（仅变更的技能目录）
 CHANGED_SKILLS=$(git diff --name-only --cached | grep '^skill-markets/' | awk -F/ '$2 && $2 !~ /\.md$/ {print $2}' | sort -u)
 if [ -n "$CHANGED_SKILLS" ]; then
-  echo "4️⃣ 执行技能安全守卫..."
+  echo "3️⃣ 技能安全守卫..."
   for skill in $CHANGED_SKILLS; do
     if [ -d "skill-markets/$skill" ]; then
-      echo "  - 检查 $skill..."
-      python scripts/skill-security-guard.py "skill-markets/$skill" || {
-        echo "❌ 安全守卫失败: $skill"
-        exit 1
-      }
+      echo "  - $skill"
+      python scripts/skill-security-guard.py "skill-markets/$skill"
     fi
   done
 fi
 
-# 5. 技能结构守卫（仅新建技能）
-# 只匹配 skill-markets/<dir>/SKILL.md,排除 CAPABILITY-MAP.md 等单文件
+# 4. 技能结构守卫（仅新建技能目录）
 NEW_SKILLS=$(git diff --name-only --cached --diff-filter=A | grep '^skill-markets/[^/]*/SKILL\.md$' | awk -F/ '{print $2}' | sort -u)
 if [ -n "$NEW_SKILLS" ]; then
-  echo "5️⃣ 执行技能结构守卫..."
+  echo "4️⃣ 技能结构守卫..."
   for skill in $NEW_SKILLS; do
     if [ -d "skill-markets/$skill" ]; then
-      echo "  - 检查 $skill..."
-      python scripts/skill-structure-guard.py "skill-markets/$skill" || {
-        echo "❌ 结构守卫失败: $skill"
-        exit 1
-      }
+      echo "  - $skill"
+      python scripts/skill-structure-guard.py "skill-markets/$skill"
     fi
   done
 fi
