@@ -1,6 +1,6 @@
 ---
 name: trae-security-review
-description: 双引擎安全审查能力包 — Agent 驱动的代码安全审查 + 本地 Skill 目录静态扫描。当用户需要代码安全审计、项目安全扫描、依赖漏洞检查、密钥泄露检测、三方 Skill 准入审查时加载。
+description: 双引擎安全审查能力包 — Agent 驱动的代码安全审查 + 本地 Skill 目录静态扫描 + 严谨用词扫描。当用户需要代码安全审计、项目安全扫描、依赖漏洞检查、密钥泄露检测、三方 Skill 准入审查、文档用词严谨性检查时加载。
 requires:
   optional: [acceptance-discipline]
 ---
@@ -18,9 +18,15 @@ trae-security-review/
 ├── references/
 │   ├── checklists.md            ← 安全审查清单
 │   ├── risk-patterns.md         ← 高/中/低风险模式库
+│   ├── rigor-patterns.md        ← 严谨用词模式库（10 类）
 │   └── report-template.md       ← 报告模板
 └── scripts/
-    └── scan_skills_dir.py V2.1  ← Skill 目录静态扫描脚本（8 类风险 + 三层白名单 + 词边界正则）
+    ├── scan_skills_dir.py V2.1  ← 技术安全扫描（8 类风险 + 三层白名单 + 词边界）
+    ├── scan_rigor.py            ← 严谨用词扫描（10 类模式 + 词库豁免 + 量化阈值）
+    ├── rigor_scanner.py         ← 严谨扫描核心库
+    ├── rigor_reporter.py        ← 严谨扫描报告输出
+    └── lib/
+        └── rigor_patterns.py    ← 严谨用词词表（10 类 × 中英文）
 ```
 
 ## 双引擎工作流
@@ -95,4 +101,55 @@ code-security-reviewer 输出
     → 移交 gate-keeper-agent 汇总
     → 与 unit-test / integration-test / perf 结果合并
 ```
+
+---
+
+## scan_rigor.py 严谨用词扫描（V2.2 NEW）
+
+### 10 类风险模式
+
+| Code | 类别 | 严重度 | 触发示例（应避免） |
+|------|------|--------|-------------------|
+| `EMOTIONAL_TONE` | 情绪化用词 | LOW | 非常好用 / 极致 / 完美 / awesome / perfect |
+| `ABSOLUTE_CLAIM` | 绝对断言 | LOW | 100% / 零风险 / absolutely safe / guaranteed |
+| `VAGUE_QUANTIFIER` | 模糊量化 | LOW | 大量 / 少量 / many / several |
+| `INCLUSIVE_HEDGE` | 兜底模糊 | MEDIUM | 等等 / 诸如此类 / 以此类推 |
+| `UNDEFINED_TERM` | 未定义术语 | MEDIUM | 特殊情况 / 极端情况 / edge cases |
+| `DEAD_ANGLE_MARKER` | 死角提示词 | MEDIUM | 一般情况下 / 通常情况下 / generally / typically |
+| `PERSONAL_OPINION` | 主观判断 | LOW | 我觉得 / 我认为 / I think |
+| `PROHIBITED_PHRASE` | 禁用短语 | LOW | 显而易见 / 显然 / obviously / clearly |
+| `OVER_PROMISE` | 过度承诺 | MEDIUM | 一键搞定 / 轻松实现 / one-click / effortlessly |
+| `UNMEASURED_BENEFIT` | 不可量化收益 | LOW | 提升效率 / 改善体验 / improve performance |
+
+### 设计原则
+
+- **可证伪**：每条规则都给出具体触发模式 + 替换建议
+- **豁免**：代码块（` ``` `）/ 行内代码（` ` `）/ Python 原始字符串（`r"..."`）自动豁免
+- **三层白名单**：复用 `scan_skills_dir.py` 的文件级 / 区块级 / 行级白名单语法
+- **量化阈值**：总命中 ≥ 30 / EMOTIONAL+PROHIBITED ≥ 10 / 其它类别 ≥ 5 → WARNING
+
+### 用法
+
+```bash
+# 自检（验证词表 + 阈值）
+python scripts/scan_rigor.py --self-test
+
+# 扫描目录
+python scripts/scan_rigor.py skill-markets/<pkg> audit_reports
+python scripts/scan_rigor.py skill-markets/<pkg> audit_reports --quiet   # 单行 JSON
+```
+
+### 与 .husky 集成
+
+仓库根 `.husky/pre-commit` 已绑定双扫描：
+
+```
+每次 git commit
+  ├── 1. scan_skills_dir.py → HIGH 阻断 commit
+  └── 2. scan_rigor.py → WARNING 仅提示，不阻断
+```
+
+启用方式：`git config core.hooksPath .husky`（已配置）
+跳过方式：`git commit --no-verify`（不推荐）
+
 

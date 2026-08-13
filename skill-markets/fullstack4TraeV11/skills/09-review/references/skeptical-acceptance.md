@@ -34,7 +34,7 @@ evidence:
 
 ## ACTIVE FALSIFICATION（主动证伪）
 
-reviewer 不接受"看起来对"，必主动找反例：
+reviewer 不接受未经证伪的结论，必主动找反例：
 
 | 高风险清单 | 证伪动作 |
 |-----------|---------|

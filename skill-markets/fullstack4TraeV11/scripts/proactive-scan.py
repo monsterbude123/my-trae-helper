@@ -85,7 +85,7 @@ def scan_archive(project_root: pathlib.Path) -> Tuple[bool, str]:
 def scan_self_attest(project_root: pathlib.Path) -> Tuple[bool, str]:
     """Check 3: 自验腐烂"""
     # 检测 review-report.md 是否声明 reviewer 亲自跑了测试
-    reviews = list(project_root.rglob("review-report.md"))
+    reviews = [p for p in project_root.rglob("review-report.md") if "_invalidated" not in p.parts]
     if not reviews:
         return True, "无 review-report.md（N/A）"
 
@@ -131,7 +131,7 @@ def scan_self_aggrandizing(project_root: pathlib.Path) -> Tuple[bool, str]:
 
 def scan_state_card_staleness(project_root: pathlib.Path) -> Tuple[bool, str]:
     """Check 7: 状态卡陈旧"""
-    state_cards = list(project_root.rglob(".state-card.md"))
+    state_cards = [p for p in project_root.rglob(".state-card.md") if "_invalidated" not in p.parts]
     if not state_cards:
         return True, "无状态卡（N/A）"
 
@@ -171,7 +171,7 @@ def scan_stub_pileup(project_root: pathlib.Path) -> Tuple[bool, str]:
 
     found = []
     for src_file in project_root.rglob("*.py"):
-        if any(p in src_file.parts for p in ["node_modules", ".git", "__pycache__", "dist", "build"]):
+        if any(p in src_file.parts for p in ["node_modules", ".git", "__pycache__", "dist", "build", "_invalidated"]):
             continue
         if src_file.name in filename_whitelist:
             continue
@@ -191,7 +191,10 @@ def scan_stub_pileup(project_root: pathlib.Path) -> Tuple[bool, str]:
 def scan_obstacle_honesty(project_root: pathlib.Path) -> Tuple[bool, str]:
     """Check 9: V10.10 障碍诚实"""
     # 检测阻塞报告是否含 5 字段
-    blockers = list(project_root.rglob("*blocker*.md")) + list(project_root.rglob("*阻塞*.md"))
+    blockers = (
+        [p for p in project_root.rglob("*blocker*.md") if "_invalidated" not in p.parts]
+        + [p for p in project_root.rglob("*阻塞*.md") if "_invalidated" not in p.parts]
+    )
     if not blockers:
         return True, "无阻塞报告（N/A）"
 
@@ -237,6 +240,7 @@ def scan_reason_fabrication(project_root: pathlib.Path) -> Tuple[bool, str]:
             "audit_history.json",  # 自检历史
             "auto-audit",  # 自检报告(本身就是元数据)
             "templates",  # 模板(含示例占位符)
+            "_invalidated",  # V11.2.2 NEW: 失效归档(已被作废的产物,Article VIII 不可变,不应 rot 扫描)
         ]):
             continue
         if any(wd in str(md_file) for wd in [
@@ -244,6 +248,7 @@ def scan_reason_fabrication(project_root: pathlib.Path) -> Tuple[bool, str]:
             "/docs/bugs/",  # bug 单(已是腐烂记录)
             "/docs/reports/",  # 周期报告(数据来源不同)
             "/docs/history/",  # 历史快照
+            "/_invalidated/",  # V11.2.2 NEW: 失效归档路径(防漏:即使 rglob parts 不完全匹配也跳过)
         ]):
             continue
         if md_file.name in filename_whitelist:

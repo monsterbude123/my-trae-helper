@@ -28,13 +28,19 @@ triggers: ["Skill 扫描", "Skill 准入", "技能安全", "skill scan", "skills
 ### Step 2 — 运行扫描脚本
 
 ```bash
-# 如果脚本可用
+# 技术安全扫描（8 类风险）
 python scan_skills_dir.py /path/to/skills [/path/to/output]
+
+# 严谨用词扫描（10 类模式；2026-08-13 新增）
+python scan_rigor.py /path/to/skills [/path/to/output]
+
+# 双扫描一键运行（推荐用于准入审查）
+python scan_skills_dir.py /path/to/skills && python scan_rigor.py /path/to/skills
 ```
 
 ### Step 3 — 分析结果
 
-检查以下 5 类风险：
+检查以下 9 类风险（技术安全 5 类 + 严谨用词 4 类）：
 
 | 风险 | 严重度 | 检测模式 | 解释 |
 |------|--------|---------|------|
@@ -43,6 +49,10 @@ python scan_skills_dir.py /path/to/skills [/path/to/output]
 | 硬编码密钥 | HIGH | `api_key`/`token`/`secret` + 值 | 密钥硬编码在源代码中 |
 | Shell 执行调用 | MEDIUM | `child_process.exec(` | 可能被用于执行任意命令 |
 | 明文 HTTP | LOW | `http://` | 应使用 HTTPS |
+| 情绪化用词 | LOW | 非常好用 / 完美 / awesome | 影响文档专业性 |
+| 绝对断言 | LOW | 100% / 零风险 / guaranteed | 违反严谨表达 |
+| 兜底模糊 | MEDIUM | 等等 / 诸如此类 | 违反严谨枚举 |
+| 死角提示词 | MEDIUM | 一般情况下 / 通常情况下 | 掩盖未覆盖场景 |
 
 ### Step 4 — 生成报告
 

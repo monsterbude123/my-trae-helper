@@ -1,5 +1,5 @@
 ---
-name: intake
+name: fullstack-01-intake
 description: "Stage -1 入口 — 全栈流程的意图受理 + 路由起点。识别用户意图（新功能 / Bug / 重构 / 文档同步 / 项目初始化）+ 路由决策 + 状态卡初始化 + Bug 录入触发 + 项目惯例勘察。触发词：初始化 / 新需求 / Bug 修复 / 重构 / 文档同步 / 报错 / 不工作 / 接入新项目。"
 stage: -1
 parent: fullstack4traev11

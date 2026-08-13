@@ -1,5 +1,5 @@
 ---
-name: project-health
+name: fullstack-13-project-health
 description: "Stage 7 项目健康度自检 — 主动自检 + 4 维度检查 + 优先级分级 + 防失真。 异步支线，可与任一 stage 并行。触发词：project health / 健康度 / 自检 / 诊断。"
 stage: 7
 parent: fullstack4traev11

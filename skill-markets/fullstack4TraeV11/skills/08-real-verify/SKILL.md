@@ -1,5 +1,5 @@
 ---
-name: real-verify
+name: fullstack-08-real-verify
 description: "Stage 3.5 启动可见产物 — 唯一信任基础，不接受自评。环境依赖 + 真实验证 + 启动可见产物 + 阻塞处理。触发词：real verify / 启动验证 / 真实验证 / visible product。"
 stage: 3.5
 parent: fullstack4traev11
@@ -50,16 +50,26 @@ Step 4: 阻塞处理（任一 FAIL → 5 字段报告 + 状态卡 blocked）
 
 | 项目类型 | 验证产物 | 强约束 |
 |---------|---------|--------|
-| **Web** | curl localhost 返回 200 + Playwright 截图 ≥1 张（≥5KB） | 必含 file:line 路径 |
+| **Web** | curl localhost 返回 200 + **真实浏览器端到端 UI 截图（含本 change 实施 + 端到端可交互）** | 必含 file:line 路径 + 实施组件 ID/class/role 标注 |
 | **Tauri** | `tauri dev` 进程存活 + 主窗口 screenshot ≥1 张 | 主上下文亲自 Read |
 | **CLI** | 实际跑 1 次 end-to-end 命令 + 输出片段 ≥10 行 | 必含退出码 |
 | **Library** | 集成测试真实调用 + 返回 200/正确字段 | 必含 API 调用证据 |
 | **后端服务** | 健康检查端点返回 200 + 日志无 ERROR | 必含 health 路径 |
 
+**真实浏览器端到端 UI 截图硬约束（V11.2 NEW — 蒸馏自 canvas-asset-folders）**：
+
+- ✅ 必须用 Playwright MCP / Chrome DevTools MCP / 真实浏览器 驱动
+- ✅ 截图必须包含本 change 实施的关键 UI 组件 ID/class/role
+- ✅ 截图必须证明端到端可交互（点击 → API 调用 → 状态变化）
+- ❌ 禁止 prototype 截图 / mock 截图 / 拼图截图
+- ❌ 禁止"API 兜底全 PASS + 单元测试全 PASS" 等于 "UI 集成层 PASS" — 三层独立验证
+- 失败处理：任何 1 项不满足 → 标记 FAIL + revert stage_status to in_progress + 清理虚假痕迹（截图 / 脚本 / 虚假 README）
+- 反例：[anti-patterns/03-skip-screenshot.md](anti-patterns/03-skip-screenshot.md) §B 反例 2026-08-12-canvas-asset-folders
+
 ## 强约束（V10 §0.10）
 
 - 可见产物必附 file:line 路径或 evidence_summary
-- 不可用"看到进程即通过" / "vite 启动了应该没问题" / "截图不在本次范围"
+- 不可用未验证断言充当通过依据(如"看到进程即通过"/"启动成功即认为运行正常"/"截图不在本次范围")
 - 与 §通过依据 [2] 区分: 本闸门是 Real Verify 实施者层（启动是否真跑通）
 
 ## 反例（3 条）
@@ -77,4 +87,3 @@ Step 4: 阻塞处理（任一 FAIL → 5 字段报告 + 状态卡 blocked）
 - [visual-evidence.md](references/visual-evidence.md) — 视觉证据 3 层校验
 - [blockage-report.md](references/blockage-report.md) — 5 字段阻塞报告
 - V10 §0.10: `V10 来源` (已蒸馏到本文档)
-- V10 实战蒸馏: [anti-patterns/V10-battle-tested.md](anti-patterns/V10-battle-tested.md)

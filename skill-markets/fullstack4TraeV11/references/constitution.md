@@ -49,13 +49,13 @@ TDD 三步循环（RED → GREEN → REFACTOR + DRIFT CHECK）是实施唯一路
 启动可见产物是唯一信任基础，不接受自评。5 类项目（Web / Tauri / CLI / Library / Backend）分别定义验证产物。
 
 ### Article XIV — No Rot No Accept
-Phase 4.5 rot-detector 不可跳过。腐化扫描必跑，fix-list.json 必产出且不可空。
+Stage 4.5 rot-detector 不可跳过。腐化扫描必跑且 fix-list.json 必产出（非空）。
 
 ### Article XV — Obstacle Honesty（V10.10 NEW）
 任何阻塞必 5 字段诚实汇报（type / description / attempted_solution / time_consumed / attempt_count）。禁止：
 - ❌ 跳过（"先继续，回头再看"）
 - ❌ 隐藏（"等下修，先标完成"）
-- ❌ 抽象理由（"理解偏差"/"流程裁剪"/"心理障碍"）
+- ❌ 以不可证伪术语作为失败归因
 
 ### Article XVI — Skeptical Validation（V10.10 NEW）
 任何 P0/P1 修复或升级方案必走质疑性校验 4 维度：

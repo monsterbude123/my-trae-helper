@@ -71,9 +71,16 @@ stage_config:
 ## 哲学（V10 传承 + V11 升级）
 
 ```
-复用而非自研 | 质量而非流程 | 验证而非信任 | 干净而非兼容
-主动而非被动 | 诚实而非吹嘘 | 骨感而非堆积 | 分层而非混置
-高内聚低耦合 | 插拔式专家
+复用而非自研      → 优先复用已有模块（不重写已有能力）
+质量而非流程      → 测试覆盖率 ≥ 90% + 每个主张附 evidence
+验证而非信任      → 主上下文独立抽检 3 层（evidence / pass_count / 产物存在性）
+干净而非兼容      → 不为兼容旧行为保留过渡层（L9+ 才考虑）
+主动而非被动      → 默认开启 GitNexus / state-card-validator / hooks-fidelity 校验
+质疑而非自证      → Article XVI 质疑式校验（不可证伪理由 = 🛑 REJECT）
+骨感而非堆积      → skill 文件 ≤ 10 铁律 + ≤ 150 行（Article XI）
+分层而非混置      → fact / process / log 三层隔离（sub-agent-rules §1）
+高内聚低耦合      → 每个 stage 自包含目录（skills/{NN}-{name}/）
+插拔式专家        → stage skill 可独立升级替换
 ```
 
 > V11 新增最后 2 条：每个 stage 自包含（高内聚）+ stage skill 可独立替换/升级（插拔式）。
@@ -359,7 +366,7 @@ ls docs/specs/.state-card.md
 - 破坏性操作前（rmtree / 不在 git 跟踪的大文件 Delete / 不可逆数据变换）
 - 需求模糊 + 1 轮追问仍无法澄清
 - 多方案对比无共识
-- 用户语气转硬
+- 用户在 2 轮内表达 ≥ 3 次否定判断
 - 阻塞报告（3 次失败升级用户）
 
 **专家自行判断**:
@@ -396,7 +403,7 @@ ls docs/specs/.state-card.md
 - GitNexus 可用却用 grep
 - 用后端/编译类验证充当 UI 任务"完成"
 - 盲信子代理的"已完成"声明
-- 障碍隐瞒 / 编造抽象理由（"理解偏差"等不可证伪理由）
+- 隐瞒阻塞 / 引用不可证伪理由作为失败归因
 - 状态卡说谎 / 文档与代码漂移静默迁就
 - 跳过 Stage 4.5 Rot Scan
 
@@ -409,12 +416,102 @@ ls docs/specs/.state-card.md
 1. **障碍隐瞒**: 容器未启 / 迁移失败 / 测试 FAIL 不汇报，声称"完成"
 2. **跳过测试**: 跳过 `npm run test:all` / `pytest` / `vitest` 声称"完成"
 3. **文档验收自我满足**: 文档验收 100% PASS 但未实际跑验证
-4. **编造抽象理由**: "理解偏差" / "流程裁剪" / "心理障碍" / "概念漂移" 等不可证伪理由（Article XVI）
-5. **二次再犯抽象理由**: 二次被质问仍编造不可证伪理由 → REJECT
+4. **引用不可证伪理由作为失败归因**: 未定义术语、未指明位置的偏差、未量化裁剪、未测量的心理负担、未定义的概念迁移等。允许的失败归因形式见 [references/agent-error-diagnosis.md](references/agent-error-diagnosis.md) §3 5 模式诊断。
+5. **二次再犯不可证伪理由**: 二次被质问仍引用不可证伪理由 → REJECT
 6. **AI 描述当成真实像素**: Read PNG 工具返回 AI 描述，编造"截图显示 XXX" → 主上下文必亲自 Read 对比（Article IX）
 7. **盲信子代理"已完成"**: 不抽检 evidence / 不跑 pass_count 命令 / 不 Glob 产物（Article IX）
 8. **Visual = API PASS**: 用 vitest PASS 充作 UI 任务"完成"（V10.12 教训）
 9. **"启动 = 完成"软指标**: 启动进程即声称"完成"，无可见产物（V10 §0.10 启动验证）
+
+#### V11.2.1 NEW — 蒸馏自 canvas-asset-folders Stage 4 Round 1/2 失败案例引用
+
+> **失败场景**：2026-08-12 Stage 4 Round 1/2 评审员**明知只看了"5 预设可见"未对照 prototype**，仍给 PASS。用户一句话（30 字）"这个UI和 prototypes/index.html 你前面阶段设计的内容不是一个东西啊"暴露 Stage 4 评审重大疏漏。
+>
+> **教训**：反例 #8 不只在"明知缺陷还往下走"层面失效，在"明知评审疏漏还放 PASS"层面也失效。V11 改进：
+> 1. Stage 4 review-report 必含 prototype ↔ implementation 对照表（见 [skills/09-review/SKILL.md Step -1](skills/09-review/SKILL.md)）
+> 2. 评审员必亲读 prototype 截图（≥ 2 张）
+> 3. 实施截图与 prototype 截图视觉差异 > 20% → REJECT
+>
+> **关联引用**：[skills/09-review/SKILL.md Step -1](skills/09-review/SKILL.md) | [state-card-protocol.md §5.8](references/state-card-protocol.md)（子代理擅自升级状态协议）
+
+#### §3.7.2 Article V V11.2.1 强化 — 可验证声明硬约束（V11.2.1 NEW — 蒸馏自 canvas-asset-folders）
+
+> **追加位置说明**: 原任务要求在 Article V.5 描述末尾追加，但 SKILL.md 无 Article V.5 显式编号，按 §3.7 语义就近原则追加入 §3.7 末尾（不改 9 项禁止原文）。Article V（可验证声明）的 V11.2.1 强化条款如下：
+
+**4 项硬约束（任一违反 = 🛑 REJECT）**：
+
+1. **Review 必读 prototype 截图**: Stage 4 review-report 必含 prototype ↔ implementation 对照表（reference: [skills/09-review/SKILL.md Step -1](skills/09-review/SKILL.md)），评审员必亲读 ≥ 2 张 prototype 截图，未读 = 评审疏漏
+2. **实施 vs prototype 视觉差异 > 20% → REJECT**: 实施截图与 prototype 截图逐像素对比，差异 > 20% 即拒收（不进入下一 stage）
+3. **PASS 必附三层证据**: command + output + file:line 三件套缺一不可；review-report 任一字段缺失 = 自动 FAIL
+4. **评审疏漏二次再犯 → 升级用户**: 同一 stage 连续 2 轮评审疏漏（明知未对照 prototype 仍给 PASS）→ 立即停止自评，5 字段阻塞报告 + 升级用户决策
+
+**关联铁律**：Article V（可验证声明） + Article IX（质疑式验收） + Article XVI（质疑式校验）。
+
+#### §3.7.3 灵活度铁律 8 — V11.3 NEW — 人工判定覆盖（2026-08-12 canvas-asset-folders 蒸馏）
+
+> **设计哲学**: prototype 是"参考起点 + 单一真相源",但**承认合理灵活度**。
+> **核心**: 5% 视觉差异阈值(V11.3 收紧 4 倍)+ fidelity 等级 + 偏离理由 + 工具-人类分层判定。
+
+##### 8.1 prototype fidelity 等级（必在 design-prompt.md 顶部标注）
+
+- **L1 wireframe（线框）**: 仅布局骨架 + 组件清单 + 5 状态,**不约束**颜色/间距/字号/动画
+  - 实施只要保留"布局 + 组件 + 5 状态"= PASS,视觉差异 ≤ 50% 可接受
+  - 适用场景:早期探索、需求验证、低保真原型
+- **L2 mockup（中保真）**: L1 + 主色板 + 字号层级 + 间距规则
+  - 实施差异 ≤ 30% 可接受
+  - 适用场景:中后期实施、UI 细节对齐
+- **L3 pixel-perfect（高保真）**: L2 + 动效曲线 + 阴影 + 圆角 + hover 状态
+  - 实施差异 ≤ 5% 才 PASS
+  - 适用场景:精确还原、营销页、关键 UX 节点
+
+**默认值**:design-prompt.md 无 fidelity 标注 → 视为 **L2 mockup**（默认中保真）
+
+##### 8.2 prototype 演进（V11.3 NEW）
+
+- Stage 3 实施期间如发现 prototype 设计不合理,**允许**调整 prototype + design-prompt + ui-ux-logic
+- 调整必走:
+  1. 主上下文决策（不能 agent 单方面调整）
+  2. 同步 3 份文档（保持单一真相源,见 V11 §11）
+  3. 在 review-report.md §prototype ↔ implementation 对照表 "偏离理由" 列填"prototype 演进 V11.3 §8.2"
+- **NEVER**: 暗改 prototype 而不更新文档
+
+##### 8.3 偏离理由（正当理由清单）
+
+实施可偏离 prototype,但**必在** review-report.md §prototype ↔ implementation 对照表 "偏离理由" 列填**正当理由**之一:
+
+- **性能优化** — 实施用更高效算法,功能等价
+- **可访问性** — 实施用 ARIA 增强,功能等价
+- **国际化** — 实施 i18n 拆分,文案按 locale 切换
+- **用户偏好** — 用户已确认偏离（如本期 prototype 设计 8 项,但用户要求聚焦 6 项）
+- **prototype 演进** — 见 §8.2,实施期间调整了 prototype
+- **fidelity 等级允许的差异** — 见 §8.1,L1/L2 容许范围内差异
+- **第三方库限制** — 实施用第三方库有特定约束（如 Tailwind 不支持某 CSS）
+
+主上下文在 review-report 末段"§偏离裁定"列每条偏离的批准理由。
+
+**NEVER 空洞偏离理由**（无证据的偏离裁定反例）:
+- ❌ "差不多"
+- ❌ "看起来对"
+- ❌ "感觉 OK"
+- ❌ "应该没问题"
+- ❌ "差不多就行"
+
+**反例来源**:2026-08-12 canvas-asset-folders Stage 4 Round 1/2 评审员写"5 预设可见 + API PASS"给 PASS,缺 prototype 1:1 对照 + 缺偏离理由
+
+##### 8.4 工具-人类分层判定（V11.3 NEW — 人工判定覆盖）
+
+> 2026-08-12 用户决策记录:工具反馈通过 → 主上下文直接标记通过；工具反馈未通过 → 由 agent 决定放行时必须附偏离理由（见 §8.3 正当理由清单）。无证据放行视为流程违规。
+
+```
+工具检测 PASS → 主上下文直接标记通过
+工具检测 FAIL → 不阻塞,仅作"提示"交给 agent 决策
+agent PASS  → 必写偏离理由（§8.3 正当理由清单之一）
+agent FAIL  → 必写 FAIL 原因（spec 违反 / prototype GAP / 实施错误）
+```
+
+**反例**:agent 工具检测 FAIL 时,无偏离理由即声称"通过" → 按反例 §4 不可证伪理由处理（V11 通用铁律）
+
+**关联铁律**:Article V（可验证声明） + Article IX（质疑式验收） + Article XVI（质疑式校验）。
 
 **修正路径**: 必走 [references/sub-agent-rules.md §8 三层验证](references/sub-agent-rules.md) + [references/agent-error-diagnosis.md](references/agent-error-diagnosis.md) 5 模式诊断 + [Stage 3.5 Real Verify](../skills/08-real-verify/SKILL.md) 5 类项目启动验证。
 - 主上下文直接 Edit/Write 代码（Article IV 委派纪律）
@@ -427,9 +524,9 @@ ls docs/specs/.state-card.md
 
 **核心 2 类**:
 - 反模式 1 — 用户没选选项 = 可能在质疑流程本身 → 承认错误 + 根因分析
-- 反模式 2 — 用户连续 N 轮返工后还在补小修 → 反向提示词生成（NEVER + 反例）
+- 反模式 2 — 用户累计 ≥ 3 次小修请求仍在修补细节 → 反向提示词生成（NEVER + 反例）
 
-**多轮道歉信号**: 主上下文道歉 ≥ 2 次 + 无具体改进 + 用户语气转硬 → 立即停止道歉，列 ✅ 已做 + 📍 证据。
+**多轮道歉信号**: 主上下文道歉 ≥ 2 次 + 无可观测改进 + 用户在 2 轮内表达 ≥ 3 次否定判断 → 立即停止道歉，列 ✅ 已做 + 📍 证据。
 
 ---
 
@@ -461,7 +558,7 @@ skills/{NN}-{name}/
 
 ## §13 参考索引
 
-- **references/**: constitution / common-iron-rules / common-anti-patterns / **skeptical-validation-protocol**（7 stage 永久激活）/ stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns / agent-error-diagnosis / sub-agent-rules / project-structure / gitnexus-tools / gitnexus-retry-protocol / V10-distillation-source-map（详见各节指针）
+- **references/**: constitution / common-iron-rules / common-anti-patterns / **skeptical-validation-protocol**（7 stage 永久激活）/ stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns / agent-error-diagnosis / sub-agent-rules / project-structure / gitnexus-tools / gitnexus-retry-protocol / stage-physical-isolation（详见各节指针）
 - **glossary.md** — 术语表(V10 完整继承 + V11 新增 5 大类 100+ 术语)
 - **templates/**: project-agents-example / project-rules-example / state-card / hooks/ / constitution-template
 
@@ -517,3 +614,44 @@ skills/{NN}-{name}/
 - scripts/init-from-zero.py -- Step 5 (V11.2 MOVE 模式 + README 幂等 + 占位兜底)
 - templates/project-rules-skill-template/ -- project-rules skill 入口模板
 - templates/project-rules-example/ -- 占位 rule 模板(4 个文件 + README)
+
+### §14.5 项目级 rules > V11 通用层优先级（V11.2 NEW — 蒸馏自 canvas-asset-folders）
+
+> **本节为任务委托方所指的"§14.2 项目级 vs V11 通用层优先级"**，因 §14.2/§14.3/§14.4 已被既有项目级生态管理规范占用，按 V11 §11 单源原则以 §14.5 编号追加，避免重复定义。
+
+```
+当 V11 通用层（~/.trae-cn/skills/fullstack4TraeV11/）与项目级 rules（.trae/skills/project_rules_skills/）冲突时：
+
+MUST: 项目级 rules 优先于 V11 通用层
+MUST: 项目级 .trae/skills/project_rules_skills/references/anti-patterns.md 可补 V11 通用层缺失的反例
+MUST: 项目级 .trae/skills/project_rules_skills/rules/governance.md 可强制 V11 通用层未硬化的门槛（如视觉证据）
+NEVER: 盲信 V11 通用层, 缺项目级叠加（违反 Article XVI §1.4 重叠校验的反向）
+```
+
+**适用场景（V11 通用层缺位时的项目级补全范式）**：
+
+- V11 通用层缺反例 → 项目级 anti-patterns.md 补全
+- V11 通用层误判 → 项目级 rules 纠正
+- V11 通用层缺硬门槛 → 项目级 governance 强制
+- 真实失败案例（V11 实战蒸馏）→ 项目级 references/ 沉淀
+
+**反例来源**：2026-08-12-canvas-asset-folders 会话（V11 §3.5 缺真实浏览器端到端 UI 截图硬门槛，项目级 visual-evidence-gate 补全）。
+
+**本节即任务委托方所提"V11 §14.2 项目级 vs V11 通用层优先级"小节的源头**。
+
+#### §14.5.1 与 §14.1-§14.4 的关系
+
+| 维度 | §14.1-§14.4 项目级生态管理 | §14.5 优先级（V11.2 NEW）|
+|------|--------------------------|------------------------|
+| 关注点 | init-from-zero + project-rules-skill 创建协议 | V11 通用层 vs 项目级 rules 的冲突优先级 |
+| 时机 | init 阶段 + 项目级改动前 | 任意阶段,遇到规则冲突时 |
+| 反向约束 | 不创造 rules(物理移走) | 不盲信 V11 通用层(项目级叠加) |
+
+#### §14.5.2 引用触发词
+
+| 触发词 | 必引用 §14.5 |
+|--------|-------------|
+| 跨层规则冲突（V11 通用层 vs 项目级） | §14.5 优先级铁律 |
+| 项目级新增反例（V11 通用层未覆盖） | §14.5 "适用场景" 第 1 项 |
+| 项目级 governance 强制门槛 | §14.5 "适用场景" 第 3 项 |
+| AI 自述 "V11 没规定" | §14.5 NEVER 反向铁律 |

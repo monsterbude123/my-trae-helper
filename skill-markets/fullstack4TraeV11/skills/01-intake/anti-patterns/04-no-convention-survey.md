@@ -137,7 +137,7 @@ Stage 3 Implement: 缺少 react-dev-skill → 实施技术栈不对 → 返工
 项目惯例: .trae/rules/coding-standards.md → "桩代码必须返回明确错误: 'STUB: 功能未实现'"
 V11 默认: 16 Articles 宪法
 主上下文未勘察 → Stage 3 Implement 写模糊错误 "not supported in phase 2"
-用户质问 → 返工
+用户在后续 stage 触发 1 轮纠错 → Stage 1 重做 → 累计 ≥ 2 轮返工
 ```
 
 ---

@@ -1,5 +1,5 @@
 ---
-name: test-plan
+name: fullstack-03-test-plan
 description: "Stage 0.5 测试覆盖映射 — 验收维度 → 测试用例，spec.md 测试覆盖映射。触发词：test plan / 测试计划 / 覆盖率 / 验收维度。"
 stage: 0.5
 parent: fullstack4traev11

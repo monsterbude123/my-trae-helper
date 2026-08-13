@@ -13,7 +13,7 @@
 | 1 | **跳过必走 stage**（V11 §0 硬门禁）| 各 stage SKILL.md §铁律 |
 | 2 | **编造证据**（V10.12 ANTI-反模式）| Stage 3 implement/anti-patterns/02-fabricate-evidence.md |
 | 3 | **reviewer 帮忙修代码**（REVIEWER DOES NOT FIX）| Stage 9 review/anti-patterns/02-reviewer-fix-code.md |
-| 4 | **抽象理由**（"理解偏差" / "流程裁剪" / "心理障碍"）| 公共铁律 Article XV §15.4 |
+| 4 | **不可证伪理由**（如未定义术语、未指明位置的偏差、未量化裁剪、未测量心理负担、未定义的概念迁移）| 公共铁律 Article XV §15.4 |
 | 19 | **循环 PASS 模式**（不止一次"我搞错了"+ 重新委派，无具体改进）| [./loop-pass-pattern.md](./loop-pass-pattern.md) |
 | 20 | **甩锅用户模式**（"请你去做 X"代替自己能做的部分）| [./user-orchestration-pattern.md](./user-orchestration-pattern.md) |
 | 21 | **未读 rule 就自评 PASS**（rule 太长不读 + 反复踩同一雷）| [./unread-rule-pass.md](./unread-rule-pass.md) |

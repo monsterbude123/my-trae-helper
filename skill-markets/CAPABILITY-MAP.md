@@ -18,6 +18,7 @@
 | [gitnexus4Trae](gitnexus4Trae/AGENTS.md) | 纯Skill | GitNexus 代码智能 — 探索、调试、影响分析、重构、CLI | 无（子Skill: cli, debugging, exploring, guide, impact-analysis, refactoring） |
 | [browser-use-cloud](browser-use-cloud/SKILL.md) | 纯Skill | Browser Use 浏览器自动化 — 网页抓取、自动操作、结构化提取 | api_check.py, batch_sessions.py, structured_extract.py, webhook_server.py |
 | [openapi-doc-exporter](openapi-doc-exporter/SKILL.md) | 纯Skill | OpenAPI → Markdown 文档导出，框架无关 | render_md.py, split_by_prefix.py, validate_openapi.py |
+| [deep-research](deep-research/SKILL.md) | 纯Skill | 多源深度研究 — firecrawl/exa MCP 综合 + 引用报告（V1.0 NEW 2026-08-13 蒸馏自 ECC .agents/skills/deep-research，按 §11 接入治理） | 无（依赖 MCP: firecrawl 或 exa，至少 1 个） |
 | [trae-professional](trae-professional/SKILL.md) | 纯Skill | TRAE IDE 专业知识库 | 无 |
 | [product-teardown](product-teardown/AGENTS.md) | 纯Skill | 产品拆解分析 — 6 维度解构 + PRD 生成 | 无（子Skill: analyze, prd） |
 | [vision-audit](vision-audit/SKILL.md) | 纯Skill | UI/UX 视觉验收 — Qwen3-VL 分析截图 | vision-audit.mjs, vision-audit.py |

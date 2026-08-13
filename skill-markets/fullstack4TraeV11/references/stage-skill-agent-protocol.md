@@ -109,7 +109,7 @@ agent_completion:
 | Stage | agent 类型 | 必跑 gitnexus | 必跑脚本 |
 |-------|-----------|:---:|------|
 | -1 Intake | task-notification-agent | ❌ | setup-feature.py + state-card-validator.py |
-| 0 Plan | explore-agent（3 路径并行）| ✅ impact | phase-gate.py + state-card-validator.py |
+| 0 Plan | explore-agent（3 路径并行）| ✅ impact | stage-gate.py + spec-purge.py |
 | 0.5 Test Plan | explore-agent | ✅ | state-card-validator.py |
 | 1 Spec | spec-writer-agent | ❌ | code-hygiene.py + state-card-validator.py |
 | 1.5 Prototype | prototype-builder-agent | ❌ | visual-content-check.py |

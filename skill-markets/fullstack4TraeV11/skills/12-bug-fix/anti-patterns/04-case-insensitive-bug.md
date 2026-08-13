@@ -46,5 +46,6 @@ cursor.execute("INSERT INTO t (data) VALUES ('\\x48\\x45\\x4C\\x4C\\x4F')")  # �
 
 ## 关联引用
 
-- [SKILL.md §铁律 11 类型系统陷阱](../SKILL.md)
+- [SKILL.md §铁律 5 TDD 即时 -- V10 rot #12 蒸馏说明](../SKILL.md)
+- 类型系统陷阱(String.equals 大小写不敏感 vs hash 比较)由铁律 5 TDD 即时 隐含约束: 改实现同步改测试 = 暴露此类边界差异
 - V10 来源（已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）references/sub-agent-rules.md` §11

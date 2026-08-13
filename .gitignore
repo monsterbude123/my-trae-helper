@@ -35,6 +35,9 @@ example/comfyui-test/api-json/*.png
 # --- Node ---
 node_modules/
 
+# --- @my-trae-helper/cli 发布临时产物 ---
+.publish/
+
 # --- 日志 ---
 *.log
 
@@ -46,3 +49,21 @@ node_modules/
 Thumbs.db
 Desktop.ini
 .DS_Store
+# 调试 /临时
+.env
+.env.*
+_scratch/
+.reasonix/
+.browser-use/
+auto_reports/
+logs/
+
+# 本地锁文件
+skills-lock.json
+
+# gitnexus 索引产物（必须）
+.gitnexus/
+
+# Node
+.publish/
+node_modules/

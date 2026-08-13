@@ -32,7 +32,7 @@ def extract_api(change_dir: pathlib.Path, project_root: pathlib.Path) -> list:
     endpoints = []
 
     # 提取 - path: /api/v1/... + method
-    for m in re.finditer(r"path:\s*([/\w\-]+).*?method:\s*(\w+)", content, re.DOTALL):
+    for m in re.finditer(r"path:\s*([/\w\-]+).*?method:\s*(\w+)", content, re.DOTALL | re.IGNORECASE):
         path = m.group(1)
         method = m.group(2)
         endpoints.append({"path": path, "method": method})
@@ -64,7 +64,7 @@ def extract_domain(change_dir: pathlib.Path, project_root: pathlib.Path) -> list
 
     # 提取 Entity {Name} 标题
     entities = []
-    for m in re.finditer(r"^###\s+Entity\s+\d+:\s+(\w+)", content, re.MULTILINE):
+    for m in re.finditer(r"^(?:###\s+Entity\s+\d+:\s+|##\s+\d+\.\s+)(\w+)", content, re.MULTILINE):
         entities.append(m.group(1))
 
     domain_dir = project_root / "docs/domain-models"
@@ -91,7 +91,7 @@ def extract_events(change_dir: pathlib.Path, project_root: pathlib.Path) -> list
     content = events_file.read_text(encoding="utf-8")
 
     events = []
-    for m in re.finditer(r"^###\s+Event\s+\d+:\s+(\w+)", content, re.MULTILINE):
+    for m in re.finditer(r"^(?:###\s+Event\s+\d+:\s+|##\s+\d+\.\s+)(\w+)", content, re.MULTILINE):
         events.append(m.group(1))
 
     events_dir = project_root / "docs/events"
@@ -131,7 +131,7 @@ def main():
     extracted = {"api": [], "domain": [], "events": []}
 
     if args.type in ("api", "all"):
-        extracted = extract_api(change_dir, project_root)
+        extracted["api"] = extract_api(change_dir, project_root)
     if args.type in ("domain", "all"):
         extracted["domain"] = extract_domain(change_dir, project_root)
     if args.type in ("events", "all"):

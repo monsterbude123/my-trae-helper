@@ -110,7 +110,7 @@
 15.1 任何阻塞必 5 字段诚实汇报（type/description/attempted_solution/time_consumed/attempt_count）
 15.2 禁止跳过（"先继续，回头再看"）
 15.3 禁止隐藏（"等下修，先标完成"）
-15.4 禁止抽象理由（"理解偏差"/"流程裁剪"/"心理障碍"）
+15.4 禁止以不可证伪术语作为失败归因。允许的失败归因形式见 [agent-error-diagnosis.md](agent-error-diagnosis.md) §3 5 模式诊断。
 ```
 
 ## Article XVI — Skeptical Validation（V11 全 stage 适用）

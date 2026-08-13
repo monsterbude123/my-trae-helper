@@ -1,5 +1,5 @@
 ---
-name: plan
+name: fullstack-02-plan
 description: "Stage 0 探索 + 规划 — 项目现状 3 路并行探索（文档/代码/依赖）+ GitNexus impact + 追问点 + plan.md 产出。触发词：plan / 规划 / 设计 / 分析 / 评估 / 重构。"
 stage: 0
 parent: fullstack4traev11
@@ -80,6 +80,13 @@ Step 6: 状态卡更新（current_stage=0/plan completed, next=0.5/test-plan）
 | 子代理 | 任务 | 输出 | 工具 |
 |--------|------|------|------|
 | **A 文档探索** | 读 docs/INDEX → ARCHITECTURE → spec → 模块文档 | 已有能力清单 + 架构约束 + 受影响模块 | Read + Glob |
+| ├─ spec-writer 必产双产物检查(仅 UI 涉及 change,V11.2.1 NEW — 蒸馏自 V10): | | | |
+| │  ├─ 启发式判定 UI 涉及: spec.md 含 UI/UX/页面/组件/视觉/交互/前端/prototypes 关键字 → 涉及 | | | |
+| │  ├─ Read docs/specs/changes/{id}/prototypes/design-prompt.md(仅 UI 涉及) | | | |
+| │  ├─ Read docs/specs/changes/{id}/prototypes/ui-ux-logic.md(仅 UI 涉及) | | | |
+| │  ├─ 缺 1 份 → 标 P0 阻塞(待 spec-writer 在 Stage 1.5 补) | | | |
+| │  ├─ 纯后端/API/CLI change → 跳过整个 prototypes/ 检查,不视为缺失 | | | |
+| │  └─ 产出: prototypes_status.json("ui_involved": true/false, "design-prompt": "exists|missing|skipped", "ui-ux-logic": "exists|missing|skipped") | | | |
 | **B 代码探索** | GitNexus impact + context 分析 | 受影响符号列表 + 调用链图 + 风险等级 | gitnexus MCP |
 | **C 依赖探索** | 检测公共模块/工具/可复用组件 | 可复用资源清单 + 需新建模块 | Read + Grep |
 

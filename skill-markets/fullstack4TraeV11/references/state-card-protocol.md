@@ -87,7 +87,7 @@ stage_ended_at: {ISO 8601 | null}
 # === 元数据 ===
 updated_at: {ISO 8601}
 updated_by: {主上下文 | sub-agent name}
-health: {�� on-track | �� degraded | �� blocked}
+health: {🟢 on-track | 🟡 degraded | 🔴 blocked}
 
 # === 产出物 ===
 artifacts:
@@ -95,6 +95,17 @@ artifacts:
     type: {file | dir | report | state-update}
     exists: {true | false}
     evidence: {file:line | 命令 | 截图}
+
+# === 视觉证据（V11.2 NEW — Stage 3.5 → 4 硬门槛）===
+visual_evidence:
+  status: {verified | unverified | skipped}
+  screenshots:
+    - path: {截图路径}
+      contains_change_components: {true | false}
+      interactive_proof: {string, 如 "click folder-btn → API POST 200 → drawer opens"}
+      read_by_main_context: {true | false}     # 主上下文亲自 Read PNG（禁止 AI 描述代替像素）
+  verified_at: {ISO 8601 | null}
+  failure_action: "FAIL → revert stage_status to in_progress + 清理虚假痕迹"
 
 # === 门禁 ===
 gate_result:
@@ -149,8 +160,8 @@ notes: {Markdown 备注}
 | 阶段产物落地 | 关键文件写入 | artifacts, updated_at |
 | 阶段门禁通过 | gate PASS | gate_result, stage_status |
 | 阶段门禁失败 | gate FAIL | gate_result, blocked_by |
-| 阻塞发生 | 任何阶段遇到阻塞 | health=��, blocked_by |
-| 阻塞解除 | 阻塞解决 | health=��/��, blocked_by=null |
+| 阻塞发生 | 任何阶段遇到阻塞 | health=🔴, blocked_by |
+| 阻塞解除 | 阻塞解决 | health=🟢/🟡, blocked_by=null |
 | 阶段切换 | 进入下一 stage | current_stage, stage_ended_at, next_stage |
 | 状态卡刷新 | 任何字段更新 | updated_at, updated_by |
 
@@ -221,12 +232,16 @@ stage_started_at: 2026-08-11T13:00:00
 stage_ended_at: null
 updated_at: 2026-08-11T13:30:00
 updated_by: 主上下文
-health: �� on-track
+health: 🟢 on-track
 artifacts:
   - path: docs/specs/changes/2026-08-11-add-user-auth/
     type: dir
     exists: true
     evidence: "ls 验证"
+visual_evidence:                       # V11.2 NEW — Stage 3.5 → 4 硬门槛
+  status: unverified
+  screenshots: []
+  verified_at: null
 gate_result:
   status: PENDING
   gate: stage-gate.py
@@ -256,7 +271,7 @@ stage_started_at: 2026-08-11T14:00:00
 stage_ended_at: null
 updated_at: 2026-08-11T15:30:00
 updated_by: implementer
-health: �� on-track
+health: 🟢 on-track
 artifacts:
   - path: docs/specs/changes/2026-08-11-add-user-auth/plan.md
     type: file
@@ -270,6 +285,10 @@ artifacts:
     type: file
     exists: true
     evidence: "docs/specs/changes/2026-08-11-add-user-auth/contracts/api-contracts.md:1-80"
+visual_evidence:                       # V11.2 NEW — Stage 3.5 → 4 硬门槛
+  status: unverified
+  screenshots: []
+  verified_at: null
 gate_result:
   status: PASS
   gate: contract-gate.py
@@ -304,7 +323,7 @@ stage_started_at: 2026-08-11T15:00:00
 stage_ended_at: null
 updated_at: 2026-08-11T16:30:00
 updated_by: debugger
-health: �� on-track
+health: 🟢 on-track
 artifacts:
   - path: docs/bugs/settings-009-config-key-case-mismatch.md
     type: file
@@ -333,6 +352,40 @@ notes: 涉及 regex 宽松校验，需前后端契约三方同步
 ---
 ```
 
+### §5.8 子代理擅自升级状态协议（V11.2.1 NEW — 蒸馏自 canvas-asset-folders）
+
+> **位置说明**: 本章节按任务编号 §5.8 追加到 §5（状态卡模板）末尾，但本质是"协议"而非"模板"。后续 V11.3 重排时可考虑移到独立 §七、状态卡写入权限章节。
+>
+> **问题**：Round 2 implementer 完成后**未经主上下文审核**就把状态卡 `stage_status` 从 `in_progress` 改成 `completed` + `health: 🟢 healthy` — 主上下文发现后强制纠正。V11 state-card §5 强制重置协议未涵盖此场景。
+
+**铁律**：
+
+```
+MUST: stage_status / current_stage / gate_result.status / health / next_stage.id
+      这 5 个字段只能由主上下文亲自 Edit,子代理禁止直接写入。
+
+MUST: 子代理只能在 Completion Report 中"建议"状态变更,主上下文亲自 Edit。
+
+NEVER: implementer / reviewer / debugger 等 sub-agent 直接 Edit .state-card.md 关键字段。
+
+NEVER: sub-agent 自动推 stage_status = completed。
+```
+
+**机械化校验**（[state-card-validator.py](../scripts/state-card-validator.py) V11.2.1 NEW）：
+- 状态卡 git diff 检测：状态卡字段变更必须仅来自主上下文 Edit
+- 缺审计 → 标 FAIL（V11.2.1 + 反例 §7 §8 项目级补全）
+
+**失败处理**：
+1. 立即 revert 状态卡字段
+2. 委派 implementer 重做（仅输出代码 + 截图 + Completion Report,不触碰状态卡）
+3. 记录到 anti-patterns/08（项目级）
+4. 主上下文亲自 Edit 状态卡
+
+**反例**：2026-08-12 canvas-asset-folders Round 2
+- 当时做了: implementer 未经主上下文审核 Edit stage_status: completed + health: 🟢
+- 导致后果: 虚假完成 + 主上下文需强制纠正
+- 教训: 状态卡写入权是主上下文独有权限,违反者按反例 §7 §8 处理
+
 ---
 
 ## 六、状态卡反例
@@ -347,11 +400,11 @@ notes: 涉及 regex 宽松校验，需前后端契约三方同步
 
 ### 反例 2: 状态卡永远🟢 on-track
 
-**现象**: 任何阶段都显示 `health: �� on-track`，从不降级。
+**现象**: 任何阶段都显示 `health: 🟢 on-track`，从不降级。
 
 **根因**: 维护者不知道 blocked_by 字段怎么填。
 
-**教训**: ��/�� 是阻塞状态可视化机制，不用 = 失去价值。
+**教训**: 🟡/🔴 是阻塞状态可视化机制，不用 = 失去价值。
 
 ### 反例 3: 状态卡无 next_stage
 

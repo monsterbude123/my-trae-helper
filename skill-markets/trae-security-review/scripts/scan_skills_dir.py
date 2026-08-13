@@ -427,7 +427,11 @@ def main():
     result["skills_dir"] = str(skills_dir)
     result["generated_at"] = datetime.now().isoformat()
 
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    # --quiet：单行 JSON，给 pre-commit hook 调用
+    if "--quiet" in sys.argv:
+        print(json.dumps(result, ensure_ascii=False))
+    else:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

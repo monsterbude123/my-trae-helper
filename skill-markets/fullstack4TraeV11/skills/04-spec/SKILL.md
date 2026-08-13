@@ -1,5 +1,5 @@
 ---
-name: spec
+name: fullstack-04-spec
 description: "Stage 1 规格增强 + 验收维度 — Spec 是真相源，验收维度决定交付质量。Enhanced Acceptance + INV ≥1 + E2E ≥2 + clarify ≥2 轮。触发词：spec / 规格 / 验收维度 / invariants。"
 stage: 1
 parent: fullstack4traev11

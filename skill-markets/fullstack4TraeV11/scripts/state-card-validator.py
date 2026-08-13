@@ -117,6 +117,18 @@ def validate_fields(fields: dict) -> list:
         if is_blocked and ss != "blocked":
             errors.append(f"blocked_by 非空时 stage_status 应是 blocked（当前 {ss}）")
 
+    # V11.2 NEW: visual_evidence 硬门槛校验（Stage 3.5 → 4）
+    current_stage = fields.get("current_stage", "")
+    stage_status = fields.get("stage_status", "")
+    if current_stage == "3.5/real-verify" or (current_stage == "3/implement" and stage_status == "completed"):
+        ve = fields.get("visual_evidence", {})
+        ve_status = ve.get("status", "missing") if isinstance(ve, dict) else "missing"
+        if ve_status != "verified":
+            errors.append(
+                f"visual_evidence.status 必须 = verified（当前: {ve_status}），"
+                f"Stage 3.5 → Stage 4 推进的硬门槛"
+            )
+
     return errors
 
 
@@ -196,6 +208,27 @@ def main():
         "health": fields.get("health"),
         "errors": all_errors
     }
+
+    # V11.2.1 NEW: 状态卡关键字段保护提示（state-card-protocol.md §5.8）
+    # 5 个关键字段只能由主上下文亲自 Edit,子代理禁止直接写入
+    # standalone 模式下做静态扫描 + info 提示;真正的权限校验需在 git diff 上下文工作
+    protected_fields = ["stage_status", "current_stage", "gate_result.status", "health", "next_stage.id"]
+    state_card_text = path
+
+    if state_card_text and state_card_text.exists():
+        content = state_card_text.read_text(encoding="utf-8")
+        protected_violations = []
+        for field in protected_fields:
+            # 检查状态卡中是否包含该字段(仅作 info 提示,实际权限校验需 git diff)
+            if field.split('.')[0] in content:
+                protected_violations.append({
+                    "field": field,
+                    "note": f"{field} 只能由主上下文 Edit,子代理禁止直接写入(§5.8)"
+                })
+        if protected_violations:
+            result.setdefault("info", []).extend([
+                f"🔒 {v['field']}: {v['note']}" for v in protected_violations
+            ])
 
     if args.json:
         import json

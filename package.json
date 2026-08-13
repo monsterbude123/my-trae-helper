@@ -1,0 +1,50 @@
+{
+  "name": "@my-trae-helper/cli",
+  "version": "0.1.0",
+  "description": "CLI for the Trae IDE skills ecosystem — install skill packages from the my-trae-helper marketplace to Trae, Claude Code, Codex, Cursor and 40+ agents.",
+  "type": "module",
+  "bin": {
+    "trae-skills": "./bin/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "skill-markets",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "prepublishOnly": "node scripts/prepare-publish.mjs",
+    "test": "node bin/cli.mjs --help",
+    "test:add": "node bin/cli.mjs add --help",
+    "test:list": "node bin/cli.mjs list"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.2.1",
+    "yaml": "^2.6.1"
+  },
+  "keywords": [
+    "trae",
+    "trae-cn",
+    "claude-code",
+    "codex",
+    "cursor",
+    "agent-skills",
+    "skills",
+    "cli",
+    "npx"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourname/my-trae-helper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourname/my-trae-helper/issues"
+  },
+  "homepage": "https://github.com/yourname/my-trae-helper#readme",
+  "license": "MIT",
+  "packageManager": "pnpm@11.15.1+sha512.81350b07e53c9538a02f1f2303b4290fa2d7be04e56e2a970c4cc4b417dc761de196edabd49d55c7dc9580db81007c44143e4e3d7e462b3000d23c255122d065"
+}
