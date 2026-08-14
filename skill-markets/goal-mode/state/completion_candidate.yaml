@@ -1,0 +1,21 @@
+# Goal-Mode 候选状态文件
+#
+# Agent 只能写入此文件，但不能将 status 写为 "complete"
+# 只有外部验证器 (gate/verify-goal.py) 才能写入 "complete"
+#
+# 状态机：
+#   in_progress -> candidate_complete -> [外部验证器] -> complete / blocked
+
+status: in_progress
+
+goal: ""
+
+touched_surfaces: []
+
+review_queue: []
+
+started_at: ""
+
+metadata:
+  agent: ""
+  session_id: ""

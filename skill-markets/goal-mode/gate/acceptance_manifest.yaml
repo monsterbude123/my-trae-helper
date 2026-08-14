@@ -1,0 +1,49 @@
+# Goal-Mode 验收清单模板
+#
+# 使用方法：
+#   1. 从目标中提炼验收项（Agent 草拟 + 人类确认后冻结）
+#   2. 每个检查项必须有明确的验证方式（文件存在/命令退出码/内容包含）
+#   3. 运行 python gate/verify-goal.py --manifest gate/acceptance_manifest.yaml --candidate state/completion_candidate.yaml
+#
+# 安全不变量：
+#   - 此文件受 CODEOWNERS 保护，Agent 不可编辑
+#   - 验证器只读真实产物，不读 Agent 声明
+
+goal: ""
+description: ""
+
+surfaces:
+  - id: ""
+    user_visible: true
+    paths: []
+
+checks:
+  - id: file_exists_check
+    type: file_exists
+    path: ""
+    description: "检查产物文件是否存在"
+    
+  - id: content_check
+    type: file_contains
+    path: ""
+    substring: ""
+    description: "检查文件包含目标内容"
+    
+  - id: test_check
+    type: command_exit_zero
+    command: "pytest tests/ -v"
+    description: "运行测试套件"
+    
+  - id: data_points_check
+    type: min_series_points
+    path: ""
+    series: ""
+    min_points: 2
+    description: "检查数据点数量"
+
+review_items: []
+
+meta:
+  created_by: "human"
+  frozen_at: ""
+  version: "1.0.0"
