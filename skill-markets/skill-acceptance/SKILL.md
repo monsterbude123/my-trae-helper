@@ -1,20 +1,13 @@
 ---
 name: skill-acceptance
-version: "0.1.0"
+version: 0.1.0
 description: Skill 包合规验收门禁 — CI/pre-release 钩子。自动跑 6 项检查（frontmatter 合规 / 安全扫描 / CAPABILITY-MAP 去重 / scripts 边界 / references 体积 / 决策层级标注），任意 1 项 HIGH 阻断，MEDIUM 累计 ≥3 警告。供 skill-markets 任何新装/升级/发布的 skill 准入审查使用。
 requires:
-  skills: [trae-security-review]
-  optional: [agent-dev-control-kit]
-triggers:
-  - skill 验收
-  - skill 准入
-  - skill 发布
-  - skill audit
-  - skill verify
-  - skill acceptance
-  - skill pre-release
+triggers: [skill 验收, skill 准入, skill 发布, skill audit, skill verify, skill acceptance, skill pre-release]
+intent: Skill 包合规验收门禁 — CI/pre-release 钩子
+category: cli
+audience: [devops]
 ---
-
 # skill-acceptance — Skill 包合规验收门禁
 
 ## §0 定位

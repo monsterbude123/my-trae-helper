@@ -199,3 +199,129 @@ traps:
     see_also:
       - ".trae/rules/learning.md §5 路径 C"
       - "AGENTS.md §2.4 Gate 自验收强制"
+
+  # ─────────────────────────────────────────────────────────────────
+  # 2026-08-14 第二轮蒸馏新增(本会话踩坑)
+  - id: AP-9
+    title: git commit --no-verify 绕过 pre-commit hook(违反 Gate 强制铁律)
+    detect_signal: |
+      git log --oneline 出现由 --no-verify 提交的 commit /
+      .husky/pre-commit 失败但 commit 仍成功 / user 明确反对 agent 用 --no-verify
+    what_is_wrong: |
+      pre-commit hook 是 L1 Commit Gate,失败必须阻断。任何用 --no-verify 绕过都是
+      "Gate 假通过",等于 agent 自废门禁。AGENTS.md §2.4 + agent-dev-control-kit
+      §11.1.4 都强制"Gate 失败必须报告,不能'自动回滚'却无日志"。
+    fix_template_before: |
+      # ❌ 用 --no-verify 绕过 hook(2026-08-14 本会话踩坑)
+      git commit --no-verify -m "feat: ..."
+      # 后果:hook 没跑 → user 看 commit "成功" → 实际 Gate 全无
+    fix_template_after: |
+      # ✅ hook 失败必须修 root cause,真跑真验
+      bash .husky/pre-commit 2>&1 | tail -20   # 看错
+      # 修脚本 bug / 环境探测 / 缺失依赖 → 重跑
+      bash .husky/pre-commit                    # 必须 exit 0
+      git commit -m "feat: ..."                 # 真跑 hook
+    next_skill: agent-dev-control-kit
+    next_skill_action: "走 Gate 自验收协议(§11.1.1-§11.1.4)"
+    reclaim_steps:
+      - 禁止:任何情况用 --no-verify 提交
+      - 必须:hook fail → 修 root cause → 重跑 → 真 PASS
+      - 修不好:输出 [blocking-report] 等 user 决策
+      - 若已用 --no-verify:git reset --soft HEAD~1 撤回 + 修 root cause 再重提
+    see_also:
+      - "AGENTS.md §2.4 Gate 自验收强制"
+      - "agent-dev-control-kit §11.1.4"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-10
+    title: Python 多条件布尔表达式缺括号(短路语义陷阱)
+    detect_signal: |
+      grep -E "if .+ or .+ and .+:" 或 grep -E "if .+ and .+ or .+:" 在 *.py 文件
+      该文件无配套单测覆盖布尔语义
+    what_is_wrong: |
+      Python `a or b and c` 解析为 `a or (b and c)`,与直觉 `(a or b) and c` 不同。
+      布尔判定 bug 隐蔽、测试难覆盖、运行生产后才暴露。
+    fix_template_before: |
+      # ❌ 短路语义错(本会话 manifest-assert.py v初版 bug)
+      if '__name__' not in text or 'def main' not in text and 'argv' not in text:
+          missing.append(...)
+      # 实际是:('__name__' not in text) or (('def main' not in text) and ('argv' not in text))
+    fix_template_after: |
+      # ✅ 显式括号分组 + 提取命名变量
+      has_cli = (
+          "__name__" in text and ("__main__" in text or "argv" in text)
+      ) or ("argparse" in text)
+      if not has_cli:
+          missing.append(...)
+    next_skill: trae-ponytail
+    next_skill_action: "代码风格审查"
+    reclaim_steps:
+      - 任何 `X or Y and Z` / `X and Y or Z` 必须显式 `(X) and (Y) or (Z)` 或 `(X or Y) and (Z)`
+      - 提取命名变量(has_cli / has_main / has_argv)减少出错
+      - 给布尔判定加单测覆盖 True/False 全组合
+    see_also:
+      - "Python PEP 8 — Boolean Operators"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-11
+    title: 改非本任务范围的预先存在 bug(违反最小变更)
+    detect_signal: |
+      git diff 显示本任务无关文件的修改 / commit message 提到
+      "fix: 预存 bug" 但本任务 PRD 未要求
+    what_is_wrong: |
+      本任务是加 Bridge Gate,但顺手改了 skill-security-guard.py 的
+      'python' 硬编码(预存 bug)。污染 diff、违反最小变更、
+      模糊任务边界、增加 review 负担。
+    fix_template_before: |
+      # ❌ 顺手修预存 bug
+      # 本任务:加 Bridge Gate
+      git add scripts/intent-classifier.mjs scripts/manifest-assert.py
+      git add scripts/skill-security-guard.py   # 顺手改预存 bug,污染 diff
+    fix_template_after: |
+      # ✅ 判定:跑 verify 确认 bug 真阻断当前 Gate → 改 → 单独立 commit
+      # 不阻断 → 写到 docs/backlog.md 下次再处理
+      git add scripts/intent-classifier.mjs scripts/manifest-assert.py
+      # skill-security-guard.py 的 'python' 硬编码 → 不在本次 commit
+      # 写 docs/backlog.md:
+      #   - [ ] fix: skill-security-guard.py subprocess 用 sys.executable
+      #         阻塞链:hook step 3 → Gate L1
+    next_skill: trae-ponytail
+    next_skill_action: "最小变更审查"
+    reclaim_steps:
+      - 任何修改前问:这个 bug 真阻断当前 Gate 吗?
+      - 阻断 → 修,但单独立 commit,标 "fix: 预存 ... bug"
+      - 不阻断 → docs/backlog.md,本任务不碰
+    see_also:
+      - "AGENTS.md §2 铁律 #7 最小变更"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-12
+    title: 给出未经验证的具体数字(应付性响应)
+    detect_signal: |
+      agent 数字声明(如 "43 个 skill" / "全部 N 个")与
+      实际 ls/glob/Read 计数不符 / user 反复纠正同一数字
+    what_is_wrong: |
+      agent 接收 user 给的数字(可能是 user 记错),不第一轮做精确核对,
+      默默按错数字做,user 反复纠正。违反 AGENTS.md §4 "有数据精度
+      问题就说" + session-distiller §3.5 "Completion Report 真实性"。
+    fix_template_before: |
+      # ❌ user 说 43 → agent 不核对 → 默默按 39 做 → user 反复问
+      user: "扩到 43 个"
+      agent: <生成 39 个>
+      user: "扩到 43 个" (第二次)
+      agent: "实际是 39 不是 43"(第二次才纠正)
+    fix_template_after: |
+      # ✅ 第一轮就核对 + 列精确清单
+      user: "扩到 43 个"
+      agent: "先核:ls skill-markets/ 含 SKILL.md 的有 N 个 →
+              实际 39 个,与您说的 43 差 4 个。请确认是按 39 全扩,
+              还是您记错了?有 4 个可能需要新建。"
+    next_skill: trae-ponytail
+    next_skill_action: "数据精度检查"
+    reclaim_steps:
+      - 任何数字声明必须第一轮带证据(ls / glob / Read)
+      - 与 user 给的数字不一致 → 第一轮就纠正,不是默默做
+      - 找不到 → 立即报告,不是估算
+    see_also:
+      - "AGENTS.md §4 行为规约 数据精度"
+      - "session-distiller §3.5"

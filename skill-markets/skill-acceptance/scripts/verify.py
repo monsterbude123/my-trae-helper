@@ -234,6 +234,83 @@ def check_decision_layer_tag(p: Path) -> CheckResult:
                        [asdict(i) for i in issues], note=f"keyword_hits={hit}/4")
 
 
+def check_intent(p: Path) -> CheckResult:
+    """§4 升级:SKILL.md frontmatter 必含 intent / category / audience。
+
+    intent    — 一句话技能意图(agent 加载时第一眼读到的"它要做什么")
+    category  — 分类(execution / guard / gate / knowledge / cli / 其它)
+    audience  — 适用人群(developer / agent / devops / pm 等,可数组)
+
+    缺失任一字段 → HIGH(因 gate 不知道 skill 是干啥的)。
+    """
+    issues: List[Issue] = []; sm = p / "SKILL.md"
+    if not sm.is_file():
+        issues.append(Issue("INTENT_NO_SKILLMD", "HIGH", "SKILL.md 不存在"))
+        return CheckResult("intent", "BLOCK", 0, [asdict(i) for i in issues])
+    fm = parse_fm(sm.read_text(encoding="utf-8", errors="replace"))
+    if not fm:
+        issues.append(Issue("INTENT_NO_FRONTMATTER", "HIGH", "缺 YAML frontmatter", file=str(sm)))
+        return CheckResult("intent", "BLOCK", 0, [asdict(i) for i in issues])
+    required = {
+        "intent":   ("INTENT_MISSING",   "intent   - 一句话技能意图"),
+        "category": ("CATEGORY_MISSING", "category - 分类(execution/guard/gate/...)"),
+        "audience": ("AUDIENCE_MISSING", "audience - 适用人群(developer/agent/...)"),
+    }
+    filled = 0
+    for field, (code, hint) in required.items():
+        val = fm.get(field)
+        if val is None or (isinstance(val, str) and not val.strip()) \
+           or (isinstance(val, list) and not val):
+            issues.append(Issue(code, "HIGH",
+                                f"frontmatter 缺 {field}: {hint}", file=str(sm)))
+        else:
+            filled += 1
+    return CheckResult("intent", decide(issues), bounded(100, issues),
+                       [asdict(i) for i in issues], note=f"filled={filled}/3")
+
+
+def check_smoke(p: Path) -> CheckResult:
+    """§4 升级:scripts/*.py / *.mjs 冒烟测试 — 跑 `--help` 或 import 探测。
+
+    规则:
+      .py   — python -c "import ast; ast.parse(open(...).read())" 语法解析
+      .mjs/.js — node --check 语法检查
+      .sh   — bash -n 语法检查
+
+    任何脚本无法解析 → HIGH(阻塞)。
+    """
+    issues: List[Issue] = []; sd = p / "scripts"
+    if not sd.is_dir():
+        return CheckResult("smoke", "PASS", 100, [], note="scripts/ 不存在,跳过")
+    tested = 0
+    for ext, runner in ((".py",   ["python", "-c", "import ast,sys;ast.parse(open(sys.argv[1]).read());print('ok')"]),
+                         (".mjs",  ["node", "--check"]),
+                         (".js",   ["node", "--check"]),
+                         (".sh",   ["bash", "-n"])):
+        for s in sorted(sd.rglob(f"*{ext}")):
+            # 跳过 lib/ audit_reports/ 等辅助子目录
+            parts = s.relative_to(sd).parts
+            if any(x in parts[:-1] for x in ("lib", "audit_reports", "auto_reports", "_archived_")):
+                continue
+            try:
+                proc = subprocess.run(runner + [str(s)], capture_output=True, text=True, timeout=10)
+                if proc.returncode != 0:
+                    msg = (proc.stderr or proc.stdout).strip().splitlines()[0] if proc.stderr or proc.stdout else "unknown"
+                    issues.append(Issue("SMOKE_SYNTAX_FAIL", "HIGH",
+                                        f"{s.relative_to(p)} 语法/解析失败: {msg[:100]}",
+                                        file=str(s)))
+                tested += 1
+            except subprocess.TimeoutExpired:
+                issues.append(Issue("SMOKE_TIMEOUT", "MEDIUM",
+                                    f"{s.relative_to(p)} 冒烟超时 >10s", file=str(s)))
+            except FileNotFoundError as exc:
+                issues.append(Issue("SMOKE_RUNNER_MISSING", "MEDIUM",
+                                    f"runner 不可用: {exc}", file=str(s)))
+    note = f"tested={tested} 个脚本"
+    return CheckResult("smoke", decide(issues), bounded(100, issues),
+                       [asdict(i) for i in issues], note=note)
+
+
 # ---------- 汇总 + CLI ----------
 
 def aggregate(checks: List[CheckResult], strict: bool) -> tuple:
@@ -270,13 +347,18 @@ def main(argv: Optional[List[str]] = None) -> int:
         wrap("scripts_boundary", check_scripts_boundary, skill_path),
         wrap("references_size", check_references_size, skill_path),
         wrap("decision_layer_tag", check_decision_layer_tag, skill_path),
+        wrap("intent", check_intent, skill_path),
+        wrap("smoke", check_smoke, skill_path),
     ]
     overall, exit_code = aggregate(results, strict=args.strict)
+    total_score = round(sum(c.score for c in results) / max(len(results), 1))
     summary = {"block": sum(1 for c in results if c.status == "BLOCK"),
                "warn":  sum(1 for c in results if c.status == "WARN"),
-               "pass":  sum(1 for c in results if c.status == "PASS")}
+               "pass":  sum(1 for c in results if c.status == "PASS"),
+               "total_score": total_score, "min_score": min((c.score for c in results), default=100)}
     payload = {"schema_version": SCHEMA_VERSION, "timestamp": now_iso(),
                "target": str(skill_path), "overall_status": overall,
+               "total_score": total_score,
                "checks": [c.to_dict() for c in results], "summary": summary,
                "exit_code": exit_code,
                "tool": {"name": "verify.py", "version": VERSION,
@@ -284,6 +366,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     if not args.quiet:
         sys.stderr.write("\n" + "=" * 64 + "\n")
         sys.stderr.write(f" target : {skill_path}\n overall: {overall}  exit={exit_code}\n")
+        sys.stderr.write(f" total_score: {total_score}/100\n")
         sys.stderr.write("-" * 64 + "\n")
         for c in results:
             mk = {"PASS": "[OK]  ", "WARN": "[WARN]", "BLOCK": "[BLOCK]"}.get(c.status, "[?] ")

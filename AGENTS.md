@@ -167,7 +167,36 @@ node bin/cli.mjs verify <name>
 - 改 src/ < 改 skill-markets/
 - 显式 < 隐式
 
----
+### §4.1 通用跨会话铁律(2026-08-14 第二轮蒸馏补充)
+
+```
+MUST §4.1.1: 任何数字声明必须第一轮带证据
+  反例: user 说 "43 个 skill" → agent 不核对 → 默默按 39 做 → user 反复纠正
+  正例: 任何 "N 个" 必须 ls/glob/Read 精确计数 + 第一轮列清单
+  详见 trap-instructions.yaml AP-12
+
+MUST §4.1.2: 多行 commit message 用 -F 文件,不用 -m 多参数
+  反例(PowerShell 中文换行符截断):
+    git commit -m "line 1 中文" -m "line 2 中文"   # 输出空、exit 1
+  正例:
+    Write .commit_msg.txt "<完整多行>"
+    git commit -F .commit_msg.txt
+    rm .commit_msg.txt                              # 立即删,不污染
+
+MUST §4.1.3: Git Bash hook 必须探测 miniconda Python,不能信 /usr/bin/python3
+  反例: Git Bash 的 /usr/bin/python3 没 pip/pytest → subprocess 报 No module
+  正例:
+    PY=""
+    for cand in /mnt/c/ProgramData/miniconda3/python.exe \
+                 /c/ProgramData/miniconda3/python.exe \
+                 python3 py python; do
+      [ -x "$cand" ] && PY="$cand" && break
+    done
+    [ -n "$PY" ] && ! "$PY" -c "import pytest, yaml" 2>/dev/null && PY=""
+    export MY_TRAE_HELPER_PY="$PY"
+    "$PY" scripts/verify.py ...   # 子脚本用 $PY
+  详见 trap-instructions.yaml AP-9 + §11.1.4
+```
 
 ## §5 Skill 与 Agent 严格区分
 
