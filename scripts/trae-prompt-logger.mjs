@@ -90,6 +90,23 @@ async function safeAppendFile(filePath, line) {
 
 async function main() {
   const raw = await readStdin();
+
+  // [trace-2026-08-14] 探针:任何触发都先 dump 到 logs/,便于排查是否被 TRAE 调用
+  try {
+    const { appendFileSync, mkdirSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const traceDir = join(process.cwd(), '.trae', 'prompt-logs');
+    mkdirSync(traceDir, { recursive: true });
+    appendFileSync(
+      join(traceDir, 'trace.log'),
+      `[${new Date().toISOString()}] argv=${JSON.stringify(process.argv.slice(2))} stdin_len=${raw.length} cwd=${process.cwd()}\n`,
+      'utf8',
+    );
+    if (raw) {
+      appendFileSync(join(traceDir, 'trace.log'), `  raw=${raw.slice(0, 400)}\n`, 'utf8');
+    }
+  } catch {}
+
   let payload;
   try {
     payload = raw.trim() ? JSON.parse(raw) : {};

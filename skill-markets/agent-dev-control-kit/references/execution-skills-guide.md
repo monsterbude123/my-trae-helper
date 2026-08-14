@@ -671,6 +671,34 @@ def evaluate_asset_staleness(asset_id):
   - 紧急：阻止新资产上传，强制清理
 ```
 
+#### CP-5：快照导出 / 回灌(对应 ai-short-studio-monster `npm run project:init:export` + `:init`)
+
+```bash
+# 导出当前资产 + 配置快照到 prisma/init-data.json
+asset-snapshot export --output prisma/init-data.json
+
+# 快照只包含全局初始化数据(资产/字典/默认配置)
+# 不得加入:用户、项目、任务、密钥、媒体二进制、通知
+asset-snapshot validate --input prisma/init-data.json --exclude user,project,task,key,media,notification
+
+# 期望变更前 / 期望变更后 各导一次,比对 diff
+asset-snapshot diff before.json after.json --strict
+# exit 0 = 一致; exit 1 = 出现计划外字段
+
+# 回灌:清库后恢复初始化数据
+asset-snapshot apply --input prisma/init-data.json --target prisma
+```
+
+**判定规则**:
+
+| 场景 | 必跑命令 |
+|------|---------|
+| 修改资产 schema / seed / 默认配置 | `snapshot export` → `snapshot apply` → `snapshot diff` 必须 exit 0 |
+| 仅修文档/翻译 | 仅 `snapshot diff`,确认无意外变更 |
+| 跨环境迁移 | `snapshot export --env production` → 在目标环境 `snapshot apply` |
+
+> 参考:`ai-short-studio-monster` AGENTS.md §3 + §4,`prisma/init-data.json` 是事实来源,改完初始化链路必须 `project:init:export` + `project:init` 双跑验证。
+
 ### 4.4 验收标准
 
 ```yaml

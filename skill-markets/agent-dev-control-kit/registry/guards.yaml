@@ -21,7 +21,10 @@ guards:
   id: changed-file-impact
   name: 改动影响守卫
 - category: security
+  config_schema: schemas/guards/security-scan.json
   description: 扫描依赖漏洞与硬编码密钥,发布门禁最后一道防线
   id: security-scan
   name: 安全扫描守卫
+  requires_scripts:
+    - trae-security-review/scripts/scan_skills_dir.py
 version: 1.0.0

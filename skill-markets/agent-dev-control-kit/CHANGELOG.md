@@ -7,8 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **README.md / SKILL.md / CHANGELOG.md 数字对齐**:移除"30+ 契约检查脚本 / 6 Agent Skills"夸大口径,改为真实"10 业务脚本 + 5 Execution Skill + 3 控制核心 Skill"
+- **references/implementation-roadmap.md**:删除 P0/P1/P2/P3 backlog 优先级与时间估算,只保留"必要性"三档(必须/推荐/可选)
+- **SKILL.md §5.1 / README.md 方式一**:删除不存在的 `template-project/` / `init-project.sh` / `hooks/install-hooks.sh` 路径,改为真实 `scripts/init-control-kit.py` + `validate-gate-integrity.py` + `install-husky.py`
+- **SKILL.md §6 目录结构**:删除不存在的 `rust-react/nextjs-fullstack/cli-only` scaffold,改为实际四个内置 + 用户自定义优先级说明
+- **README.md 文件结构树**:补充真实存在的 `tests/catalogs/` `registry/` `presets/` 与 10 个业务脚本
+
 ### Added
-- Reserved for future features
+- **references/trap-instructions.yaml** 新增 `AP-CAT-DOCS-LANG`(缺中英双写文档)反例 — 对应 ai-short-studio-monster AGENTS.md §2
+- **references/trap-instructions.yaml** 新增 `AP-CAT-META-REGISTER`(缺 _meta.ts 导航注册)反例 — 对应 ai-short-studio-monster AGENTS.md §2
+- **references/execution-skills-guide.md §4 CP-5**:补"快照导出 / 回灌"控制点 — 对应 ai-short-studio-monster `npm run project:init:export` + `:init` 联动
+- **registry/guards.yaml** `security-scan`:加 `requires_scripts: trae-security-review/scripts/scan_skills_dir.py`,显式声明依赖
+- **references/traps.md §0 反例索引**:加 AP-CAT-DOCS-LANG / AP-CAT-META-REGISTER 两条
+
+### Tests
+- **tests/unit/test_trap_instructions.py** REQUIRED_TRAP_IDS 加入两条新 AP-* — 全套 153 用例通过(原 102,新增 51 主要来自 trap 参数化与 catalog 覆盖)
+- `pytest -m trap` 77 passed
+- `pytest tests` 153 passed
+
+### Source
+- 本轮修订由 my-trae-helper 2026-08-14 第三轮蒸馏触发,源头是 ai-short-studio-monster AGENTS.md 的双写铁律与本 skill 自身的目录漂移
 
 ## [1.1.0] - 2026-08-13
 
@@ -44,6 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Gate configuration files with tier definitions
   - Hook installation scripts for Git integration
   - Test directories structure (unit/integration/e2e)
+
+> 注:本节"30+ 契约检查脚本 / 6 Agent Skills"等数字源于 1.0 早期口径,与 1.1.0 实际产物不符(实测 10 业务脚本 + 5 Execution Skill + 3 控制核心 Skill),以修正后的 README §来源为准。
 
 - **Standard Templates**
   - Execution skill template with YAML frontmatter

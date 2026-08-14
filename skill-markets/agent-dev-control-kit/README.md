@@ -9,20 +9,19 @@
 ### 方式一: 使用脚手架初始化新项目(推荐)
 
 ```bash
-# 1. 复制脚手架到目标项目
-cp -r skill-markets/agent-dev-control-kit/template-project /path/to/your-project
+# 1. 显式指定技术栈初始化(把 scaffolds/<stack>/files/ 复制到目标项目)
+python scripts/init-control-kit.py \
+  --target /path/to/your-project \
+  --stack python
 
 # 2. 进入项目目录
 cd /path/to/your-project
 
-# 3. 初始化项目
-bash scripts/init-project.sh
+# 3. 验证 Gate 完整性
+python scripts/validate-gate-integrity.py --target .
 
-# 4. 验证配置
-bash scripts/validate-config.sh
-
-# 5. 安装 Git Hooks
-bash hooks/install-hooks.sh
+# 4. 安装 Git Hooks
+python scripts/install-husky.py --target .
 ```
 
 ### 方式二: 手动应用模板
@@ -45,17 +44,31 @@ agent-dev-control-kit/
 │   ├── execution-skills-guide.md     # Execution Skills 完整指南
 │   ├── guard-skills-guide.md         # Guard Skills 完整指南
 │   ├── gate-skills-guide.md          # Gate Skills 完整指南
-│   └── implementation-roadmap.md     # 实施路线图
-├── scripts/                          # 可执行工具脚本
+│   ├── implementation-roadmap.md     # 实施路线图
+│   ├── traps.md                      # 反例库
+│   └── trap-instructions.yaml        # 结构化反例(机器可读)
+├── scripts/                          # 可执行工具脚本(10 个业务脚本)
 │   ├── init-control-kit.py           # 初始化控制体系
 │   ├── validate-execution-skill.py   # 验证 Execution Skill
+│   ├── validate-gate-integrity.py    # 检测 Gate 完整性漏洞
 │   ├── run-all-guards.py             # 批量运行 Guard
 │   ├── gate-check.py                 # 门禁检查工具
-│   └── generate-skill-from-template.py # 从模板生成 Skill
-├── skills/                           # 子技能拆分
+│   ├── generate-skill-from-template.py # 从模板生成 Skill
+│   ├── catalog-guard.py              # catalog 阻断
+│   ├── agent-hint-emit.py            # agent hint 聚合
+│   ├── install-husky.py              # 安装 Git Hooks
+│   └── migrate-to-layered-structure.py # 旧结构迁移
+├── skills/                           # 子技能拆分(5 Execution + 3 控制核心)
 │   ├── execution-control/            # Execution 控制核心
 │   ├── guard-control/                # Guard 控制核心
-│   └── gate-control/                 # Gate 控制核心
+│   ├── gate-control/                 # Gate 控制核心
+│   ├── asset-management-control/     # 资产管理
+│   └── release-process-control/      # 发布流程
+├── scaffolds/                        # 脚手架(按技术栈)
+│   ├── nodejs/                       # Node.js scaffold
+│   ├── python/                       # Python scaffold
+│   ├── go/                           # Go scaffold
+│   └── java-maven/                   # Java Maven scaffold
 ├── scenarios/                        # 典型使用场景
 │   ├── 01-new-project-setup.md       # 新项目建立控制体系
 │   ├── 02-add-new-execution-skill.md # 添加新 Execution Skill
@@ -66,15 +79,17 @@ agent-dev-control-kit/
 │   ├── execution-skill-template.md   # Execution Skill 模板
 │   ├── guard-skill-template.md       # Guard Skill 模板
 │   └── gate-skill-template.md        # Gate Skill 模板
-└── template-project/                 # 脚手架项目
-    ├── .agents/skills/               # 示例 Execution Skills
-    ├── guards/                       # 可执行的 Guard 脚本
-    ├── gates/                        # 可执行的门禁脚本
-    ├── hooks/                        # Git Hooks 安装脚本
-    ├── scripts/                      # 初始化和验证脚本
-    ├── tests/                        # 测试目录结构
-    ├── docs/                         # 使用指南
-    └── README.md                     # 项目说明
+├── registry/                         # 注册表
+│   ├── stacks.yaml                   # 技术栈路由
+│   ├── guards.yaml                   # 守卫配置
+│   └── gates.yaml                    # 门禁配置
+├── presets/                          # 选型元数据
+│   ├── _index.yaml
+│   ├── nodejs/  python/  go/  java-maven/
+└── tests/                            # pytest 测试(102+ 用例,含 catalog 覆盖)
+    ├── unit/
+    ├── integration/
+    └── catalogs/
 ```
 
 ## 相关链接
@@ -87,10 +102,10 @@ agent-dev-control-kit/
 
 本项目从 **vvicat AI 影视 Studio** (ai-short-studio-monster) 提炼而来,该项目展示了工业级的 Agent 开发控制实践:
 
-- **Agent Skills**: 6 个标准化开发流程
-- **Guard Scripts**: 30+ 个契约检查脚本
-- **Husky Hooks**: 多级门禁机制
-- **Requirements Matrix**: 需求追踪矩阵
+- **子技能**: 5 个 Execution Skill(数据变更 / 文档同步 / 配置同步 / 资产管理 / 发布流程)+ 3 个控制核心 Skill(execution-control / guard-control / gate-control)
+- **脚本**: 10 个业务脚本(初始化 / 验证 / 模板生成 / 守卫运行 / 门禁检查 / 目录守卫 / 提示聚合 / husky 安装等)
+- **Husky Hooks**: 多级门禁机制(scaffold 提供)
+- **反例库**: AP-1 ~ AP-7 真实蒸馏反例(`references/traps.md` + `trap-instructions.yaml`)
 
 ## 许可
 

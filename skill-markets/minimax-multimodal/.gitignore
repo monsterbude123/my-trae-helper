@@ -1,0 +1,8 @@
+# MiniMax multimodal skill — ignore runtime artifacts + secrets
+logs/
+__pycache__/
+*.pyc
+output/
+.env
+.env.local
+.env.*.local

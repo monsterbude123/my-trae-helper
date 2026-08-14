@@ -65,6 +65,9 @@ requires:
 - exit 0=PASS / 1=BLOCK / 2=WARN
 - 必须是项目侧路径，**禁止** 放 `skill-markets/<name>/scripts/`
 
+**实施工具**：`scripts/forge-skill-guard.py <name>...` 一键生成 wrapper，杜绝 47 份风格漂移。
+**实施案例**（2026-08-14）：47 个 skill 全部已通过 forge-skill-guard.py 生成 wrapper + 通过 guard-router --all 回归（38 PASS / 9 FAIL = 9 个预先存在 SKILL.md 缺 frontmatter 问题）。
+
 ### 1.3 维护 `.husky/<name>-gate` 门禁路由
 
 每个 skill 的 gate 必须挂到正确的 husky hook 或 workflow，不允许 inline 在共享脚本里堆砌。
@@ -102,7 +105,7 @@ requires:
     - 严禁修改其他 skill 文件 / 普通 src/ / 普通 scripts/
 ```
 
-### 2.3 guard-smith 收到任务后的 5 步流程
+### 2.3 guard-smith 收到任务后的 5 步流程（被调方响应）
 
 ```
 1. 读 AGENTS.md §1 §3 铁律
@@ -111,6 +114,107 @@ requires:
 4. 跑 node src/guards/skill-registration-guard.mjs → 期望 PASS（自身条目）
 5. 跑 node scripts/guard-router.mjs --all → 期望 PASS（不影响其他 skill）
 ```
+
+### 2.4 通用 SOP：任何 agent 想调整 guard / gate 的完整 7 步
+
+> 这是面向**调用方**（任意 agent,包括主 agent 和其他 sub-agent）的标准流程。
+> guard-smith 是这个流程的第 4 步的执行者,但**整个流程的责任主体是发起调整的 agent**,不是 guard-smith。
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│ Step 1. 识别需求                                                       │
+│   现象: pre-commit / pre-push / CI / verify 报错,或新场景需要新 guard │
+│   触发源:                                                             │
+│     - 用户显式要求:"给 xxx skill 加 security guard"                   │
+│     - 守卫自检失败:tests/unit/test_*.py 报 BLOCK                       │
+│     - 注册表守卫 BLOCK:node src/guards/skill-registration-guard.mjs   │
+│     - 新建 skill:bin/cli.mjs create <name>                              │
+│   输出: 一句话描述 "要改什么 + 为什么"                                 │
+└──────────────────────────────────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────────┐
+│ Step 2. 自我判定 — 我能直接改吗?                                        │
+│   查 §2.1 表:                                                         │
+│     目标路径 ∈ 白名单(registry / scripts/<name>-guard.* / .husky/<name>-gate│
+│       / scripts/guard-router.mjs / src/guards/* / gate workflow)       │
+│         → 进入 Step 3 (委派 guard-smith)                              │
+│     目标路径 ∉ 白名单 (普通 skill SKILL.md / src/*.mjs / package.json) │
+│         → 我可以自己改,但如触发 §1.11 铁律 11 提到 guard/gate 联动,    │
+│           仍需 Step 3 委派(因为白名单路径是另一份改动)                  │
+│     目标路径 = Tier 4 路径(.husky/_* / .trae/identity/* /              │
+│       scripts/change-guard-approver.mjs)                               │
+│         → 🛑 终止:任何身份都不能改(包括 guard-smith),需提 Tier 4 清单  │
+│           修订 PR(走 §2 铁律流程)                                        │
+└──────────────────────────────────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────────┐
+│ Step 3. 准备委派上下文                                                  │
+│   把 §2.2 的 [GUARD-SMITH-DELEGATION] 头部完整填好:                     │
+│     任务: <具体改的路径 + 改的内容 + 影响哪些 skill>                    │
+│     上下文: <现象 + 复现命令 + 期望结果>                               │
+│     约束: <影响范围 + 不许动的边界 + 验证标准>                          │
+│   关键: 不要省略影响范围!guard-smith 需要知道这个改动会让哪些           │
+│   skill 的 wrapper 重新生成,才能选 aspects(structure/security/capability)│
+└──────────────────────────────────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────────┐
+│ Step 4. 委派 Task(subagent_type="general-purpose")                       │
+│   选 sub-agent 而非自己动手的原因:                                      │
+│     - guard-smith 的职责是"唯一改 guard/gate",体现 AGENTS.md §1.11     │
+│       铁律 11 的白名单语义                                              │
+│     - 隔离上下文:sub-agent 不会被其他任务的噪声污染                     │
+│     - 审计清晰:每个 guard/gate 改动都有独立 sub-agent 记录             │
+│   在响应里明确: Task(description="guard-smith: <任务>", ...)            │
+└──────────────────────────────────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────────┐
+│ Step 5. 等待 sub-agent 报告 + 验收                                      │
+│   sub-agent 必须按 §2.3 的 5 步流程:                                    │
+│     1-3 读铁律 + 读 protected-paths + 改白名单路径                      │
+│     4 跑 node src/guards/skill-registration-guard.mjs (期望 PASS)        │
+│     5 跑 node scripts/guard-router.mjs --all (期望 PASS,或说明已知 fail)│
+│   主 agent 验收:                                                        │
+│     - 检查 sub-agent 是否真改了白名单路径(无越界)                       │
+│     - 检查测试输出(PASS / BLOCK 是否合理)                              │
+│     - 如失败 → 重新 Step 3 委派,或自行修问题再委派                      │
+└──────────────────────────────────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────────┐
+│ Step 6. 主 agent 自己兜底验证(关键 — 不能信 sub-agent 一面之词)          │
+│   亲自跑:                                                               │
+│     - node src/guards/skill-registration-guard.mjs                      │
+│     - node scripts/guard-router.mjs <changed-skill>                     │
+│     - node tests/unit/test_guard_router.mjs                            │
+│     - python tests/unit/test_registration_guard.py                       │
+│     - npm run lint                                                       │
+│   任何一项 fail → 回到 Step 3 重派                                      │
+└──────────────────────────────────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────────┐
+│ Step 7. commit + 文档同步 + 监控后续                                    │
+│   - git add + commit -F .commit_msg.txt(中文多行用 -F 文件,见 §4.1.2)  │
+│   - 同步 SECURITY-MAP.md + CAPABILITY-MAP.md(本次新增条目)              │
+│   - 如改了本 SKILL.md 职责清单,确认自更新                              │
+│   - commit 通过 gate 后,留意下一个 L3 PR / L4 release 是否有回归         │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+**反模式**（必须避免）:
+- ❌ 直接 Edit `scripts/<name>-guard.py` 绕过 guard-smith —— 违反 §1.11 铁律 11
+- ❌ 跳过 Step 6 主 agent 自己验证 —— 等于信 sub-agent 自检,违反 §2.4 防假通过
+- ❌ 不填 §2.2 头部就委派 —— guard-smith 不知道上下文,会写出错的 wrapper
+- ❌ 改动影响范围超出"白名单路径" —— guard-smith 会立刻 refuse,但浪费了一次 round-trip
+- ❌ 跳过文档同步 —— 下次 guard-smith 接手时无历史参考,易重复造轮子
+
+**示例**（常见场景对照表）:
+
+| 场景 | 调用方 agent 应该 |
+|------|------------------|
+| 用户:"想给 trae-security-review 加 security 扫描"| 主 agent → Step 2 查表(security-guard.py 是共享脚本,guard-smith 维护) → Step 3-4 委派 |
+| 用户:"新 skill `my-foo`,请接入"| 主 agent → Step 2 查表(bin/cli.mjs create 自动调用 guard-smith 委派),所以**主 agent 跑 `bin/cli.mjs create my-foo`** 即可,CLI 内部按 §4.2 流程 |
+| pre-commit BLOCK: "skill-markets/my-foo/ 未在 registry 注册"| 调用方 agent → 直接跑 `node src/guards/skill-registration-guard.mjs` 看完整错误 → Step 1 锁定是"新 skill 缺注册" → Step 2 判定(新建注册条目是 guard-smith 职责) → Step 3-4 委派 |
+| CI L3 fail: `fullstack4TraeV9-capability` 在注册表但 script 不存在 | 调用方 agent → Step 1 锁定是"注册了但 wrapper 缺失" → Step 2(是白名单路径改动) → Step 3-4 委派 |
+| 我(主 agent)只是想改 `skill-markets/coding-xinfa/SKILL.md` 的拼写错误 | 调用方 agent → Step 2 查表(普通 skill 文件,不在白名单) → **不**需要 guard-smith 委派 → 自己 Edit + commit |
 
 ---
 

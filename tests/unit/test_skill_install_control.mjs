@@ -62,8 +62,8 @@ await test('checkDependencies: test-experience (DEPRECATED → acceptance-discip
   );
 });
 
-await test('checkDependencies: skills-security (DEPRECATED → trae-security-review) → BLOCK', async () => {
-  const r = await checkDependencies({ skillName: 'skills-security' });
+await test('checkDependencies: skills-security-scan (DEPRECATED → trae-security-review) → BLOCK', async () => {
+  const r = await checkDependencies({ skillName: 'skills-security-scan' });
   assert.equal(r.passed, false);
   assert.ok(
     r.missing.some((m) => m.includes('DEPRECATED') && m.includes('trae-security-review')),

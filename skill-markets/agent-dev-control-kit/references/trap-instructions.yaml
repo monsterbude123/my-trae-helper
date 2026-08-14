@@ -172,6 +172,67 @@ traps:
       - "references/traps.md §AP-7"
 
   # ─────────────────────────────────────────────────────────────────
+  - id: AP-CAT-DOCS-LANG
+    title: 缺中英双写文档
+    detect_signal: |
+      对应 ai-short-studio-monster AGENTS.md §2:修改/新增功能必须同步 content/zh/* 与 content/en/*
+    what_is_wrong: |
+      只写了一侧语言(zh / en)的文档,另一侧缺失。Agent 提示系统强制"中英双写",单侧文档被 catalog 检测为缺口。
+    fix_template_before: |
+      # ❌ 加了 content/zh/canvas/nodes.mdx 但没加 content/en/canvas/nodes.mdx
+      # ❌ 加了 content/en/assets/index.mdx 但没加 content/zh/assets/index.mdx
+    fix_template_after: |
+      # ✅ 双侧同时加
+      #    content/zh/<path>.mdx
+      #    content/en/<path>.mdx
+      # ✅ 在 tests/catalogs/skill-catalog.yaml 加 required_docs 双侧声明
+      - path: content/zh/canvas/nodes.mdx
+      - path: content/en/canvas/nodes.mdx
+    next_skill: trae-ponytail
+    next_skill_action: "复制 + 翻译 + 双侧注册"
+    reclaim_steps:
+      - 看 stderr HINT-AP-CAT-002,定位缺哪一侧
+      - 复制已有侧到目标路径
+      - 翻译 + 校对人名/术语
+      - 在 skill-catalog.yaml 双侧同时声明
+      - 跑 pytest tests/catalogs -m trap 验证
+    see_also:
+      - "ai-short-studio-monster AGENTS.md §2"
+      - "references/traps.md §AP-CAT-DOCS"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-CAT-META-REGISTER
+    title: 缺 _meta.ts 导航注册
+    detect_signal: |
+      对应 ai-short-studio-monster AGENTS.md §2:新增页面 / API / 工作流必须注册两侧 _meta.ts
+    what_is_wrong: |
+      新建了 content/zh/<section>/<page>.mdx 但没在 content/zh/<section>/_meta.ts 与 content/en/<section>/_meta.ts 注册,导致导航/面包屑/目录找不到该页面。
+    fix_template_before: |
+      # ❌ 加了 content/zh/canvas/nodes.mdx
+      #    但 content/zh/canvas/_meta.ts 与 content/en/canvas/_meta.ts 都没注册 nodes 条目
+    fix_template_after: |
+      # ✅ content/zh/canvas/_meta.ts
+      export default {
+        index: '总览',
+        nodes: '节点',
+      } as const
+      # ✅ content/en/canvas/_meta.ts
+      export default {
+        index: 'Overview',
+        nodes: 'Nodes',
+      } as const
+    next_skill: trae-ponytail
+    next_skill_action: "在双侧 _meta.ts 注册"
+    reclaim_steps:
+      - 看 stderr HINT-AP-CAT-META-001,定位缺哪个 _meta.ts
+      - 在双侧 _meta.ts 中加入对应 key
+      - key 与文件名(去掉 .mdx)严格一致
+      - 跑 npm run check:docs-sync 验证
+    see_also:
+      - "ai-short-studio-monster AGENTS.md §2"
+      - "references/traps.md §AP-CAT-SECTIONS"
+
+  # ─────────────────────────────────────────────────────────────────
   - id: AP-8
     title: post-commit 假阻断(SIA 不可用时 exit 0)
     detect_signal: |
@@ -408,3 +469,42 @@ traps:
       - "AGENTS.md §4 #6 不给 P0/P1/P2 配硬性条数(2026-08-14 新增)"
       - "AGENTS.md §4.1.1 数字必须第一轮带证据"
       - ".trae/rules/learning.md §1 全局自管经验沉淀"
+
+  # ─────────────────────────────────────────────────────────────────
+  # 2026-08-14 第二轮蒸馏再次修正(用户纠正)
+  - id: AP-15
+    title: Git Hook 探测到 Python 但缺依赖时不补装(矫枉过正)
+    detect_signal: |
+      scripts/detect-python.sh / .husky/pre-commit / pre-push 含
+      "缺 pytest/yaml,BLOCK" / "请手动 pip install" 等字样 /
+      没有尝试 python -m pip install --user 自愈
+    what_is_wrong: |
+      第一轮修正时为了"跨平台"只信 PATH 上的 python3,但用户机器装了 Python
+      只是忘装 pytest 时,hook 必然失败。这是矫枉过正 — hook 存在的目的是
+      真跑守卫,不是反复 prompt 用户装环境。
+      反过来想: 用户既然 commit 了,说明已装 Git; 同理应能接受自动
+      pip install --user(写到 ~/.local,不污染系统)。
+    fix_template_before: |
+      # ❌ 只探测,不补装(矫枉过正,2026-08-14 用户纠正)
+      if _can_import "$PY2"; then PY="$PY2"; break; fi
+      # 若缺 pytest/yaml → 直接 BLOCK → 用户每次 commit 都卡
+    fix_template_after: |
+      # ✅ 探测 + 自愈 + 降级提示
+      if _can_import "$PY2"; then
+        PY="$PY2"; break
+      elif _try_bootstrap "$PY2"; then   # 内部跑 python -m pip install --user
+        PY="$PY2"; break
+      fi
+      # 仍失败 → 才打印三平台安装指南 + exit 1
+    next_skill: trae-ponytail
+    next_skill_action: "矫枉过正识别 + 自愈优先"
+    reclaim_steps:
+      - 触发:任何"探测环境/能力"的脚本(不限于 Python)
+      - 第一轮动作:问"缺了能不能自愈?(pip install / npm install / brew install)"
+      - 能自愈 → 加 _try_bootstrap 路径,不阻断主流程
+      - 真不能(无网/无权限) → 才 BLOCK + 明确修复指南
+      - 反向钉死:detect_signal 关键词必须命中"自愈尝试"或"明确非自愈原因"
+    see_also:
+      - "AGENTS.md §4.1.3 跨平台 Python 探测 + 自愈依赖"
+      - "scripts/detect-python.sh _try_bootstrap"
+      - "ponytail §矫枉过正(从反例变正例)"

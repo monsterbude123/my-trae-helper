@@ -283,26 +283,27 @@ guard:
 **适用场景**：新建项目,需要完整的控制体系。
 
 ```bash
-# 1. 复制脚手架到目标项目
-cp -r skill-markets/agent-dev-control-kit/template-project /path/to/your-project
+# 1. 显式指定技术栈初始化(把 scaffolds/<stack>/files/ 复制到目标项目)
+python scripts/init-control-kit.py \
+  --target /path/to/your-project \
+  --stack python
 
 # 2. 进入项目目录
 cd /path/to/your-project
 
-# 3. 执行初始化脚本
-./scripts/init-project.sh
+# 3. 验证 Gate 完整性(无漏洞即通过)
+python scripts/validate-gate-integrity.py --target .
 
 # 4. 安装 Git Hooks
-./hooks/install-hooks.sh
+python scripts/install-husky.py --target .
 ```
 
-**脚手架包含**：
-- `.agents/skills/` — Execution Skill 模板
-- `gates/` — 4 层门禁配置
-- `guards/` — Guard 脚本与配置
-- `hooks/` — Git Hooks 安装脚本
-- `tests/` — 测试目录结构（unit / integration / e2e）
-- `package.json` — 预配置的 npm scripts
+**脚手架包含**(由 `scaffolds/<stack>/files/` 提供):
+- `guards/` — Guard 脚本与配置(`api-contract-guard` / `test-coverage-guard` 等)
+- `gates/` — 4 层门禁配置(`gate-config.json` + `pre-commit.sh` + `pre-push.sh`)
+- `scripts/` — 初始化与验证脚本
+- `tests/` — 测试目录结构(unit / integration)
+- 根级 `package.json` / `pyproject.toml` / `go.mod` / `pom.xml` — 已带必需 scripts
 
 ### 5.2 方式二：工具脚本自动化
 
@@ -383,12 +384,12 @@ python scripts/validate-execution-skill.py \
 ### 执行层 (Execution Layer)
 - `scripts/` — Python 脚本（读取 registry/）
 - `scaffolds/` — 脚手架物理分离（按技术栈）
-  - `nodejs/`, `python/`, `go/`, `java-maven/`
-  - `rust-react/`, `nextjs-fullstack/`, `cli-only/`
+  - `nodejs/`, `python/`, `go/`, `java-maven/` 四个内置
   - 每个 scaffold 包含 `scaffold.yaml` + `files/`
+  - 用户自定义: `~/.agent-dev-control-kit/scaffolds/<your-id>/` 优先级高于内置
 
-### 子技能（跨层引用）
-- `skills/` — 5 个 Execution Skills
+### 子技能(跨层引用)
+- `skills/` — 5 个 Execution Skills(data-change / doc-sync / config-sync / asset-management / release-process)+ 3 个控制核心 Skill(execution-control / guard-control / gate-control)
 
 ---
 

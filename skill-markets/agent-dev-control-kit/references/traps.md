@@ -17,6 +17,8 @@
 | AP-5 | 一次性 commit 巨大违反最小变更 | MEDIUM | §7.4 (change ↔ feature)|
 | AP-6 | 跨项目 skill 引用未消除 | LOW | §7 (project boundary) |
 | AP-7 | Guard 正则覆盖不足 | HIGH | §11.1.1 |
+| AP-CAT-DOCS-LANG | 缺中英双写文档 | HIGH | trap-instructions.yaml |
+| AP-CAT-META-REGISTER | 缺 _meta.ts 导航注册 | HIGH | trap-instructions.yaml |
 
 ---
 
