@@ -41,7 +41,7 @@ export async function runRemove(args) {
   for (const agent of targetAgents) {
     const dir = isGlobal ? agent.globalSkillsDir : resolveTargetDir(agent.skillsDir, false);
     if (!dir || !existsSync(dir)) continue;
-    const { readdirSync, lstatSync, statSync } = await import('node:fs');
+    const { readdirSync, statSync } = await import('node:fs');
     for (const e of readdirSync(dir, { withFileTypes: true })) {
       let isDir = false;
       try {

@@ -1,7 +1,7 @@
 /**
  * src/utils.mjs — shared helpers (paths, output, arg parsing)
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, lstatSync, statSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
@@ -160,6 +160,8 @@ export function resolveTargetDir(skillsDir, isGlobal) {
 
 /**
  * 列出已安装 skills（在某个目录下）
+ * 注意: Windows junction 在 lstat 下报 isDirectory()=false,必须用 statSync 跟随
+ *       (见 trap-instructions.yaml 7 月新增 junction 模式)
  */
 export function listDirSkills(dir) {
   if (!dir) return [];
@@ -168,7 +170,8 @@ export function listDirSkills(dir) {
       .filter((e) => {
         if (!e.isDirectory() && !e.isSymbolicLink()) return false;
         try {
-          return lstatSync(join(dir, e.name)).isDirectory();
+          // 用 statSync 跟随 reparse point(junction / symlink to dir)
+          return statSync(join(dir, e.name)).isDirectory();
         } catch {
           return false;
         }

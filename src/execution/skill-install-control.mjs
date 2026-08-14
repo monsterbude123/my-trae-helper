@@ -306,13 +306,14 @@ function safeLstat(p) {
  * Helper: 解析 YAML frontmatter
  */
 function parseYAMLFrontmatter(content) {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  // 兼容 CRLF（Windows）+ LF（Unix）两种换行（2026-08-14 修复）
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return {};
 
   const yaml = match[1];
   const meta = {};
 
-  for (const line of yaml.split('\n')) {
+  for (const line of yaml.split(/\r?\n/)) {
     const [key, ...rest] = line.split(':');
     if (key && rest.length > 0) {
       const value = rest.join(':').trim();
