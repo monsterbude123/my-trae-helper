@@ -94,4 +94,9 @@ jobs:
           fi
 
       - name: Upload pytest HTML report
-        if:
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-report
+          path: skill-markets/agent-dev-control-kit/pytest-report.html
+          if-no-files-found: ignore
