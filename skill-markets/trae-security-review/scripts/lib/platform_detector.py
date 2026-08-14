@@ -1,7 +1,7 @@
 """
 TRAE Security Review — Skill 平台兼容性检测库
 
-从 skills-security/main.py（DEPRECATED 2026-08-14）迁移而来。
+从 skills-security-scan/main.py（DEPRECATED 2026-08-14）迁移而来。
 保留独特能力：识别 Skill 类型（trae-skill / claude-skill / json-skill / node-skill / unknown）
 + 推断支持平台（Trae / Claude Code / Cursor / OpenClaw / Codex / Gemini CLI / Aider /
 Windsurf / Kilo Code / OpenCode / Augment / Antigravity / GitHub Copilot / Kimi / Cline /

@@ -91,7 +91,7 @@ trae-security-review/
 | 工具 | 用途 | 安装 |
 |------|------|------|
 | `github/awesome-copilot@security-review` | AI 驱动的全代码库安全扫描 | `npx skills add github/awesome-copilot@security-review` |
-| ~~`skills-security`（Damond-Fung）~~ | ~~纯本地 Skill 目录静态扫描~~ | **已整合**：能力（5 类风险 + 平台识别）已迁入本 skill `scripts/lib/platform_detector.py` + `scan_skills_dir.py V2.1`。原仓库保留 DEPRECATED 兼容壳 |
+| ~~`skills-security-scan`（Damond-Fung）~~ | ~~纯本地 Skill 目录静态扫描~~ | **已整合**：能力（5 类风险 + 平台识别）已迁入本 skill `scripts/lib/platform_detector.py` + `scan_skills_dir.py V2.1`。原仓库保留 DEPRECATED 兼容壳 |
 
 ## 与 acceptance-discipline 的协作
 

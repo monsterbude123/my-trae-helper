@@ -1,0 +1,52 @@
+{
+  "name": "skills-security-scan",
+  "version": "1.0.0",
+  "description": "Local security-first assessment for Skills across Trae, OpenClaw, cc, Cursor and similar ecosystems.",
+  "entry": "main.py",
+  "language": "python",
+  "platforms": [
+    "universal",
+    "amp",
+    "cline",
+    "codex",
+    "trae",
+    "openclaw",
+    "cc",
+    "cursor",
+    "gemini-cli",
+    "github-copilot",
+    "kimi-code-cli",
+    "opencode",
+    "warp"
+  ],
+  "inputs": {
+    "skills_dir": {
+      "type": "string",
+      "required": true,
+      "description": "Skills root directory to assess"
+    },
+    "output_dir": {
+      "type": "string",
+      "required": false,
+      "description": "Directory for generated json/markdown reports. Default: ./auto_reports"
+    }
+  },
+  "outputs": {
+    "summary": {
+      "type": "string",
+      "description": "Security summary with high-risk findings"
+    },
+    "report_files": {
+      "type": "object",
+      "description": "Generated report files: json/md/summary"
+    },
+    "risk_counts": {
+      "type": "object",
+      "description": "Risk counts grouped by high/medium/low"
+    },
+    "skill_basic_info": {
+      "type": "array",
+      "description": "Assessed skill basic information list"
+    }
+  }
+}

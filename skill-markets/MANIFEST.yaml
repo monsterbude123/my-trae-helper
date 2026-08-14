@@ -622,7 +622,7 @@ skills:
       - path: references/schemas.md
     tests: []
 
-  - name: skills-security
+  - name: skills-security-scan
     status: deprecated
     redirect_to: trae-security-review
     scripts: []

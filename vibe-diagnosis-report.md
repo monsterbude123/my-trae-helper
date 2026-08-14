@@ -150,7 +150,7 @@
 | 技能文件 | skill-markets/modelscope-assistant/SKILL.md | 272 | ❌ | v2.1 旧标准（≤150 行硬上限）的误判；v2.5 弹性 100~350 行下 272 行属正常范围，仅 info 提示 |
 | 技能文件 | skill-markets/openapi-doc-exporter/SKILL.md | 225 | ❌ | v2.1 旧标准（≤150 行硬上限）的误判；v2.5 弹性 100~350 行下 225 行属正常范围，仅 info 提示 |
 | 技能文件 | skill-markets/shuxia-novel-engine/SKILL.md | 254 | ❌ | v2.1 旧标准（≤150 行硬上限）的误判；v2.5 弹性 100~350 行下 254 行属正常范围，仅 info 提示 |
-| 技能文件 | skill-markets/skills-security/SKILL.md | 32 | ✅ |  |
+| 技能文件 | skill-markets/skills-security-scan/SKILL.md | 32 | ✅ |  |
 | 技能文件 | skill-markets/test-experience/SKILL.md | 321 | ❌ | v2.1 旧标准（≤150 行硬上限）的误判；v2.5 弹性 100~350 行下 321 行属正常范围，仅 info 提示 |
 | 技能文件 | skill-markets/test-partition-runner/SKILL.md | 213 | ❌ | v2.1 旧标准（≤150 行硬上限）的误判；v2.5 弹性 100~350 行下 213 行属正常范围，仅 info 提示 |
 | 技能文件 | skill-markets/trae-professional/SKILL.md | 123 | ✅ |  |

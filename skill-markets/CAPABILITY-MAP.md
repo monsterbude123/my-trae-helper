@@ -26,7 +26,7 @@
 | [vision-audit](vision-audit/SKILL.md) | 纯Skill | UI/UX 视觉验收 — Qwen3-VL 分析截图 | vision-audit.mjs, vision-audit.py |
 | [shuxia-novel-engine](shuxia-novel-engine/SKILL.md) | Agent驱动 | 小说创作引擎 — 世界观构建、剧情编织、一致性审计 | 12 脚本（check, combat, drama, enumerate, evaluate, ripple 等） |
 | [modelscope-assistant](modelscope-assistant/SKILL.md) | 纯Skill | 魔搭社区助手 — 模型搜索、SDK 调用、微调指导 | mymodelscope/ Python 库 + scan-models.ps1 |
-| [minimax-multimodal](minimax-multimodal/SKILL.md) | 纯Skill | MiniMax(海螺 AI)开放平台多模态 — 6 大模态可跑通 Python 客户端(文本/图像/视频/语音/音乐/视觉) | 8 脚本(_client + 6 模态 + verify_all + run_all) + 7 references + 28 pytest 测试 |
+| [minimax-multimodal](minimax-multimodal/SKILL.md) | 纯Skill | MiniMax(海螺 AI)开放平台多模态 — 6 大模态可跑通 Python 客户端(文本/图像/视频/语音/音乐/视觉) | 12 脚本(_client + 6 模态 + verify_all + run_all + 4 check_*) + 7 references + 31 pytest 测试;**2026-08-14 实跑 PASS** — 国内 `api.minimaxi.com` 真实 Key 验证 6/6 模态端到端通过(产物落 `output/`) |
 | [test-experience](test-experience/SKILL.md) | 纯Skill | **⚠ DEPRECATED** → acceptance-discipline（兼容壳）| 无 |
 | [test-partition-runner](test-partition-runner/SKILL.md) | 纯Skill | **⚠ DEPRECATED** → acceptance-discipline（兼容壳）| 无 |
 | [e2e-module-audit](e2e-module-audit/SKILL.md) | 纯Skill | **⚠ DEPRECATED** → acceptance-discipline（兼容壳）| 无 |
@@ -77,7 +77,7 @@
 | [test-experience](test-experience/SKILL.md) | [acceptance-discipline](acceptance-discipline/SKILL.md) | 已整合进 `agents/unit-test-agent.md` + `references/bad-test-cases.md` |
 | [test-partition-runner](test-partition-runner/SKILL.md) | [acceptance-discipline](acceptance-discipline/SKILL.md) | 已整合进 `agents/blockage-resolver-agent.md` |
 | [e2e-module-audit](e2e-module-audit/SKILL.md) | [acceptance-discipline](acceptance-discipline/SKILL.md) | 已整合进 `agents/e2e-audit-agent.md`（双工作流） |
-| [skills-security](skills-security/SKILL.md) | [trae-security-review](trae-security-review/SKILL.md) | 扫描能力迁入 `scan_skills_dir.py V2.1`（8 类 + 三层白名单）；平台识别迁入 `scripts/lib/platform_detector.py` |
+| [skills-security-scan](skills-security-scan/SKILL.md) | [trae-security-review](trae-security-review/SKILL.md) | 扫描能力迁入 `scan_skills_dir.py V2.1`（8 类 + 三层白名单）；平台识别迁入 `scripts/lib/platform_detector.py` |
 
 ### 游戏制作群岛（单一 Kit 入口，内部 7 子技能）
 
@@ -113,6 +113,9 @@
 | 技能能力守卫 | `scripts/skill-capability-guard.py` | verify 命令 + Git hooks | Python 脚本 | 脚本去重 + CAPABILITY-MAP.md 同步 |
 | **技能注册表守卫**（NEW 2026-08-14 §3 收紧方案 A）| `src/guards/skill-registration-guard.mjs` | pre-commit / pre-push / L3 PR | Node.js + yaml 包 | 校验 `registry/skills.yaml` 完整性:每个根 skill 必带同名 guard + gate 注册,script/hook 文件存在,maintainer=guard-smith 白名单 |
 | **Guard 路由器**（NEW 2026-08-14 §3 收紧方案 A）| `scripts/guard-router.mjs` | pre-commit step 3 + verify | Node.js + yaml 包 | 按 skill 名查 `registry/skills.yaml` → 依次执行该 skill 注册的 guards(每个 skill 自治 guard 雏形) |
+| **Skill 专属守卫 wrapper**（NEW 2026-08-14 §3 拆分方案 A）| `scripts/<name>-guard.py` × 47 | guard-router 调用 | Python wrapper + importlib | 每个 skill 自带一个 guard wrapper,通过 importlib 加载共享的 structure/security 守卫并合并结果。模板由 `scripts/forge-skill-guard.py` 生成,杜绝 47 份风格漂移 |
+| **Forge 模板生成器**（NEW 2026-08-14 §3 拆分方案 A）| `scripts/forge-skill-guard.py` | 手动 / guard-smith agent | Python | 接收 skill 名列表 → 生成对应的 scripts/<name>-guard.py。支持 `--all` 批量 / `--dry-run` 预览 |
+| **守卫共享工具**（NEW 2026-08-14 §3 拆分方案 A）| `scripts/_guard_lib.py` | wrapper 内部使用 | Python | 提供 `cli_main(check_fn, label)` 统一入口:JSON 输出 + exit 0/1 + 自动去重 warnings |
 
 ---
 
@@ -258,7 +261,7 @@ L0 基座（独立可用，无外部依赖）
 | gitnexus4Trae | fullstack4traev9 | ⚠️ 影响面分析降级为 grep，存在盲区风险 |
 | doc-map-manager | fullstack4traev9 | ⚠️ 文档索引无法自动更新，DOC SYNC 不完整 |
 
-> **2026-08-14 聚合说明**：test-experience / e2e-module-audit / test-partition-runner 三个 L0 skill 已并入 acceptance-discipline（内部子体系），不再作为独立外部依赖。其原降级后果已并入 acceptance-discipline 的硬依赖降级链。skills-security 同理并入 trae-security-review。
+> **2026-08-14 聚合说明**：test-experience / e2e-module-audit / test-partition-runner 三个 L0 skill 已并入 acceptance-discipline（内部子体系），不再作为独立外部依赖。其原降级后果已并入 acceptance-discipline 的硬依赖降级链。skills-security-scan 同理并入 trae-security-review。
 
 ### 完整协议
 
