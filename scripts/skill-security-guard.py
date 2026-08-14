@@ -194,6 +194,38 @@ def extract_real_high_details(skill_dir: Path) -> List[str]:
     return details
 
 
+def check_security_for_skill(skill_path: str) -> Dict:
+    """统一接口 wrapper — 让 scripts/<name>-guard.py 可 import 调用.
+
+    Args:
+        skill_path: skill 目录路径
+
+    Returns:
+        {passed, errors, warnings, info}
+    """
+    result = run_security_guard(skill_path)
+    # 适配: status → passed/errors/warnings/info
+    passed = result.get('status') == 'PASS'
+    warnings = []
+    errors = []
+    info = [result.get('message', '')] if result.get('message') else []
+
+    if result.get('status') == 'WARN':
+        # WARN 不阻断但要上报
+        warnings.append(f"security scan WARN: high={result.get('high_count', 0)} "
+                       f"medium={result.get('medium_count', 0)} "
+                       f"low={result.get('low_count', 0)}")
+    elif result.get('status') == 'BLOCK':
+        errors.append(f"security scan BLOCK: {result.get('details', [])}")
+
+    return {
+        'passed': passed,
+        'errors': errors,
+        'warnings': warnings,
+        'info': info,
+    }
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("用法: python scripts/skill-security-guard.py skill-markets/<skill_name>")

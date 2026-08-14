@@ -191,6 +191,32 @@ def parse_yaml_frontmatter(content: str) -> Dict:
     return meta
 
 
+def check_capability_for_skill(skill_path: str) -> Dict:
+    """统一接口 wrapper — 让 scripts/<name>-guard.py 可 import 调用.
+
+    Args:
+        skill_path: skill 目录路径
+
+    Returns:
+        {passed, errors, warnings, info}
+    """
+    r1 = check_capability_duplicate(skill_path)
+    r2 = check_capability_map_sync(skill_path)
+    errors = []
+    warnings = []
+    info = []
+    for src in (r1, r2):
+        errors.extend(src.get('errors') or [])
+        warnings.extend(src.get('warnings') or [])
+        info.extend(src.get('missing_entries') or [])
+    return {
+        'passed': r1.get('passed', False) and r2.get('passed', False),
+        'errors': errors,
+        'warnings': warnings,
+        'info': info,
+    }
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("用法: python scripts/skill-capability-guard.py skill-markets/<skill_name> [script_name]")

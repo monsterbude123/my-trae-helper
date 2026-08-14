@@ -171,6 +171,18 @@ def check_scripts_dir(scripts_dir: Path, errors: List[str], warnings: List[str],
                 warnings.append(f'{script_file.name}: 使用 subprocess + shell=True（参数化命令更安全）')
 
 
+def check_structure_for_skill(skill_path: str) -> Dict:
+    """统一接口 wrapper — 让 scripts/<name>-guard.py 可 import 调用.
+
+    Args:
+        skill_path: skill 目录路径
+
+    Returns:
+        {passed, errors, warnings, info}
+    """
+    return check_structure(skill_path)
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("用法: python scripts/skill-structure-guard.py skill-markets/<skill_name>")
