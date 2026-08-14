@@ -1,45 +1,54 @@
 #!/usr/bin/env node
 /**
- * self-improving-agent shim (本地实现,非外部 CLI)
+ * self-improving-agent shim v2 (A+B+C 组合,2026-08-14)
  *
- * 设计:
- *   - 这不是真正的 SIA CLI,是 .husky/post-commit 调用的轻量 shim
- *   - 把"会话级 hint"(git log / 反例)沉淀到 $HOME/.self-improving-agent/.learnings/
- *   - 符合 SIA SKILL.md 的日志格式 (LRN- / ERR- / FEAT- 前缀)
+ * 三个子命令对应三个自动化路径:
+ *   reflect     (B) 扫 logs/*.log 的 warn/error 行 + git log,append .learnings/*
+ *   log         (A) 主 agent 显式调用,直接落一条 entry
+ *   scan-hints  (C) 扫 logs/agent-hints.jsonl(主 agent 写入的会话级 hint)
  *
- * 子命令:
- *   reflect [--since <commit>] [--auto] [--quiet]
- *     读 git log --since=<commit> 之后未落盘的反例/经验,append 到 .learnings/*.md
- *
- * 退码:
- *   0 = 成功或无变更
- *   1 = 致命错误(仅 --strict 才用,默认永不返回 1)
+ * 数据落地: --home 指定路径/.learnings/{LEARNINGS,ERRORS,FEATURE_REQUESTS}.md
+ * HOME 解析: --home CLI > SELF_IMPROVING_HOME env > $HOME/.self-improving-agent
  *
  * 关联:
  *   - .trae/rules/learning.md §5 路径 C
  *   - .husky/post-commit (调用方)
- *   - .agents/skills/self-improving-agent/SKILL.md (格式参考)
+ *   - 关联反例: skill-markets/agent-dev-control-kit/references/trap-instructions.yaml AP-8
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, appendFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, appendFileSync, renameSync } from 'node:fs';
+import { join } from 'node:path';
 import { homedir } from 'node:os';
 
-const HOME = process.env.SELF_IMPROVING_HOME || join(homedir(), '.self-improving-agent');
-const LEARN_DIR = join(HOME, '.learnings');
+// HOME 解析(每次重新计算,因为 main() 会修改 process.env.SELF_IMPROVING_HOME)
+// 优先级: --home CLI > SELF_IMPROVING_HOME env > 项目内 .self-improving-agent/
+// 注意: 默认不用 $HOME/.self-improving-agent,因为 WSL/Windows 互操作下不可见
+function getHome() {
+  const argv = process.argv;
+  for (let i = 0; i < argv.length - 1; i++) {
+    if (argv[i] === '--home') return argv[i + 1];
+  }
+  if (process.env.SELF_IMPROVING_HOME) return process.env.SELF_IMPROVING_HOME;
+  // 默认: 仓库根目录下 .self-improving-agent/(WSL/Windows 都可见)
+  return join(process.cwd(), '.self-improving-agent');
+}
+function getLearnDir() {
+  return join(getHome(), '.learnings');
+}
+
+// ─── 通用工具 ─────────────────────────────────────────────
 
 function nowISO() { return new Date().toISOString(); }
-function today() {
-  return nowISO().slice(0, 10).replace(/-/g, '');
-}
+function today() { return nowISO().slice(0, 10).replace(/-/g, ''); }
+
 function nextId(prefix) {
-  // LRN-20260814-001 风格,扫同前缀找 max
   try {
+    const learnDir = getLearnDir();
     const files = ['LEARNINGS.md', 'ERRORS.md', 'FEATURE_REQUESTS.md'];
     let max = 0;
     for (const f of files) {
-      const p = join(LEARN_DIR, f);
+      const p = join(learnDir, f);
       if (!existsSync(p)) continue;
       const txt = readFileSync(p, 'utf8');
       const re = new RegExp(`## \\[${prefix}-\\d{8}-(\\d{3})\\]`, 'g');
@@ -56,13 +65,11 @@ function nextId(prefix) {
 }
 
 function ensureHome() {
-  if (!existsSync(LEARN_DIR)) {
-    mkdirSync(LEARN_DIR, { recursive: true });
-  }
+  const learnDir = getLearnDir();
+  if (!existsSync(learnDir)) mkdirSync(learnDir, { recursive: true });
   for (const f of ['LEARNINGS.md', 'ERRORS.md', 'FEATURE_REQUESTS.md']) {
-    const p = join(LEARN_DIR, f);
+    const p = join(learnDir, f);
     if (!existsSync(p)) {
-      // 仅首次创建带 header
       const header =
         f === 'LEARNINGS.md'      ? '# Learnings\n\n> 跨会话经验沉淀(自动生成)\n' :
         f === 'ERRORS.md'         ? '# Errors\n\n> 命令/工具失败(自动生成)\n' :
@@ -73,26 +80,219 @@ function ensureHome() {
 }
 
 function appendEntry(file, header, body) {
-  const p = join(LEARN_DIR, file);
+  const p = join(getLearnDir(), file);
+  ensureHome();
   appendFileSync(p, `\n---\n\n${header}\n${body}\n`, 'utf8');
 }
 
+// ─── B: 扫 .log 找 warn/error 行 → ERRORS.md ──────────────
+
+function scanLogsForWarnings(logPaths) {
+  const hits = [];
+  const patterns = [
+    /\bwarn[:：]\s+(.+)/i,
+    /\bwarning[:：]\s+(.+)/i,
+    /\[FATAL_ERROR\]/i,
+    /\b(command not found|enoent|eacces|eperm)\b/i,
+    /\bexit(?:ed)?\s+(?:with\s+)?(?:code\s+)?(?:1|2|127|128|130|137|139|143)\b/i,
+  ];
+  for (const logPath of logPaths) {
+    if (!existsSync(logPath)) continue;
+    const txt = readFileSync(logPath, 'utf8');
+    const lines = txt.split('\n');
+    const start = Math.max(0, lines.length - 200);
+    for (let i = start; i < lines.length; i++) {
+      const line = lines[i];
+      for (const re of patterns) {
+        if (re.test(line)) {
+          hits.push({ source: logPath, line: i + 1, text: line.trim().slice(0, 240) });
+          break;
+        }
+      }
+    }
+  }
+  return hits;
+}
+
+function writeErrorsFromLogHits(hits, quiet) {
+  if (hits.length === 0) return 0;
+  ensureHome();
+  let n = 0;
+  for (const h of hits) {
+    const sig = h.text.slice(0, 80);
+    const errFile = join(getLearnDir(), 'ERRORS.md');
+    const existing = existsSync(errFile) ? readFileSync(errFile, 'utf8') : '';
+    if (existing.includes(sig)) continue;
+
+    const id = nextId('ERR');
+    const header = `## [${id}] post_commit_warn`;
+    const body = [
+      `**Logged**: ${nowISO()}`,
+      `**Priority**: medium`,
+      `**Status**: pending`,
+      `**Area**: config`,
+      ``,
+      `### Summary`,
+      `post-commit 钩子日志中检测到 warn/error`,
+      ``,
+      `### Error`,
+      '```',
+      h.text,
+      '```',
+      ``,
+      `### Context`,
+      `- Source log: ${h.source}`,
+      `- Line: ${h.line}`,
+      ``,
+      `### Metadata`,
+      `- Source: log_scan`,
+      `- Tags: auto-captured, hook-warning`,
+      ``,
+    ].join('\n');
+    appendEntry('ERRORS.md', header, body);
+    n++;
+    if (!quiet) console.log(`[sia-shim] wrote ${id} ← ${h.text.slice(0, 60)}`);
+  }
+  return n;
+}
+
+// ─── C: 扫 logs/agent-hints.jsonl ─────────────────────────
+
+function scanAgentHints(hintPath, quiet) {
+  if (!existsSync(hintPath)) return { errors: 0, features: 0, learnings: 0 };
+  const txt = readFileSync(hintPath, 'utf8');
+  const lines = txt.split('\n').filter(Boolean);
+  if (lines.length === 0) return { errors: 0, features: 0, learnings: 0 };
+
+  ensureHome();
+  let errors = 0, features = 0, learnings = 0;
+
+  for (const line of lines) {
+    let h;
+    try { h = JSON.parse(line); } catch { continue; }
+    if (h.processed) continue;
+
+    const type = (h.type || 'error').toLowerCase();
+    const summary = h.summary || h.message || h.error || 'no summary';
+    const detail = h.detail || h.context || '';
+    const priority = h.priority || 'medium';
+    const area = h.area || 'config';
+    const source = h.source || 'agent_hint';
+
+    let file, prefix, category;
+    if (type === 'feature' || type === 'feat') {
+      file = 'FEATURE_REQUESTS.md'; prefix = 'FEAT'; category = 'feature_request';
+    } else if (type === 'learning' || type === 'learn') {
+      file = 'LEARNINGS.md'; prefix = 'LRN'; category = 'best_practice';
+    } else {
+      file = 'ERRORS.md'; prefix = 'ERR'; category = 'agent_error';
+    }
+    const id = nextId(prefix);
+    const header = `## [${id}] ${category}`;
+    const body = [
+      `**Logged**: ${nowISO()}`,
+      `**Priority**: ${priority}`,
+      `**Status**: pending`,
+      `**Area**: ${area}`,
+      ``,
+      `### Summary`,
+      summary,
+      ``,
+      `### Details`,
+      detail || '(no detail)',
+      ``,
+      `### Metadata`,
+      `- Source: ${source}`,
+      `- Tags: agent-hint, auto-captured`,
+      ``,
+    ].join('\n');
+    appendEntry(file, header, body);
+    if (file === 'ERRORS.md') errors++;
+    else if (file === 'FEATURE_REQUESTS.md') features++;
+    else learnings++;
+    if (!quiet) console.log(`[sia-shim] wrote ${id} ← ${summary.slice(0, 50)}`);
+  }
+
+  try {
+    renameSync(hintPath, hintPath + '.processed.' + Date.now());
+  } catch {}
+
+  return { errors, features, learnings };
+}
+
+// ─── A: log 子命令(主 agent 显式调用) ───────────────────
+
+function cmdLog(args) {
+  let type = 'error';
+  let summary = '';
+  let detail = '';
+  let priority = 'medium';
+  let area = 'config';
+  let quiet = false;
+
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '--type') type = args[++i];
+    else if (a === '--summary' || a === '-s') summary = args[++i];
+    else if (a === '--detail' || a === '-d') detail = args[++i];
+    else if (a === '--priority' || a === '-p') priority = args[++i];
+    else if (a === '--area' || a === '-a') area = args[++i];
+    else if (a === '--quiet') quiet = true;
+    else if (a.startsWith('--')) { /* skip unknown */ }
+    else if (!summary) summary = a;
+    else detail = (detail ? detail + ' ' : '') + a;
+  }
+  if (!summary) {
+    console.error('[sia-shim] log: --summary is required');
+    return 0;
+  }
+
+  let file, prefix, category;
+  if (type === 'feature' || type === 'feat') {
+    file = 'FEATURE_REQUESTS.md'; prefix = 'FEAT'; category = 'feature_request';
+  } else if (type === 'learning' || type === 'learn') {
+    file = 'LEARNINGS.md'; prefix = 'LRN'; category = 'best_practice';
+  } else {
+    file = 'ERRORS.md'; prefix = 'ERR'; category = 'agent_error';
+  }
+
+  const id = nextId(prefix);
+  const header = `## [${id}] ${category}`;
+  const body = [
+    `**Logged**: ${nowISO()}`,
+    `**Priority**: ${priority}`,
+    `**Status**: pending`,
+    `**Area**: ${area}`,
+    ``,
+    `### Summary`,
+    summary,
+    ``,
+    `### Details`,
+    detail || '(no detail)',
+    ``,
+    `### Metadata`,
+    `- Source: explicit_log`,
+    `- Tags: agent-cmd, auto-captured`,
+    ``,
+  ].join('\n');
+  appendEntry(file, header, body);
+  if (!quiet) console.log(`[sia-shim] wrote ${id} (${type}) ← ${summary.slice(0, 50)}`);
+  return 0;
+}
+
+// ─── reflect 子命令(commit log + 日志扫描 + hint 扫描) ───
+
 function readSince(sha) {
-  // git log <sha>..HEAD --oneline (反向:从 <sha> 到当前)
-  // --since 用 ref~1 也行,这里用 ref..HEAD 更稳
   try {
     const out = execFileSync('git', ['log', `${sha}..HEAD`, '--oneline', '--no-decorate'], {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
     });
     return out.trim().split('\n').filter(Boolean);
-  } catch (e) {
-    return [];
-  }
+  } catch { return []; }
 }
 
 function cmdReflect(args) {
-  // 解析参数
   let since = null;
   let auto = false;
   let quiet = false;
@@ -103,7 +303,6 @@ function cmdReflect(args) {
     else if (a === '--quiet') quiet = true;
   }
 
-  // 当前 commit
   let head;
   try {
     head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
@@ -113,16 +312,10 @@ function cmdReflect(args) {
   }
   const sinceRef = since || `${head}~1`;
 
-  // 读 commit log
-  const commits = readSince(sinceRef);
-  if (commits.length === 0) {
-    if (!quiet) console.log('[sia-shim] no new commits since', sinceRef);
-    return 0;
-  }
-
   ensureHome();
 
-  // 每条 commit 写一条 LRN
+  // 1) commit log → LEARNINGS
+  const commits = readSince(sinceRef);
   for (const line of commits) {
     const [sha, ...rest] = line.split(' ');
     const subject = rest.join(' ');
@@ -150,15 +343,56 @@ function cmdReflect(args) {
     if (!quiet) console.log(`[sia-shim] wrote ${id} ← ${sha.slice(0, 7)} ${subject.slice(0, 40)}`);
   }
 
+  // 2) 日志扫描 → ERRORS
+  const cwd = process.cwd();
+  // 默认扫项目内 hooks 日志;支持 --log <file>... 追加(测试用)
+  const logPaths = [
+    join(cwd, 'logs', 'post-commit-self-improve.log'),
+    join(cwd, 'logs', 'pre-commit.log'),
+    join(cwd, 'logs', 'pre-push.log'),
+  ];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--log' && i + 1 < args.length) {
+      logPaths.push(args[++i]);
+    }
+  }
+  const logHits = scanLogsForWarnings(logPaths);
+  const errN = writeErrorsFromLogHits(logHits, quiet);
+  if (!quiet && errN > 0) console.log(`[sia-shim] scan-logs: ${errN} entries written to ERRORS.md`);
+
+  // 3) agent-hints.jsonl → ERRORS/FEATURE_REQUESTS
+  //    扫两个位置: 仓库内 logs/ + $HOME/.self-improving-agent/logs/
+  const hintPaths = [
+    join(cwd, 'logs', 'agent-hints.jsonl'),
+    join(getHome(), 'logs', 'agent-hints.jsonl'),
+  ];
+  let stats = { errors: 0, features: 0, learnings: 0 };
+  for (const hp of hintPaths) {
+    const s = scanAgentHints(hp, quiet);
+    stats.errors += s.errors;
+    stats.features += s.features;
+    stats.learnings += s.learnings;
+  }
+  if (!quiet && (stats.errors + stats.features + stats.learnings) > 0) {
+    console.log(`[sia-shim] scan-hints: ${stats.errors}E / ${stats.features}F / ${stats.learnings}L`);
+  }
+
   return 0;
 }
 
 function usage() {
-  console.log('Usage: self-improving-agent <command> [args]');
+  console.log('Usage: self-improving-agent [--home <path>] <command> [args]');
+  console.log('');
+  console.log('Global:');
+  console.log('  --home <path>   覆盖 HOME 路径(WSL 调 Windows native node 用)');
   console.log('');
   console.log('Commands:');
   console.log('  reflect [--since <ref>] [--auto] [--quiet]');
-  console.log('    提取 git log 自 <ref> 起的 commits,写入 ~/.self-improving-agent/.learnings/LEARNINGS.md');
+  console.log('    综合: 提取 commit log + 扫 hooks 日志 warn + 扫 agent-hints.jsonl');
+  console.log('  log --type <error|feature|learning> --summary <text> [--detail <text>]');
+  console.log('    主 agent 显式调用,直接落一条 entry(A 路径)');
+  console.log('  scan-hints [--quiet]');
+  console.log('    单独扫 logs/agent-hints.jsonl(C 路径)');
   console.log('');
   console.log('Env:');
   console.log('  SELF_IMPROVING_HOME  覆盖默认 $HOME/.self-improving-agent');
@@ -166,25 +400,53 @@ function usage() {
 
 function main() {
   const argv = process.argv.slice(2);
-  const cmd = argv[0];
-  const rest = argv.slice(1);
-  if (!cmd || cmd === '--help' || cmd === '-h') {
-    usage();
-    return 0;
+  // 提取全局选项 --home
+  const filteredArgv = [];
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--home' && i + 1 < argv.length) {
+      // 同步到 process.env,让 getHome() 也能读到
+      process.env.SELF_IMPROVING_HOME = argv[i + 1];
+      i++;
+    } else {
+      filteredArgv.push(argv[i]);
+    }
   }
+  const cmd = filteredArgv[0];
+  const rest = filteredArgv.slice(1);
+  if (!cmd || cmd === '--help' || cmd === '-h') { usage(); return 0; }
   try {
     switch (cmd) {
-      case 'reflect':
-        return cmdReflect(rest);
+      case 'reflect':     return cmdReflect(rest);
+      case 'log':         return cmdLog(rest);
+      case 'scan-hints':  return cmdScanHintsMain(rest);
       default:
         console.error(`[sia-shim] unknown command: ${cmd}`);
         usage();
-        return 0; // 不阻断
+        return 0;
     }
   } catch (e) {
     console.error(`[sia-shim] error: ${e.message}`);
-    return 0; // 不阻断
+    return 0;
   }
+}
+
+function cmdScanHintsMain(args) {
+  let quiet = false;
+  for (const a of args) if (a === '--quiet') quiet = true;
+  const cwd = process.cwd();
+  const hintPaths = [
+    join(cwd, 'logs', 'agent-hints.jsonl'),
+    join(getHome(), 'logs', 'agent-hints.jsonl'),
+  ];
+  let stats = { errors: 0, features: 0, learnings: 0 };
+  for (const hp of hintPaths) {
+    const s = scanAgentHints(hp, quiet);
+    stats.errors += s.errors;
+    stats.features += s.features;
+    stats.learnings += s.learnings;
+  }
+  if (!quiet) console.log(`[sia-shim] scan-hints: ${stats.errors}E / ${stats.features}F / ${stats.learnings}L`);
+  return 0;
 }
 
 main();

@@ -58,8 +58,18 @@ echo "[post-commit] resolved: SIA=${SIA_CMD[*]}" >> "$LOG_FILE"
 
 # 2. 探测全局 LEARNING 目录
 #    shim 在 Windows 原生 node 跑,读 Windows 路径 — 需把 WSL 路径转换
+#    关键: $HOME 在 WSL root 下是 /root,不是 Windows 用户家目录
+#    改用 USERPROFILE 翻译 或硬编码 Windows 路径探测
 SIA_HOME_LINUX="${SELF_IMPROVING_HOME:-$HOME/.self-improving-agent}"
-# 转换 /mnt/c/Users/foo → C:\Users\foo(让 shim 写对位置)
+# 1) 优先用 USERPROFILE 转换
+if [ -n "$USERPROFILE" ]; then
+  SIA_HOME_LINUX="$(cygpath -u "$USERPROFILE" 2>/dev/null || echo "$USERPROFILE")/.self-improving-agent"
+fi
+# 2) 还是 /root 这种 WSL 默认,直接用 Windows 用户家目录
+if [[ "$SIA_HOME_LINUX" =~ ^/root/?$ ]] || [[ "$SIA_HOME_LINUX" == *"/root/.self-improving-agent" ]]; then
+  SIA_HOME_LINUX="/mnt/c/Users/septe/.self-improving-agent"
+fi
+# 3) /mnt/c/... → C:\... 翻译
 if [[ "$SIA_HOME_LINUX" =~ ^/mnt/([a-z])/(.*)$ ]]; then
   DRIVE_UPPER="$(echo "${BASH_REMATCH[1]}" | tr '[:lower:]' '[:upper:]')"
   REST="${BASH_REMATCH[2]//\//\\}"
@@ -67,7 +77,6 @@ if [[ "$SIA_HOME_LINUX" =~ ^/mnt/([a-z])/(.*)$ ]]; then
 else
   SIA_HOME_WIN="$SIA_HOME_LINUX"
 fi
-export SELF_IMPROVING_HOME="$SIA_HOME_WIN"
 echo "[post-commit] HOME: linux=$SIA_HOME_LINUX → win=$SIA_HOME_WIN" >> "$LOG_FILE"
 if [ ! -d "$SIA_HOME_LINUX" ] && [ ! -d "$SIA_HOME_WIN" ]; then
   echo "[post-commit] init: $SIA_HOME_WIN 不存在,shim 首次跑会创建" >> "$LOG_FILE"
@@ -83,7 +92,8 @@ fi
 # --since <commit>: 只回放本次 commit 之前未持久化的会话级 hint
 # --auto: 非交互,自动合并重复条目
 # --quiet: 静默,只输出错误
-"${SIA_CMD[@]}" reflect \
+# --home: WSL 调 Windows native node 时 env 不透传,改用 CLI
+"${SIA_CMD[@]}" --home "$SIA_HOME_WIN" reflect \
   --since "$COMMIT_SHA~1" \
   --auto \
   --quiet \
