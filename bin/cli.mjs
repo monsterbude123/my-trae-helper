@@ -3,13 +3,16 @@
  * @my-trae-helper/cli — Trae IDE skills CLI
  *
  * Usage:
- *   trae-skills add <skill-name>       Install a skill
- *   trae-skills list                   List installed skills
- *   trae-skills remove <skill-name>    Remove a skill
- *   trae-skills update [skill-name]    Update skills
- *   trae-skills init <skill-name>      Create a new SKILL.md template
- *   trae-skills create <name>          Create a new skill package (三层控制)
- *   trae-skills verify <name>          Verify a skill (执行所有守卫)
+ *   trae-skills add <skill-name>                Install a skill
+ *   trae-skills list                             List installed skills
+ *   trae-skills remove <skill-name>              Remove a skill
+ *   trae-skills update [skill-name]              Update skills
+ *   trae-skills init <skill-name>                Create a new SKILL.md template
+ *   trae-skills create <name>                    Create a new skill package (三层控制)
+ *   trae-skills verify <name>                    Verify a skill (执行所有守卫)
+ *   trae-skills bundle <subcmd> <pkg>            Bundle install/update/uninstall/list
+ *                                                 (one-click for sub-skill packages
+ *                                                  like fullstack4TraeV11 / game-production-kit)
  *
  * Entry point — only routes commands. Logic lives in src/*.mjs.
  */
@@ -21,18 +24,18 @@ import { runUpdate } from '../src/update.mjs';
 import { runInit } from '../src/init.mjs';
 import { runCreate } from '../src/create.mjs';
 import { runVerify } from '../src/verify.mjs';
+import { runBundle } from '../src/bundle.mjs';
 
 const commands = {
   add: { run: runAdd, desc: 'Install a skill from skill-markets' },
   list: { run: runList, desc: 'List installed skills' },
-  ls: { run: runList, desc: 'Alias for list' },
   remove: { run: runRemove, desc: 'Remove an installed skill' },
-  rm: { run: runRemove, desc: 'Alias for remove' },
   update: { run: runUpdate, desc: 'Update installed skills' },
   up: { run: runUpdate, desc: 'Alias for update' },
   init: { run: runInit, desc: 'Create a new SKILL.md template' },
   create: { run: runCreate, desc: 'Create a new skill package (三层控制)' },
   verify: { run: runVerify, desc: 'Verify a skill (执行所有守卫)' },
+  bundle: { run: runBundle, desc: 'Bundle ops for sub-skill packages (install/update/uninstall/list)' },
 };
 
 async function main() {

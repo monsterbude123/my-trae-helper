@@ -21,7 +21,7 @@
 | [browser-use-cloud](browser-use-cloud/SKILL.md) | 纯Skill | Browser Use 浏览器自动化 — 网页抓取、自动操作、结构化提取 | api_check.py, batch_sessions.py, structured_extract.py, webhook_server.py |
 | [openapi-doc-exporter](openapi-doc-exporter/SKILL.md) | 纯Skill | OpenAPI → Markdown 文档导出，框架无关 | render_md.py, split_by_prefix.py, validate_openapi.py |
 | [deep-research](deep-research/SKILL.md) | 纯Skill | 多源深度研究 — firecrawl/exa MCP 综合 + 引用报告（V1.0 NEW 2026-08-13 蒸馏自 ECC .agents/skills/deep-research，按 §11 接入治理） | 无（依赖 MCP: firecrawl 或 exa，至少 1 个） |
-| [trae-professional](trae-professional/SKILL.md) | 纯Skill | TRAE IDE 专业知识库 | 无 |
+| [trae-professional](trae-professional/SKILL.md) | 纯Skill | TRAE IDE / TRAE Work / TRAE APP 专业知识库（2026-08-14 同步 docs.trae.cn 全 22 个分类）| 无 |
 | [product-teardown](product-teardown/AGENTS.md) | 纯Skill | 产品拆解分析 — 6 维度解构 + PRD 生成 | 无（子Skill: analyze, prd） |
 | [vision-audit](vision-audit/SKILL.md) | 纯Skill | UI/UX 视觉验收 — Qwen3-VL 分析截图 | vision-audit.mjs, vision-audit.py |
 | [shuxia-novel-engine](shuxia-novel-engine/SKILL.md) | Agent驱动 | 小说创作引擎 — 世界观构建、剧情编织、一致性审计 | 12 脚本（check, combat, drama, enumerate, evaluate, ripple 等） |
@@ -260,3 +260,8 @@ L0 基座（独立可用，无外部依赖）
 ### 完整协议
 
 > 依赖检查完整流程 + 加载时机械验证 + 降级影响模板 → [vibe-coding-standards/references/skill-dependency-check.md](vibe-coding-standards/references/skill-dependency-check.md)
+
+| [skill-bundle](skill-bundle/SKILL.md) | 纯Skill | 子 skills 装载规范 v1.0 — 父包目录结构、命名空间、CLI bundle 命令、3 道闸(deprecation/version/name-conflict)、7 项守卫(BND-001~007)、L1-L4 Gate 自动接入 | bundle 命令 + install-guards.mjs + 07_bundle_structure.py(3 模式) |
+
+
+| [guard-approver](guard-approver/SKILL.md) | 纯Skill | 保护路径守卫 v1.0 — 4 Tier 保护 + 3 类身份 + 4 步决策流,防止 agent 越权修改 .husky/.github/scripts 等关键路径 | change-guard-approver.mjs + .trae/identity/{skill-roles,protected-paths}.yaml |

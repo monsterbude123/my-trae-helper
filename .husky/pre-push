@@ -42,6 +42,15 @@ if [ -d "skill-markets" ]; then
   done
 fi
 
+# 3.5 Skill Bundle 守卫(all mode,全量 — skill-bundle/SKILL.md §Guard L2)
+if [ -d "skill-markets" ]; then
+  echo "3.5️⃣ Skill Bundle 守卫 (all mode,全量扫全部父包)..."
+  "$PY" skill-markets/skill-acceptance/checks/07_bundle_structure.py --mode all || {
+    echo "❌ Skill Bundle 守卫 BLOCK,见上方 BND-001~006"
+    exit 1
+  }
+fi
+
 # 4. Build（必须存在）
 if ! grep -q '"build"' package.json; then
   echo "❌ Gate 配置错误: package.json 缺少 build 脚本"
@@ -56,5 +65,12 @@ if echo "$PUSH_SKILLS" | grep -q "agent-dev-control-kit"; then
   echo "5️⃣ agent-dev-control-kit catalog-guard (L2) ..."
   python scripts/run-agent-dev-control-kit-tests.py
 fi
+
+# 5. 保护路径守卫(change-guard-approver gate) — 阻断未审批的 Tier 2/3 修改
+echo "5️⃣ 保护路径守卫(gate,要求所有 Tier 2/3 修改已 resolve)..."
+node scripts/change-guard-approver.mjs gate || {
+  echo "❌ push gate BLOCK — 有保护路径变更未审批或被拒绝"
+  exit 1
+}
 
 echo "✅ L2 Push Gate 通过"

@@ -6,6 +6,12 @@ Trae IDE 技能包开发工程 + 跨 Agent 技能市场 CLI。
 > - `skill-markets/` —— 23+ 个技能包
 > - `bin/` + `src/` —— `@my-trae-helper/cli`（已发布到 npm）
 
+## �� 工作流指南
+
+不同身份读者走读指南：
+
+- [docs/GUIDE.md](file:///d:/workspace/my-trae-helper/docs/GUIDE.md) — 四类受众全景工作流（仓库开发者 / 安装使用者 / 调研者 / vibecoding 配置者）
+
 ## ⚡ 快速开始（推荐：用 npx）
 
 ```bash
@@ -162,6 +168,148 @@ requires:
 ```
 
 完整规范见 [AgentSkills.io 开放标准](https://agentskills.io/)。
+
+## ⚙️ 项目自维护机制（防止遗忘清单）
+
+> 仓库本身跑着一组自动化机制，多数用户不可见。下面是**所有自动触发的钩子、守卫、CI 门禁和后台记录器**的索引，方便日后回查"为什么这次 commit 被拦了""日志落到哪了"。
+
+---
+
+### 🪝 A. TRAE 用户级钩子（IDE 会话侧）
+
+#### A1. `trae-prompt-logger` — 用户发言落盘器
+
+| 项 | 值 |
+|---|---|
+| 入口脚本 | [`scripts/trae-prompt-logger.mjs`](scripts/trae-prompt-logger.mjs) |
+| 安装器 | [`scripts/trae-prompt-logger.install.mjs`](scripts/trae-prompt-logger.install.mjs)（由 PowerShell 调用） |
+| 触发事件 | TRAE IDE `UserPromptSubmit` Hook |
+| 输入 | TRAE 通过 stdin 推送的 JSON `{session_id, cwd, prompt, workspace_roots, hook_event_name}` |
+| 落盘路径 | `<cwd>/.trae/prompt-logs/sessions/<session_id>/prompts.ndjson` + `<cwd>/.trae/prompt-logs/index.ndjson` |
+| 安装位置 | `~/.trae-cn/hooks.json` 的 `UserPromptSubmit` 数组 |
+| 标记字符串 | `node "<脚本绝对路径>"`（用 marker 匹配去重/卸载） |
+| 设计原则 | 零依赖 / 写入失败不抛错（exit 0）/ NDJSON 流式追加 / 隐私脱敏（sk- / Bearer / ghp_ / AKID）/ 跨 session 并行无冲突 |
+| 卸载 | `node scripts/trae-prompt-logger.install.mjs --op uninstall --file <hooks.json> --script <logger.mjs> --marker <mark>` |
+
+**查找历史 prompt**：
+
+```bash
+# 单项目
+cat .trae/prompt-logs/index.ndjson | jq -r '. | "\(.ts)  \(.session_id[0:8])  \(.prompt[0:80])"'
+
+# 跨 session 检索关键词
+grep -r "TODO" .trae/prompt-logs/sessions/
+```
+
+---
+
+### 🪝 B. Git 钩子 — 门禁执行器（`.husky/`）
+
+启用：`git config core.hooksPath .husky`
+
+#### B1. `pre-commit` — L1 提交门禁
+
+| 顺序 | 检查 | 失败行为 |
+|---|---|---|
+| 1 | `npm run lint`（`scripts/lint.mjs` 对所有 `.mjs` 跑 `node --check`） | 阻断 |
+| 2 | `npm run test:unit`（5 个 control 测试 + pytest） | 阻断 |
+| 3 | `python scripts/skill-security-guard.py`（仅本次变更的技能目录） | 阻断 |
+| 4 | `python scripts/skill-structure-guard.py`（仅新建的 `SKILL.md`） | 阻断 |
+| 5 | `python scripts/run-agent-dev-control-kit-tests.py`（仅 `agent-dev-control-kit` 变更时） | 阻断 |
+| 6 | `npm run test:manifest`（`scripts/test-manifest.mjs` → `intent-classifier.mjs` → `manifest-assert.py`） | 阻断 |
+
+**Windows 兼容细节**：探测 Python 路径用 `miniconda3 → Python3xx → PATH` 三段 fallback，必须能 `import pytest, yaml`；找不到则阻断（hook 头部有完整探测逻辑）。
+
+#### B2. `pre-push` — L2 推送门禁
+
+| 顺序 | 检查 | 失败行为 |
+|---|---|---|
+| 1 | `npm run test:integration` | 阻断 |
+| 2 | `npm run test:coverage` | 阻断 |
+| 3 | `node src/guards/skill-dependency-guard.mjs`（全量技能） | 阻断 |
+| 4 | `npm run build`（`scripts/validate-config.mjs`） | 阻断 |
+| 5 | `agent-dev-control-kit` catalog-guard（仅变更时） | 阻断 |
+
+#### B3. `post-commit` — 跨会话经验沉淀（C 路径兜底）
+
+| 项 | 值 |
+|---|---|
+| 入口 | `.husky/post-commit` |
+| 触发 | commit 成功后（**不阻断 commit**，失败仅 warn） |
+| 职责 | 把上一 commit 期间的 commit log + agent-hints + log warn 自动落到 `~/.self-improving-agent/.learnings/` |
+| 探测顺序 | `self-improving-agent`（PATH）→ 仓库内 `scripts/self-improving-agent.mjs`（shim）→ 跳过 |
+| WSL 兼容 | 自动把 `/root/...` 重定向到 `/mnt/c/Users/septe/...`，`/mnt/c/...` → `C:\...` |
+| 日志 | `logs/post-commit-self-improve.log`（**所有 stdout/stderr 丢这里**，不污染 commit 输出） |
+
+---
+
+### 🪝 C. GitHub Actions — 远程门禁（`.github/workflows/`）
+
+#### C1. `skill-market-gate.yml` — L3 合并 + L4 发布
+
+- **L3 merge gate**（PR → `main` / `release/*`）：
+  全量 `scan_skills_dir.py` → 变更技能 `skill-structure-guard` → 变更技能 `skill-dependency-guard` → 变更技能 `skill-capability-guard` → `CAPABILITY-MAP.md` 与 `SECURITY-MAP.md` diff 检查 → 构建 CLI
+- **L4 publish gate**（`release: published`）：
+  L3 + 全量结构守卫 + 全量能力守卫 + `npm publish --tag next` + 灰度 5 分钟 → `dist-tag add latest`
+
+#### C2. `agent-dev-control-kit-ci.yml` — 子套件专项
+
+- 触发：PR 改 `skill-markets/agent-dev-control-kit/**` / push main / manual
+- 步骤：`catalog-guard.py` → trap 反例集（pytest `-m trap`） → 全量 pytest → hint 聚合
+- 自验收：trap 反例必须 PASS/FAIL 双态都跑过（对应 `AGENTS.md §2.4`）
+
+---
+
+### 🛡️ D. 守卫脚本（`scripts/*.py` / `src/guards/*.mjs`）
+
+| 守卫 | 类型 | 触发场景 |
+|---|---|---|
+| `scripts/skill-security-guard.py` | 安全 | pre-commit / pre-push |
+| `scripts/skill-structure-guard.py` | 结构 | pre-commit |
+| `scripts/skill-capability-guard.py` | 能力去重 | pre-push / L3 / L4 |
+| `scripts/manifest-assert.py` | Manifest 对账 | pre-commit（`test:manifest`） |
+| `src/guards/skill-dependency-guard.mjs` | 依赖 | pre-push / L3 / L4 |
+| `src/execution/skill-change-control.mjs` | 变更控制（CP1~CP6） | `create` / `update` 子命令 |
+| `src/execution/skill-install-control.mjs` | 安装控制（CP1~CP6） | `add` / `remove` 子命令 |
+
+---
+
+### 📊 E. 仓库内日志 / 临时产物
+
+> 这些是 **运行时落盘**，不进 git（按需清理）。
+
+| 路径 | 产生者 | 用途 |
+|---|---|---|
+| `logs/post-commit-self-improve.log` | `.husky/post-commit` | post-commit 经验沉淀日志 |
+| `logs/pre-commit.log` / `logs/pre-push.log` | gate hooks | 门禁执行明细 |
+| `logs/agent-hints.jsonl` | `agent-signal-detect.mjs` | 会话级 hint（C 路径数据源） |
+| `.trae/prompt-logs/**/*.ndjson` | `trae-prompt-logger.mjs` | 用户发言存档（每个 IDE 项目） |
+| `auto_reports/` | `scan_skills_dir.py` | 安全扫描报告（CI artifact） |
+| `.publish/` | `scripts/prepare-publish.mjs` | 发布预处理（npm pack 前） |
+
+---
+
+### 🤖 F. self-improving-agent 自动化路径（`.trae/rules/learning.md`）
+
+| 路径 | 方式 | 触发点 | 工具 |
+|---|---|---|---|
+| A 启动注入 | 会话开始强制 `Skill(self-improving-agent)` | 每个会话第一步 | `project-rule-skill` 网关 |
+| B 显式 log | 主 agent 调用 | 关键决策后 | `scripts/self-improving-agent.mjs log --type ... --summary ...` |
+| C commit 兜底 | `.husky/post-commit` 触发 `reflect` | 每次 commit | `.husky/post-commit` |
+| 三方组合 | A + C 永远在跑，B 关键时用 | — | — |
+
+---
+
+### 🚫 G. **不**自动触发的清单（手动）
+
+| 操作 | 何时手动 |
+|---|---|
+| `npm publish` | 仅 L4 CI 触发；本地勿跑 |
+| `git push --force` | 必须显式申请（默认拒绝） |
+| 直接改 `~/.trae-cn/hooks.json` | 用 `trae-prompt-logger.install.mjs` 维护 |
+| 在仓库外写脚本 | AGENTS.md §1.6 禁止；正确路径 `scripts/` |
+
+---
 
 ## 📜 许可
 

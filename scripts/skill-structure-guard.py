@@ -105,6 +105,14 @@ def check_skill_md(skill_md: Path, errors: List[str], warnings: List[str], info:
                 if not re.search(rf'^{field}:', yaml_content, re.MULTILINE):
                     errors.append(f'SKILL.md YAML frontmatter 缺少必需字段: {field}')
 
+            # version 字段: AGENTS.md §1.1 推荐(非强阻断)
+            # 缺失 → WARNING(2026-08-14 self-audit #2 + upgrade-guidance §1 建议)
+            if not re.search(r'^version:', yaml_content, re.MULTILINE):
+                warnings.append(
+                    'SKILL.md 缺 version 字段(AGENTS.md §1.1 推荐) — '
+                    '建议添加 version: x.y.z 以追踪演进 + 支持 bundle 守 VER-xxx'
+                )
+
             # name 字段与目录名一致 → 降级为 info（archived 兼容壳就是合理反例）
             # 正则容忍 `name: foo` / `name: "foo"` / `name: 'foo'` 三种 YAML 写法
             name_pattern = r'^name:\s*["\']?' + re.escape(skill_md.parent.name) + r'["\']?\s*$'

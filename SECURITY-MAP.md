@@ -33,7 +33,7 @@
 | browser-use-cloud | 1 md + 12 ref + 4 py | 1 | 3 | 0 | **3.9** | 🟡 | 1 个 HIGH 为 local-usage.md 中的示例 API Key（文档引用）；3 MEDIUM 为 HTTP 引用 |
 | openapi-doc-exporter | 1 md + 3 ref + 3 py | 0 | 1 | 0 | **4.8** | 🟢 | 1 个 MEDIUM 为 export-guide.md 中的 HTTP 示例 |
 | **deep-research** (V1.0 NEW 2026-08-13) | 1 md + 3 ref | 0 | 0 | 0 | **5.0** | 🟢 | **实跑扫描（2026-08-13 15:25，最新）**：trae-security-review scan_skills_dir.py V2.1 → **HIGH 0 + MEDIUM 0 + LOW 0 → PASS**。**质疑性验收治理**：源材料 ECC .agents/skills/deep-research（含 3 份同源副本在 docs/references/）未注册到 skill-markets/，按 AGENTS.md §5 落地。**精简骨架**：SKILL.md 59 行 / 6 铁律（≤150 + ≤10 双约束），详细内容按需 references/{workflow, report-template, quality-rules}.md。**网络面**：依赖外部 firecrawl/exa MCP（用户配置），SKILL.md 本身无 HTTP/Shell 调用面（无脚本）。**与现有能力差异化**：browser-use-cloud 通用 web 自动化 / doc-map-manager 项目文档索引 / trae-remote-official:lark 通讯办公 — 均不重复"多源研究+引用报告"垂直场景 |
-| trae-professional | 1 md + 5 ref | 1 | 0 | 0 | **4.5** | 🟢 | 1 个 HIGH 为 sandbox.md 中的 rm -rf 说明（文档引用，非可执行） |
+| trae-professional | 1 md + 25 ref | 1 | 0 | 0 | **4.5** | 🟢 | 1 个 HIGH 为 sandbox.md 中的 rm -rf 说明（文档引用，非可执行）；2026-08-14 扩展至 25 个 references 覆盖 docs.trae.cn 全部分类 |
 | product-teardown | 3 md + 2 agent | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档，无脚本 |
 | vision-audit | 1 md + 2 scripts | 0 | 1 | 0 | **4.8** | 🟢 | 1 个 MEDIUM 为 vision-audit.py 中的 HTTP 引用 |
 | shuxia-novel-engine | 1 md + 5 agent + 12 py + 9 wf | 0 | 1 | 0 | **4.8** | 🟢 | 1 个 MEDIUM 为 export_subculture_package.py 中的 subprocess 调用 |
@@ -165,3 +165,10 @@ code auto_reports\{package_name}_{timestamp}.md
 
 *生成日期: 2026-08-13 | 扫描引擎: trae-security-review/scan_skills_dir.py v2.1*
 *本次更新: agent-dev-control-kit 首次登记（独立群岛表新增一行）。**实跑扫描（2026-08-13 23:58）**：HIGH 0 + MEDIUM 3 + LOW 4 → **PASS**（决策矩阵 HIGH 0 + MEDIUM ≤ 3）。3 MEDIUM = release-process-control/SKILL.md ×1 + release-process-template.md ×1 HTTP_INSECURE（文档 HTTP 示例）+ scaffolds/python/files/guards/test-coverage-guard.py ×1 SHELL_EXEC（子进程 pytest 调用，参数化命令）；4 LOW = init-control-kit.py ×3 STACK_LEAK（DEBUG 栈追踪示例）+ asset-management-control/SKILL.md ×1 WEAK_CRYPTO（SHA-256 升级建议文档引用）。本子代理 V0.5 升级：改 3 文件（presets/README.md + registry/gates.yaml + pre-commit-template.sh opt-in 化）+ 新增 6 文件（changed-file-impact-guard 模板/脚本 ×3 + install-husky.py/.test.py ×2 + guard 同步模板 ×1）。下一轮升级前 backlog: 无（已 PASS）*
+
+| skill-bundle | 1 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯规范文档,无脚本,无网络面；关联 src/bundle.mjs + install-guards.mjs（命令均经三道闸，命令路径在仓库内）；BND-001~007 守卫接入 L1-L4 Gate 7 处（pre-commit diff / pre-push all / CI L3+L4 all / 显式 npm run test:bundle） |
+
+
+| guard-approver | 1 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯规范文档;关联 scripts/change-guard-approver.mjs(Node,0 网络面);Tier 4 路径保护清单防止 agent 改守卫自绕过 |
+
+| daily-vibe-coding | 2 md (SKILL + installation-prompt) | 0 | 0 | 0 | **5.0** | 🟢 | 纯规范+prompt 文档,无脚本,无网络面;agent 部署在 TRAE Work 云端定时任务 |

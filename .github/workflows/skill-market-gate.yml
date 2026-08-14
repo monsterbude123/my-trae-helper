@@ -69,6 +69,13 @@ jobs:
             }
           fi
 
+          # 5.5 Skill Bundle 守卫(L3 PR merge — 全量 + diff 跨包冲突,确保 PR 不引入新冲突)
+          echo "5.5️⃣ Skill Bundle 守卫 (L3 all mode)..."
+          python skill-markets/skill-acceptance/checks/07_bundle_structure.py --mode all || {
+            echo "❌ Skill Bundle 守卫 L3 BLOCK"
+            exit 1
+          }
+
       - name: Check CAPABILITY-MAP.md sync
         run: |
           git diff --exit-code skill-markets/CAPABILITY-MAP.md || {
@@ -138,6 +145,13 @@ jobs:
               }
             fi
           done
+
+          # Skill Bundle 守卫 L4 all mode (灰度前最后一次全量 BLOCK 检查)
+          echo "🛡 Skill Bundle 守卫 (L4 all mode,publish 前全量校验)..."
+          python skill-markets/skill-acceptance/checks/07_bundle_structure.py --mode all || {
+            echo "❌ Skill Bundle L4 BLOCK,禁止发布"
+            exit 1
+          }
 
           # catalog-guard（agent-dev-control-kit L4 必跑）
           if [ -d "skill-markets/agent-dev-control-kit" ]; then

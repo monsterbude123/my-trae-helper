@@ -26,6 +26,9 @@
     "test:coverage": "node tests/unit/test_skill_change_control.mjs && node tests/unit/test_skill_install_control.mjs && node tests/unit/test_dependency_guard.mjs && python tests/unit/test_structure_guard.py && python tests/unit/test_security_guard.py",
     "test:agent-dev-control-kit": "python scripts/run-agent-dev-control-kit-tests.py",
     "test:manifest": "node scripts/test-manifest.mjs",
+    "test:bundle": "python skill-markets/skill-acceptance/checks/07_bundle_structure.py --mode all",
+    "test:bundle:diff": "node -e \"process.exit(0)\"  # placeholder; 真实调用见 pre-commit Step 4.5",
+    "test:approver:status": "node scripts/change-guard-approver.mjs status",
     "lint": "node scripts/lint.mjs && python -m pytest tests/unit/test_agent_dev_control_kit_wrapper.py -q",
     "build": "node scripts/validate-config.mjs"
   },
