@@ -407,14 +407,6 @@ skills:
       - { id: skill-acceptance-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [skill-acceptance-structure] }
     maintainer: guard-smith
 
-  - skill: security-review
-    status: active
-    guards:
-      - { id: security-review-structure, category: structure, script: scripts/security-review-guard.py, triggers: [pre-commit] }
-    gates:
-      - { id: security-review-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [security-review-structure] }
-    maintainer: guard-smith
-
   # ── 新增：GuardSmith 自注册（2026-08-14 一次性 git 拦截自举） ────────────
   - skill: guard-gate-smith
     status: active
