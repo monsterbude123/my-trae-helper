@@ -1,0 +1,159 @@
+# trap-instructions.yaml — V11 反例 → 指令映射（flow 层机器可读源）
+#
+# 角色定位:
+#   - 仓库内不建 .learnings/ 目录（由全局 self-improving-agent 统一管理）— 见 .trae/rules/learning.md §1
+#   - 本文件是仓库内"反例 → 修复指令"的机器可读源 — pytest trap 测试从这里校验字段
+#   - 字段命名刻意避开全局 self-improving-agent schema（Logged / Priority / Status /
+#     Reproducible / Related Files / Source），避免冲突 — 见 learning.md §3
+#
+# V11 语境: 本文件只管 V11 特有反例（门禁硬化 / flow 层可解析），
+# 跨会话通用经验走全局 self-improving-agent，不复制进本文件。
+
+version: 1.0.0
+
+traps:
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-T1
+    title: Gate 软通过（只查脚本存在不执行）
+    detect_signal: |
+      gate 脚本只有 `if [ -f xxx.py ]` 判断，命中后仅打印不真跑 /
+      `run-all-guards.py --validate-only` 被误当"真跑"使用
+    what_is_wrong: |
+      V11 门禁硬化的核心是"真跑真验"。只检查脚本存在与否、不执行检查逻辑，
+      则 agent 可提供空壳脚本骗过 Gate，exit 0 假通过。
+    fix_template_before: |
+      # ❌ gate 只查存在
+      if [ -f scripts/spec-validate-hook.py ]; then
+        echo "spec-validate-hook.py 存在，PASS"
+      fi
+    fix_template_after: |
+      # ✅ 真跑检查逻辑，失败即 exit 非 0
+      python scripts/spec-validate-hook.py || { echo "spec gate FAIL"; exit 1; }
+    next_skill: trae-ponytail
+    next_skill_action: "最小修改 gate 脚本，把存在性判断替换为真实执行"
+    reclaim_steps:
+      - 找到触发 Gate（pre-commit / pre-push / CI job）
+      - 看是否存在 `if [ -f … ]` 后仅 echo 不执行的模式
+      - 改为真实调用脚本 + 失败 exit 非 0
+      - 自验收：造空壳脚本 → Gate 必须 BLOCK
+    see_also: ["registry/README.md 设计原则 #4 脚本统一消费"]
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-T2
+    title: echo-skip 占位符脚本
+    detect_signal: |
+      package.json scripts 含 `echo "skipping lint"` / `echo skip` 等
+      （run-gate-level.py is_echo_skip() 命中）
+    what_is_wrong: |
+      用 echo 占位假装脚本存在，npm run 立即成功，Gate 假通过。
+    fix_template_before: |
+      # ❌ package.json
+      "scripts": { "lint": "echo \"skipping lint\"" }
+    fix_template_after: |
+      # ✅ 真实命令
+      "scripts": { "lint": "eslint src/" }
+    next_skill: trae-ponytail
+    next_skill_action: "识别占位符并替换为真实工具命令"
+    reclaim_steps:
+      - 跑 run-gate-level.py，看 reason=echo-skip-detected
+      - 替换 scripts 为真实 lint/typecheck/test 命令
+      - 重跑 Gate 必须真 PASS
+    see_also: ["scaffolds/nodejs/files/scripts/run-gate-level.py is_echo_skip"]
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-T3
+    title: --no-verify 绕过本地 husky（L1/L2 假通过）
+    detect_signal: |
+      git log 出现由 --no-verify 提交的 commit / .huspy/pre-commit 失败但 commit 仍成功
+    what_is_wrong: |
+      L1/L2 由本地 husky 强制，--no-verify 整体绕过，等于自废门禁。
+      CI 层（L3/L4 v11-gate.yml）是兜底，但本地若长跑 --no-verify 会累积脏状态。
+    fix_template_before: |
+      # ❌
+      git commit --no-verify -m "feat: ..."
+    fix_template_after: |
+      # ✅ 真跑真验
+      bash .husky/pre-commit 2>&1 | tail -20   # 看错
+      git commit -m "feat: ..."                 # 真跑 hook
+    next_skill: agent-dev-control-kit
+    next_skill_action: "走 Gate 自验收协议"
+    reclaim_steps:
+      - 禁止任何情况用 --no-verify 提交
+      - hook fail → 修 root cause → 重跑 → 真 PASS
+      - 已用 --no-verify → git reset --soft HEAD~1 撤回 + 修后再提
+    see_also: ["AGENTS.md §2.4 Gate 自验收强制"]
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-T4
+    title: stage 无门禁（13 stage 每 stage 必登记）
+    detect_signal: |
+      gates.yaml 中 gate 数量 ≠ 13 / 某 stage 在 gates.yaml 无对应条目
+      （run-all-guards.py count_note 命中）
+    what_is_wrong: |
+      V11 铁律"每 stage 必有一门禁"。缺门禁 stage 无法被程序化断言，
+      是"13 个 stage 只有 2 个硬化"问题的根因。
+    fix_template_before: |
+      # ❌ gates.yaml 缺某 stage 条目
+      gates: [ stage-intake, stage-plan, ... ]  # 少 1 个
+    fix_template_after: |
+      # ✅ 13 stage 全登记
+      gates:
+        - { id: stage-health, stage: "7/health", script: stage-gate.py, ... }
+    next_skill: trae-ponytail
+    next_skill_action: "补登记的 stage 门禁"
+    reclaim_steps:
+      - 跑 run-all-guards.py 看 count_note
+      - 定位缺哪个 stage
+      - 在 gates.yaml 补登记该 stage 门禁
+      - 重跑必须 13/13 PASS
+    see_also: ["registry/gates.yaml", "registry/README.md 设计原则 #3"]
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-T5
+    title: flow 层 yaml 不可解析（可解析性铁律）
+    detect_signal: |
+      registry/*.yaml 无法被 yaml.safe_load / json.load 解析 /
+      结构校验缺主键（run-all-guards.py table FAIL）
+    what_is_wrong: |
+      flow 层设计为纯程序化解析，人类/agent 不硬读。yaml 不可解析 →
+      脚本无法消费 → 门禁无法断言，退回"agent 硬读 md"老路。
+    fix_template_before: |
+      # ❌ registry/stacks.yaml 顶层不是 dict 或缺 stacks 主键
+      stacks: "not-a-list"
+    fix_template_after: |
+      # ✅ 合法结构
+      version: 1.0.0
+      stacks:
+        - id: nodejs
+          name: Node.js
+    next_skill: trae-ponytail
+    next_skill_action: "修复 yaml 结构，使其可被 yaml.safe_load 解析 + schema 校验"
+    reclaim_steps:
+      - 跑 run-all-guards.py 看 table FAIL
+      - python -c "import yaml; yaml.safe_load(open('registry/stacks.yaml'))"
+      - 修复结构 + 补主键
+      - 重跑必须 5 表全 PASS
+    see_also: ["registry/README.md 设计原则 #4", "scripts/run-all-guards.py TABLES"]
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-T6
+    title: gate-config.json 与 registry 档位映射漂移
+    detect_signal: |
+      gate-config.json 的 stage 字段与 gates.yaml 的 stage 命名不一致 /
+      scaffold.yaml gate_mapping 与 gate-config.json levels 不一致
+    what_is_wrong: |
+      L1-L4 档位映射（gate-config.json）和 registry（gates.yaml）是 flow 层双源，
+      一旦漂移，CI 强制的档位与 stage 门禁脱节，门禁形同虚设。
+    fix_template_before: |
+      # ❌ gate-config.json L3 stage 写 "2-contract,4,4.5"
+      #    gates.yaml 实际 stage 命名 "2/contract,4/review,4.5/rot-scan"
+    fix_template_after: |
+      # ✅ 统一用 gates.yaml 的 stage id 命名
+      "stage": "2/contract,4/review,4.5/rot-scan"
+    next_skill: trae-ponytail
+    next_skill_action: "统一 stage 命名，消除双源漂移"
+    reclaim_steps:
+      - 对比 gate-config.json levels[*].stage 与 gates.yaml gates[*].stage
+      - 统一命名格式
+      - 跑 validate-gate-config.py 校验
+    see_also: ["scaffolds/nodejs/files/gates/gate-config.json", "registry/gates.yaml"]

@@ -1,0 +1,29 @@
+#!/bin/bash
+# .husky/fullstack4TraeV11-pre-push — fullstack4TraeV11 L2 Push Gate (2026-08-14 V11.5 升级)
+#
+# 触发时机: git push（同时被 .husky/pre-push 在 step 末尾 source 加载）
+# 门禁项:
+#   1. flow aspect       → 校验 skill 五表 schema 合法 + 13/13 PASS
+#   2. gate-config aspect → 校验 nodejs/python gate-config.json L1-L4 四档 schema
+#
+# 跨平台 Python 探测:复用 scripts/detect-python.sh,见 AGENTS.md §4.1.3
+
+# shellcheck disable=SC1091
+. "$(dirname "$0")/../scripts/detect-python.sh" || exit 1
+PY="$MY_TRAE_HELPER_PY"
+
+# PowerShell 调 bash 子进程时,stdout 句柄可能被父进程 pipe 截断
+exec 1>&2
+set -e
+
+echo "🔍 执行 fullstack4TraeV11 L2 Push Gate (PY=$PY)..."
+
+# 1. flow aspect
+echo "1️⃣ flow aspect（registry 五表 + 13 stage gate 校验）..."
+"$PY" scripts/fullstack4TraeV11-flow-guard.py fullstack4TraeV11
+
+# 2. gate-config aspect
+echo "2️⃣ gate-config aspect（nodejs/python gate-config.json schema 校验）..."
+"$PY" scripts/fullstack4TraeV11-gate-config-guard.py fullstack4TraeV11
+
+echo "✅ fullstack4TraeV11 L2 Push Gate 通过"

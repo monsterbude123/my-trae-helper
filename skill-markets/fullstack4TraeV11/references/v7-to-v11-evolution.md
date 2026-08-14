@@ -252,6 +252,35 @@ maintenance_trigger:
 - 📉 V11 3 个 state-card 字段从 int 改 string（避免向后兼容债）
 - 📉 移除 4 个 V10 `auto-test` 双 agent 比较脚本（实测误判率高）
 
+### V11.4.1 — GitNexus 双端 Hook 硬化 + 捆绑机制重构（2026-08-14）
+
+> **触发背景**：V11.4 三层架构落地后，发现 hooks "形同虚设"——依赖 TRAE IDE 提示性 hook + agent 自觉，无强制宿主。
+
+- 📈 **唯一强制宿主 = Git 钩子层**（husky pre-commit/pre-push + CI `--no-verify` 拦截），TRAE event hooks 降级为辅助提示
+- 📈 **GitNexus 双端触发时机重构**：SessionStart 会话开始必跑 + Stop 会话结束若工作区脏（agent 改过代码）才跑，非编辑时实时触发
+- 📈 **脏检测硬化**：`detect_workspace_dirty()` 用 `git status --porcelain`，**排除 `.gitnexus/` 自身**（避免工具产物死循环触发）
+- 📈 **运行痕迹可验证**：两端写 `last-run-check.json` / `last-run.json`，`hooks-fidelity.py` 新增 `check_gitnexus_freshness`（24h 内新鲜，过期/缺失计入 FAIL）
+- 📈 **统一日志格式**：stdout 统一 `[gitnexus] event=... reason=... action=...`，可直接 grep
+- 📈 **init-from-zero.py 补装**：`create_hooks()` 从 3 个补到 5 个，新项目自动装 gitnexus 双端
+- 📈 **launch-guard.sh 自校验兜底**：运行任何 stage 前检测 `.husky/` 就绪，未就绪即阻断
+- 📈 **状态卡路径统一**：`docs/specs/changes/{id}/.state-card.md` 优先，顶层兜底
+- 📈 **脚手架 scaffold.yaml**：nodejs + python 双栈，含 Gate 映射（L1→Stage 1 / L2→Stage 3.5）+ 硬化逻辑
+- 📉 **hooks 源路径修复**：`install-hooks.py` 从"写死部署态"改为"仓库优先 + 部署兜底"双探测
+- 📉 **hooks-fidelity 崩溃修复**：补上缺失的 check_gate_layer / check_guard_layer / check_hardening 函数（原 NameError 崩溃，自校验完全失效）
+
+#### ⚠️ V11.4.1 已知未对齐（对齐诊断，见 §F）
+
+对齐 agent-dev-control-kit 的 registry 模式后，发现 V11 仍有本质缺口：
+
+| 缺口 | control-kit 做法 | V11 现状 | 影响 |
+|------|----------------|---------|------|
+| **门禁无声明式登记** | `registry/gates.yaml` + `guards.yaml` 数据化 | 门禁散落在 SKILL.md 表格 + scripts/README.md 表格 | 脚本无法对"门禁该存在/绑定哪个 Git 层"做程序化断言 |
+| **只有 L1/L2 绑定 Git 层** | L1-L4 全绑定 | 仅 pre-commit(pre-1 Spec) + pre-push(pre-3.5) | L3/L4 无强制宿主 |
+| **Guard 无 config_schema** | `guards.yaml` 带 JSON Schema | 守卫脚本无配置校验 | Agent 可改阈值逃避（已有 script-threshold-audit 但非 schema 级） |
+| **反例无结构化 trap** | `trap-instructions.yaml` | 反例是 md 文本 | pytest 无法程序化断言反例字段 |
+
+> 🎯 **V11.4 核心结论**：**层级是先决条件，registry 是硬化的前提**。V11 已建三层骨架（§0），但缺"声明式登记层"，导致门禁无法被脚本统一校验 = 仍是"软"的。V12 方向：补 registry（gates/guards/stacks/traps 四表）+ 让脚本统一消费。
+
 ### 未来版本（V12+ 占位）
 
 > 任何 V12+ 升级需在本节追加 delta 段，并走 §E 维护协议。
@@ -298,6 +327,86 @@ maintenance_trigger:
 3. **升级后**：检查是否有"丢弃但应恢复"项（§C），按修复决策执行。
 4. **情绪化词语检查**：所有 references/SKILL.md 新增文本必须用「理智、克制、精确」字词。**禁用**：「革命性」「革命」「无敌」「最强」「甩」「碾压」「N 倍」「惊人」等。
 5. **质疑性校验**：任何 P0 / P1 修复或升级方案必走 [references/skeptical-validation-protocol.md](skeptical-validation-protocol.md) 4 维度。
+
+---
+
+## §F 逐 Stage 对齐诊断（V11.4.1，对齐 agent-dev-control-kit registry 模式）
+
+> 本节对照 control-kit 的"声明式登记 + Git 层绑定"核查 V11 每个 stage 的门禁硬化状态。**"已对齐" = 有脚本 + 有 Git/Shell 强制宿主 + 可程序化校验**；"部分对齐" = 有脚本但无强制宿主或无可校验性。
+
+### §F.1 逐 Stage 门禁硬化矩阵
+
+| Stage | 门禁内容（SKILL.md §0.2.3） | 关联脚本 | 强制宿主 | 可程序化校验 | 对齐状态 |
+|:---:|------|------|:---:|:---:|:---:|
+| -1 Intake | 状态卡初始化 + 路由决策 | setup-feature.py | stage-gate（shell） | 🟡 stage-gate 校验 | ⚠️ 部分 |
+| 0 Plan | 3 路探索 + GitNexus impact | change-status.py | stage-gate | 🟡 | ⚠️ 部分 |
+| 0.5 Test Plan | 验收→映射 | — | stage-gate | 🟡 | ⚠️ 部分 |
+| 1 Spec | ENH ACC + clarify + spec-validate | spec-validate-hook.py | **husky pre-commit** | 🟢 | ✅ 已对齐 |
+| 1.5 Prototype | 双源兼容 | prototype-backfill-check.py | stage-gate | 🟢 | ⚠️ 部分（有脚本无 Git 层）|
+| 2 Contract | contract-gate 四件套 | check_integration_contract.py | stage-gate | 🟢 | ⚠️ 部分 |
+| 3 Implement | TDD + DRIFT + code-hygiene | code-hygiene.py / auto-test | stage-gate | 🟢 | ⚠️ 部分 |
+| 3.5 Real Verify | 5 项必跑 + 可见产物 | visual-content-check.py | **husky pre-push** | 🟢 | ✅ 已对齐 |
+| 4 Review | 4 维 + 证据链 3 层 | acceptance-audit.py | stage-gate | 🟢 | ⚠️ 部分 |
+| 4.5 Rot Scan | proactive-scan 8 项 | proactive-scan.py | stage-gate | 🟢 | ⚠️ 部分 |
+| 5 Accept | 归档 + 知识沉淀 | spec-purge.py / pre-accept.sh | pre-accept（shell） | 🟢 | ⚠️ 部分 |
+| 6 Bug Fix | e2e 先行 + 6 层排查 | — | stage-gate | 🟡 | ⚠️ 部分 |
+| 7 Health | 4 维 + 优先级 | — | 异步（无 gate） | 🔴 | ❌ 未约束 |
+
+### §F.2 对齐结论
+
+**已对齐（Git 层强制）**：Stage 1（L1 pre-commit）、Stage 3.5（L2 pre-push）——仅 2 个。
+
+**部分对齐（有脚本但无强制宿主）**：9 个 stage 依赖 `stage-gate.py`（shell 手动触发）或各 stage 脚本，**无 Git 钩子绑定**，Agent 可跳过。
+
+**未约束**：Stage 7 Project Health 是异步自检，无任何 gate 绑定（设计有意，但无兜底）。
+
+### §F.3 V12 对齐行动项（补 registry 后）
+
+> ✅ **V11.5 已落地 §F.3 的 1/2/4/5 四项**（2026-08-14）。剩 3 项待 V12。
+
+```
+✅ 1. 建 registry/gates.yaml  — 声明式登记 13 stage 门禁（id/对应脚本/触发宿主）— V11.5 DONE
+✅ 2. 建 registry/guards.yaml — 登记守卫脚本 + config_schema（阈值 JSON Schema）— V11.5 DONE
+⬜ 3. 建 registry/stacks.yaml — 复用已有 scaffolds/*/scaffold.yaml 索引 — 待 V12
+⬜ 4. 建 registry/traps.yaml  — 反例结构化（what/detect_signal），供 pytest 断言 — 待 V12（V11.5 用 repair-flow.yaml 替代）
+✅ 5. run-all-guards.py 统一消费四表，替代散落的手动校验 — V11.5 DONE
+```
+
+### §F.5 V11.5 Flow 层 Registry 落地记录（2026-08-14）
+
+> 用户理念落地：**fact 层（人类+agent 读 .md）与 flow 层（纯程序化解析 .yaml）分离**。状态卡本质是状态机，驾驶舱角色（主上下文）唯一可改状态字段。每 stage 必登记一门禁。
+
+| 产物 | 文件 | 状态 |
+|------|------|:---:|
+| 门禁表 | `registry/gates.yaml`（13 stage 全登记） | ✅ |
+| 守卫表 | `registry/guards.yaml`（11 守卫） | ✅ |
+| 状态机表 | `registry/state-machine.yaml`（13 state + 13 transitions + pilot） | ✅ |
+| 修复流程表 | `registry/repair-flow.yaml`（1 trigger + 4 steps + 4 gates） | ✅ |
+| schema 契约 | `registry/README.md` | ✅ |
+| 状态机解析 | `scripts/_lib_state_card.py` 新增 4 函数 | ✅ |
+| 修复流程消费 | `scripts/repair-flow-gate.py` | ✅ |
+| 统一消费 | `scripts/run-all-guards.py`（读四表 → PASS/FAIL 矩阵） | ✅ |
+| fact 层协议 | `references/state-card-protocol.md` 九章"状态机 + 驾驶舱" | ✅ |
+
+**V11.5 追加 — 四档 Git/CI 门禁落地（对齐 control-kit 的 gate-config 模式）**：
+
+| 交付物 | 位置 | 状态 |
+|------|------|:---:|
+| 四档门禁声明 | `scaffolds/nodejs/files/gates/gate-config.json`（L1-L4 / checks / gates / timeout / blocking） | ✅ |
+| 档位执行器 | `scaffolds/nodejs/files/scripts/run-gate-level.py`（读 gate-config.json，`--level` 执行，跨平台） | ✅ |
+| L3 PR merge | `templates/ci/v11-gate.yml` → `v11-gate-l3` job（`pull_request`） | ✅ |
+| L4 Release | `templates/ci/v11-gate.yml` → `v11-gate-l4` job（`release` / `tag v*`） | ✅ |
+| 脚手架映射 | `scaffolds/nodejs/scaffold.yaml` gate_mapping 补 L3（2/4/4.5）/ L4（5） | ✅ |
+
+**gate-config.json 档位映射**：L1→1/spec（husky-pre-commit）、L2→3.5/real-verify（husky-pre-push）、L3→2/contract·4/review·4.5/rot-scan（CI）、L4→5/accept（CI）。L3/L4 的 `gates` 字段引用 registry 门禁 id，脚本存在则跑、缺失则 SKIP（WARN 不阻断）。
+
+**对齐效果**：13 个 stage 门禁从"只有 2 个绑定 Git 层 + 9 个不可断言"升级为"13 个全部声明式登记 + 可程序化断言"。`run-all-guards.py --validate-only` → 13/13 PASS，exit 0。L1/L2 由本地 husky 强制，L3/L4 由 GitHub Actions 强制，`--no-verify` 无法绕过 CI 层。
+
+**仍待办（V12）**：stacks.yaml + traps.yaml（L3/L4 执行强制已落地）。
+
+### §F.4 一句话
+
+**V11.5 已把"层级 + 登记 + 执行强制"对齐改造**：三层骨架（§0）+ flow 层 registry（四表）落地，13/13 stage 门禁可程序化断言；L1/L2 由本地 husky 强制、L3/L4 由 GitHub Actions（`run-gate-level.py` + `gate-config.json`）强制，`--no-verify` 无法绕过 CI 层。V12 剩余动作 = 补 stacks.yaml / traps.yaml。
 
 ---
 

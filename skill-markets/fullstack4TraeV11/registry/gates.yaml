@@ -1,0 +1,119 @@
+version: 1.0.0
+description: V11 门禁注册表（13 个 stage 每个必登记一门禁）
+gates:
+  - id: stage-intake
+    stage: -1/intake
+    name: 需求摄取门禁
+    script: setup-feature.py
+    host: stage-gate
+    guards: [state-card-valid]
+    required_artifacts: []
+    fail_action: BLOCK
+
+  - id: stage-plan
+    stage: 0/plan
+    name: 规划门禁
+    script: change-status.py
+    host: stage-gate
+    guards: [state-card-valid]
+    required_artifacts: ["docs/plans/plan.md"]
+    fail_action: BLOCK
+
+  - id: stage-test-plan
+    stage: 0.5/test-plan
+    name: 测试计划门禁
+    script: stage-gate.py
+    host: stage-gate
+    guards: [state-card-valid]
+    required_artifacts: ["docs/test-plans/test-plan.md"]
+    fail_action: BLOCK
+
+  - id: stage-spec
+    stage: 1/spec
+    name: Spec 门禁
+    script: spec-validate-hook.py
+    host: husky-pre-commit
+    guards: [spec-frontmatter]
+    required_artifacts: ["docs/specs/changes/{change_id}/spec.md"]
+    fail_action: BLOCK
+
+  - id: stage-prototype
+    stage: 1.5/prototype
+    name: 原型门禁
+    script: prototype-backfill-check.py
+    host: stage-gate
+    guards: [state-card-valid]
+    required_artifacts: ["docs/specs/changes/{change_id}/prototypes/design.html"]
+    fail_action: BLOCK
+
+  - id: stage-contract
+    stage: 2/contract
+    name: 契约门禁
+    script: check_integration_contract.py
+    host: stage-gate
+    guards: [contract-integrity]
+    required_artifacts: ["docs/contracts/api-contracts.md"]
+    fail_action: BLOCK
+
+  - id: stage-implement
+    stage: 3/implement
+    name: 实施门禁
+    script: code-hygiene.py
+    host: stage-gate
+    guards: [code-hygiene]
+    required_artifacts: []
+    fail_action: BLOCK
+
+  - id: stage-real-verify
+    stage: 3.5/real-verify
+    name: 真实验证门禁
+    script: visual-content-check.py
+    host: husky-pre-push
+    guards: [visual-content]
+    required_artifacts: ["docs/specs/changes/{change_id}/prototypes/design.html"]
+    fail_action: BLOCK
+
+  - id: stage-review
+    stage: 4/review
+    name: 评审门禁
+    script: acceptance-audit.py
+    host: manual
+    guards: [acceptance-audit]
+    required_artifacts: ["docs/reviews/review-report.md"]
+    fail_action: BLOCK
+
+  - id: stage-rot-scan
+    stage: 4.5/rot-scan
+    name: 腐化扫描门禁
+    script: proactive-scan.py
+    host: stage-gate
+    guards: [rot-scan]
+    required_artifacts: []
+    fail_action: BLOCK
+
+  - id: stage-accept
+    stage: 5/accept
+    name: 验收门禁
+    script: pre-accept.sh
+    host: manual
+    guards: [spec-purge]
+    required_artifacts: ["docs/archives/{change_id}/"]
+    fail_action: BLOCK
+
+  - id: stage-bug-fix
+    stage: 6/bug-fix
+    name: Bug 修复门禁
+    script: reason-classifier.py
+    host: manual
+    guards: [reason-classification]
+    required_artifacts: ["docs/bugs/{bug_id}.yaml"]
+    fail_action: BLOCK
+
+  - id: stage-health
+    stage: 7/health
+    name: 项目健康门禁
+    script: stage-gate.py
+    host: stage-gate
+    guards: [state-card-valid]
+    required_artifacts: []
+    fail_action: WARN

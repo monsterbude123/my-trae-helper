@@ -149,7 +149,7 @@ def create_config(project_root: pathlib.Path, project_name: str, project_type: s
 
 
 def create_hooks(project_root: pathlib.Path) -> bool:
-    """创建 V11 默认 3 个 hook"""
+    """创建 V11 默认 5 个 hook（3 shell + 2 gitnexus）"""
     hooks_dir = project_root / ".trae/hooks"
     hooks_dir.mkdir(parents=True, exist_ok=True)
 
@@ -168,6 +168,22 @@ def create_hooks(project_root: pathlib.Path) -> bool:
             continue
         path.write_text(content, encoding="utf-8")
         path.chmod(0o755)
+        created.append(name)
+
+    # 从 templates/hooks/ 复制 GitNexus 双端 hook（V11.4 NEW — 会话开始/结束必跑）
+    gitnexus_hooks = ["gitnexus-session-check.py", "gitnexus-session-finalize.py"]
+    templates_hooks = V11_TEMPLATES / "hooks"
+    for name in gitnexus_hooks:
+        src = templates_hooks / name
+        dst = hooks_dir / name
+        if not src.exists():
+            print(f"   ⚠️  gitnexus 模板缺失: {src}（跳过）")
+            continue
+        if dst.exists():
+            skipped.append(name)
+            continue
+        dst.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+        dst.chmod(0o755)
         created.append(name)
 
     if created:

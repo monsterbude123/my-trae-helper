@@ -1,0 +1,22 @@
+version: 1.0.0
+description: V11 技术栈注册表（flow 层 — 程序化消费，供脚手架门禁/守卫映射断言）
+stacks:
+  - id: nodejs
+    category: language
+    name: Node.js (V11)
+    description: Node.js + JavaScript/TypeScript 项目（V11 全栈流程）
+    scaffold: scaffolds/nodejs
+    gate_config: scaffolds/nodejs/files/gates/gate-config.json
+    gates:
+      - stage-spec
+      - stage-real-verify
+    guards:
+      - code-hygiene
+      - contract-integrity
+      - acceptance-audit
+      - rot-scan
+    tags:
+      - javascript
+      - typescript
+      - node
+      - v11

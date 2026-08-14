@@ -183,7 +183,7 @@
 | scan-templates.py | 模板扫描 |
 | reason-classifier.py | 抽象理由分类器(6 类) |
 | change-status.py | 读取 change 真实状态 |
-| GitNexus 双端 Hook | 读端:`gitnexus-session-check.py`(SessionStart,staleness 检测 + 后台刷新)+写端:`gitnexus-session-finalize.py`(Stop,写新 HEAD → 后台刷新) |
+| GitNexus 双端 Hook | 读端:`gitnexus-session-check.py`(SessionStart,会话开始必跑,staleness 检测→后台刷新)+写端:`gitnexus-session-finalize.py`(Stop,会话结束若工作区脏才跑→后台刷新)。每次执行写痕迹`last-run-check.json`/`last-run.json`,stdout 统一`[gitnexus]` 格式可 grep |
 | GitNexus 3 次重试协议 | 第 1 次修参数 → 第 2 次换工具(impact ↔ context ↔ query)→ 第 3 次 list_repos(看索引状态)→ 仍失败 → 5 字段阻塞报告。NEVER: 直接降级为 grep/glob(违反 Article V.5 不可降级) |
 | V11 Hook 清单(13 个) | 覆盖 5 种 TRAE IDE event + 3 个 V11 shell hook。V11 独有:pre-stage.sh / post-stage.sh / pre-accept.sh(shell)+ gitnexus 双端(SessionStart + Stop) |
 

@@ -43,8 +43,10 @@ if specs_changes_dir.exists():
             break
 
 if not has_contracts and not has_spec_contracts:
-    print("[V11 Contract Gate] ⚠️ No contracts/ found in project or specs/changes/")
-    print("    → 对于纯后端变更，建议先定义 contracts/")
+    print("[V11 Contract Gate] 🛑 BLOCKED: No contracts/ found in project or specs/changes/")
+    print("    → contracts/ 缺失，禁止写代码")
+    print("    → 修复: 纯后端项目先定义 contracts/，前后端项目运行 stage-1-intake 生成 specs/changes/{id}/contracts/")
+    sys.exit(1)
 
 print("[V11 Contract Gate] ✅ 检查完成")
 sys.exit(0)

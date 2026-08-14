@@ -12,6 +12,9 @@ Usage:
     4. V11 脚本路径可达（~/.trae-cn/skills/fullstack4TraeV11/scripts/）
     5. State card 与 status_card 字段一致性
     6. AGENTS.md 引用的 SKILL.md 路径可达
+    7. Gate 层验证（检测 .husky/pre-commit / .husky/pre-push 存在性）
+    8. Guard 层验证（检测 TRAE IDE Hooks 是否实际安装）
+    9. 硬化验证（检测 echo-skip 反例）
 
 Exit codes:
     0 = PASS（hooks 保真度 OK）
@@ -188,10 +191,18 @@ def check_v11_script_reachable() -> dict:
 
 def check_state_card_consistency(project_root: pathlib.Path) -> dict:
     """状态卡与文件系统一致性"""
-    state_card = project_root / "docs/specs/.state-card.md"
-    result = {"state_card_exists": state_card.exists()}
+    # 优先探测新路径 docs/specs/changes/{id}/.state-card.md，找不到回退顶层旧路径
+    state_card = None
+    change_cards = list((project_root / "docs" / "specs" / "changes").glob("*/.state-card.md")) if (project_root / "docs" / "specs" / "changes").exists() else []
+    if change_cards:
+        state_card = change_cards[0]
+    else:
+        top_card = project_root / "docs/specs/.state-card.md"
+        if top_card.exists():
+            state_card = top_card
+    result = {"state_card_exists": state_card is not None and state_card.exists()}
 
-    if not state_card.exists():
+    if not state_card or not state_card.exists():
         return result
 
     content = state_card.read_text(encoding="utf-8")
@@ -253,20 +264,138 @@ def check_agents_md_paths(project_root: pathlib.Path) -> dict:
     return result
 
 
+def check_gate_layer(project_root: pathlib.Path) -> dict:
+    """Gate 层验证：检测 .husky/pre-commit 和 .husky/pre-push 是否存在、可执行、已硬化"""
+    husky_dir = project_root / ".husky"
+    result = {"husky_dir_exists": husky_dir.exists()}
+    for hook_name in ["pre-commit", "pre-push"]:
+        hook_path = husky_dir / hook_name
+        info = {"exists": False, "executable": False, "has_hardening": False}
+        if hook_path.exists():
+            info["exists"] = True
+            try:
+                info["executable"] = bool(hook_path.stat().st_mode & 0o111)
+            except (AttributeError, OSError):
+                info["executable"] = False
+            if not info["executable"]:
+                # Windows fallback: 检查 .sh 后缀或 shebang
+                try:
+                    first = hook_path.read_text(encoding="utf-8").split("\n")[0]
+                    if first.startswith("#!") or hook_name.endswith(".sh"):
+                        info["executable"] = True
+                except Exception:
+                    pass
+            # 硬化检测：必须含 set -e 或 set -euo pipefail
+            try:
+                content = hook_path.read_text(encoding="utf-8")
+                info["has_hardening"] = "set -euo pipefail" in content or "set -e" in content
+            except Exception:
+                info["has_hardening"] = False
+        result[hook_name] = info
+    return result
+
+
+def check_guard_layer(project_root: pathlib.Path) -> dict:
+    """Guard 层验证：检测 .trae/hooks/ 下 TRAE IDE event hooks 是否安装"""
+    hooks_dir = project_root / ".trae" / "hooks"
+    expected = ["doc-sync-gate.py", "contract-gate.py", "spec-validate-hook.py", "auto-test.py", "drift-detect.py"]
+    result = {"trae_hooks_dir_exists": hooks_dir.exists(), "hooks_expected": expected, "missing_hooks": [], "hooks_installed": 0}
+    if hooks_dir.exists():
+        installed = 0
+        for name in expected:
+            if (hooks_dir / name).exists():
+                installed += 1
+            else:
+                result["missing_hooks"].append(name)
+        result["hooks_installed"] = installed
+    else:
+        result["missing_hooks"] = expected[:]
+    return result
+
+
+def check_gitnexus_freshness(project_root: pathlib.Path) -> dict:
+    """GitNexus 运行痕迹新鲜度校验（V11.4 NEW）
+    会话开始写 last-run-check.json，会话结束写 last-run.json。
+    用最近一条痕迹的时间戳判断 gitnexus hook 是否真的跑过。"""
+    gitnexus_dir = project_root / ".gitnexus"
+    result = {
+        "gitnexus_dir_exists": False,
+        "trace_files": [],          # 实际存在的痕迹文件
+        "missing_trace_files": [],  # 缺失的痕迹文件
+        "last_run_at": None,        # 最近一次运行时间(ISO)
+        "fresh": False,             # 是否 24h 内跑过
+        "stale_days": None,
+    }
+    if not gitnexus_dir.exists():
+        result["missing_trace_files"] = ["last-run.json", "last-run-check.json"]
+        return result
+    result["gitnexus_dir_exists"] = True
+    expected = ["last-run.json", "last-run-check.json"]
+    latest = None
+    for name in expected:
+        p = gitnexus_dir / name
+        if p.exists():
+            result["trace_files"].append(name)
+            try:
+                data = json.loads(p.read_text(encoding="utf-8"))
+                at = data.get("at")
+                if at and (latest is None or at > latest):
+                    latest = at
+            except (OSError, ValueError):
+                pass
+        else:
+            result["missing_trace_files"].append(name)
+    result["last_run_at"] = latest
+    if latest:
+        try:
+            from datetime import datetime, timezone
+            dt = datetime.fromisoformat(latest)
+            delta = datetime.now(timezone.utc) - dt
+            result["stale_days"] = round(delta.total_seconds() / 86400, 2)
+            result["fresh"] = delta.total_seconds() < 86400  # 24h 内
+        except (ValueError, TypeError):
+            result["fresh"] = False
+    return result
+
+
+def check_hardening(project_root: pathlib.Path) -> dict:
+    """硬化验证：检测 echo-skip 占位符反例"""
+    result = {"checked_files": 0, "violations": [], "passed": True}
+    for d in [project_root / ".husky", project_root / ".trae" / "hooks"]:
+        if not d.exists():
+            continue
+        for f in d.glob("*"):
+            if not f.is_file():
+                continue
+            try:
+                content = f.read_text(encoding="utf-8")
+            except Exception:
+                continue
+            result["checked_files"] += 1
+            if re.search(r'echo\s+["\']?(skip|not|skipp)', content, re.IGNORECASE):
+                result["violations"].append({"file": str(f), "pattern": "echo-skip detected"})
+                result["passed"] = False
+    return result
+
+
 def main():
-    parser = argparse.ArgumentParser(description="V11 Hook 保真度门禁")
+    parser = argparse.ArgumentParser(description="V11 Hook 保真度门禁（硬化版）")
     parser.add_argument("--project-root", default=".", help="项目根路径")
     parser.add_argument("--json", action="store_true", help="JSON 输出")
     args = parser.parse_args()
 
     project_root = pathlib.Path(args.project_root).resolve()
 
-    # 6 维度检查
+    # 9 维度检查（新增 Gate 层 + Guard 层 + 硬化验证）
     existence = check_hook_existence(project_root)
     invocation = check_hook_invocation(project_root)
     reachability = check_v11_script_reachable()
     consistency = check_state_card_consistency(project_root)
     agents_md = check_agents_md_paths(project_root)
+    gate_layer = check_gate_layer(project_root)
+    guard_layer = check_guard_layer(project_root)
+    hardening = check_hardening(project_root)
+    gitnexus_freshness = check_gitnexus_freshness(project_root)
 
     # 汇总
     issues = []
@@ -302,6 +431,40 @@ def main():
             if not ref["exists"]:
                 issues.append(f"AGENTS.md 引用路径不可达: {ref['path']}")
 
+    # 6. Gate 层验证（.husky/pre-commit / .husky/pre-push）
+    if not gate_layer["husky_dir_exists"]:
+        issues.append("缺 .husky/ 目录（Gate 层未配置）")
+    else:
+        for hook_name in ["pre-commit", "pre-push"]:
+            hook_info = gate_layer.get(hook_name, {})
+            if not hook_info.get("exists"):
+                issues.append(f"缺 Gate hook: .husky/{hook_name}")
+            elif not hook_info.get("executable"):
+                issues.append(f"Gate hook 无 +x: .husky/{hook_name}")
+            elif not hook_info.get("has_hardening"):
+                issues.append(f"Gate hook 未硬化: .husky/{hook_name}（缺 set -euo pipefail）")
+
+    # 7. Guard 层验证（TRAE IDE Hooks 安装）
+    if not guard_layer["trae_hooks_dir_exists"]:
+        issues.append("缺 .trae/hooks/ 目录（Guard 层未配置）")
+    else:
+        missing_count = len(guard_layer["missing_hooks"])
+        if missing_count > 0:
+            issues.append(f"Guard 层缺失 {missing_count} 个 hook（期望 {len(guard_layer['hooks_expected'])} 个）")
+
+    # 8. 硬化验证（echo-skip 反例）
+    if not hardening["passed"]:
+        for violation in hardening["violations"]:
+            issues.append(f"硬化违规: {violation['file']} — {violation['pattern']}")
+
+    # 9. GitNexus 运行痕迹新鲜度（V11.4 NEW — 证明 gitnexus hook 真的跑过）
+    if not gitnexus_freshness["gitnexus_dir_exists"]:
+        issues.append("缺 .gitnexus/ 目录（GitNexus 未运行，无运行痕迹）")
+    elif not gitnexus_freshness["fresh"]:
+        issues.append(f"GitNexus 运行痕迹过期（stale_days={gitnexus_freshness['stale_days']}, last_run_at={gitnexus_freshness['last_run_at']}）")
+    elif gitnexus_freshness["missing_trace_files"]:
+        issues.append(f"GitNexus 痕迹文件缺失: {', '.join(gitnexus_freshness['missing_trace_files'])}")
+
     is_pass = len(issues) == 0
 
     output = {
@@ -313,6 +476,10 @@ def main():
             "v11_reachability": reachability,
             "state_card_consistency": consistency,
             "agents_md_paths": agents_md,
+            "gate_layer": gate_layer,
+            "guard_layer": guard_layer,
+            "hardening": hardening,
+            "gitnexus_freshness": gitnexus_freshness,
         },
         "issues": issues,
         "status": "PASS" if is_pass else "FAIL",
@@ -322,7 +489,7 @@ def main():
         print(json.dumps(output, indent=2, ensure_ascii=False, default=str))
     else:
         icon = "✅" if is_pass else "❌"
-        print(f"{icon} {output['status']} — Hook 保真度门禁")
+        print(f"{icon} {output['status']} — Hook 保真度门禁（硬化版）")
         print(f"\n1. Hook 存在性: {'✅' if existence['hooks_dir_exists'] else '❌'}")
         if existence["hooks_dir_exists"]:
             for h, s in existence["hooks"].items():
@@ -338,6 +505,23 @@ def main():
         print(f"\n4. 状态卡一致性: {consistency.get('valid_yaml', 'N/A')}")
 
         print(f"\n5. AGENTS.md 路径: {len(agents_md.get('reachable', []))}")
+
+        print(f"\n6. Gate 层（.husky）: {'✅' if gate_layer['husky_dir_exists'] else '❌'}")
+        for hook_name in ["pre-commit", "pre-push"]:
+            info = gate_layer.get(hook_name, {})
+            hardening_mark = "✓" if info.get("has_hardening") else "✗"
+            print(f"   [{hardening_mark}] .husky/{hook_name}: exists={info.get('exists')}, hardened={info.get('has_hardening')}")
+
+        print(f"\n7. Guard 层（.trae/hooks）: {'✅' if guard_layer['trae_hooks_dir_exists'] else '❌'}")
+        print(f"   已安装: {guard_layer['hooks_installed']}/{len(guard_layer['hooks_expected'])}")
+
+        print(f"\n8. 硬化验证: {'✅' if hardening['passed'] else '❌'}")
+        print(f"   检查文件: {hardening['checked_files']}, 违规: {len(hardening['violations'])}")
+
+        print(f"\n9. GitNexus 运行痕迹: {'✅' if gitnexus_freshness['fresh'] else '❌'}")
+        print(f"   .gitnexus 存在: {gitnexus_freshness['gitnexus_dir_exists']}")
+        print(f"   痕迹文件: {gitnexus_freshness['trace_files'] or '无'}")
+        print(f"   最近运行: {gitnexus_freshness['last_run_at'] or 'N/A'}, stale_days={gitnexus_freshness['stale_days']}")
 
         if issues:
             print(f"\n⚠️ 问题:")

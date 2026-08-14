@@ -541,3 +541,26 @@ reset_history:
 - 公共铁律: [common-iron-rules.md](common-iron-rules.md) — Article XII 文档诚实
 - 公共反例: [common-anti-patterns.md](common-anti-patterns.md) — 反例 4 状态卡说谎
 - 阶段交互协议:
+
+---
+
+## 九、状态机 + 驾驶舱（V11.5 NEW — flow 层程序化）
+
+> 状态卡本质是状态机。current_stage 是当前状态，next_stage 是转换。驾驶舱角色（主上下文）是唯一允许改状态字段的 actor（已在 §5.8 铁律 5 字段）。
+
+### 状态机定义
+[registry/state-machine.yaml](../registry/state-machine.yaml)（flow 层，程序化解析）
+- initial_state: -1/intake
+- terminal_states: [5/accept]
+- pilot: 主上下文（驾驶舱）
+
+### 驾驶舱角色
+- 主上下文是唯一允许改 stage_status / current_stage / gate_result.status / health / next_stage.id 的 actor
+- 子代理只能"建议"状态变更，主上下文亲自 Edit
+- 状态转换必须通过 validate_transition() 校验
+
+### 程序化校验
+- _lib_state_card.load_state_machine() 加载状态机
+- _lib_state_card.validate_transition() 校验转换合法性
+- _lib_state_card.is_terminal_state() 判断终止态
+- run-all-guards.py 统一消费（Agent-D 实现）

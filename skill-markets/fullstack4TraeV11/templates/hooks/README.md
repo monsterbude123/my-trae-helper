@@ -72,20 +72,35 @@ Stage 5 Accept 前
 
 ---
 
-## GitNexus 双端（V11 NEW）
+## GitNexus 双端（V11.4）
 
-| 端 | Hook | 职责 |
-|----|------|------|
-| 读（SessionStart）| `gitnexus-session-check.py` | 检测 staleness → 后台刷新 |
-| 写（Stop）| `gitnexus-session-finalize.py` | 写新 HEAD → 后台刷新 |
+| 端 | Hook | 触发 | 职责 |
+|----|------|------|------|
+| 读（SessionStart）| `gitnexus-session-check.py` | 会话开始必跑 | 检测 staleness → 后台刷新 |
+| 写（Stop）| `gitnexus-session-finalize.py` | 会话结束（agent 改过代码才跑）| **检测工作区脏** → 后台刷新 |
+
+**触发时机**：会话开始跑一次 + 会话结束若工作区脏（agent 改了代码）再跑一次，非编辑时实时触发。
 
 **关键设计**:
 - 用 `git rev-parse --show-toplevel` 找逻辑项目根
 - 后台用 `subprocess.Popen + DETACHED_PROCESS + CREATE_NEW_PROCESS_GROUP`
-- 跑前 HEAD 比对：lastCommit == HEAD 时跳过
+- **写端脏检测**：`git status --porcelain` 非空即脏，但**排除 `.gitnexus/` 自身**（避免工具产物导致死循环触发）
+- 跑前 HEAD 比对：lastCommit == HEAD 且不脏时跳过
 - `GITNEXUS_AUTO_ANALYZE=0` 关闭
 - 日志写 `.gitnexus/analyze.log`
-- 禁止手动跑 analyze
+
+**运行痕迹（可验证）**:
+- 读端每次执行写 `.gitnexus/last-run-check.json`
+- 写端每次执行写 `.gitnexus/last-run.json`（含 workspace_dirty / run_reason）
+- `hooks-fidelity.py` 校验痕迹存在 + 24h 内新鲜，过期/缺失计入 FAIL
+
+**统一日志格式（stdout，可 grep）**:
+```
+[gitnexus] event=SessionStart reason=index_stale action=analyze head=<sha>
+[gitnexus] event=Stop reason=workspace_dirty action=analyze head=<sha> dirty=true
+[gitnexus] event=Stop reason=no_change_skipped action=skip head=<sha> dirty=false
+```
+字段：`event` / `reason` / `action` / `head` / `dirty` / `detail`。用 `grep "\[gitnexus\]"` 查看全部。
 
 ---
 

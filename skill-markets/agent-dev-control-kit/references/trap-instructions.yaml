@@ -18,7 +18,7 @@
 #   - reclaim_steps:           agent 拿到该 hint 后应走的步骤
 #   - see_also:                交叉引用
 
-version: 1.0.0
+version: 1.1.0
 
 traps:
   # ─────────────────────────────────────────────────────────────────
@@ -552,3 +552,44 @@ traps:
       - ".agents/skills/project-rule-skill/SKILL.md §9 CI 闭环验证铁律"
       - ".github/workflows/agent-dev-control-kit-ci.yml (self-bootstrap 已落地)"
       - "AGENTS.md §4 完成报告必须含闭环证据"
+
+  # ─────────────────────────────────────────────────────────────────
+  # 2026-08-14 嵌套子技能引用反例(实测:Trae 只识别 skills 根目录一层)
+  - id: AP-17
+    title: 文档用 Skill(name=) 引用未注册的嵌套子技能
+    detect_signal: |
+      文本含 `Skill(name=["'](execution-control|guard-control|gate-control|asset-management-control|release-process-control|data-change-control|doc-sync-control|config-sync-control)["'])` /
+      `使用 (execution-control|guard-control|gate-control) 技能` /
+      提及 skills/ 子技能名但无相对路径(SKILL.md / ./skills/ 前缀)
+    what_is_wrong: |
+      Trae 只识别全局/项目 skills 根目录下**一层**的 skill(目录名/SKILL.md),
+      不递归扫描嵌套的 skills/ 子目录。agent-dev-control-kit 的 skills/ 子技能
+      (execution-control / guard-control / gate-control)未注册为独立 skill,
+      只作为主 skill 的内部资源(相对路径透传)。
+      2026-08-14 实测:add/update/remove 均不处理嵌套,子技能不产生独立顶层条目;
+      `add execution-control` 报"未找到 skill"。
+      若文档用 `Skill(name="execution-control")` 或"使用 execution-control 技能"
+      这类可调用口吻引用未注册名,agent 调用 Skill 工具会找不到 → 运行期失效。
+    fix_template_before: |
+      # ❌ 用可调用口吻引用未注册的嵌套子技能(2026-08-14 反例)
+      # SKILL.md / references / rules 中:
+      → 用 execution-control 技能处理本次变更
+      → Skill(name="execution-control")
+    fix_template_after: |
+      # ✅ 引用一律给相对路径(junction 透传,文件真实可读)
+      # SKILL.md / references / rules 中:
+      → 读取 skills/execution-control/SKILL.md 并按其中流程执行
+      → Read skills/guard-control/SKILL.md
+      → 见 skills/gate-control/templates/gate-config-template.json
+    next_skill: agent-dev-control-kit
+    next_skill_action: "按 §子技能(跨层引用)规范改写,禁止 Skill(name=) 引用未注册名"
+    reclaim_steps:
+      - 触发:任何文档(SKILL.md / references / scenarios / rules / AGENTS.md)提及子技能
+      - 第一轮动作:判断被引用技能是否已注册——检查全局/项目 skills 根目录是否存在同名独立目录(含 SKILL.md),或是否在 available_skills 中
+      - 未注册 → 一律改为相对路径引用(skills/<name>/SKILL.md)或 Read 指令
+      - 确需 Skill() 调用 → 先将其注册为独立顶层 skill 包,再引用
+      - 反向钉死:引用子技能必须可解析——要么带相对路径,要么已注册为独立 skill
+    see_also:
+      - "agent-dev-control-kit SKILL.md §子技能(跨层引用)"
+      - "agent-dev-control-kit INDEX.md 子技能拆分"
+      - "trae-professional references/skills.md 技能目录结构(skill-name/SKILL.md 一层)"

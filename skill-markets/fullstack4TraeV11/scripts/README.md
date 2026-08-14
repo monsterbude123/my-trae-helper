@@ -26,6 +26,52 @@
 | `scan-templates.py` | 模板扫描 | 模板变更时 |
 | `phase-gate.py` | 阶段门禁（V10 兼容） | V10 项目兼容 |
 | `check_integration_contract.py` | 集成契约检查 | Stage 2 Contract |
+| `run-all-guards.py` | flow 层统一消费四表（registry/），逐 stage 跑门禁 | 所有 stage 验收 |
+| `repair-flow-gate.py` | 修复流程程序化门禁（读 registry/repair-flow.yaml） | Stage 6 Bug Fix |
+
+---
+
+## Flow 层 registry（V11.5 NEW — 程序化门禁）
+
+> **理念**：fact 层（人类+agent 读 .md）与 flow 层（纯程序化解析 .yaml）分离。状态卡本质是状态机，驾驶舱角色（主上下文）唯一可改状态字段。每 stage 必登记一门禁。
+
+### 四表（registry/）
+
+| 表 | 内容 | 消费脚本 |
+|----|------|---------|
+| `gates.yaml` | 13 stage 门禁声明（id/脚本/宿主/guards/artifacts） | `run-all-guards.py` |
+| `guards.yaml` | 守卫声明（id/脚本/分类/schema） | `run-all-guards.py` |
+| `state-machine.yaml` | 状态机（13 state + transitions + pilot） | `_lib_state_card.py` |
+| `repair-flow.yaml` | 修复流程（triggers/steps/gates） | `repair-flow-gate.py` |
+
+### 用法
+
+```bash
+# 全量跑（读四表 → 13 stage 门禁矩阵）
+python scripts/run-all-guards.py
+
+# 只校验四表结构
+python scripts/run-all-guards.py --validate-only
+
+# 校验指定项目产物
+python scripts/run-all-guards.py --project-root .
+
+# 修复流程校验
+python scripts/repair-flow-gate.py --validate-only
+python scripts/repair-flow-gate.py --list-steps
+```
+
+### 状态机驾驶舱
+
+```python
+import sys; sys.path.insert(0, 'scripts')
+import _lib_state_card as L
+from pathlib import Path
+sm = L.load_state_machine(Path('registry'))
+L.validate_transition(sm, '-1/intake', '0/plan')   # (True, '')
+L.is_terminal_state(sm, '5/accept')                # True
+L.get_pilot_actor(sm)                              # 'main-context'
+```
 
 ---
 

@@ -14,11 +14,19 @@ Exit codes:
     -1/intake | 0/plan | 0.5/test-plan | 1/spec | 1.5/prototype | 2/contract
     3/implement | 3.5/real-verify | 4/review | 4.5/rot-scan | 5/accept
     6/bug-fix | 7/project-health
+
+Gate Hardening (2026-08-14):
+    - Environment validation (V11_GATE_ENFORCED / V11_GATE_STAGE / V11_GATE_CALLER)
+    - SHA-256 signature generation and verification
+    - Gate execution validation (evidence chain + gate ID + timestamp)
 """
 import sys
 import argparse
 import pathlib
-from datetime import datetime
+import hashlib
+import os
+import json
+from datetime import datetime, timezone
 
 # 13 stage 名单（必须严格匹配编排器 stage_config）
 VALID_STAGES = [
@@ -40,6 +48,103 @@ REQUIRED_FIELDS = [
 
 VALID_HEALTH = ["🟢 on-track", "🟡 degraded", "🔴 blocked"]
 VALID_STATUS = ["PENDING", "PASS", "FAIL", "N/A"]
+
+
+def validate_environment() -> dict:
+    """验证 V11 Gate 环境变量（V11_GATE_ENFORCED / V11_GATE_STAGE / V11_GATE_CALLER）
+    
+    Returns:
+        dict: {"valid": bool, "enforced": str, "stage": str, "caller": str, "errors": list}
+    """
+    enforced = os.getenv("V11_GATE_ENFORCED", "")
+    stage = os.getenv("V11_GATE_STAGE", "")
+    caller = os.getenv("V11_GATE_CALLER", "")
+    
+    result = {
+        "valid": True,
+        "enforced": enforced,
+        "stage": stage,
+        "caller": caller,
+        "errors": []
+    }
+    
+    if enforced and enforced.lower() not in ("true", "1", "yes"):
+        result["valid"] = False
+        result["errors"].append(f"V11_GATE_ENFORCED={enforced} 非法（应为 true/false）")
+    
+    if stage and stage not in VALID_STAGES:
+        result["valid"] = False
+        result["errors"].append(f"V11_GATE_STAGE={stage} 非法（不在 13 stage 名单中）")
+    
+    return result
+
+
+def sign_gate_result(result: dict) -> str:
+    """生成 Gate 结果的 SHA-256 签名
+    
+    Args:
+        result: Gate 结果字典（必须含 status / gate_id / stage / timestamp）
+    
+    Returns:
+        str: SHA-256 签名（hex）
+    """
+    canonical = json.dumps({
+        "status": result.get("status"),
+        "gate_id": result.get("gate_id", ""),
+        "stage": result.get("stage", result.get("current_stage", "")),
+        "timestamp": result.get("timestamp", "")
+    }, sort_keys=True, ensure_ascii=False)
+    
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def verify_gate_signature(result: dict, signature: str) -> bool:
+    """验证 Gate 结果签名
+    
+    Args:
+        result: Gate 结果字典
+        signature: 预期签名（hex）
+    
+    Returns:
+        bool: 签名是否匹配
+    """
+    expected = sign_gate_result(result)
+    return expected == signature
+
+
+def validate_gate_execution(result: dict, env_info: dict) -> dict:
+    """验证 Gate 执行完整性（环境变量 + 签名 + 证据链 + 门禁 ID + 时间戳）
+    
+    Args:
+        result: Gate 结果字典
+        env_info: validate_environment() 返回的环境信息
+    
+    Returns:
+        dict: {"valid": bool, "errors": list, "warnings": list}
+    """
+    errors = []
+    warnings = []
+    
+    if not env_info.get("valid"):
+        errors.extend(env_info.get("errors", []))
+    
+    if "gate_id" not in result:
+        warnings.append("缺 gate_id（建议在 husky hook 中生成）")
+    
+    if "timestamp" not in result:
+        warnings.append("缺 timestamp（建议使用 ISO 8601 格式）")
+    
+    if "status" not in result:
+        errors.append("缺 status 字段")
+    
+    if "evidence" not in result and "artifacts" not in result:
+        warnings.append("缺 evidence/artifacts（证据链不完整）")
+    
+    return {
+        "valid": len(errors) == 0,
+        "errors": errors,
+        "warnings": warnings
+    }
 
 
 def parse_state_card(path: pathlib.Path) -> dict:
@@ -106,17 +211,27 @@ def validate_state_card(fields: dict, stage: str = None) -> tuple:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="V11 阶段门禁")
+    parser = argparse.ArgumentParser(description="V11 阶段门禁（硬化版）")
     parser.add_argument("--state-card", required=True, help="状态卡文件路径")
     parser.add_argument("--stage", help="期望 stage（与状态卡 current_stage 一致）")
     parser.add_argument("--json", action="store_true", help="JSON 输出")
+    parser.add_argument("--verify-signature", help="验证 Gate 签名（hex）")
+    parser.add_argument("--skip-env-check", action="store_true", help="跳过环境变量验证")
     args = parser.parse_args()
 
     path = pathlib.Path(args.state_card)
     fields = parse_state_card(path)
 
     if "error" in fields:
-        result = {"status": "FAIL", "errors": [fields["error"]], "path": str(path)}
+        result = {
+            "status": "FAIL",
+            "errors": [fields["error"]],
+            "path": str(path),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "gate_id": f"stage-gate-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        }
+        signature = sign_gate_result(result)
+        result["signature"] = signature
         print_json_or_text(result, args.json)
         return 1
 
@@ -128,12 +243,42 @@ def main():
             "current_stage": fields.get("current_stage"),
             "next_stage_id": (fields.get("next_stage") or {}).get("id"),
             "health": fields.get("health"),
-            "gate_status": (fields.get("gate_result") or {}).get("status")
+            "gate_status": (fields.get("gate_result") or {}).get("status"),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "gate_id": f"stage-gate-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "artifacts": fields.get("artifacts", [])
         }
+        
+        if not args.skip_env_check:
+            env_info = validate_environment()
+            result["environment"] = env_info
+            
+            exec_validation = validate_gate_execution(result, env_info)
+            result["execution_valid"] = exec_validation["valid"]
+            if exec_validation["errors"]:
+                result["execution_errors"] = exec_validation["errors"]
+            if exec_validation["warnings"]:
+                result["execution_warnings"] = exec_validation["warnings"]
+        
+        signature = sign_gate_result(result)
+        result["signature"] = signature
+        
+        if args.verify_signature:
+            sig_valid = verify_gate_signature(result, args.verify_signature)
+            result["signature_valid"] = sig_valid
+        
         print_json_or_text(result, args.json)
         return 0
     else:
-        result = {"status": "FAIL", "errors": errors, "path": str(path)}
+        result = {
+            "status": "FAIL",
+            "errors": errors,
+            "path": str(path),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "gate_id": f"stage-gate-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        }
+        signature = sign_gate_result(result)
+        result["signature"] = signature
         print_json_or_text(result, args.json)
         return 1
 
