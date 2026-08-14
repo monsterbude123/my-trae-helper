@@ -26,10 +26,9 @@ CHECK_ID = "07_bundle_structure"
 # 数字开头允许(顺序编号),但首字符必须在 [a-zA-Z0-9_-] 内
 KEBAB_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]*$")
 SKILLS_DIR_NAME = "skills"
-# BND-005 嵌套豁免白名单(2026-08-14):voice-acting-skill 是历史复合 skill,内部再拆 5 个
-# 子 skill(annotation-generator / batch-manager / script-parser / tts-synthesizer /
-# voice-assigner)是它本身的设计选择。TRAE 协议单层规则在此 skill 上豁免。
-NESTED_WHITELIST = {"voice-acting-skill"}
+# BND-005 不维护白名单(skill-bundle/SKILL.md §flatten 子命令)
+# 嵌套全部 BLOCK,跑 `trae-skills bundle flatten --plan <pkg>` 拿可执行 plan
+NESTED_WHITELIST = set()  # 显式空,防 hardcode 漂移
 
 
 def find_yaml_field(block: str, key: str):
@@ -66,29 +65,62 @@ def parse_frontmatter(text: str):
 
 
 def collect_sub_skills(skill_root: Path):
-    """返回 [{name, path, fm, nested}]"""
+    """返回父包单层子 skills(BND-001/002/003 用) + 嵌套 sub-skill 列表(BND-005 用)。
+
+    返回 dict:
+      - direct: [{name, path, fm}]   单层子 skill 列表(BND-001/002/003 检查对象)
+      - nested: [{path, depth, parent_chain, leaf_name}]  嵌套 leaf 列表(BND-005 BLOCK 用)
+        parent_chain: 从父包名到嵌套 leaf 的链
+        leaf_name: leaf 目录名
+    """
     skills_dir = skill_root / SKILLS_DIR_NAME
     if not skills_dir.is_dir():
-        return []
-    result = []
-    for entry in sorted(skills_dir.iterdir()):
-        if entry.name.startswith("."):
-            continue
-        if not entry.is_dir():
-            continue
-        skill_md = entry / "SKILL.md"
-        if not skill_md.is_file():
-            continue
-        nested_skills = entry / SKILLS_DIR_NAME
-        nested = nested_skills.is_dir()
-        fm_block = parse_frontmatter(skill_md.read_text(encoding="utf-8"))
-        result.append({
-            "name": entry.name,
-            "path": entry,
-            "fm": parse_fm(fm_block) if fm_block else {},
-            "nested": nested,
-        })
-    return result
+        return {"direct": [], "nested": []}
+    direct = []
+    nested = []
+    parent_name = skill_root.name
+
+    def walk_direct(current: Path):
+        """单层枚举(BND-001/002/003 用,不递归)"""
+        for entry in sorted(current.iterdir()):
+            if entry.name.startswith("."):
+                continue
+            if not entry.is_dir():
+                continue
+            skill_md = entry / "SKILL.md"
+            if not skill_md.is_file():
+                continue
+            fm_block = parse_frontmatter(skill_md.read_text(encoding="utf-8"))
+            direct.append({
+                "name": entry.name,
+                "path": entry,
+                "fm": parse_fm(fm_block) if fm_block else {},
+            })
+
+    def walk_nested(current: Path, chain: list, depth: int):
+        """递归收集所有 leaf 嵌套(BND-005 用)"""
+        for entry in sorted(current.iterdir()):
+            if entry.name.startswith("."):
+                continue
+            if not entry.is_dir():
+                continue
+            inner_skills = entry / SKILLS_DIR_NAME
+            skill_md = entry / "SKILL.md"
+            if inner_skills.is_dir():
+                # 嵌套: 递归
+                walk_nested(inner_skills, chain + [entry.name], depth + 1)
+            elif skill_md.is_file():
+                # leaf (即使是 depth=0 也在 nested 列表,BND-005 过滤 depth>=1)
+                nested.append({
+                    "path": entry,
+                    "depth": depth,
+                    "parent_chain": chain + [entry.name],
+                    "leaf_name": entry.name,
+                })
+
+    walk_direct(skills_dir)
+    walk_nested(skills_dir, [parent_name], 0)
+    return {"direct": direct, "nested": nested}
 
 
 def parse_fm(block: str):
@@ -111,7 +143,7 @@ def collect_all_marketplace_names(repo_root: Path):
     for child in markets.iterdir():
         if not child.is_dir():
             continue
-        for sub in collect_sub_skills(child):
+        for sub in collect_sub_skills(child)["direct"]:
             if sub["fm"].get("name"):
                 names.add(sub["fm"]["name"])
     return names
@@ -129,8 +161,10 @@ def run(target: Path) -> dict:
         }
 
     # 只在有子 skills 时跑
-    subs = collect_sub_skills(target)
-    if not subs:
+    sub_data = collect_sub_skills(target)
+    subs = sub_data["direct"]
+    nested_subs = sub_data["nested"]
+    if not subs and not nested_subs:
         return {
             "check": CHECK_ID,
             "target": str(target),
@@ -156,11 +190,21 @@ def run(target: Path) -> dict:
             issues.append(("WARN", "BND-004",
                           f"子 skill {sub['name']} 标记为 deprecated 但缺 redirect_to 字段"))
 
-    # 检查 4: 双层嵌套(白名单豁免)
-    nested_subs = [s["name"] for s in subs if s["nested"] and s["name"] not in NESTED_WHITELIST]
-    if nested_subs:
-        issues.append(("BLOCK", "BND-005",
-                      f"子 skills 含嵌套 skills/ 目录(TRAE 协议只识别单层): {', '.join(nested_subs)}"))
+    # 检查 4: 嵌套(BND-005)— 自动遍历深度,严格 BLOCK,无白名单
+    # depth >= 1 才算嵌套(单层 depth=0 是合法的)
+    violations = [n for n in nested_subs if n["depth"] >= 1]
+    if violations:
+        # 报告每条完整路径,提示运行 flatten --plan
+        rel_paths = [
+            "/".join(n["parent_chain"][1:])  # 去掉父包名,留 skills/...
+            for n in violations
+        ]
+        issues.append((
+            "BLOCK", "BND-005",
+            f"{len(violations)} 个 sub-skill 嵌套(TRAE 协议只识别单层):\n  "
+            + "\n  ".join(rel_paths)
+            + f"\n  💡 运行 `trae-skills bundle flatten --plan {parent_name}` 拿可执行 git mv 命令"
+        ))
 
     # 检查 5: 跨包同名(扫整个 marketplace)
     repo_root = Path(__file__).resolve().parents[3]
@@ -175,7 +219,7 @@ def run(target: Path) -> dict:
         for other in markets.iterdir():
             if other == target or not other.is_dir():
                 continue
-            for other_sub in collect_sub_skills(other):
+            for other_sub in collect_sub_skills(other)["direct"]:
                 if other_sub["fm"].get("name") == fn:
                     issues.append(("BLOCK", "BND-006",
                                   f"frontmatter name {fn!r} 在其他包 {other.name}/{other_sub['name']} 中重复"))
@@ -195,7 +239,7 @@ def run(target: Path) -> dict:
         "target": str(target),
         "status": status,
         "issues": [{"severity": s, "code": c, "message": m} for s, c, m in issues],
-        "summary": f"{len(subs)} sub-skills, {len(issues)} issues ({sum(1 for s,_,_ in issues if s=='BLOCK')} BLOCK / {sum(1 for s,_,_ in issues if s=='WARN')} WARN)",
+        "summary": f"{len(subs)} direct sub-skills ({len(nested_subs)} nested leaves total), {len(issues)} issues ({sum(1 for s,_,_ in issues if s=='BLOCK')} BLOCK / {sum(1 for s,_,_ in issues if s=='WARN')} WARN)",
     }
 
 
@@ -205,7 +249,7 @@ def collect_all_frontmatter_names(markets: Path):
     for child in markets.iterdir():
         if not child.is_dir():
             continue
-        for sub in collect_sub_skills(child):
+        for sub in collect_sub_skills(child)["direct"]:
             fn = sub["fm"].get("name")
             if not fn:
                 continue

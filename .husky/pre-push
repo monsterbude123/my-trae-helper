@@ -16,6 +16,10 @@
 . "$(dirname "$0")/../scripts/detect-python.sh" || exit 1
 PY="$MY_TRAE_HELPER_PY"
 
+# PowerShell 调 bash 子进程时,stdout 句柄可能被父进程 pipe 截断,导致 echo 报
+# "Bad file descriptor"(行 21)。修复:把 stdout 全部重定向到 stderr(stderr 不被 pipe)
+# 这样 echo 不会触发 stdout 写入错误。
+exec 1>&2
 set -e
 
 echo "🔍 执行 L2 Push Gate (PY=$PY)..."

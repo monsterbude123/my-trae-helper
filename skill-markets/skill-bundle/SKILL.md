@@ -85,6 +85,7 @@ agent-dev-control-kit/skills/guard-control/SKILL.md    # ✅ kebab-case
 | `trae-skills bundle update <pkg>` | 一键检查 + 更新已装子 skills(版本比对) |
 | `trae-skills bundle uninstall <pkg>` | 一键卸载(只删带 `<pkg>-` 前缀的) |
 | `trae-skills bundle list <pkg>` | 列出子 skills + 装载状态(已装/未装/最新版) |
+| `trae-skills bundle flatten --plan <pkg>` | **新增** — 报告 BND-005 嵌套结构 + 打印可执行拆扁 plan(不写盘) |
 | `trae-skills verify <pkg>` | 跑全部守卫,含 07_bundle_structure |
 
 **Options**:
@@ -95,6 +96,34 @@ agent-dev-control-kit/skills/guard-control/SKILL.md    # ✅ kebab-case
 - `-y / --yes` 跳过确认
 - `--dry-run` 只打印,不实际操作
 - `--copy` copy 而非 symlink
+
+### flatten 子命令(BND-005 自检辅助)
+
+`trae-skills bundle flatten --plan <pkg>` 是 BND-005 BLOCK 后的**可执行下一步**:
+
+```
+$ trae-skills bundle flatten --plan game-production-kit
+
+🔍 [BND-005] game-production-kit 嵌套扫描:
+  ❌ skills/voice-acting-skill/skills/  ← 嵌套深度 1,违反 TRAE 单层协议
+
+📋 拆扁 plan(只读,不写盘):
+  1. mkdir game-production-kit/skills/voice-acting-annotation-generator
+  2. git mv game-production-kit/skills/voice-acting-skill/skills/annotation-generator/SKILL.md \
+        game-production-kit/skills/voice-acting-annotation-generator/SKILL.md
+  3. (重复步骤 1-2 给 batch-manager / script-parser / tts-synthesizer / voice-assigner)
+  4. 更新 voice-acting-skill/SKILL.md 路由表:子 skill 入口改写为
+     skills/voice-acting-annotation-generator/ 等
+  5. 删除空目录 game-production-kit/skills/voice-acting-skill/skills/
+
+💡 命名约定: voice-acting-{原嵌套名},把父 skill 名作为前缀,保留语义关联
+```
+
+**设计**:
+- `--plan` 只打印 plan,不实际操作(避免误改)
+- 嵌套**自动遍历**深度递归(不只看一层,任意层数都报)
+- plan 输出**完整 git mv 命令** — 用户复制即可执行
+- 不维护白名单(避免硬编码,与 trap-instructions.yaml 反硬编码对齐)
 
 ## 三道闸(每次 install/update/uninstall 都跑)
 
@@ -175,7 +204,7 @@ trae-skills verify fullstack4TraeV11
 | **BND-002** | BLOCK | 子 skill 目录名 ≠ 父包名 | 避免自指循环 |
 | **BND-003** | BLOCK | 子 skill frontmatter 含 `name` 字段 | TRAE 触发依赖 |
 | **BND-004** | WARN | DEPRECATED 子 skill 缺 `redirect_to` | 重定向完整性 |
-| **BND-005** | BLOCK | 单层 `skills/<sub>/`(无双层嵌套) | TRAE 协议只识别一层 |
+| **BND-005** | BLOCK | 单层 `skills/<sub>/`(无双层嵌套,**自动遍历深度**,不维护白名单) | TRAE 协议只识别一层 |
 | **BND-006** | BLOCK | 跨包 frontmatter name 不重复 | 全局命名空间唯一性 |
 | **BND-007** | WARN | 子 skills 数量 > 30 | 过度拆分提示 |
 
@@ -226,7 +255,7 @@ python skill-markets/skill-acceptance/checks/07_bundle_structure.py --mode diff 
 | agent-dev-control-kit | 5 | ✅ PASS | — |
 | comfyui-api-skills | 15 | ✅ PASS | — |
 | **fullstack4TraeV11** | 13 | ❌ **BLOCK** | BND-001 × 13(目录名数字开头) |
-| **game-production-kit** | 21 | ❌ **BLOCK** | BND-005 × 1(voice-acting-skill 嵌套) |
+| **game-production-kit** | 21 | ❌ **BLOCK** | BND-005 × 1(voice-acting-skill 嵌套,运行 `trae-skills bundle flatten --plan game-production-kit` 拿 plan) |
 | trae-professional | 0 | ✅ skip(非 bundle) | — |
 | ponytail4Trae | 0 | ✅ skip(无 SKILL.md) | — |
 | ... 其他 | 0 | ✅ skip | — |

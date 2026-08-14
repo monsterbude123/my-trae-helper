@@ -196,6 +196,81 @@ export function readInstalledVersion(targetDir, skillName) {
   }
 }
 
+// ─── 4. BND-005 Nested Guard (BND-005 嵌套守卫) ──────────────────────
+
+/**
+ * 检测父包内是否存在嵌套 sub-skill(depth >= 1,自动遍历)。
+ * 与 07_bundle_structure.py BND-005 一致,但在 install 阶段也拦,深度防御。
+ *
+ * 设计:
+ *   - 不维护白名单(与 skill-bundle/SKILL.md §BND-005 对齐)
+ *   - 递归遍历整个 skills/ 树,任何 depth >= 1 立即报
+ *   - 提示运行 `trae-skills bundle flatten --plan <pkg>` 拿可执行 plan
+ *
+ * @param {string} parentDir 父包根目录路径(如 skill-markets/game-production-kit)
+ * @returns {{ok: boolean, severity: 'pass'|'block', violations: Array<{path: string, depth: number, parentChain: string[]}>}}
+ */
+export function nestedSubSkillGuard(parentDir) {
+  if (!existsSync(parentDir)) {
+    return { ok: true, severity: 'pass', violations: [] };
+  }
+  const skillsDir = join(parentDir, 'skills');
+  if (!existsSync(skillsDir)) {
+    return { ok: true, severity: 'pass', violations: [] };
+  }
+
+  const violations = [];
+
+  /**
+   * 递归收集所有 depth >= 1 的 leaf
+   * @param {string} current 当前目录
+   * @param {string[]} chain 父链(从父包名开始)
+   * @param {number} depth 当前深度(0 = 单层)
+   */
+  function collectNested(current, chain, depth) {
+    let entries;
+    try {
+      entries = readdirSync(current, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (entry.name.startsWith('.')) continue;
+      const full = join(current, entry.name);
+      let isDir = false;
+      try {
+        isDir = statSync(full).isDirectory();
+      } catch {
+        continue;
+      }
+      if (!isDir) continue;
+      const innerSkills = join(full, 'skills');
+      let hasInner = false;
+      try {
+        hasInner = statSync(innerSkills).isDirectory();
+      } catch {
+        // not exists
+      }
+      if (hasInner) {
+        collectNested(innerSkills, [...chain, entry.name], depth + 1);
+      } else if (depth >= 1) {
+        violations.push({
+          path: full,
+          depth,
+          parentChain: [...chain, entry.name],
+        });
+      }
+    }
+  }
+
+  collectNested(skillsDir, [parentDir.split(/[/\\]/).pop()], 0);
+  return {
+    ok: violations.length === 0,
+    severity: violations.length === 0 ? 'pass' : 'block',
+    violations,
+  };
+}
+
 // ─── 工具: 列子目录 ─────────────────────────────────────────────
 
 function listSubdirs(dir) {
