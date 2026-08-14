@@ -18,56 +18,12 @@
 #   - 未来 guard-smith 拆分专属 <name>-guard.*,只改注册表即可生效
 #   - 详见 skill-markets/guard-gate-smith/SKILL.md
 #
-# Windows 兼容: Git Bash 默认无 `python`,用 `py`(Python Launcher) 或 `python3` 兜底
+# 跨平台 Python 探测: 不硬编码任何具体路径,只信 PATH + 能力校验
+# 详见 scripts/detect-python.sh + AGENTS.md §4.1.3
 
-# Python 命令探测:Windows 上 npm 能跑 python,但 Git Bash 只能 python3/py
-# 优先用 miniconda Python(已装 pytest/pyyaml);Git Bash 的 /usr/bin/python3 没 pip
-PY=""
-
-# 直接探测已知的 Python 路径(Windows 常见位置)
-# 注意:Git Bash hook 进程可能 mount /mnt 不可用,所以同时测 /c/ 和 /mnt/c/ 两种前缀
-for cand in \
-  /mnt/c/ProgramData/miniconda3/python.exe \
-  /c/ProgramData/miniconda3/python.exe \
-  /mnt/c/Python313/python.exe \
-  /c/Python313/python.exe \
-  /mnt/c/Python312/python.exe \
-  /c/Python312/python.exe \
-  /mnt/c/Python311/python.exe \
-  /c/Python311/python.exe; do
-  if [ -x "$cand" ]; then PY="$cand"; break; fi
-done
-
-# 验证 PY 真的能 import pytest(避免选到 WindowsApps 的 launcher stub)
-if [ -n "$PY" ]; then
-  if ! "$PY" -c "import pytest, yaml" 2>/dev/null; then
-    PY=""
-  fi
-fi
-
-# 回退到 PATH 探测
-if [ -z "$PY" ]; then
-  for cand in python3 py python; do
-    if PY2="$(type -p "$cand" 2>/dev/null)"; then
-      if [ -n "$PY2" ] && [ -x "$PY2" ]; then
-        if "$PY2" -c "import pytest, yaml" 2>/dev/null; then
-          PY="$PY2"
-          break
-        fi
-      fi
-    fi
-  done
-fi
-if [ -z "$PY" ]; then
-  PY="$(command -v python3 || command -v py || command -v python)"
-fi
-if [ -z "$PY" ]; then
-  echo "❌ Gate 配置错误: python3 / py / python 都不在 PATH"
-  exit 1
-fi
-
-# 注入到子进程,子脚本可拾取(MY_TRAE_HELPER_PY 比 sys.executable 优先级更高)
-export MY_TRAE_HELPER_PY="$PY"
+# shellcheck disable=SC1091
+. "$(dirname "$0")/../scripts/detect-python.sh" || exit 1
+PY="$MY_TRAE_HELPER_PY"
 
 set -e
 

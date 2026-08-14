@@ -37,7 +37,7 @@ skills:
   - skill: coding-xinfa
     status: active
     guards:
-      - { id: coding-xinfa-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: coding-xinfa-structure, category: structure, script: scripts/coding-xinfa-guard.py, triggers: [pre-commit] }
     gates:
       - { id: coding-xinfa-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [coding-xinfa-structure] }
     maintainer: guard-smith
@@ -45,7 +45,7 @@ skills:
   - skill: goal-mode
     status: active
     guards:
-      - { id: goal-mode-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: goal-mode-structure, category: structure, script: scripts/goal-mode-guard.py, triggers: [pre-commit] }
     gates:
       - { id: goal-mode-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [goal-mode-structure] }
     maintainer: guard-smith
@@ -53,7 +53,7 @@ skills:
   - skill: gitnexus4Trae
     status: active
     guards:
-      - { id: gitnexus4Trae-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: gitnexus4Trae-structure, category: structure, script: scripts/gitnexus4Trae-guard.py, triggers: [pre-commit] }
     gates:
       - { id: gitnexus4Trae-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [gitnexus4Trae-structure] }
     maintainer: guard-smith
@@ -61,7 +61,7 @@ skills:
   - skill: ponytail4Trae
     status: active
     guards:
-      - { id: ponytail4Trae-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: ponytail4Trae-structure, category: structure, script: scripts/ponytail4Trae-guard.py, triggers: [pre-commit] }
     gates:
       - { id: ponytail4Trae-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [ponytail4Trae-structure] }
     maintainer: guard-smith
@@ -69,7 +69,7 @@ skills:
   - skill: trae-professional
     status: active
     guards:
-      - { id: trae-professional-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: trae-professional-structure, category: structure, script: scripts/trae-professional-guard.py, triggers: [pre-commit] }
     gates:
       - { id: trae-professional-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [trae-professional-structure] }
     maintainer: guard-smith
@@ -77,7 +77,7 @@ skills:
   - skill: trae-security-review
     status: active
     guards:
-      - { id: trae-security-review-security, category: security, script: scripts/skill-security-guard.py, triggers: [pre-commit, L3] }
+      - { id: trae-security-review-security, category: security, script: scripts/trae-security-review-guard.py, triggers: [pre-commit, L3] }
     gates:
       - { id: trae-security-review-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [trae-security-review-security] }
     maintainer: guard-smith
@@ -85,8 +85,8 @@ skills:
   - skill: trae-local-data-export
     status: active
     guards:
-      - { id: trae-local-data-export-security, category: security, script: scripts/skill-security-guard.py, triggers: [pre-commit] }
-      - { id: trae-local-data-export-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: trae-local-data-export-security, category: security, script: scripts/trae-local-data-export-guard.py, triggers: [pre-commit] }
+      - { id: trae-local-data-export-structure, category: structure, script: scripts/trae-local-data-export-guard.py, triggers: [pre-commit] }
     gates:
       - { id: trae-local-data-export-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [trae-local-data-export-security, trae-local-data-export-structure] }
     maintainer: guard-smith
@@ -95,7 +95,7 @@ skills:
   - skill: browser-use-cloud
     status: active
     guards:
-      - { id: browser-use-cloud-security, category: security, script: scripts/skill-security-guard.py, triggers: [pre-commit] }
+      - { id: browser-use-cloud-security, category: security, script: scripts/browser-use-cloud-guard.py, triggers: [pre-commit] }
     gates:
       - { id: browser-use-cloud-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [browser-use-cloud-security] }
     maintainer: guard-smith
@@ -103,7 +103,7 @@ skills:
   - skill: openapi-doc-exporter
     status: active
     guards:
-      - { id: openapi-doc-exporter-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: openapi-doc-exporter-structure, category: structure, script: scripts/openapi-doc-exporter-guard.py, triggers: [pre-commit] }
     gates:
       - { id: openapi-doc-exporter-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [openapi-doc-exporter-structure] }
     maintainer: guard-smith
@@ -111,7 +111,7 @@ skills:
   - skill: deep-research
     status: active
     guards:
-      - { id: deep-research-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: deep-research-structure, category: structure, script: scripts/deep-research-guard.py, triggers: [pre-commit] }
     gates:
       - { id: deep-research-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [deep-research-structure] }
     maintainer: guard-smith
@@ -119,7 +119,7 @@ skills:
   - skill: vision-audit
     status: active
     guards:
-      - { id: vision-audit-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: vision-audit-structure, category: structure, script: scripts/vision-audit-guard.py, triggers: [pre-commit] }
     gates:
       - { id: vision-audit-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [vision-audit-structure] }
     maintainer: guard-smith
@@ -127,7 +127,7 @@ skills:
   - skill: shuxia-novel-engine
     status: active
     guards:
-      - { id: shuxia-novel-engine-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: shuxia-novel-engine-structure, category: structure, script: scripts/shuxia-novel-engine-guard.py, triggers: [pre-commit] }
     gates:
       - { id: shuxia-novel-engine-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [shuxia-novel-engine-structure] }
     maintainer: guard-smith
@@ -135,7 +135,7 @@ skills:
   - skill: modelscope-assistant
     status: active
     guards:
-      - { id: modelscope-assistant-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: modelscope-assistant-structure, category: structure, script: scripts/modelscope-assistant-guard.py, triggers: [pre-commit] }
     gates:
       - { id: modelscope-assistant-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [modelscope-assistant-structure] }
     maintainer: guard-smith
@@ -143,7 +143,7 @@ skills:
   - skill: minimax-multimodal
     status: active
     guards:
-      - { id: minimax-multimodal-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: minimax-multimodal-structure, category: structure, script: scripts/minimax-multimodal-guard.py, triggers: [pre-commit] }
     gates:
       - { id: minimax-multimodal-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [minimax-multimodal-structure] }
     maintainer: guard-smith
@@ -151,7 +151,7 @@ skills:
   - skill: doc-map-manager
     status: active
     guards:
-      - { id: doc-map-manager-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: doc-map-manager-structure, category: structure, script: scripts/doc-map-manager-guard.py, triggers: [pre-commit] }
     gates:
       - { id: doc-map-manager-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [doc-map-manager-structure] }
     maintainer: guard-smith
@@ -159,7 +159,7 @@ skills:
   - skill: vibe-coding-standards
     status: active
     guards:
-      - { id: vibe-coding-standards-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: vibe-coding-standards-structure, category: structure, script: scripts/vibe-coding-standards-guard.py, triggers: [pre-commit] }
     gates:
       - { id: vibe-coding-standards-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [vibe-coding-standards-structure] }
     maintainer: guard-smith
@@ -167,7 +167,7 @@ skills:
   - skill: project-rules-gate
     status: active
     guards:
-      - { id: project-rules-gate-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: project-rules-gate-structure, category: structure, script: scripts/project-rules-gate-guard.py, triggers: [pre-commit] }
     gates:
       - { id: project-rules-gate-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [project-rules-gate-structure] }
     maintainer: guard-smith
@@ -175,7 +175,7 @@ skills:
   - skill: session-distiller
     status: active
     guards:
-      - { id: session-distiller-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: session-distiller-structure, category: structure, script: scripts/session-distiller-guard.py, triggers: [pre-commit] }
     gates:
       - { id: session-distiller-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [session-distiller-structure] }
     maintainer: guard-smith
@@ -183,7 +183,7 @@ skills:
   - skill: docsify-doc-builder
     status: active
     guards:
-      - { id: docsify-doc-builder-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: docsify-doc-builder-structure, category: structure, script: scripts/docsify-doc-builder-guard.py, triggers: [pre-commit] }
     gates:
       - { id: docsify-doc-builder-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [docsify-doc-builder-structure] }
     maintainer: guard-smith
@@ -191,7 +191,7 @@ skills:
   - skill: window-process-skills
     status: active
     guards:
-      - { id: window-process-skills-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: window-process-skills-structure, category: structure, script: scripts/window-process-skills-guard.py, triggers: [pre-commit] }
     gates:
       - { id: window-process-skills-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [window-process-skills-structure] }
     maintainer: guard-smith
@@ -199,7 +199,7 @@ skills:
   - skill: meeting-minutes-taker
     status: active
     guards:
-      - { id: meeting-minutes-taker-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: meeting-minutes-taker-structure, category: structure, script: scripts/meeting-minutes-taker-guard.py, triggers: [pre-commit] }
     gates:
       - { id: meeting-minutes-taker-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [meeting-minutes-taker-structure] }
     maintainer: guard-smith
@@ -207,7 +207,7 @@ skills:
   - skill: mini-game-p2p-room
     status: active
     guards:
-      - { id: mini-game-p2p-room-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: mini-game-p2p-room-structure, category: structure, script: scripts/mini-game-p2p-room-guard.py, triggers: [pre-commit] }
     gates:
       - { id: mini-game-p2p-room-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [mini-game-p2p-room-structure] }
     maintainer: guard-smith
@@ -215,7 +215,7 @@ skills:
   - skill: learn-plan-skill
     status: active
     guards:
-      - { id: learn-plan-skill-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: learn-plan-skill-structure, category: structure, script: scripts/learn-plan-skill-guard.py, triggers: [pre-commit] }
     gates:
       - { id: learn-plan-skill-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [learn-plan-skill-structure] }
     maintainer: guard-smith
@@ -223,7 +223,7 @@ skills:
   - skill: langgraph_teach_skill
     status: active
     guards:
-      - { id: langgraph_teach_skill-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: langgraph_teach_skill-structure, category: structure, script: scripts/langgraph_teach_skill-guard.py, triggers: [pre-commit] }
     gates:
       - { id: langgraph_teach_skill-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [langgraph_teach_skill-structure] }
     maintainer: guard-smith
@@ -231,7 +231,7 @@ skills:
   - skill: deepagents_teach_skill
     status: active
     guards:
-      - { id: deepagents_teach_skill-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: deepagents_teach_skill-structure, category: structure, script: scripts/deepagents_teach_skill-guard.py, triggers: [pre-commit] }
     gates:
       - { id: deepagents_teach_skill-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [deepagents_teach_skill-structure] }
     maintainer: guard-smith
@@ -239,7 +239,7 @@ skills:
   - skill: comfyui-api-skills
     status: active
     guards:
-      - { id: comfyui-api-skills-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: comfyui-api-skills-structure, category: structure, script: scripts/comfyui-api-skills-guard.py, triggers: [pre-commit] }
     gates:
       - { id: comfyui-api-skills-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [comfyui-api-skills-structure] }
     maintainer: guard-smith
@@ -247,7 +247,7 @@ skills:
   - skill: agent-dev-control-kit
     status: active
     guards:
-      - { id: agent-dev-control-kit-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: agent-dev-control-kit-structure, category: structure, script: scripts/agent-dev-control-kit-guard.py, triggers: [pre-commit] }
     gates:
       - { id: agent-dev-control-kit-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [agent-dev-control-kit-structure] }
     maintainer: guard-smith
@@ -255,7 +255,7 @@ skills:
   - skill: screenshot
     status: active
     guards:
-      - { id: screenshot-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: screenshot-structure, category: structure, script: scripts/screenshot-guard.py, triggers: [pre-commit] }
     gates:
       - { id: screenshot-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [screenshot-structure] }
     maintainer: guard-smith
@@ -263,7 +263,7 @@ skills:
   - skill: daily-vibe-coding
     status: active
     guards:
-      - { id: daily-vibe-coding-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: daily-vibe-coding-structure, category: structure, script: scripts/daily-vibe-coding-guard.py, triggers: [pre-commit] }
     gates:
       - { id: daily-vibe-coding-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [daily-vibe-coding-structure] }
     maintainer: guard-smith
@@ -271,7 +271,7 @@ skills:
   - skill: skill-creator-claude
     status: active
     guards:
-      - { id: skill-creator-claude-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: skill-creator-claude-structure, category: structure, script: scripts/skill-creator-claude-guard.py, triggers: [pre-commit] }
     gates:
       - { id: skill-creator-claude-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [skill-creator-claude-structure] }
     maintainer: guard-smith
@@ -279,7 +279,7 @@ skills:
   - skill: product-teardown
     status: active
     guards:
-      - { id: product-teardown-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: product-teardown-structure, category: structure, script: scripts/product-teardown-guard.py, triggers: [pre-commit] }
     gates:
       - { id: product-teardown-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [product-teardown-structure] }
     maintainer: guard-smith
@@ -288,7 +288,7 @@ skills:
   - skill: acceptance-discipline
     status: active
     guards:
-      - { id: acceptance-discipline-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit, L3] }
+      - { id: acceptance-discipline-structure, category: structure, script: scripts/acceptance-discipline-guard.py, triggers: [pre-commit, L3] }
     gates:
       - { id: acceptance-discipline-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [acceptance-discipline-structure] }
     maintainer: guard-smith
@@ -297,7 +297,7 @@ skills:
   - skill: fullstack4TraeV9
     status: deprecated
     guards:
-      - { id: fullstack4TraeV9-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: fullstack4TraeV9-structure, category: structure, script: scripts/fullstack4TraeV9-guard.py, triggers: [pre-commit] }
     gates:
       - { id: fullstack4TraeV9-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack4TraeV9-structure] }
     maintainer: guard-smith
@@ -306,7 +306,7 @@ skills:
   - skill: fullstack4TraeV10
     status: deprecated
     guards:
-      - { id: fullstack4TraeV10-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: fullstack4TraeV10-structure, category: structure, script: scripts/fullstack4TraeV10-guard.py, triggers: [pre-commit] }
     gates:
       - { id: fullstack4TraeV10-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack4TraeV10-structure] }
     maintainer: guard-smith
@@ -315,17 +315,16 @@ skills:
   - skill: fullstack4TraeV11
     status: active
     guards:
-      - { id: fullstack4TraeV11-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit, L3] }
-      - { id: fullstack4TraeV11-capability, category: capability, script: scripts/skill-capability-guard.py, triggers: [L3] }
+      - { id: fullstack4TraeV11-structure, category: structure, script: scripts/fullstack4TraeV11-guard.py, triggers: [pre-commit, L3] }
     gates:
       - { id: fullstack4TraeV11-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack4TraeV11-structure] }
-      - { id: fullstack4TraeV11-l3, level: L3, hooks: [.github/workflows/skill-market-gate.yml], runs_guards: [fullstack4TraeV11-structure, fullstack4TraeV11-capability] }
+      - { id: fullstack4TraeV11-l3, level: L3, hooks: [.github/workflows/skill-market-gate.yml], runs_guards: [fullstack4TraeV11-structure] }
     maintainer: guard-smith
 
   - skill: game-production-kit
     status: active
     guards:
-      - { id: game-production-kit-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit, L3] }
+      - { id: game-production-kit-structure, category: structure, script: scripts/game-production-kit-guard.py, triggers: [pre-commit, L3] }
     gates:
       - { id: game-production-kit-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [game-production-kit-structure] }
     maintainer: guard-smith
@@ -334,7 +333,7 @@ skills:
   - skill: fullstack-auto
     status: active
     guards:
-      - { id: fullstack-auto-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: fullstack-auto-structure, category: structure, script: scripts/fullstack-auto-guard.py, triggers: [pre-commit] }
     gates:
       - { id: fullstack-auto-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack-auto-structure] }
     maintainer: guard-smith
@@ -342,7 +341,7 @@ skills:
   - skill: fullstack-skill-architect
     status: active
     guards:
-      - { id: fullstack-skill-architect-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: fullstack-skill-architect-structure, category: structure, script: scripts/fullstack-skill-architect-guard.py, triggers: [pre-commit] }
     gates:
       - { id: fullstack-skill-architect-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack-skill-architect-structure] }
     maintainer: guard-smith
@@ -351,7 +350,7 @@ skills:
   - skill: test-experience
     status: deprecated
     guards:
-      - { id: test-experience-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: test-experience-structure, category: structure, script: scripts/test-experience-guard.py, triggers: [pre-commit] }
     gates:
       - { id: test-experience-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [test-experience-structure] }
     maintainer: guard-smith
@@ -360,7 +359,7 @@ skills:
   - skill: test-partition-runner
     status: deprecated
     guards:
-      - { id: test-partition-runner-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: test-partition-runner-structure, category: structure, script: scripts/test-partition-runner-guard.py, triggers: [pre-commit] }
     gates:
       - { id: test-partition-runner-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [test-partition-runner-structure] }
     maintainer: guard-smith
@@ -369,25 +368,25 @@ skills:
   - skill: e2e-module-audit
     status: deprecated
     guards:
-      - { id: e2e-module-audit-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: e2e-module-audit-structure, category: structure, script: scripts/e2e-module-audit-guard.py, triggers: [pre-commit] }
     gates:
       - { id: e2e-module-audit-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [e2e-module-audit-structure] }
     maintainer: guard-smith
     notes: DEPRECATED → acceptance-discipline
 
-  - skill: skills-security
+  - skill: skills-security-scan
     status: deprecated
     guards:
-      - { id: skills-security-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: skills-security-scan-structure, category: structure, script: scripts/skills-security-scan-guard.py, triggers: [pre-commit] }
     gates:
-      - { id: skills-security-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [skills-security-structure] }
+      - { id: skills-security-scan-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [skills-security-scan-structure] }
     maintainer: guard-smith
     notes: DEPRECATED → trae-security-review
 
   - skill: guard-approver
     status: active
     guards:
-      - { id: guard-approver-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: guard-approver-structure, category: structure, script: scripts/guard-approver-guard.py, triggers: [pre-commit] }
     gates:
       - { id: guard-approver-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [guard-approver-structure] }
     maintainer: guard-smith
@@ -395,7 +394,7 @@ skills:
   - skill: skill-bundle
     status: active
     guards:
-      - { id: skill-bundle-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit, L3] }
+      - { id: skill-bundle-structure, category: structure, script: scripts/skill-bundle-guard.py, triggers: [pre-commit, L3] }
     gates:
       - { id: skill-bundle-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [skill-bundle-structure] }
     maintainer: guard-smith
@@ -403,7 +402,7 @@ skills:
   - skill: skill-acceptance
     status: active
     guards:
-      - { id: skill-acceptance-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit, L3] }
+      - { id: skill-acceptance-structure, category: structure, script: scripts/skill-acceptance-guard.py, triggers: [pre-commit, L3] }
     gates:
       - { id: skill-acceptance-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [skill-acceptance-structure] }
     maintainer: guard-smith
@@ -411,7 +410,7 @@ skills:
   - skill: security-review
     status: active
     guards:
-      - { id: security-review-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: security-review-structure, category: structure, script: scripts/security-review-guard.py, triggers: [pre-commit] }
     gates:
       - { id: security-review-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [security-review-structure] }
     maintainer: guard-smith
@@ -421,7 +420,7 @@ skills:
     status: active
     guards:
       - { id: guard-gate-smith-registration, category: registration, script: src/guards/skill-registration-guard.mjs, triggers: [pre-commit, pre-push, L3] }
-      - { id: guard-gate-smith-structure, category: structure, script: scripts/skill-structure-guard.py, triggers: [pre-commit] }
+      - { id: guard-gate-smith-structure, category: structure, script: scripts/guard-gate-smith-guard.py, triggers: [pre-commit] }
     gates:
       - { id: guard-gate-smith-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [guard-gate-smith-registration, guard-gate-smith-structure] }
       - { id: guard-gate-smith-l3, level: L3, hooks: [.github/workflows/skill-market-gate.yml], runs_guards: [guard-gate-smith-registration] }

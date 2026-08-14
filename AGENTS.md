@@ -60,6 +60,27 @@ my-trae-helper/
     - 其他 agent 试图 Edit 这些路径 → guard-approver Tier 3 拦截 + 注册表守卫自举
     - 详见 `skill-markets/guard-gate-smith/SKILL.md`
 
+12. **调整 guard/gate 必走 7 步 SOP（2026-08-14 §2.4 新增，调用方强制）**：
+    任何 agent（含主 agent / 其他 sub-agent）要调整 guard / gate，按以下 7 步：
+    1. **识别需求** —— 锁定"要改什么 + 为什么"，现象源：pre-commit 报错 / 用户需求 / 新建 skill / 注册表守卫 BLOCK
+    2. **自我判定** —— 查 guard-gate-smith §2.1 表：
+       - 目标 ∈ 白名单路径（registry / scripts/<name>-guard.* / .husky/<name>-gate / scripts/guard-router.mjs / src/guards/* / gate workflow）→ 委派 guard-smith
+       - 目标 ∉ 白名单但触发 guard/gate 联动 → 仍委派 guard-smith
+       - 目标 = Tier 4（.husky/_* / .trae/identity/* / scripts/change-guard-approver.mjs）→ 🛑 终止，提 Tier 4 清单修订 PR
+    3. **准备委派上下文** —— 按 guard-gate-smith §2.2 填 `[GUARD-SMITH-DELEGATION]` 头部：任务 + 上下文 + 约束（**不省略影响范围**）
+    4. **委派 Task** —— `subagent_type="general-purpose"`（隔离上下文 + 审计清晰）
+    5. **等 sub-agent 报告 + 验收** —— 检查越界 + 输出合理性
+    6. **主 agent 自己兜底验证**（关键 —— §2.4 防假通过）—— 亲自跑：
+       - `node src/guards/skill-registration-guard.mjs`
+       - `node scripts/guard-router.mjs <changed-skill>`
+       - `node tests/unit/test_guard_router.mjs`
+       - `python tests/unit/test_registration_guard.py`
+       - `npm run lint`
+    7. **commit + 文档同步** —— `git commit -F .commit_msg.txt`（多行中文用 -F 文件，见 §4.1.2）+ 同步 SECURITY-MAP.md / CAPABILITY-MAP.md
+
+    反模式（必避免）：❌ 绕过 guard-smith 直接 Edit 白名单路径 / ❌ 跳过 Step 6 自检 / ❌ 不填 §2.2 头部 / ❌ 让 sub-agent 越界改非白名单路径 / ❌ 跳过文档同步
+    完整流程 + 场景对照表详见 `skill-markets/guard-gate-smith/SKILL.md` §2.4
+
 **§1.4 经验沉淀路由(覆盖 §1.4 可能引入)**:仓库内不建 `.learnings/` 目录。ERR / LEARN / FEATURE_REQUESTS 用全局 `self-improving-agent` 统一管理。本仓库内反例 → `skill-markets/<pkg>/references/trap-instructions.yaml`。详见 [.agents/rules/learning.md](.agents/rules/learning.md)。
 
 **§1.1 路径位置**：`scripts/` 放 Node/Python 脚本；`logs/` 放临时输出。
@@ -193,26 +214,18 @@ MUST §4.1.1: 任何数字声明必须第一轮带证据
   详见 trap-instructions.yaml AP-12
 
 MUST §4.1.2: 多行 commit message 用 -F 文件,不用 -m 多参数
-  反例(PowerShell 中文换行符截断):
-    git commit -m "line 1 中文" -m "line 2 中文"   # 输出空、exit 1
-  正例:
-    Write .commit_msg.txt "<完整多行>"
-    git commit -F .commit_msg.txt
-    rm .commit_msg.txt                              # 立即删,不污染
+  使用git bash进行操作
 
-MUST §4.1.3: Git Bash hook 必须探测 miniconda Python,不能信 /usr/bin/python3
-  反例: Git Bash 的 /usr/bin/python3 没 pip/pytest → subprocess 报 No module
-  正例:
-    PY=""
-    for cand in /mnt/c/ProgramData/miniconda3/python.exe \
-                 /c/ProgramData/miniconda3/python.exe \
-                 python3 py python; do
-      [ -x "$cand" ] && PY="$cand" && break
-    done
-    [ -n "$PY" ] && ! "$PY" -c "import pytest, yaml" 2>/dev/null && PY=""
-    export MY_TRAE_HELPER_PY="$PY"
-    "$PY" scripts/verify.py ...   # 子脚本用 $PY
-  详见 trap-instructions.yaml AP-9 + §11.1.4
+MUST §4.1.3: Git Hook 必须跨平台探测 Python + 自愈依赖,不硬编码任何具体路径
+  反例 1: 写死 /mnt/c/ProgramData/miniconda3/python.exe → macOS/Linux 跑不动,违反跨平台铁律
+  反例 2: 探测失败就 BLOCK → 装了 pip 但忘装 pytest 时连跑一次机会都没有,矫枉过正
+  正例(共享 scripts/detect-python.sh,hook 内 source):
+    # 跨平台探测 — PATH + 平台典型位置(由 uname 动态生成),带能力校验
+    # 缺 pytest/yaml → 自动 python -m pip install --user(自愈,不阻断)
+    . scripts/detect-python.sh
+    # detect-python.sh 自动导出 MY_TRAE_HELPER_PY=$PY
+    "$MY_TRAE_HELPER_PY" scripts/verify.py ...
+  详见 trap-instructions.yaml AP-9 + §11.1.4 + scripts/detect-python.sh
 ```
 
 ## §5 Skill 与 Agent 严格区分

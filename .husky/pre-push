@@ -9,49 +9,12 @@
 #   - Skill Bundle 守卫
 #   - Build（验证 CLI 配置）
 
-# Python 命令探测: 与 .husky/pre-commit 一致
+# 跨平台 Python 探测: 与 .husky/pre-commit 一致(共享 scripts/detect-python.sh)
 # pre-push 是独立进程,不继承 pre-commit 的 $PY,必须自己探测
-PY=""
 
-for cand in \
-  /mnt/c/ProgramData/miniconda3/python.exe \
-  /c/ProgramData/miniconda3/python.exe \
-  /mnt/c/Python313/python.exe \
-  /c/Python313/python.exe \
-  /mnt/c/Python312/python.exe \
-  /c/Python312/python.exe \
-  /mnt/c/Python311/python.exe \
-  /c/Python311/python.exe; do
-  if [ -x "$cand" ]; then PY="$cand"; break; fi
-done
-
-if [ -n "$PY" ]; then
-  if ! "$PY" -c "import pytest, yaml" 2>/dev/null; then
-    PY=""
-  fi
-fi
-
-if [ -z "$PY" ]; then
-  for cand in python3 py python; do
-    if PY2="$(type -p "$cand" 2>/dev/null)"; then
-      if [ -n "$PY2" ] && [ -x "$PY2" ]; then
-        if "$PY2" -c "import pytest, yaml" 2>/dev/null; then
-          PY="$PY2"
-          break
-        fi
-      fi
-    fi
-  done
-fi
-if [ -z "$PY" ]; then
-  PY="$(command -v python3 || command -v py || command -v python)"
-fi
-if [ -z "$PY" ]; then
-  echo "❌ Gate 配置错误: python3 / py / python 都不在 PATH"
-  exit 1
-fi
-
-export MY_TRAE_HELPER_PY="$PY"
+# shellcheck disable=SC1091
+. "$(dirname "$0")/../scripts/detect-python.sh" || exit 1
+PY="$MY_TRAE_HELPER_PY"
 
 set -e
 
