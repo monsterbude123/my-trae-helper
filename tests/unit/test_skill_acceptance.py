@@ -19,6 +19,15 @@ import tempfile
 import json
 from pathlib import Path
 
+# Windows 默认 cp1252 控制台无法编码 ━━━ 等 Unicode 字符,
+# 强制 stdout/stderr 用 utf-8,避免 L1/L2 Gate 在 npm run test:unit 时炸 UnicodeEncodeError
+# (2026-08-14 push 失败修复)
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
+
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 STRUCTURE_GUARD = REPO_ROOT / "scripts" / "skill-structure-guard.py"
 SECURITY_GUARD = REPO_ROOT / "scripts" / "skill-security-guard.py"
