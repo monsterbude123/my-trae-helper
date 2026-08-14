@@ -22,16 +22,16 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 
 // HOME 解析(每次重新计算,因为 main() 会修改 process.env.SELF_IMPROVING_HOME)
-// 优先级: --home CLI > SELF_IMPROVING_HOME env > 项目内 .self-improving-agent/
-// 注意: 默认不用 $HOME/.self-improving-agent,因为 WSL/Windows 互操作下不可见
+// 优先级: --home CLI > SELF_IMPROVING_HOME env > homedir()/.self-improving-agent
+// 注意: 跨平台时(homedir)Windows native node 返回 C:\Users\foo(正确);
+//       WSL→Windows 调 node 时,如果想写到仓库内,显式传 --home "$PWD/.self-improving-agent"
 function getHome() {
   const argv = process.argv;
   for (let i = 0; i < argv.length - 1; i++) {
     if (argv[i] === '--home') return argv[i + 1];
   }
   if (process.env.SELF_IMPROVING_HOME) return process.env.SELF_IMPROVING_HOME;
-  // 默认: 仓库根目录下 .self-improving-agent/(WSL/Windows 都可见)
-  return join(process.cwd(), '.self-improving-agent');
+  return join(homedir(), '.self-improving-agent');
 }
 function getLearnDir() {
   return join(getHome(), '.learnings');

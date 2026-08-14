@@ -29,9 +29,10 @@
 
 import { appendFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { homedir } from 'node:os';
 
 // --home 支持: 写在 $HOME/.self-improving-agent/logs/agent-hints.jsonl
-// 默认: 仓库根目录 + logs/agent-hints.jsonl
+// 默认: homedir()/.self-improving-agent/logs/agent-hints.jsonl
 function getHintPath() {
   const argv = process.argv;
   for (let i = 0; i < argv.length - 1; i++) {
@@ -39,7 +40,7 @@ function getHintPath() {
       return join(argv[i + 1], 'logs', 'agent-hints.jsonl');
     }
   }
-  return join(process.cwd(), 'logs', 'agent-hints.jsonl');
+  return join(homedir(), '.self-improving-agent', 'logs', 'agent-hints.jsonl');
 }
 
 async function readStdin() {
@@ -57,13 +58,19 @@ async function readStdin() {
 }
 
 async function main() {
-  // 读取输入: 优先 stdin,fallback argv
+  // 读取输入: 跳过 --home <path> 选项,只看真正的文本 argv
+  // 优先 stdin,fallback 非 --home 的 argv 元素
   let text = '';
-  if (process.stdin && process.stdin.readable && !process.argv[2]) {
+  const textArgs = process.argv.slice(2).filter((a, i, arr) => {
+    if (a === '--home') return false;
+    if (arr[i - 1] === '--home') return false;  // --home 的 value 跳过
+    return true;
+  });
+  if (process.stdin && process.stdin.readable && textArgs.length === 0) {
     text = await readStdin();
   }
-  if (!text && process.argv.length > 2) {
-    text = process.argv.slice(2).join(' ');
+  if (!text && textArgs.length > 0) {
+    text = textArgs.join(' ');
   }
   if (!text) {
     process.exit(0);
@@ -95,10 +102,10 @@ async function main() {
 
   if (!detected) process.exit(0);
 
-  // 写 hint
-  const logDir = join(process.cwd(), 'logs');
+  // 写 hint(用 getHintPath() 拿正确的路径,支持 --home)
+  const hintPath = getHintPath();
+  const logDir = dirname(hintPath);
   if (!existsSync(logDir)) mkdirSync(logDir, { recursive: true });
-  const hintPath = join(logDir, 'agent-hints.jsonl');
 
   const hint = {
     type: detected,
