@@ -8,6 +8,24 @@ name: Skill Market Gate
 on:
   pull_request:
     branches: [main, release/*]
+    paths:
+      - "skill-markets/**"
+      - "scripts/**"
+      - "src/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/skill-market-gate.yml"
+      - ".github/workflows/agent-dev-control-kit-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "skill-markets/**"
+      - "scripts/**"
+      - "src/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/skill-market-gate.yml"
+      - ".github/workflows/agent-dev-control-kit-ci.yml"
   release:
     types: [published]
 

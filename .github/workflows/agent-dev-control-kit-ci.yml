@@ -28,6 +28,8 @@ on:
     branches: [main]
     paths:
       - "skill-markets/agent-dev-control-kit/**"
+      - "scripts/run-agent-dev-control-kit-tests.sh"
+      - ".github/workflows/agent-dev-control-kit-ci.yml"
   workflow_dispatch:
 
 # 与 skill-market-gate.yml 共享并发槽(避免重复跑)
