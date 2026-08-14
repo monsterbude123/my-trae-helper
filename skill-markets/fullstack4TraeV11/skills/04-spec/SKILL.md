@@ -39,7 +39,7 @@ depends_on:
 7. NEVER 写实施       — spec.md 不写代码细节
 8. DRIFT → SPEC FIRST — 代码与 spec 漂移时先改 spec
 9. DOC HONEST         — spec.md INV 必在 Stage 4 落地
-10. SKEPTICAL          — P0/P1 spec 按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) 质疑性校验
+10. SKEPTICAL          — P0/P1 spec 按 [skeptical-validation-protocol.md](../../references/skeptical-validation-protocol.md) 质疑性校验
 ```
 
 ## 委派触发词

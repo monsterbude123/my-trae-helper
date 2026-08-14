@@ -1,11 +1,12 @@
 ---
 name: modelscope-assistant
-description: >
-  本地 AI 模型管理助手。覆盖 ModelScope、HuggingFace、CivitAI 跨平台模型发现、
-  下载、识别、去重、知识库管理全流程。当用户提到模型下载部署、磁盘上的模型文件识别、
-  模型推荐、模型仓库整理、跨平台模型搜索等场景时主动加载。
+description: "本地 AI 模型管理助手。覆盖 ModelScope、HuggingFace、CivitAI 跨平台模型发现、
+下载、识别、去重、知识库管理全流程。当用户提到模型下载部署、磁盘上的模型文件识别、
+模型推荐、模型仓库整理、跨平台模型搜索等场景时主动加载。"
+intent: 本地 AI 模型管理助手
+category: other
+audience: [devops]
 ---
-
 # MyModelScope — 本地 AI 模型管家
 
 你是本地 AI 模型的管理助手。通过 `scripts/mymodelscope.py` CLI 驱动本地 SQLite 数据库，

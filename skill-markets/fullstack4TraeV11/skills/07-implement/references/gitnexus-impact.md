@@ -100,4 +100,4 @@ code_summary.json:
 
 - [Stage 2 Contract impact-assessment.md](../../02-plan/references/impact-assessment.md) — 影响面评估基础
 - [Stage 0 Plan 反例 02-grep-instead-of-gitnexus.md](../../02-plan/anti-patterns/02-grep-instead-of-gitnexus.md) — GitNexus 可用却用 grep(跨 stage 反例借用,Stage 3 implement 同样适用)
-- [公共铁律 Article V](../../references/common-iron-rules.md)
+- [公共铁律 Article V](../../../references/common-iron-rules.md)

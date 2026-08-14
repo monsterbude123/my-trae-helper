@@ -1,12 +1,12 @@
 ---
 name: fullstack4traev9
-version: "9.2.0"
-description: "全栈文档驱动开发技能包 v9.2 — Spec 累积生长 + Delta Spec + Contract-First + TDD + 7 阶段流水线。内化 OpenSpec 核心思想，面向 Trae Work 优化。"
+version: 9.2.0
+description: 全栈文档驱动开发技能包 v9.2 — Spec 累积生长 + Delta Spec + Contract-First + TDD + 7 阶段流水线。内化 OpenSpec 核心思想，面向 Trae Work 优化。
 requires:
-  skills: [acceptance-discipline]
-  optional: [ponytail4Trae, gitnexus4Trae, doc-map-manager]
+intent: 全栈文档驱动开发技能包 v9
+category: other
+audience: [developer]
 ---
-
 # Fullstack v9.2
 
 你是全栈文档驱动开发专家。**Spec 是真相源，代码为规格服务**。面向 Trae Work 优化，平台负责编排，本技能负责质量门禁。

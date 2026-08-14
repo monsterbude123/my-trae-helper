@@ -1,25 +1,13 @@
 ---
-name: "test-partition-runner"
+name: test-partition-runner
 status: deprecated
 redirect_to: acceptance-discipline
-description: "[DEPRECATED → acceptance-discipline] 测试阻塞解决策略 - 分区测试+坏测试识别。当全局测试挂起/失败或用户报告测试阻塞问题时调用。支持逐步分区定位坏测试，而非盲目重试整个套件。"
-triggers:
-  - "测试卡住"
-  - "测试阻塞"
-  - "测试挂起"
-  - "测试失败"
-  - "test blocking"
-  - "test hang"
-  - "test stuck"
-  - "test failed"
-  - "测试不过"
-  - "test timeout"
-  - "分区测试"
-  - "partition test"
-  - "坏测试"
-  - "bad test"
+description: [DEPRECATED → acceptance-discipline] 测试阻塞解决策略 - 分区测试+坏测试识别。当全局测试挂起/失败或用户报告测试阻塞问题时调用。支持逐步分区定位坏测试，而非盲目重试整个套件。
+triggers: [测试卡住, 测试阻塞, 测试挂起, 测试失败, test blocking, test hang, test stuck, test failed, 测试不过, test timeout, 分区测试, partition test, 坏测试, bad test]
+intent: [DEPRECATED → acceptance-discipline] 测试阻塞解决策略 - 分区测试+坏测试识别
+category: gate
+audience: [devops]
 ---
-
 # Test Partition Runner
 
 **Solve test blocking by partitioning, not guessing.**

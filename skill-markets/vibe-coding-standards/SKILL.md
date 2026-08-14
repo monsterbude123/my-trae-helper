@@ -1,22 +1,11 @@
 ---
 name: vibe-coding-standards
 description: Vibe Coding 核心组件编写原则 v2.5 — AGENTS.md、Rules、Skills、Subagents 的结构规范、体积弹性范围（100~350 行）和防上下文击穿策略。v2.5 放宽体积阈值 +30%（AGENTS/SKILL/Subagent 100~350、> 350 才拆；Rule ≤ 120），校验脚本同步调整。
-triggers:
-  - "编写AGENTS.md"
-  - "写规则"
-  - "编写skill"
-  - "写子代理"
-  - "vibe coding"
-  - "防上下文击穿"
-  - "体积红线"
-  - "子代理设计"
-  - "系统提示词"
-  - "agent prompt"
-  - "项目地图"
-  - "地图内联"
-  - "防机械指针化"
+triggers: [编写AGENTS.md, 写规则, 编写skill, 写子代理, vibe coding, 防上下文击穿, 体积红线, 子代理设计, 系统提示词, agent prompt, 项目地图, 地图内联, 防机械指针化]
+intent: Vibe Coding 核心组件编写原则 v2
+category: orchestration
+audience: [agent]
 ---
-
 # Vibe Coding 核心组件编写原则
 
 > 分层治理、按需加载、地图内联（防迷路）+ 规范指针（防击穿）。
@@ -39,6 +28,19 @@ triggers:
 
 是 → 🗺️ 地图（内联）    否 → 📋 规范（指针）
 ```
+
+### §1.6 Context Engineering 5 Pillar（参考 GitHub Copilot 2026-06）
+
+> 来源: [external-report 2026-08-14 §M-03](../2026-08-14/external-report.md) + [GitHub Copilot context handling](https://github.blog/ai-and-ml/github-copilot/getting-more-from-each-token-how-copilot-improves-context-handling-and-model-routing/)
+
+**中等 prompt + 优秀 context 几乎总赢过 优秀 prompt + 贫 context**(Copilot 实测 2026-06)。规则文件首次可用率从 40% → 80%+。**前置 30 分钟写好 context 远比调 prompt 划算**。
+
+5 Pillar:
+1. **项目结构** — 让 agent 知道"文件在哪、模块怎么分"
+2. **代码风格** — 命名 / 缩进 / 错误处理 / 测试约定
+3. **领域知识** — 业务术语 / 关键决策 / 历史原因
+4. **相关代码示例** — 真实可参考的范例(胜过抽象描述)
+5. **反馈循环** — agent 输出错了,怎么纠正(规则补 / 例补 / 排除补)
 
 | 地图（必须内联） | 规范（指针引用） |
 |-----------------|----------------|

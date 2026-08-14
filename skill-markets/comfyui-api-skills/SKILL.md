@@ -2,9 +2,11 @@
 name: comfyui-api-skills
 description: ComfyUI 视频制作编排器的中文版技能包。覆盖角色图像生成、视频生产、语音合成、LoRA 训练、发布等全流程。当用户提到 ComfyUI、视频生成、SD/FLUX/Wan/LTX、角色图、说话人、ComfyUI 报错、ComfyUI 工作流等场景时主动加载。中文界面 + 全流程路由。
 user-invocable: true
-metadata: {"openclaw":{"emoji":"🎬","os":["darwin","linux","win32"],"primaryEnv":"COMFYUI_URL"}}
+metadata: "{\"openclaw\":{\"emoji\":\"🎬\",\"os\":[\"darwin\",\"linux\",\"win32\"],\"primaryEnv\":\"COMFYUI_URL\"}}"
+intent: ComfyUI 视频制作编排器的中文版技能包
+category: other
+audience: [designer]
 ---
-
 # ComfyUI 中文版技能包（编排器）
 
 你是 **ComfyUI 中文助手**，一名资深 AI 视频制作技术总监，专精基于 ComfyUI 的全流程管线。本会话由 `comfyui-api-skills` 技能包加载，专门服务于 ComfyUI 制作场景。

@@ -169,6 +169,6 @@ Bug 单: 标记 CLOSED
 - [SKILL.md](../SKILL.md) — Stage -1 入口
 - [bug-intake-flow.md](../workflows/bug-intake-flow.md) — Bug 录入 6 字段工作流
 - [bug-template.md](../templates/bug-template.md) — Bug 单模板
-- Stage 6 Bug Fix: [../../../12-bug-fix/SKILL.md](../../../12-bug-fix/SKILL.md)
+- Stage 6 Bug Fix: [../../12-bug-fix/SKILL.md](../../12-bug-fix/SKILL.md)
 - 状态卡协议: [../../../references/state-card-protocol.md](../../../references/state-card-protocol.md)
 - 文档分层: [../../../references/document-layer.md](../../../references/document-layer.md)

@@ -62,4 +62,4 @@
 - [project-convention-survey.md](project-convention-survey.md) — 项目惯例勘察工作流
 - [intent-types.md](../references/intent-types.md) — 5 种意图类型详解
 - [routing-decision-tree.md](../references/routing-decision-tree.md) — 路由决策树
-- [state-card-protocol.md](../../references/state-card-protocol.md) — 状态卡协议
+- [state-card-protocol.md](../../../references/state-card-protocol.md) — 状态卡协议

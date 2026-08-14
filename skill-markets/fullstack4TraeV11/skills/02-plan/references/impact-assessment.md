@@ -135,7 +135,7 @@ Step 5: detect_changes({scope="compare"}) → 冲突检测
 
 ## 反模式
 
-> 完整反例见 [anti-patterns/02-grep-instead-of-gitnexus.md](../../anti-patterns/02-grep-instead-of-gitnexus.md),本节不再展开(防冗余)。
+> 完整反例见 [anti-patterns/02-grep-instead-of-gitnexus.md](../anti-patterns/02-grep-instead-of-gitnexus.md),本节不再展开(防冗余)。
 
 ---
 

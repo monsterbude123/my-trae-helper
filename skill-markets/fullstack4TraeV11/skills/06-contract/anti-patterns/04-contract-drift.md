@@ -203,5 +203,5 @@ ci_pipeline:
 
 - [SKILL.md §铁律 10](../SKILL.md) — THREE-WAY SYNC
 - V10 drift-detect.md: 已蒸馏到本文档（V11 实战案例）
-- [drift-detect.py](../../scripts/drift-detect.py) — 三方一致性自动验证
+- [drift-detect.py](../../../templates/hooks/drift-detect.py) — 三方一致性自动验证（V11 已迁入 templates/hooks/）
 - 公共铁律 Article VIII: [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)

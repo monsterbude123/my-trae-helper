@@ -34,7 +34,7 @@
 | L3 | 文件路径 | ✅ `dirs::data_dir()` + env 覆盖 |
 | L4 | URL placeholder | ✅ 占位符合理 |
 
-详见 `.trae/rules/硬编码治理.md`。
+详见 `.trae/rules/硬编码治理.md`（V10 蒸馏；项目可按需创建）。
 
 ---
 
@@ -67,5 +67,5 @@ api_key = "sk-1234567890"  # ❌ L0 硬编码
 ## 关联引用
 
 - [SKILL.md §铁律 6](../SKILL.md) — 代码卫生
-- V10 .trae/rules/硬编码治理.md: [../../../.trae/rules/硬编码治理.md](../../../.trae/rules/硬编码治理.md)
+- V10 `.trae/rules/硬编码治理.md`（已蒸馏到本文档）
 - V10 implementer.md 铁律 6: `V10 来源` (已蒸馏到本文档)

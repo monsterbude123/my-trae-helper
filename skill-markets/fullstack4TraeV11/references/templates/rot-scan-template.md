@@ -62,6 +62,6 @@
 
 ## 关联引用
 
-- [Stage 4.5 Rot Scan](../skills/10-rot-scan/SKILL.md)
-- [rot-classification.md](../skills/10-rot-scan/references/rot-classification.md)
-- [scan-protocol.md](../skills/10-rot-scan/references/scan-protocol.md)
+- [Stage 4.5 Rot Scan](../../skills/10-rot-scan/SKILL.md)
+- [rot-classification.md](../../skills/10-rot-scan/references/rot-classification.md)
+- [scan-protocol.md](../../skills/10-rot-scan/references/scan-protocol.md)

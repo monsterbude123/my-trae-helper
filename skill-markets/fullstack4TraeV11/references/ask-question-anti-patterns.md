@@ -77,7 +77,7 @@ AskUserQuestion(questions=[
 ])
 ```
 
-正确: 强制 yes/no 应走 [NotifyUser](file) 或独立 alert() 机制。
+正确: 强制 yes/no 应走 NotifyUser 工具或独立 alert() 机制。
 
 ### 反例 6：与 NotifyUser 混淆
 

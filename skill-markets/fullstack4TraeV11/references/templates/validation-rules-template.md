@@ -41,5 +41,5 @@
 
 ## 关联引用
 
-- [Stage 2 Contract](../skills/06-contract/SKILL.md)
+- [Stage 2 Contract](../../skills/06-contract/SKILL.md)
 - [api-contracts-template.md](api-contracts-template.md)

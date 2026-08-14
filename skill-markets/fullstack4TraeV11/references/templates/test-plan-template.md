@@ -65,6 +65,6 @@ pytest tests/unit/ -v
 
 ## 关联引用
 
-- [Stage 0.5 Test Plan](../skills/03-test-plan/SKILL.md)
-- [coverage-matrix-build.md](../skills/03-test-plan/workflows/coverage-matrix-build.md)
-- [Stage 4 Review §Step 2.4](../skills/09-review/references/multi-round-revision.md)
+- [Stage 0.5 Test Plan](../../skills/03-test-plan/SKILL.md)
+- [coverage-matrix-build.md](../../skills/03-test-plan/workflows/coverage-matrix-build.md)
+- [Stage 4 Review §Step 2.4](../../skills/09-review/references/multi-round-revision.md)

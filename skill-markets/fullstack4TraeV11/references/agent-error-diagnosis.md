@@ -50,7 +50,7 @@ Step 4: 若现有铁律缺失 → 🛑 必新增 Article + 反例（不走 Artic
 **症状**：rule > 200 行没读完 + 反复踩同一雷 + 自评 PASS
 
 **真实根因**：
-- Article XI ≤10 铁律 + ≤150 行（V11 **已含**）
+- Article XI vibe-coding-standards v2.5 弹性 100~350 行（V11 **已含**，2026-08-14 解除硬编码上限）
 - 反例库 common-anti-patterns.md 没读（V11 **已含**）
 
 **反例**：新增 P0 §21 未读 rule PASS

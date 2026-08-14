@@ -164,7 +164,7 @@ blocker:
 | Step 5 全 PASS | `stage_status` = "completed", `stage_ended_at` = ISO 8601 | `next_stage = "4/review"` |
 | 任何 FAIL | `health = 🔴 blocked` | 立即按阻塞升级路径走 |
 
-完整字段定义见 [references/state-card-protocol.md §二](../../references/state-card-protocol.md)。
+完整字段定义见 [references/state-card-protocol.md §二](../../../references/state-card-protocol.md)。
 
 ## 5 工作流 × 4 维度总览表（V11.2 NEW — 蒸馏自 08-real-verify 自检报告）
 

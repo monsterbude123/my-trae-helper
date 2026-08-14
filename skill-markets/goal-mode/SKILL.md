@@ -1,17 +1,12 @@
 ---
-name: "goal-mode"
-description: "目标追逐模式 — 绝对严格的任务执行协议。当用户有明确目标、需要严格追踪和逐项验证时使用。激活后 Agent 不得声称任何形式的\"完成\"、\"好了\"、\"搞定\"、\"done\"，除非通过完整审计门禁。触发词: /goal、目标追逐、严格验收、不准偷懒、goal mode、进入目标模式。未通过审计 = 未完成。"
-triggers:
-  - "/goal"
-  - "/goal-mode"
-  - "目标追逐"
-  - "进入目标模式"
-  - "激活goal"
-related:
-  - "coding-xinfa"     # 通用编码心法 + 精简 Goal Mode 提要 + 表达风格规范
-  - "ponytail4Trae"    # 懒人开发模式（避免目标追逐变成"过度严格"）
+name: goal-mode
+description: "目标追逐模式 — 绝对严格的任务执行协议。当用户有明确目标、需要严格追踪和逐项验证时使用。激活后 Agent 不得声称任何形式的\\"完成\\"、\\"好了\\"、\\"搞定\\"、\\"done\\"，除非通过完整审计门禁。触发词: /goal、目标追逐、严格验收、不准偷懒、goal mode、进入目标模式。未通过审计 = 未完成。"
+triggers: [/goal, /goal-mode, 目标追逐, 进入目标模式, 激活goal]
+related: [coding-xinfa"     # 通用编码心法 + 精简 Goal Mode 提要 + 表达风格规范, ponytail4Trae"    # 懒人开发模式（避免目标追逐变成"过度严格"）]
+intent: 目标追逐模式 — 绝对严格的任务执行协议
+category: gate
+audience: [agent]
 ---
-
 # Goal Mode — 目标追逐协议
 
 > **激活后，Agent 不得以任何形式声称完成，除非通过六步审计门禁。没有例外。**

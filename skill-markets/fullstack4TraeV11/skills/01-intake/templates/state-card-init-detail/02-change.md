@@ -63,4 +63,4 @@ notes: |
 ## 关联引用
 
 - 父文件：[../state-card-init.md](../state-card-init.md)
-- state-card-protocol.md：[../../../references/state-card-protocol.md](../../../references/state-card-protocol.md)
+- state-card-protocol.md：[../../../references/state-card-protocol.md](../../../../references/state-card-protocol.md)

@@ -127,24 +127,24 @@ trae-skills add my-new-skill -a trae-cn
 
 | 文件 | 功能 |
 |------|------|
-| [src/execution/skill-change-control.mjs](src/execution/skill-change-control.mjs) | 新建/修改/删除技能 |
-| [src/execution/skill-install-control.mjs](src/execution/skill-install-control.mjs) | 安装/卸载技能 |
+| [src/execution/skill-change-control.mjs](../../../src/execution/skill-change-control.mjs) | 新建/修改/删除技能 |
+| [src/execution/skill-install-control.mjs](../../../src/execution/skill-install-control.mjs) | 安装/卸载技能 |
 
 ### Guard Skills
 
 | 文件 | 功能 |
 |------|------|
-| [scripts/skill-security-guard.py](scripts/skill-security-guard.py) | 安全扫描 |
-| [scripts/skill-structure-guard.py](scripts/skill-structure-guard.py) | 结构检查 |
-| [src/guards/skill-dependency-guard.mjs](src/guards/skill-dependency-guard.mjs) | 依赖检查 |
-| [scripts/skill-capability-guard.py](scripts/skill-capability-guard.py) | 能力去重 |
+| [scripts/skill-security-guard.py](../../../scripts/skill-security-guard.py) | 安全扫描 |
+| [scripts/skill-structure-guard.py](../../../scripts/skill-structure-guard.py) | 结构检查 |
+| [src/guards/skill-dependency-guard.mjs](../../../src/guards/skill-dependency-guard.mjs) | 依赖检查 |
+| [scripts/skill-capability-guard.py](../../../scripts/skill-capability-guard.py) | 能力去重 |
 
 ### Gate Hooks
 
 | 文件 | 功能 |
 |------|------|
-| [.husky/pre-commit](.husky/pre-commit) | L1 提交门禁 |
-| [.husky/pre-push](.husky/pre-push) | L2 推送门禁 |
+| [.husky/pre-commit](../../../.husky/pre-commit) | L1 提交门禁 |
+| [.husky/pre-push](../../../.husky/pre-push) | L2 推送门禁 |
 
 ### 设计文档
 

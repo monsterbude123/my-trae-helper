@@ -117,4 +117,4 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 - [fullstack-hooks.json](fullstack-hooks.json) — TRAE IDE event 注册
 - [scripts/install-hooks.py](../../scripts/install-hooks.py) — V11 13 hook 安装工具
 - [scripts/hooks-fidelity.py](../../scripts/hooks-fidelity.py) — Hook 保真度门禁
-- [Article XVII](../references/common-iron-rules.md) — Secret 红化（V11 NEW）
+- Article XVII — Secret 红化（V11 NEW，见 references/common-iron-rules.md）

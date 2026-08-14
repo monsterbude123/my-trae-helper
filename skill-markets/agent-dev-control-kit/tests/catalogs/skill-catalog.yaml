@@ -28,7 +28,7 @@ required_docs:
 
   - path: CHANGELOG.md
     purpose: 变更日志(语义化)
-    must_contain_regex: "## \\["   # 必须含 ## [vX.Y.Z] 格式
+    must_contain_regex: "## \\["
 
   - path: README.md
     purpose: 项目概览 + 链接

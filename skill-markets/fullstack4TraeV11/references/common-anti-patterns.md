@@ -39,7 +39,7 @@
 | 13 | **契约漂移**（代码与契约不一致）| Stage 6 contract/anti-patterns/04-contract-drift.md |
 | 14 | **"非阻塞 FAIL" 放水** | Stage 9 review/anti-patterns/01-non-blocking-fail.md |
 | 15 | **编造测试覆盖** | Stage 9 review/anti-patterns/03-fabricate-coverage.md |
-| 23 | **GitNexus 可用却 grep / glob**（V10 process-rot-analysis.md 蒸馏） | [02-grep-instead-of-gitnexus.md](02-grep-instead-of-gitnexus.md)（Article V.5）+ [.gitnexus-降级-replace-by-grep.md](.gitnexus-降级-replace-by-grep.md) |
+| 23 | **GitNexus 可用却 grep / glob**（V10 process-rot-analysis.md 蒸馏） | 反例 23 本节已展开（Article V.5 + §19-22 cross-ref） |
 
 ### P3 低优类
 

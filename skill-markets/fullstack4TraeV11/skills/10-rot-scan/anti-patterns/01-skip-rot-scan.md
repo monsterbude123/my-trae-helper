@@ -42,6 +42,6 @@ python scripts/proactive-scan.py --project-root .
 ## 关联引用
 
 - [SKILL.md §铁律 1](../SKILL.md) — 跳过 rot-scan
-- [proactive-scan.py 文档](../../../../scripts/proactive-scan.py)
+- [proactive-scan.py 文档](../../../scripts/proactive-scan.py)
 - V11 Article XIV（铁律不可降级）
 - V10 来源（已蒸馏）: 见 V11 references 与 anti-patterns（部署时不依赖）references/process-rot-analysis.md`

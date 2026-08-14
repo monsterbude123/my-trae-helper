@@ -1,8 +1,10 @@
 ---
 name: vision-audit
 description: UI/UX 视觉验收 — 用本地 Qwen3-VL 模型分析 Playwright 截图，自动识别布局异常、样式错误、空白占位，输出结构化审计报告
+intent: UI/UX 视觉验收 — 用本地 Qwen3-VL 模型分析 Playwright 截图，自动识别布局异常、样式错...
+category: gate
+audience: [designer]
 ---
-
 # vision-audit
 
 用本地视觉语言模型（Qwen3-VL via local llm）分析 E2E 截图，自动检测 UI/UX 异常。

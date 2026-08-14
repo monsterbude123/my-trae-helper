@@ -104,5 +104,5 @@ planner: 选 C 引入新依赖 → 不论证  # ❌ rot #15
 ## 关联引用
 
 - [SKILL.md](../SKILL.md)
-- [constitution.md](../../references/constitution.md) — Article XVI
-- [stage-interaction-protocol.md](../../references/stage-interaction-protocol.md)
+- [constitution.md](../../../references/constitution.md) — Article XVI
+- [stage-interaction-protocol.md](../../../references/stage-interaction-protocol.md)

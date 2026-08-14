@@ -1,10 +1,11 @@
 ---
 name: trae-local-data-export
-description: "Trae IDE 本地数据导出工具箱。整合 ZedeX/trae-chat-decrypt（Windows 进程内存 → SQLCipher 密钥 → AES-256-CBC 解密）与 cgint/ai-data-extraction（跨平台解密库解析），产出三大产物：结构化 JSON 会话文件 / 合并 TXT / 完整 SQLite 离线备份。Invoke when user wants to export / decrypt / backup Trae local chat history, or migrate ModularData/ai-agent/database.db."
+description: Trae IDE 本地数据导出工具箱。整合 ZedeX/trae-chat-decrypt（Windows 进程内存 → SQLCipher 密钥 → AES-256-CBC 解密）与 cgint/ai-data-extraction（跨平台解密库解析），产出三大产物：结构化 JSON 会话文件 / 合并 TXT / 完整 SQLite 离线备份。Invoke when user wants to export / decrypt / backup Trae local chat history, or migrate ModularData/ai-agent/database.db.
 requires:
-  optional: [ponytail4Trae]
+intent: Trae IDE 本地数据导出工具箱
+category: other
+audience: [agent, devops]
 ---
-
 # Trae Local Data Export
 
 > 端到端导出 Trae IDE 本地加密聊天数据库的技能包。整合两个开源工具，串联"加密库 → 密钥 → 明文库 → 三大产物"完整管线。

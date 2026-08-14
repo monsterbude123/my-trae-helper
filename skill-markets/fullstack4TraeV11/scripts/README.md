@@ -142,7 +142,7 @@ python scripts/prototype-backfill-check.py --change-id {id} --json
 
 ## 灵活度铁律 8（V11.3 NEW — 人工判定覆盖 — 蒸馏自 canvas-asset-folders）
 
-> **核心**: 5% 视觉差异阈值（V11.3 收紧 4 倍）+ fidelity 等级 + 偏离理由 + 工具-人类分层判定。
+> **核心**: 5% 视觉差异阈值（V11.2 的 20% → V11.3 的 5%）+ fidelity 等级 + 偏离理由 + 工具-人类分层判定。
 > **设计哲学**: prototype 是"参考起点 + 单一真相源",但**承认合理灵活度**。
 
 ### 工具-人类分层判定（2026-08-12 用户决策记录）

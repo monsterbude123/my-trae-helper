@@ -55,7 +55,7 @@ pnpm test --coverage
 ## 教训
 
 - **V11 实战**：Stage 3 实施者交付 80% line coverage，自评"已覆盖主要功能"。Stage 4 Review 拿覆盖率报告 → REJECT → 补测 1.5 天
-- **真实场景**：业务侧隐藏 helper 函数（`format_currency` / `parse_date` / `validate_email`）未覆盖。这些是生产事故高发点。覆盖率门槛宽松 = 生产事故 2 倍概率
+- **真实场景**：业务侧隐藏 helper 函数（`format_currency` / `parse_date` / `validate_email`）未覆盖。这些是生产事故高发点。覆盖率门槛宽松直接增加生产事故概率
 - **关键路径 100% 反例**：支付回调函数 0 测试（"反正测过类似函数"），生产环境支付回调失败 → 直接资金损失
 
 ---

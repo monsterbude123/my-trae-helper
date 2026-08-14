@@ -16,7 +16,7 @@ Exit codes:
 
 V11.3 NEW (人工判定覆盖 — 蒸馏自 canvas-asset-folders):
   - --fidelity L1|L2|L3 (默认 L2 mockup)
-  - 5% 视觉差异阈值 (从 V11.2 的 20% 收紧 4 倍)
+  - 5% 视觉差异阈值（V11.2 的 20% → V11.3 的 5%）
   - 工具-人类分层判定: 工具 FAIL → 不阻塞,仅作"提示"交给 agent 决策
 """
 import sys
@@ -25,7 +25,7 @@ import pathlib
 import json
 from datetime import datetime, timezone
 
-# V11.3 NEW — 人工判定覆盖: 5% 视觉差异阈值(从 V11.2 的 20% 收紧 4 倍)
+# V11.3 NEW — 人工判定覆盖: 5% 视觉差异阈值（V11.2 的 20% → V11.3 的 5%）
 DEFAULT_VISUAL_DIFF_THRESHOLD = 0.05  # 5%
 
 # Fidelity 等级阈值 (V11.3 §8.1)

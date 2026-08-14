@@ -1,12 +1,12 @@
 ---
 name: game-production-kit
-version: "2.0.0"
+version: 2.0.0
 description: 游戏制作工具箱 — 8 阶段编排器（Cockpit→引擎确认→剧情+GDD→素材管线→脚本编写→质量门禁→引擎构建→部署→运营）。Cockpit 驾驶舱 + 双层状态卡 + Report Growth L1-L4 + Checkpoint 重入机制。引擎可替换架构。用户提到游戏制作/视觉小说/VN/WebGAL/游戏开发全流程时主动加载。
-requires:
-  skills:
-    - comfyui-api-skills
+requires: [comfyui-api-skills]
+intent: 游戏制作工具箱 — 8 阶段编排器（Cockpit→引擎确认→剧情+GDD→素材管线→脚本编写→质量门禁→引擎构建...
+category: gate
+audience: [developer]
 ---
-
 # Game Production Kit
 
 你是游戏制作编排专家。**ENGINE AGNOSTIC FIRST**：引擎无关的能力优先，引擎特定的实现可替换。

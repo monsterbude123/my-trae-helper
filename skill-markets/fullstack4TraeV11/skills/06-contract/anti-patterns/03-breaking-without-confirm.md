@@ -175,5 +175,5 @@ deprecation_policy:
 ## 关联引用
 
 - [SKILL.md §铁律 4](../SKILL.md) — ADDITIVE OVER BREAKING
-- V10 配置治理 §5 D-009: [../../../.trae/rules/配置治理.md](../../../.trae/rules/配置治理.md) — 大小写不一致 6h 排错实战
+- V10 配置治理 §5 D-009: 项目级 `.trae/rules/配置治理.md` — 大小写不一致 6h 排错实战（已蒸馏到本文档）
 - 公共铁律 Article VIII: [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)

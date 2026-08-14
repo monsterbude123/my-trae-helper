@@ -4,7 +4,7 @@
 
 ---
 
-## 17 Articles 全文
+## 17 Articles 全文（Article XVII 见 [common-iron-rules.md](common-iron-rules.md) §Article XVII）
 
 ### Article I — Quality First
 代码质量优先于开发速度。不可为赶进度降低测试覆盖 / 代码卫生 / 文档质量。
@@ -40,7 +40,9 @@ TDD 三步循环（RED → GREEN → REFACTOR + DRIFT CHECK）是实施唯一路
 每个验收结论必含 evidence：command / output / exit_code / file:line。
 
 ### Article XI — Self-Contained Constraints
-所有 skill 文件遵循 ≤10 铁律 + ≤150 行（V10.12 减肥后恢复）。新增铁律必走 Article XVI 质疑性校验。
+所有 skill 文件**遵循 vibe-coding-standards v2.5 弹性 100~350 行**（非硬上限，超阈按"指针引用"原则瘦身）。新增铁律必走 Article XVI 质疑性校验。
+
+> 修订：原 V10.12 文本 "≤10 铁律 + ≤150 行" 与 2026-08-14 AGENTS.md §1 #3 修订冲突（已删除硬编码铁律上限）。本 Article 现引用 vibe-coding-standards v2.5 弹性范围。
 
 ### Article XII — Workflow Discipline
 必走完整流程：Intake → Plan → Spec → Contract → Implement → Real Verify → Review → Rot Scan → Accept。不可跳过。

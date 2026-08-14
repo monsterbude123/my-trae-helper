@@ -32,16 +32,16 @@ python ../../scripts/spec-knowledge-extract.py --change-id {id} --type events
 
 ## API Endpoints
 
-- [auth-login](docs/api-endpoints/auth-login.md) — 用户登录
-- [user-create](docs/api-endpoints/user-create.md) — 用户创建（新增 2026-08-11）
+- `auth-login` (docs/api-endpoints/auth-login.md) — 用户登录
+- `user-create` (docs/api-endpoints/user-create.md) — 用户创建（新增 2026-08-11）
 
 ## Domain Models
 
-- [User](docs/domain-models/User.md) — 用户实体（新增 2026-08-11）
+- `User` (docs/domain-models/User.md) — 用户实体（新增 2026-08-11）
 
 ## Events
 
-- [UserRegistered](docs/events/UserRegistered.md) — 用户注册事件（新增 2026-08-11）
+- `UserRegistered` (docs/events/UserRegistered.md) — 用户注册事件（新增 2026-08-11）
 ```
 
 ## CHANGELOG 追加

@@ -12,7 +12,7 @@
 - **references/stage-physical-isolation.md**: 物理隔离规范（fact/ + stage/ 双目录布局，借鉴 Docker 镜像层）
 - **docs/给验收角色的一封信.md**: 验收瘦身操作手册（像产品经理验收，不读代码细节）
 
-### 🗑️ 革命性瘦身（-50%，53 文件删除）
+### 🗑️ 精简过渡产物（删除 53 个 V10 过渡文件，体积降低约 50%）
 
 - 删除 `references/V10-distillation-source-map.md`（V10 蒸馏溯源，过渡产物）
 - 删除 13 份 `skills/*/anti-patterns/V10-battle-tested.md`（V10 过渡引用）
@@ -51,7 +51,7 @@
 
 ### 🎯 V11 改进（vs V10）
 
-- **SUITE 减肥**: 每个 skill 文件遵循 ≤10 铁律 + ≤150 行（V10.12 减肥）
+- **SUITE 减肥**: 每个 skill 文件遵循 vibe-coding-standards v2.5 弹性 100~350 行（V10.12 减肥 → 2026-08-14 解除硬上限）
 - **3 层依赖配置**: 全局（user-level）/ V11 / 项目级
 - **独立部署**: V11 不依赖 V10 目录
 - **runtime 引用归零**: 全部 66 处 V10 运行时路径已替换为 V11 内部 reference

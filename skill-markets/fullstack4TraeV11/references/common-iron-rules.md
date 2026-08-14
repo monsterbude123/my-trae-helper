@@ -47,7 +47,7 @@
 
 ### 反例索引
 
-- [02-grep-instead-of-gitnexus.md](02-grep-instead-of-gitnexus.md) — V10 process-rot-analysis.md 反例蒸馏
+- 反例 23（V10 process-rot-analysis.md 蒸馏；见 references/common-anti-patterns.md）
 - [common-anti-patterns.md](common-anti-patterns.md) — 公共反例库
 
 ## Article VIII — Archive Immutable（Stage 5 强制）
@@ -71,11 +71,13 @@
 ## Article XI — Self-Contained Constraints（所有 skill 文件适用）
 
 ```
-11.1 所有 skill 文件遵循 ≤10 铁律
-11.2 所有 skill 文件遵循 ≤150 行（V10.12 减肥）
+11.1 所有 skill 文件遵循 vibe-coding-standards v2.5 弹性 100~350 行（非硬上限）
+11.2 超阈按"指针引用"原则瘦身（拆 references/），而非裁剪内容
 11.3 新增铁律必走 Article XVI §1.4 修复成本校验
 11.4 引用 references/ 而非内联（不腐化自己）
 ```
+
+> 修订：原 11.1/11.2 "≤10 铁律 + ≤150 行" 与 2026-08-14 AGENTS.md §1 #3 修订冲突（已删除硬编码铁律上限）。本条目现引用 vibe-coding-standards v2.5 弹性范围。
 
 ## Article XII — Workflow Discipline（V11 全 stage 适用）
 

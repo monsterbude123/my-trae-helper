@@ -1,8 +1,10 @@
 ---
 name: deep-research
 description: Multi-source deep research with firecrawl/exa MCPs. Searches the web, synthesizes findings, delivers cited reports. Use when the user wants thorough research with evidence and citations.
+intent: Multi-source deep research with firecrawl/exa MCPs
+category: other
+audience: [devops]
 ---
-
 # Deep Research
 
 > 精简骨架（§11 约束：≤10 铁律 + ≤150 行 + 详细内容按需 references/）。

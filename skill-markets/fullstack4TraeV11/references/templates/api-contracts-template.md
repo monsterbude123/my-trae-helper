@@ -61,6 +61,6 @@
 
 ## 关联引用
 
-- [Stage 2 Contract](../skills/06-contract/SKILL.md)
+- [Stage 2 Contract](../../skills/06-contract/SKILL.md)
 - [domain-models-template.md](domain-models-template.md)
 - [validation-rules-template.md](validation-rules-template.md)

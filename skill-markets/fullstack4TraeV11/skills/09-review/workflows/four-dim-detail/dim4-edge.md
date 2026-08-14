@@ -129,5 +129,5 @@ Round 3+: rescue hatch — 回退 Phase 0（Intake）
 - four-dimension-scoring.md：[../../references/four-dimension-scoring.md](../../references/four-dimension-scoring.md)
 - skeptical-acceptance.md：[../../references/skeptical-acceptance.md](../../references/skeptical-acceptance.md)
 - multi-round-revision.md：[../../references/multi-round-revision.md](../../references/multi-round-revision.md)
-- GitNexus 失败处理协议：[../../../references/gitnexus-retry-protocol.md](../../../references/gitnexus-retry-protocol.md)
+- GitNexus 失败处理协议：[../../../references/gitnexus-retry-protocol.md](../../../../references/gitnexus-retry-protocol.md)
 - SKILL.md：[../../SKILL.md](../../SKILL.md)

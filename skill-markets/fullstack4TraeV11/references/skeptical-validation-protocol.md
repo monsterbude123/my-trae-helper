@@ -80,7 +80,7 @@ MUST 激活质疑性校验:
 质疑: 这个修复值得做吗？
 检查:
   [ ] 修复行数 / 影响范围（10 行 vs 100 行）
-  [ ] 是否破坏 Article XI（skill 文件 ≤10 铁律 + ≤150 行）
+  [ ] 是否破坏 Article XI（skill 文件遵循 vibe-coding-standards v2.5 弹性 100~350 行）
   [ ] 是否有更低成本的等价方案？（如文档引用优于内联）
   [ ] 修复能否被"挂载时机"取代？
 
@@ -239,7 +239,7 @@ MUST 激活质疑性校验:
   - Step 3 强制调 Skill(name="project-rules")（如项目已有 .trae/skills/project_rules_skills/）
   - Step 5 核对状态卡路径 docs/specs/.state-card.md（项目级）/ docs/specs/changes/{id}/.state-card.md（change 级）
   - 禁止用 .trae/state-card.md（V10 残留）
-关联: [SKILL.md §0.5](../../SKILL.md) + [state-card-protocol.md §1.1](state-card-protocol.md)
+关联: [SKILL.md §0.5](../SKILL.md) + [state-card-protocol.md §1.1](state-card-protocol.md)
 ```
 
 ---
@@ -252,7 +252,7 @@ MUST 激活质疑性校验:
 | [common-iron-rules.md Article XVII](common-iron-rules.md) | 互补 | §1.1 根因"必须证据" + Article XVII secret redaction |
 | [agent-error-diagnosis.md](agent-error-diagnosis.md) | 诊断手册 | §4 反例 6/7 来自 agent 5 模式 |
 | [common-anti-patterns.md §19-22](common-anti-patterns.md) | 反例库 | §4 反例 6/7 的索引 |
-| [skill-optimization-method.md](skill-optimization-method.md) | 父级方法论 | 触发词"升级前" + §1 Step 0 引用本协议 |
+| skill-optimization-method.md | 父级方法论（已蒸馏到 V11 common-iron-rules.md） | 触发词"升级前" + §1 Step 0 引用本协议 |
 
 ---
 

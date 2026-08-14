@@ -79,4 +79,4 @@ debugger: 用户报 bug → 立即修代码 → 没创建 bug 单
 
 - [SKILL.md](../SKILL.md)
 - [Stage 6 Bug Fix](../../12-bug-fix/SKILL.md)
-- [stage-card-protocol.md](../../references/state-card-protocol.md)
+- [stage-card-protocol.md](../../../references/state-card-protocol.md)

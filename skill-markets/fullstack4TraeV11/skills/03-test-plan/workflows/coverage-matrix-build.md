@@ -117,4 +117,4 @@ Test Plan: tests/foo.test.ts:999  # ❌ 文件不存在
 
 - [SKILL.md](../SKILL.md)
 - [Stage 4 Review §Step 2.4](../../09-review/references/multi-round-revision.md)
-- [stage-interaction-protocol.md](../../references/stage-interaction-protocol.md)
+- [stage-interaction-protocol.md](../../../references/stage-interaction-protocol.md)

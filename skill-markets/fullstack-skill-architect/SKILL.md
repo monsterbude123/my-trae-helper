@@ -1,14 +1,14 @@
 ---
 name: fullstack-skill-architect
-version: "1.0.0"
+version: 1.0.0
 description: "全栈技能设计专家 — 起源于 fullstack4TraeV11 V11→V11.3 升级会话蒸馏,适用于任何多 stage + 多 sub-agent 协同的全栈开发技能包设计/改造/升级(V11/V12/V{n+1})。核心 5 把刀: 物理隔离、husky式门禁硬化、子代理严格边界、验收瘦身、革命性瘦身。触发词: 技能设计/技能升级/技能瘦身/V11→V12/V11.3/物理隔离/门禁硬化/子代理越界/验收精简/革命性清理/陈旧移除。"
 origin: fullstack4TraeV11 V11.3 升级会话(2026-08-13)
 applicability: 通用全栈技能设计方法论(不止 V11,适用于任何多 stage + 多 sub-agent 协同场景)
 requires:
-  skills: [goal-mode, skeptical-validation-protocol]
-  optional: [acceptance-discipline, coding-xinfa]
+intent: 全栈技能设计专家 — 起源于 fullstack4TraeV11 V11→V11
+category: gate
+audience: [agent, designer]
 ---
-
 # fullstack-skill-architect — 全栈技能设计专家
 
 > **一句话定位**: 你设计/改造/升级全栈开发技能包时,这个 skill 让你用"物理隔离 + 门禁硬化 + 子代理边界 + 革命性瘦身"四把刀,把臃肿的技能包砍到清爽。

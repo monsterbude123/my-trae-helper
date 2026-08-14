@@ -24,5 +24,5 @@
 
 ## 关联引用
 
-- spec.md: [spec.md](spec.md)
+- spec.md: `../spec.md`（项目级路径，本模板运行时由项目生成）
 - 双源协议: [../references/dual-source-protocol.md](../references/dual-source-protocol.md)

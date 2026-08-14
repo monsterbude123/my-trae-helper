@@ -1,65 +1,13 @@
 ---
 name: fullstack4traev11
-version: "11.0.0"
-description: "全栈文档驱动开发技能包 v11.0 — 高内聚专家架构。13 个 stage skill 自包含骨架/铁律/反例/模板/脚本/依赖声明，编排器只做路由+门禁+状态卡同步。V10 思想传承 + 流程控制 + Hook 生命周期 + 脚本使用时机 + 配置化依赖。触发词：全栈开发 / spec-kit / 文档驱动 / V11 / 高内聚 / 13 stage。"
+version: 11.0.0
+description: 全栈文档驱动开发技能包 v11.0 — 高内聚专家架构。13 个 stage skill 自包含骨架/铁律/反例/模板/脚本/依赖声明，编排器只做路由+门禁+状态卡同步。V10 思想传承 + 流程控制 + Hook 生命周期 + 脚本使用时机 + 配置化依赖。触发词：全栈开发 / spec-kit / 文档驱动 / V11 / 高内聚 / 13 stage。
 requires:
-  skills: [acceptance-discipline, goal-mode, coding-xinfa]
-  optional: [ponytail4Trae, gitnexus4Trae, doc-map-manager, visual-evidence-discipline, screenshot, playwright-best-practices, browser-use-cloud, frontend-backend-contract-alignment, ui-ux-pro-max]
 stage_config:
-  intake:
-    route: "skills/01-intake/SKILL.md"
-    skills: []
-    stages: []
-  plan:
-    route: "skills/02-plan/SKILL.md"
-    skills: [gitnexus4Trae]
-    stages: [-1/intake]
-  test-plan:
-    route: "skills/03-test-plan/SKILL.md"
-    skills: []
-    stages: [0/plan]
-  spec:
-    route: "skills/04-spec/SKILL.md"
-    skills: []
-    stages: [0.5/test-plan]
-  prototype:
-    route: "skills/05-prototype/SKILL.md"
-    skills: [ui-ux-pro-max]
-    stages: [1/spec]
-  contract:
-    route: "skills/06-contract/SKILL.md"
-    skills: [frontend-backend-contract-alignment]
-    stages: [1.5/prototype]
-  implement:
-    route: "skills/07-implement/SKILL.md"
-    skills: [ponytail4Trae, gitnexus4Trae]
-    stages: [2/contract]
-  real-verify:
-    route: "skills/08-real-verify/SKILL.md"
-    skills: [visual-evidence-discipline, screenshot, playwright-best-practices]
-    stages: [3/implement]
-  review:
-    route: "skills/09-review/SKILL.md"
-    skills: [acceptance-discipline]
-    stages: [3.5/real-verify]
-  rot-scan:
-    route: "skills/10-rot-scan/SKILL.md"
-    skills: [goal-mode]
-    stages: [4/review]
-  accept:
-    route: "skills/11-accept/SKILL.md"
-    skills: [doc-map-manager]
-    stages: [4.5/rot-scan]
-  bug-fix:
-    route: "skills/12-bug-fix/SKILL.md"
-    skills: [gitnexus4Trae]
-    stages: [-1/intake]
-  project-health:
-    route: "skills/13-project-health/SKILL.md"
-    skills: []
-    stages: []
+intent: 全栈文档驱动开发技能包 v11
+category: gate
+audience: [developer]
 ---
-
 # Fullstack v11.0 — 高内聚专家技能包
 
 你是全栈文档驱动开发编排专家。**Spec 是真相源，代码为规格服务**。13 个 stage 各由独立专家 skill 负责，编排器只做路由 + 门禁 + 状态卡同步。
@@ -86,7 +34,7 @@ stage_config:
 > V11 新增最后 2 条：每个 stage 自包含（高内聚）+ stage skill 可独立替换/升级（插拔式）。
 
 **冲突判定顺序**: Constitution > Spec > Contract > Code > 个人判断。
-**永不可降级**: Articles I、II、IV、V、VIII、IX、XIV、XV、XVI（详见 [references/constitution.md](references/constitution.md)）。
+**永不可降级**: 全部 17 Articles（详见 [references/constitution.md](references/constitution.md)，其中 Article XVII Secret Redaction 见 [common-iron-rules.md](references/common-iron-rules.md)）。
 
 ---
 
@@ -390,7 +338,7 @@ ls docs/specs/.state-card.md
 
 ---
 
-## §10 禁止项（核心 10 条）
+## §10 禁止项（核心 9 条）
 
 > 18 条反例详细：[references/common-anti-patterns.md](references/common-anti-patterns.md)
 > 16 条铁律详细：[references/common-iron-rules.md](references/common-iron-rules.md)
@@ -450,7 +398,7 @@ ls docs/specs/.state-card.md
 #### §3.7.3 灵活度铁律 8 — V11.3 NEW — 人工判定覆盖（2026-08-12 canvas-asset-folders 蒸馏）
 
 > **设计哲学**: prototype 是"参考起点 + 单一真相源",但**承认合理灵活度**。
-> **核心**: 5% 视觉差异阈值(V11.3 收紧 4 倍)+ fidelity 等级 + 偏离理由 + 工具-人类分层判定。
+> **核心**: 5% 视觉差异阈值（V11.2 的 20% → V11.3 的 5%）+ fidelity 等级 + 偏离理由 + 工具-人类分层判定。
 
 ##### 8.1 prototype fidelity 等级（必在 design-prompt.md 顶部标注）
 
@@ -513,7 +461,7 @@ agent FAIL  → 必写 FAIL 原因（spec 违反 / prototype GAP / 实施错误�
 
 **关联铁律**:Article V（可验证声明） + Article IX（质疑式验收） + Article XVI（质疑式校验）。
 
-**修正路径**: 必走 [references/sub-agent-rules.md §8 三层验证](references/sub-agent-rules.md) + [references/agent-error-diagnosis.md](references/agent-error-diagnosis.md) 5 模式诊断 + [Stage 3.5 Real Verify](../skills/08-real-verify/SKILL.md) 5 类项目启动验证。
+**修正路径**: 必走 [references/sub-agent-rules.md §8 三层验证](references/sub-agent-rules.md) + [references/agent-error-diagnosis.md](references/agent-error-diagnosis.md) 5 模式诊断 + [Stage 3.5 Real Verify](skills/08-real-verify/SKILL.md) 5 类项目启动验证。
 - 主上下文直接 Edit/Write 代码（Article IV 委派纪律）
 
 ---

@@ -119,5 +119,5 @@ REFACTOR: {{refactor_changes}}
 
 - [bug-state-machine.md](../references/bug-state-machine.md) — Bug 单状态机
 - [bug-intake-flow.md](../workflows/bug-intake-flow.md) — Bug 录入工作流
-- Stage 6 Bug Fix: [../../../12-bug-fix/SKILL.md](../../../12-bug-fix/SKILL.md)
+- Stage 6 Bug Fix: [../../12-bug-fix/SKILL.md](../../12-bug-fix/SKILL.md)
 - 状态卡路径: `docs/bugs/{{bug_id}}/.state-card.md`

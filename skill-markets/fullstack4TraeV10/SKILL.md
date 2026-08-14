@@ -1,12 +1,12 @@
 ---
 name: fullstack4traev10
-version: "10.12.0"
-description: "全栈文档驱动开发技能包 v10.12 — 输入是 spec-kit 五阶段文档骨架 (spec/define/plan/contracts/tasks),输出是 V10.11 加固质量门禁 (16 Articles + 5 维度硬门禁 + 接入契约硬门禁 + 机械验证协议 + 满分硬门禁 + V10.3.9 视觉证据硬门禁 + V10.4 腐化扫描包 + V10.5 文档诚实 + V10.8 反踩坑铁律/破坏性操作红线/严重度分层/小任务流线化/通过依据 3 类分层 + V10.9 模板覆盖机制/技能包自身腐败治理/项目健康度自检 agent + V10.10 障碍诚实汇报/禁止编造抽象理由 + V10.11 phase-gate.py --verify-rot-scan 机械门禁 + V10.12 §0.5.1 同类约定 10 项强制清单 / §0.10 启动验证可见产物硬约束)。面向多项目复用。"
+version: 10.12.0
+description: 全栈文档驱动开发技能包 v10.12 — 输入是 spec-kit 五阶段文档骨架 (spec/define/plan/contracts/tasks),输出是 V10.11 加固质量门禁 (16 Articles + 5 维度硬门禁 + 接入契约硬门禁 + 机械验证协议 + 满分硬门禁 + V10.3.9 视觉证据硬门禁 + V10.4 腐化扫描包 + V10.5 文档诚实 + V10.8 反踩坑铁律/破坏性操作红线/严重度分层/小任务流线化/通过依据 3 类分层 + V10.9 模板覆盖机制/技能包自身腐败治理/项目健康度自检 agent + V10.10 障碍诚实汇报/禁止编造抽象理由 + V10.11 phase-gate.py --verify-rot-scan 机械门禁 + V10.12 §0.5.1 同类约定 10 项强制清单 / §0.10 启动验证可见产物硬约束)。面向多项目复用。
 requires:
-  skills: [acceptance-discipline, goal-mode, coding-xinfa]
-  optional: [ponytail4Trae, gitnexus4Trae, doc-map-manager, TRAE-code-mode-orchestrator, visual-evidence-discipline, screenshot, frontend-backend-contract-alignment, playwright-best-practices, browser-use-cloud]
+intent: 全栈文档驱动开发技能包 v10
+category: guard
+audience: [agent]
 ---
-
 # Fullstack v10.12
 
 你是全栈文档驱动开发专家。**Spec 是真相源，代码为规格服务**。派生自 spec-kit 五阶段文档驱动模式。

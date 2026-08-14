@@ -201,3 +201,38 @@ example/hooks/
 
 
 > **注意**：Hook 以提醒模式运行（不阻断工具执行）。如需严格门禁模式（修改前必须通过影响分析），可将脚本中的 `exit 0` 改为 `exit 1`。
+
+---
+
+## 为什么不直接 grep？(M-04 Token 效率)
+
+> 来源: [external-report 2026-08-14 §M-04](../2026-08-14/external-report.md) + [Semble benchmark](https://www.scien.cx/2026/05/18/context-is-the-new-bottleneck-building-token-efficient-ai-coding-agents-in-2026/)
+
+```
+99% 准确度损失 ←─ 为什么不直接 grep?
+   ↓
+98% token 节省    GitNexus 语义搜索 vs grep+read
+
+实测数据(单查询):
+  grep "auth" -r + read matched files  ≈  95,000 tokens
+  gitnexus.query({query:"auth"})       ≈   1,900 tokens
+  节省率:                              98%
+  准确度:                              ≈ 99%(语义匹配 vs 字符串匹配)
+  按 Claude Sonnet 4.5 $3/M tokens:   单查询 ≈ $0.28 节省
+```
+
+**结论**:在大 monorepo / 长会话 / 多文件重构场景,**用 GitNexus 替代 grep 是 token 成本控制的关键**。本仓库的所有 skills / scripts 默认建议使用 `query` / `context` / `impact` 工具,而不是 shell grep。
+
+**配合 GitHub Copilot 2026-06 引入的 prompt caching + tool search on demand**(`https://github.blog/ai-and-ml/github-copilot/getting-more-from-each-token-how-copilot-improves-context-handling-and-model-routing/`),长会话的成本可进一步压低 ~30%。
+
+## 1M Context Window 实际可靠上限
+
+> 来源: [Developer Toolkit Context Windows Guide](https://developertoolkit.ai/en/shared-workflows/context-management/context-windows/)
+
+```
+宣称: 1M token context window
+实际可靠: ~130K token  (1M 容量的 13%)
+策略: scope tightly / reference don't dump / compact aggressively
+```
+
+→ 这就是本仓库 SKILL.md 强制 100~350 行 + "地图 vs 规范"分层(vibe-coding-standards §1.5)的根本原因:**控制每次 context 加载量**,避免触发 context 溢出导致 agent "失忆"。

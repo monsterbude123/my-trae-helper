@@ -39,7 +39,7 @@ depends_on:
 7. NO CODE NO CONTRACT    — 无已 approved 契约不写代码
 8. CONTRACT-GATE          — contract-gate.py 必 PASS（4 件套齐全 + 测试骨架）
 9. THREE-WAY SYNC         — 契约修改必同步改 docs/ 文档 + 测试代码（V10 配置治理 D-009）
-10. SKEPTICAL VALIDATION   — P0/P1 修复按 [skeptical-validation-protocol.md](../references/skeptical-validation-protocol.md) 质疑性校验
+10. SKEPTICAL VALIDATION   — P0/P1 修复按 [skeptical-validation-protocol.md](../../references/skeptical-validation-protocol.md) 质疑性校验
 ```
 
 ## 骨架流程（5 步）

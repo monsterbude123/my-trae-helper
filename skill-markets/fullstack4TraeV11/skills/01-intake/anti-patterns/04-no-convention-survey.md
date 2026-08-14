@@ -148,4 +148,4 @@ V11 默认: 16 Articles 宪法
 - [SKILL.md §铁律 7](../SKILL.md) — 编排器依赖空不空路由（指 Intake 自身是入口）
 - [project-convention-survey.md](../workflows/project-convention-survey.md) — 项目惯例勘察工作流
 - [dependency-config.md](../../../references/dependency-config.md) — 3 层优先级协议
-- 编排器 §0.5 Skill 加载协议: [../../../../SKILL.md](../../../../SKILL.md)
+- 编排器 §0.5 Skill 加载协议: [../../../SKILL.md](../../../SKILL.md)

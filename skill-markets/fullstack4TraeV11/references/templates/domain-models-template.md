@@ -69,6 +69,6 @@
 
 ## 关联引用
 
-- [Stage 2 Contract](../skills/06-contract/SKILL.md)
-- [domain-driven-design.md](../skills/06-contract/workflows/domain-driven-design.md)
-- [contract-four-suite.md](../skills/06-contract/references/contract-four-suite.md)
+- [Stage 2 Contract](../../skills/06-contract/SKILL.md)
+- [domain-driven-design.md](../../skills/06-contract/workflows/domain-driven-design.md)
+- [contract-four-suite.md](../../skills/06-contract/references/contract-four-suite.md)

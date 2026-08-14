@@ -1,8 +1,10 @@
 ---
-name: "docsify-doc-builder"
-description: "为任何项目搭建虚幻引擎 5 风格的 docsify 文档系统。集成顶栏 + 多级分类 + 面包屑 + 右侧页内目录 + Mermaid 全屏 + Markmap 思维导图（默认全部展开）。当用户要求建立文档、搭建文档系统、初始化文档站点、配置 docsify、UE 风格文档站时自动加载。"
+name: docsify-doc-builder
+description: 为任何项目搭建虚幻引擎 5 风格的 docsify 文档系统。集成顶栏 + 多级分类 + 面包屑 + 右侧页内目录 + Mermaid 全屏 + Markmap 思维导图（默认全部展开）。当用户要求建立文档、搭建文档系统、初始化文档站点、配置 docsify、UE 风格文档站时自动加载。
+intent: 为任何项目搭建虚幻引擎 5 风格的 docsify 文档系统
+category: other
+audience: [developer]
 ---
-
 # Docsify 文档建设者（v2.0 — UE 5 风格）
 
 为项目快速搭建基于 docsify 的**虚幻引擎 5 风格**现代化文档系统：顶栏 + 多级分类树 + 面包屑 + 右侧页内目录 + Mermaid 全屏 + Markmap 思维导图。

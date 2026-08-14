@@ -110,14 +110,14 @@ bug_severity: P0 | P1 | P2
 ---
 ```
 
-**完整状态卡协议**: [../../../references/state-card-protocol.md](../../../references/state-card-protocol.md)
-**状态卡初始化模板**: [../templates/state-card-init.md](../templates/state-card-init.md)
+**完整状态卡协议**: [../../../references/state-card-protocol.md](../../../../references/state-card-protocol.md)
+**状态卡初始化模板**: [../../templates/state-card-init.md](../../templates/state-card-init.md)
 
 ---
 
 ## 关联引用
 
 - 父文件：[../intent-routing.md](../intent-routing.md)
-- state-card-protocol.md：[../../../references/state-card-protocol.md](../../../references/state-card-protocol.md)
-- state-card-init.md：[../templates/state-card-init.md](../templates/state-card-init.md)
+- state-card-protocol.md：[../../../references/state-card-protocol.md](../../../../references/state-card-protocol.md)
+- state-card-init.md：[../../templates/state-card-init.md](../../templates/state-card-init.md)
 - SKILL.md：[../../SKILL.md](../../SKILL.md)

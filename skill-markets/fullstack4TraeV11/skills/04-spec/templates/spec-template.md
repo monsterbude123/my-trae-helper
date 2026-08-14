@@ -48,7 +48,7 @@
 
 ## 关联引用
 
-- plan.md: [plan.md](plan.md)
-- test-plan.md: [test-plan.md](test-plan.md)
+- plan.md: `../plan.md`（项目级路径，本模板运行时由项目生成）
+- test-plan.md: `../test-plan.md`（项目级路径，本模板运行时由项目生成）
 - 验收维度规则: [../references/acceptance-enhancement.md](../references/acceptance-enhancement.md)
 - Clarify 清单: [../references/clarify-checklist.md](../references/clarify-checklist.md)

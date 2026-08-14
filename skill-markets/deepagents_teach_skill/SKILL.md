@@ -1,9 +1,10 @@
 ---
 name: deepagents_teach_skill
-description: >-
-  Teaches how to use the DeepAgents framework for building single or multi-agent systems with context management, file system tools, subagent delegation, skills, and MCP integration. This skill should be used when the user needs to create DeepAgents-based AI agents, implement subagent architectures, configure filesystem backends, set up permission controls, or understand DeepAgents API patterns. Triggers on: DeepAgents, create_deep_agent, SubAgent, deep agent, agent with tools, multi-agent delegation, filesystem agent, agent with memory.
+description: "Teaches how to use the DeepAgents framework for building single or multi-agent systems with context management, file system tools, subagent delegation, skills, and MCP integration. This skill should be used when the user needs to create DeepAgents-based AI agents, implement subagent architectures, configure filesystem backends, set up permission controls, or understand DeepAgents API patterns. Triggers on: DeepAgents, create_deep_agent, SubAgent, deep agent, agent with tools, multi-agent delegation, filesystem agent, agent with memory."
+intent: Teaches how to use the DeepAgents framework for building ...
+category: orchestration
+audience: [agent, designer]
 ---
-
 # DeepAgents Teach Skill
 
 ## What is DeepAgents

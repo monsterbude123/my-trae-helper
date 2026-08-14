@@ -96,4 +96,4 @@ bug_closed:
 - [six-layer-diagnosis.md](six-layer-diagnosis.md) — 6 层排查协议
 - [cross-layer-fix.md](cross-layer-fix.md) — 跨层修复协议
 - [Stage 7 impact-assessment.md](../../02-plan/references/impact-assessment.md) — 影响面评估基础
-- [公共铁律 Article V](../../references/common-iron-rules.md)
+- [公共铁律 Article V](../../../references/common-iron-rules.md)

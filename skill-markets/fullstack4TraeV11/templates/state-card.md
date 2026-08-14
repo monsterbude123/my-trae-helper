@@ -2,7 +2,7 @@
 
 > V11 三类状态卡通用模板。Stage -1 Intake 初始化时按 `card_type` 选择对应模板。
 >
-> **路径映射**(完整协议见 [state-card-protocol.md](../../references/state-card-protocol.md)):
+> **路径映射**(完整协议见 [state-card-protocol.md](../references/state-card-protocol.md)):
 >
 > | 类型 | 路径 |
 > |------|------|
@@ -15,7 +15,7 @@
 > **⚠️ V11.2 反例 — 蒸馏自 canvas-asset-folders 实战**:
 > - ❌ **绝不能用 `.trae/state-card.md`**（V10 残留路径，V11 已迁移出 `.trae/`）
 > - ❌ **绝不能用 `.state-card.change.md`** 后缀区分（路径区分已足够，后缀是过度设计）
-> - 必须按 [state-card-protocol.md §1.1](../../references/state-card-protocol.md) 协议路径初始化
+> - 必须按 [state-card-protocol.md §1.1](../references/state-card-protocol.md) 协议路径初始化
 
 ---
 
@@ -160,6 +160,6 @@ bug_severity: P0 | P1 | P2
 
 ## 关联引用
 
-- [state-card-protocol.md](../../references/state-card-protocol.md) — 完整协议
-- Stage -1 Intake: [../../skills/01-intake/SKILL.md](../../skills/01-intake/SKILL.md)
-- state-card-init.md: [../../skills/01-intake/templates/state-card-init.md](../../skills/01-intake/templates/state-card-init.md)
+- [state-card-protocol.md](../references/state-card-protocol.md) — 完整协议
+- Stage -1 Intake: [../skills/01-intake/SKILL.md](../skills/01-intake/SKILL.md)
+- state-card-init.md: [../skills/01-intake/templates/state-card-init.md](../skills/01-intake/templates/state-card-init.md)

@@ -42,7 +42,7 @@ Agent: 自评 PASS（实际 PASS 状态待核实）
 
 | 根因 | 占比 |
 |------|:---:|
-| Article XI ≤150 行约束被破坏（rule 真太长）| 30% |
+| Article XI vibe-coding-standards v2.5 弹性范围被破坏（rule 真太长）| 30% |
 | Agent 没强制读完（V11 §0.5 加载协议未严格）| 50% |
 | rule 内有反例但未读反例库（common-anti-patterns.md）| 20% |
 
@@ -70,7 +70,7 @@ Agent: 自评 PASS（实际 PASS 状态待核实）
 ## 关键约束（V11 应有但项目违反）
 
 ```
-❌ 反例：rule > 200 行未拆分 → Article XI.2 违反（≤150 行/文件）
+❌ 反例：rule > 350 行未拆分 → Article XI 违反（vibe-coding-standards v2.5 软上限）
 ❌ 反例：加载后没列"我能踩的雷"清单 → V11 §0.5 违反
 ❌ 反例：同规则反复踩 → Article V.2 违反（"已完成"无证据）
 ```
@@ -137,5 +137,5 @@ unread_rule_check:
 ## 关联引用
 
 - [V11 SKILL.md §0.5 加载协议](../SKILL.md) — 加载后必读清单
-- [Article XI](common-iron-rules.md) — ≤10 铁律 + ≤150 行
+- [Article XI](common-iron-rules.md) — vibe-coding-standards v2.5 弹性 100~350 行（2026-08-14 解除硬上限）
 - [Article V.2](common-iron-rules.md) — "已完成"必附证据

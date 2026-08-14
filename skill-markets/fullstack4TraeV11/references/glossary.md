@@ -242,7 +242,7 @@
 
 ## 关联引用
 
-- [V10 glossary.md](../fullstack4TraeV10/references/glossary.md) — V10 原始术语表
+- V10 glossary.md — V10 原始术语表（已蒸馏；V11 仓库根目录无对应文件，此处仅作历史记录）
 - [V11 state-card-protocol.md](state-card-protocol.md) — 状态卡协议(含路径定义)
 - [V11 skeptical-validation-protocol.md](skeptical-validation-protocol.md) — 质疑性校验协议
 - [V11 common-iron-rules.md](common-iron-rules.md) — 公共铁律(含 Article XVII)

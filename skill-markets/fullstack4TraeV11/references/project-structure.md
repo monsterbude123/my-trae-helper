@@ -100,7 +100,7 @@ project/
 
 ## 关联引用
 
-- [SKILL.md §0.5 加载协议](../../SKILL.md) — 主上下文必查
+- [SKILL.md §0.5 加载协议](../SKILL.md) — 主上下文必查
 - [stage-card-protocol.md](stage-card-protocol.md) — 状态卡 schema
 - [stage-interaction-protocol.md](stage-interaction-protocol.md) — 阶段产物路径
 - V10 来源（开发期，已蒸馏）：见 V11 references 与 anti-patterns

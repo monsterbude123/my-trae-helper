@@ -1,12 +1,12 @@
 ---
 name: agent-dev-control-kit
-version: "1.1.0"
+version: 1.1.0
 description: Agent 开发控制体系技能包 — 通过 Execution+Guard+Gate 三层控制实现标准化执行、自动检查与质量门禁
 requires:
-  skills: []
-  optional: [project-rule-skill, acceptance-discipline, goal-mode]
+intent: Agent 开发控制体系技能包 — 通过 Execution+Guard+Gate 三层控制实现标准化执行、自动检...
+category: guard
+audience: [agent]
 ---
-
 # Agent Development Control Kit
 
 > **核心理念**：通过**制度 + 工具**强制执行质量标准,不依赖人的自觉性。

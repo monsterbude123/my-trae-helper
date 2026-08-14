@@ -1,13 +1,14 @@
 ---
 name: subculture-novel-engine
-description: >-
-  General fiction world-building engine. Use for novel writing, chapter planning,
-  world-building consistency checks, character arc verification, foreshadow tracking,
-  plot enumeration, ripple analysis, combat/drama evaluation, and creative workflows.
-  Triggers on: novel writing, world-building, chapter planning, consistency auditing,
-  foreshadow management, character design, plot structure, creative pipelines.
+description: "General fiction world-building engine. Use for novel writing, chapter planning,
+world-building consistency checks, character arc verification, foreshadow tracking,
+plot enumeration, ripple analysis, combat/drama evaluation, and creative workflows.
+Triggers on: novel writing, world-building, chapter planning, consistency auditing,
+foreshadow management, character design, plot structure, creative pipelines.
+intent: General fiction world-building engine
+category: gate
+audience: [designer]
 ---
-
 # 亚文化创作引擎 · 薄编排层
 
 > 通用虚构世界创作引擎——约束空间内的可能性管理器

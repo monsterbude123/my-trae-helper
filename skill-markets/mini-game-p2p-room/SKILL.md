@@ -1,8 +1,10 @@
 ---
 name: mini-game-p2p-room
-description: "网页小游戏 P2P 房间对战完整构建模式 — PeerJS 房主-客户端协议 + 游戏状态机 + CSS 精灵图 + Web Audio 音效 + 移动端适配 + TypeScript/esbuild 构建经验 + Playwright E2E 测试模式。当用户需要在 web-mini-game 项目中创建多人房间对战游戏、使用 PeerJS 实现 P2P 联机、刷新重连、esbuild IIFE window 赋值、编写 E2E 测试、或遇到精灵图偏移/连接超时/AudioContext 锁等问题时主动加载。触发词：房间对战、P2P 联机、PeerJS、多人游戏、数字炸弹、五子棋、精灵图头像、AudioContext、ICE 服务器、连接超时、刷新重连、esbuild IIFE、window undefined、TypeScript 迁移、E2E 测试、Playwright 双 Tab、P2P 测试。"
+description: 网页小游戏 P2P 房间对战完整构建模式 — PeerJS 房主-客户端协议 + 游戏状态机 + CSS 精灵图 + Web Audio 音效 + 移动端适配 + TypeScript/esbuild 构建经验 + Playwright E2E 测试模式。当用户需要在 web-mini-game 项目中创建多人房间对战游戏、使用 PeerJS 实现 P2P 联机、刷新重连、esbuild IIFE window 赋值、编写 E2E 测试、或遇到精灵图偏移/连接超时/AudioContext 锁等问题时主动加载。触发词：房间对战、P2P 联机、PeerJS、多人游戏、数字炸弹、五子棋、精灵图头像、AudioContext、ICE 服务器、连接超时、刷新重连、esbuild IIFE、window undefined、TypeScript 迁移、E2E 测试、Playwright 双 Tab、P2P 测试。
+intent: 网页小游戏 P2P 房间对战完整构建模式 — PeerJS 房主-客户端协议 + 游戏状态机 + CSS 精灵图 ...
+category: other
+audience: [designer]
 ---
-
 # P2P 房间对战小游戏 — 构建模式
 
 > 基于 `number-bomb-room` + `gomoku` 两次从零实战的完整经验。

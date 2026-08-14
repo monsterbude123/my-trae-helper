@@ -15,7 +15,7 @@ project-health 报告必包含质疑段：
 
 ### 2. 不可证伪理由分类（V10.10 Article XVI）
 
-允许引用的失败归因（[agent-error-diagnosis.md §3 5 模式诊断](../../references/agent-error-diagnosis.md)）:
+允许引用的失败归因（[agent-error-diagnosis.md §3 5 模式诊断](../../../references/agent-error-diagnosis.md)）:
 - 盲信子代理产物（模式 1）
 - 应付性汇报，缺 evidence（模式 2）
 - 上下文击穿 + rule 长度超限（模式 3）

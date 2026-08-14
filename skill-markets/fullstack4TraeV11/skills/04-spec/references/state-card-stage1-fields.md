@@ -2,7 +2,7 @@
 
 > 04-spec 完成时,change 级状态卡 (`docs/specs/changes/{id}/.state-card.md`) 必含以下字段,缺一即腐烂点 16 状态卡陈旧。
 >
-> 完整协议见 [state-card-protocol.md §二](../../references/state-card-protocol.md) + [references/state-card-protocol.md §三 必更新场景](../../references/state-card-protocol.md)。
+> 完整协议见 [state-card-protocol.md §二](../../../references/state-card-protocol.md) + [references/state-card-protocol.md §三 必更新场景](../../../references/state-card-protocol.md)。
 
 ## §1 必含字段(Stage 1 完成时)
 
@@ -107,8 +107,8 @@ notes: |
 
 ## §5 关联引用
 
-- [state-card-protocol.md §二](../../references/state-card-protocol.md) — 完整字段定义
-- [state-card-protocol.md §三](../../references/state-card-protocol.md) — 必更新场景
-- [stage-interaction-protocol.md §V11 各 stage 移交约定](../../references/stage-interaction-protocol.md) — 产物清单
-- [stage-card-protocol.md §必填字段](../../references/stage-card-protocol.md) — 流转规则
-- [../../references/common-iron-rules.md Article XII](../../references/common-iron-rules.md) — 文档诚实铁律
+- [state-card-protocol.md §二](../../../references/state-card-protocol.md) — 完整字段定义
+- [state-card-protocol.md §三](../../../references/state-card-protocol.md) — 必更新场景
+- [stage-interaction-protocol.md §V11 各 stage 移交约定](../../../references/stage-interaction-protocol.md) — 产物清单
+- [stage-card-protocol.md §必填字段](../../../references/stage-card-protocol.md) — 流转规则
+- [../../references/common-iron-rules.md Article XII](../../../references/common-iron-rules.md) — 文档诚实铁律

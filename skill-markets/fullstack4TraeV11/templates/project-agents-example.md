@@ -57,27 +57,27 @@ V11 入口加载协议、stage 流水线、17 Articles 宪法、铁律、反模�
 | 测试 | {测试框架} |
 | 包管理 | {npm / pnpm / yarn / cargo / pip / uv} |
 
-详细命令 → [.trae/rules/stack.md](.trae/rules/stack.md)
+详细命令 → 项目级 `.trae/rules/stack.md`（由 init-from-zero.py 生成，非 V11 内文件）
 
 ## 3. 项目级 stage_config
 
-参见: [.trae/fullstack4traev11.config.yaml](.trae/fullstack4traev11.config.yaml)
+参见: 项目级 `.trae/fullstack4traev11.config.yaml`（由 init-from-zero.py 生成，非 V11 内文件）
 
 ## 4. 项目级 rules（独立于 V11 skill）
 
 > **加载协议**: 任何 agent（主 / sub-agent）必须先调 `Skill(name="project-rules")` 获取本任务所需 rules，**禁止**直接 Read `.trae/rules/*.md` 中除 README.md 外的其他文件。
-> 详见 [.trae/rules/README.md](.trae/rules/README.md)（强制入口说明）。
+> 详见项目级 `.trae/rules/README.md`（强制入口说明；由 init-from-zero.py 生成）。
 
-- [.trae/rules/stack.md](.trae/rules/stack.md) — 构建/测试/lint 命令
-- [.trae/rules/paths.md](.trae/rules/paths.md) — 项目级禁读路径
-- [.trae/rules/git.md](.trae/rules/git.md) — Git 工作流
+- `.trae/rules/stack.md` — 构建/测试/lint 命令（项目级）
+- `.trae/rules/paths.md` — 项目级禁读路径
+- `.trae/rules/git.md` — Git 工作流
 
 ## 5. 项目级钩子（V11 默认 + 项目扩展）
 
-参见: [.trae/hooks/](.trae/hooks/)
+参见: 项目级 `.trae/hooks/`（由 init-from-zero.py 生成）
 
 V11 默认 3 个 hook（pre-stage / post-stage / pre-accept）由 init-from-zero.py 生成。
-项目可加 hook（如 pre-commit / pre-push），规则在 [.trae/rules/git.md](.trae/rules/git.md)。
+项目可加 hook（如 pre-commit / pre-push），规则在项目级 `.trae/rules/git.md`。
 
 ## 6. 验收门禁
 
@@ -144,4 +144,4 @@ Step 4: 输出项目根 AGENTS.md
 
 - [project-rules-example/](project-rules-example/) — rules 模板
 - [init-from-zero.py](../scripts/init-from-zero.py) — 仅生成 config + hooks（不生成 AGENTS / rules）
-- [V11 SKILL.md §0.5 加载协议](../../SKILL.md)
+- [V11 SKILL.md §0.5 加载协议](../SKILL.md)

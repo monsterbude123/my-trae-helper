@@ -29,4 +29,4 @@
 
 - [api-contracts.md](api-contracts.md)
 - [domain-models.md](domain-models.md)
-- V10 配置治理 D-009: [../../../.trae/rules/配置治理.md §5](../../../.trae/rules/配置治理.md)
+- V10 配置治理 D-009: 项目级 `.trae/rules/配置治理.md §5`（已蒸馏到本文档）

@@ -1,39 +1,12 @@
 ---
 name: acceptance-discipline
-description: "高质量验收铁律 — 面向 AI agent 与团队的统一项目验收体系。覆盖单测 / 集成 / E2E / 性能 / 安全 / 验收门禁全生命周期。当 agent 进行 PR 提交、发版前检查、E2E 回归、性能压测、安全扫描、测试阻塞排查时加载。整合并扩展 test-experience / e2e-module-audit / test-partition-runner 三个能力。"
-triggers:
-  - "验收"
-  - "交付"
-  - "发版"
-  - "上线前"
-  - "release gate"
-  - "acceptance"
-  - "verify"
-  - "gate"
-  - "跑 E2E"
-  - "跑测试"
-  - "测试卡住"
-  - "测试阻塞"
-  - "测试挂起"
-  - "测试失败"
-  - "测试超时"
-  - "测试慢"
-  - "mock 不生效"
-  - "fixture"
-  - "坏测试"
-  - "bad test"
-  - "flaky test"
-  - "分区测试"
-  - "性能压测"
-  - "安全扫描"
-  - "依赖扫描"
-  - "PR check"
-  - "门禁"
+description: 高质量验收铁律 — 面向 AI agent 与团队的统一项目验收体系。覆盖单测 / 集成 / E2E / 性能 / 安全 / 验收门禁全生命周期。当 agent 进行 PR 提交、发版前检查、E2E 回归、性能压测、安全扫描、测试阻塞排查时加载。整合并扩展 test-experience / e2e-module-audit / test-partition-runner 三个能力。
+triggers: [验收, 交付, 发版, 上线前, release gate, acceptance, verify, gate, 跑 E2E, 跑测试, 测试卡住, 测试阻塞, 测试挂起, 测试失败, 测试超时, 测试慢, mock 不生效, fixture, 坏测试, bad test, flaky test, 分区测试, 性能压测, 安全扫描, 依赖扫描, PR check, 门禁]
 requires:
-  skills: []
-  note: "test-experience / e2e-module-audit / test-partition-runner 三个能力已整合至本 skill（agents/ 目录 + references/）。三个根级 SKILL.md 保留为 DEPRECATED 兼容壳，加载时跳转到本 skill。"
+intent: 高质量验收铁律 — 面向 AI agent 与团队的统一项目验收体系
+category: guard
+audience: [agent]
 ---
-
 # Acceptance Discipline — 高质量验收铁律
 
 > **核心命题**：高质量验收是产品可交付的必要铁律。验收不是 QA 的"最后一步"，而是嵌入每一次提交、每一次合并、每一次发版的连续防护网。

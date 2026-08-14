@@ -54,4 +54,4 @@ intent_class:
 ## 关联引用
 
 - [SKILL.md](../SKILL.md)
-- [stage-interaction-protocol.md](../../references/stage-interaction-protocol.md)
+- [stage-interaction-protocol.md](../../../references/stage-interaction-protocol.md)

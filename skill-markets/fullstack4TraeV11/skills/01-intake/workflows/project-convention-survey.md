@@ -64,4 +64,4 @@ project_convention:
 ## 关联引用
 
 - [SKILL.md](../SKILL.md)
-- [stage-card-protocol.md](../../references/state-card-protocol.md)
+- [stage-card-protocol.md](../../../references/state-card-protocol.md)

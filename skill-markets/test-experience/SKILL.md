@@ -1,29 +1,13 @@
 ---
-name: "test-experience"
+name: test-experience
 status: deprecated
 redirect_to: acceptance-discipline
-description: "[DEPRECATED → acceptance-discipline] 测试开发与质量经验库 — 编写/修改测试代码时加载，覆盖 mock 策略、fixture 设计、异步陷阱、超时控制、bad-test 反模式、E2E 最小门禁、跳过 TDD 的真实代价。适用 Python + pytest + asyncio + Playwright E2E 技术栈。"
-triggers:
-  - "写测试"
-  - "加测试"
-  - "补测试"
-  - "测试失败"
-  - "测试超时"
-  - "test timeout"
-  - "测试卡"
-  - "mock 不生效"
-  - "fixture"
-  - "测试慢"
-  - "新增测试"
-  - "测试报错"
-  - "E2E 测试"
-  - "Playwright"
-  - "端到端测试"
-  - "伪 TDD"
-  - "无测试"
-  - "补 E2E"
+description: [DEPRECATED → acceptance-discipline] 测试开发与质量经验库 — 编写/修改测试代码时加载，覆盖 mock 策略、fixture 设计、异步陷阱、超时控制、bad-test 反模式、E2E 最小门禁、跳过 TDD 的真实代价。适用 Python + pytest + asyncio + Playwright E2E 技术栈。
+triggers: [写测试, 加测试, 补测试, 测试失败, 测试超时, test timeout, 测试卡, mock 不生效, fixture, 测试慢, 新增测试, 测试报错, E2E 测试, Playwright, 端到端测试, 伪 TDD, 无测试, 补 E2E]
+intent: [DEPRECATED → acceptance-discipline] 测试开发与质量经验库 — 编写/修改测试...
+category: gate
+audience: [devops, designer]
 ---
-
 > ⚠️ **DEPRECATED 2026-08-14** — 本 skill 已整合并入 [`acceptance-discipline`](../acceptance-discipline/SKILL.md)。
 >
 > 实际逻辑已迁移至：

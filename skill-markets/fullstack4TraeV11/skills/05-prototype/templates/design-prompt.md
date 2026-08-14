@@ -5,7 +5,7 @@
 > **约束范围**: L1 = 仅布局 + 组件 + 5 状态;L2 = L1 + 主色板 + 字号 + 间距;L3 = L2 + 动效 + 阴影 + 圆角 + hover
 > **视觉差异容许**: L1 ≤ 50% / L2 ≤ 30% / L3 ≤ 5%
 >
-> 详见 [SKILL.md §3.7.3 §8.1](SKILL.md)。
+> 详见 [SKILL.md §3.7.3 §8.1](../SKILL.md)。
 
 > **位置**: `docs/specs/changes/{id}/prototypes/design-prompt.md`
 > **编制依据**: V11.2 NEW 双产物机制，蒸馏自 V10 prototype.md §文档一

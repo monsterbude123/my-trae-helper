@@ -1,6 +1,6 @@
 # 视觉证据 3 层校验（Visual Evidence 3-Layer）
 
-> Stage 3.5 Real Verify + Stage 4 Review 必走。V10 视觉证据铁律 + .trae/rules/视觉证据铁律.md 蒸馏。
+> Stage 3.5 Real Verify + Stage 4 Review 必走。V10 视觉证据铁律 + 项目级 `.trae/rules/视觉证据铁律.md` 蒸馏。
 
 ---
 
@@ -47,5 +47,5 @@ assert 30 <= avg_brightness <= 240, "截图过暗或过亮"
 ## 关联引用
 
 - [SKILL.md §铁律 6](../SKILL.md) — 主上下文必查
-- V10 .trae/rules/视觉证据铁律.md: [../../../.trae/rules/视觉证据铁律.md](../../../.trae/rules/视觉证据铁律.md)
+- V10 项目级 `.trae/rules/视觉证据铁律.md`（已蒸馏到本文档）
 - V10 visual-content-check.py: `V10 来源` (已蒸馏到本文档)

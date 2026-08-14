@@ -119,8 +119,8 @@ Constitution 是项目的**最高原则集合**，优先级高于：
 **Rationale**: 规则必自身可约束。
 
 **Enforcement**:
-- 所有 skill 文件遵循 ≤10 铁律
-- 所有 skill 文件遵循 ≤150 行（V10.12 减肥）
+- 所有 skill 文件遵循 vibe-coding-standards v2.5 弹性 100~350 行（2026-08-14 解除硬编码上限）
+- 超阈按"指针引用"原则瘦身（拆 references/），而非裁剪内容
 - 新增铁律必走 Article XVI §1.4 修复成本校验
 - 引用 references/ 而非内联（不腐化自己）
 

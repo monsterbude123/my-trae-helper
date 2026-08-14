@@ -1,7 +1,7 @@
 # 子代理通用铁律（V11 — 蒸馏自 V10.8 实操）
 
 > V11 全 agent 通用，主上下文委派时引用本文件路径（不内联全文）。
-> 关联: [stage-skill-agent-protocol.md](stage-skill-agent-protocol.md) 委派速查 + [bug-workflow](../../skills/12-bug-fix/references/bug-state-machine.md) 任务路由 + [document-layer.md](document-layer.md) 索引器范围 + [acceptance-gates-v10.md](stage-interaction-protocol.md) 通过依据 + [agent-error-diagnosis.md](agent-error-diagnosis.md) 错误诊断。
+> 关联: [stage-skill-agent-protocol.md](stage-skill-agent-protocol.md) 委派速查 + [bug-workflow](../skills/12-bug-fix/references/bug-state-machine.md) 任务路由 + [document-layer.md](document-layer.md) 索引器范围 + [acceptance-gates-v10.md](stage-interaction-protocol.md) 通过依据 + [agent-error-diagnosis.md](agent-error-diagnosis.md) 错误诊断。
 
 ---
 

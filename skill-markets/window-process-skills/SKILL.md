@@ -1,8 +1,10 @@
 ---
-name: "window-process-skills"
-description: "Windows process and port management toolkit (kill by port/PID/name, query, free port). Invoke when user needs to manage Windows processes, free occupied ports, or perform related Windows system operations."
+name: window-process-skills
+description: Windows process and port management toolkit (kill by port/PID/name, query, free port). Invoke when user needs to manage Windows processes, free occupied ports, or perform related Windows system operations.
+intent: Windows process and port management toolkit (kill by port...
+category: other
+audience: [developer]
 ---
-
 # Window Process Skills
 
 Windows 进程与端口管理工具集。提供常用的 Windows 进程/端口操作命令模板，支持持续扩展。

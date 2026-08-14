@@ -68,6 +68,6 @@ test_{module}_{scenario}_{expected}
 
 ## 关联引用
 
-- plan.md: [plan.md](plan.md)
+- plan.md: `../plan.md`（项目级路径，本模板运行时由项目生成）
 - 覆盖率规则: [../references/coverage-rules.md](../references/coverage-rules.md)
 - 验收维度工作流: [../workflows/coverage-mapping.md](../workflows/coverage-mapping.md)
