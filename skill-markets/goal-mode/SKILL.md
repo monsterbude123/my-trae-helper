@@ -7,11 +7,29 @@ triggers:
   - "目标追逐"
   - "进入目标模式"
   - "激活goal"
+related:
+  - "coding-xinfa"     # 通用编码心法 + 精简 Goal Mode 提要 + 表达风格规范
+  - "ponytail4Trae"    # 懒人开发模式（避免目标追逐变成"过度严格"）
 ---
 
 # Goal Mode — 目标追逐协议
 
 > **激活后，Agent 不得以任何形式声称完成，除非通过六步审计门禁。没有例外。**
+
+---
+
+## 三角心法互引（2026-08-14 收敛说明）
+
+| 关注维度 | 推荐加载 | 本 skill 覆盖 |
+|---------|---------|---------------|
+| **通用编码心法 + 完成审计精简版 + 表达风格** | [`coding-xinfa`](../coding-xinfa/SKILL.md) — 入口最广，三角互引的"总目录" | 不在本 skill 重复 |
+| **目标追逐完整协议 + Agent 编排** | **本 skill** | 全文 |
+| **懒人开发模式 / 过度工程审查 / ponytail: 标记技术债** | [`ponytail4Trae`](../ponytail4Trae/AGENTS.md) — 避免过度严格变过度工程 | 不在本 skill 重复 |
+
+**循环互引消除原则**：
+- 本 skill 不重复 `coding-xinfa` 的通用风格规范（§3 表达风格）和精简 Goal Mode 提要（§1）。
+- 本 skill 不重复 `ponytail4Trae` 的过度工程判断（ponytail: 标记 + 决策阶梯）。
+- 启用本 skill 后，目标完成判定标准**严格按本文六步门禁**；遇到"是否过度工程"判断 → 加载 ponytail4Trae。
 
 ---
 

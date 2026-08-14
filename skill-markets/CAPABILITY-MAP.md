@@ -4,7 +4,7 @@
 > 
 > 维护规则：新增/删除/改依赖 → 同步更新此文件。地图与 SKILL.md 不一致时，以地图为准。
 > 
-> **Last Updated**: 2026-08-14
+> **Last Updated**: 2026-08-14（聚合归档 P1.1 + P1.2 + P2）
 
 ---
 
@@ -14,9 +14,9 @@
 
 | 技能 | 类型 | 一句话 | 脚本/工具 |
 |------|------|--------|----------|
-| [coding-xinfa](coding-xinfa/SKILL.md) | 纯Skill | 通用编码心法 + Goal Mode + 完成审计 + 风格规范 | 无 |
-| [goal-mode](goal-mode/SKILL.md) | Agent驱动 | 目标追逐协议 — 持久化任务执行 + 审计门禁 + 阻塞检测 | 无（Agent: goal, auditor, planner） |
-| [ponytail4Trae](ponytail4Trae/AGENTS.md) | 纯Skill | 懒人开发模式 — 最简实现、减少依赖、删除优先 | 无（子Skill: ponytail, review, debt, help） |
+| [coding-xinfa](coding-xinfa/SKILL.md) | 纯Skill | 通用编码心法 + 精简 Goal Mode 提要 + 完成审计 + 风格规范（三角互引总目录） | 无（related: goal-mode, ponytail4Trae） |
+| [goal-mode](goal-mode/SKILL.md) | Agent驱动 | 目标追逐完整协议 — 六步审计门禁 + Agent 编排（goal-mode, goal-auditor, goal-planner） | 无（related: coding-xinfa, ponytail4Trae） |
+| [ponytail4Trae](ponytail4Trae/AGENTS.md) | 纯Skill | 懒人开发模式 — 最简实现 + 过度工程审查 + ponytail: 标记技术债 + 快速参考 | 无（子Skill: ponytail, review, debt, help；related: coding-xinfa, goal-mode） |
 | [gitnexus4Trae](gitnexus4Trae/AGENTS.md) | 纯Skill | GitNexus 代码智能 — 探索、调试、影响分析、重构、CLI | 无（子Skill: cli, debugging, exploring, guide, impact-analysis, refactoring） |
 | [browser-use-cloud](browser-use-cloud/SKILL.md) | 纯Skill | Browser Use 浏览器自动化 — 网页抓取、自动操作、结构化提取 | api_check.py, batch_sessions.py, structured_extract.py, webhook_server.py |
 | [openapi-doc-exporter](openapi-doc-exporter/SKILL.md) | 纯Skill | OpenAPI → Markdown 文档导出，框架无关 | render_md.py, split_by_prefix.py, validate_openapi.py |
@@ -26,9 +26,9 @@
 | [vision-audit](vision-audit/SKILL.md) | 纯Skill | UI/UX 视觉验收 — Qwen3-VL 分析截图 | vision-audit.mjs, vision-audit.py |
 | [shuxia-novel-engine](shuxia-novel-engine/SKILL.md) | Agent驱动 | 小说创作引擎 — 世界观构建、剧情编织、一致性审计 | 12 脚本（check, combat, drama, enumerate, evaluate, ripple 等） |
 | [modelscope-assistant](modelscope-assistant/SKILL.md) | 纯Skill | 魔搭社区助手 — 模型搜索、SDK 调用、微调指导 | mymodelscope/ Python 库 + scan-models.ps1 |
-| [test-experience](test-experience/SKILL.md) | 纯Skill | 测试开发经验库 — mock/fixture/异步陷阱 | 无（⚠ 已整合到 acceptance-discipline） |
-| [test-partition-runner](test-partition-runner/SKILL.md) | 纯Skill | 测试阻塞解决 — 分区定位坏测试 | 无（⚠ 已整合到 acceptance-discipline） |
-| [e2e-module-audit](e2e-module-audit/SKILL.md) | 纯Skill | E2E 双模式验证 — 批量验收 + 即时诊断 | 无（⚠ 已整合到 acceptance-discipline） |
+| [test-experience](test-experience/SKILL.md) | 纯Skill | **⚠ DEPRECATED** → acceptance-discipline（兼容壳）| 无 |
+| [test-partition-runner](test-partition-runner/SKILL.md) | 纯Skill | **⚠ DEPRECATED** → acceptance-discipline（兼容壳）| 无 |
+| [e2e-module-audit](e2e-module-audit/SKILL.md) | 纯Skill | **⚠ DEPRECATED** → acceptance-discipline（兼容壳）| 无 |
 | [doc-map-manager](doc-map-manager/SKILL.md) | 纯Skill | 文档地图管理器 — 结构化索引构建 + 多模式查询（grab/lookup/fuzzy/semantic/file） | build-index.py, query-index.py |
 | [vibe-coding-standards](vibe-coding-standards/SKILL.md) | 纯Skill | Vibe Coding 组件编写原则 — AGENTS.md/Rules/Skills/Subagents 结构规范与防击穿策略 | 无 |
 | [project-rules-gate](project-rules-gate/SKILL.md) | 纯Skill | 项目级 Rules 强制加载与子代理门禁 — 把 .trae/rules/ 锻造为 project_rules_skills 入口 skill + 强制 sub-agent [PROJECT-RULES-GATE] 头。V11 同名协议独立分发版(v0.2 加 --move 物理移走 + frontmatter 自动注入) | forge_project_rules_skill.py |
@@ -63,9 +63,20 @@
 | 技能 | 类型 | 一句话 | 规模 |
 |------|------|--------|------|
 | [comfyui-api-skills](comfyui-api-skills/SKILL.md) | 纯Skill | ComfyUI 视频制作全流程 — 15 子技能编排 | 15 子Skill + 10 脚本 + lib/ 共享库 |
-| [trae-security-review](trae-security-review/SKILL.md) | Agent驱动 | 双引擎安全审查 — AI 驱动的代码安全审查 + Skill 目录静态扫描 | 2 Agent + 1 脚本 + 3 参考文档 |
+| [trae-security-review](trae-security-review/SKILL.md) | Agent驱动 | 双引擎安全审查 — AI 驱动的代码安全审查 + Skill 目录静态扫描（含 19 类平台兼容性识别） | 2 Agent + 4 脚本 + 3 参考文档 + 2 lib |
 | [vibe-coding-diagnosis](vibe-coding-diagnosis/SKILL.md) | 纯Skill | Vibe Coding 项目合规自检诊断 — 三步流程(定类型→套矩阵→出诊断)，9类项目 × 6维度(A-F) × 体量分级 | 3 参考文档 + 1 模板 |
 | [docsify-doc-builder](docsify-doc-builder/SKILL.md) | 纯Skill | UE 5 风格 docsify 文档系统 — 顶栏/多级分类/面包屑/右侧页内目录 + Mermaid 全屏/导出 + Markmap 思维导图（默认全部展开） | 1 SKILL + 4 ps1/sh 脚本（init-docs/serve/check-env/generate-sidebar）+ 6 模板（index.html/custom.css/_sidebar/_navbar/README/logo.svg） |
+
+### DEPRECATED 兼容壳（2026-08-14 聚合归档）
+
+> 以下 skill 已并入上层 skill，仅保留**根级独立 SKILL.md + redirect 兼容壳**用于向后兼容触发词。CLI `add` 时应被识别为 DEPRECATED 并引导用户改用上层 skill。
+
+| 兼容壳 | 重定向目标 | 归档原因 |
+|--------|-----------|---------|
+| [test-experience](test-experience/SKILL.md) | [acceptance-discipline](acceptance-discipline/SKILL.md) | 已整合进 `agents/unit-test-agent.md` + `references/bad-test-cases.md` |
+| [test-partition-runner](test-partition-runner/SKILL.md) | [acceptance-discipline](acceptance-discipline/SKILL.md) | 已整合进 `agents/blockage-resolver-agent.md` |
+| [e2e-module-audit](e2e-module-audit/SKILL.md) | [acceptance-discipline](acceptance-discipline/SKILL.md) | 已整合进 `agents/e2e-audit-agent.md`（双工作流） |
+| [skills-security](skills-security/SKILL.md) | [trae-security-review](trae-security-review/SKILL.md) | 扫描能力迁入 `scan_skills_dir.py V2.1`（8 类 + 三层白名单）；平台识别迁入 `scripts/lib/platform_detector.py` |
 
 ### 游戏制作群岛（单一 Kit 入口，内部 7 子技能）
 
@@ -243,9 +254,8 @@ L0 基座（独立可用，无外部依赖）
 | ponytail4Trae | fullstack4traev9 | ⚠️ 代码可能过度工程，无懒人模式提示 |
 | gitnexus4Trae | fullstack4traev9 | ⚠️ 影响面分析降级为 grep，存在盲区风险 |
 | doc-map-manager | fullstack4traev9 | ⚠️ 文档索引无法自动更新，DOC SYNC 不完整 |
-| test-experience | acceptance-discipline | ⚠️ 测试编写质量降低，陷阱可能重复踩 |
-| e2e-module-audit | acceptance-discipline | ⚠️ E2E 验收降级为手动 |
-| test-partition-runner | acceptance-discipline | ⚠️ 测试阻塞时无法自动分区定位 |
+
+> **2026-08-14 聚合说明**：test-experience / e2e-module-audit / test-partition-runner 三个 L0 skill 已并入 acceptance-discipline（内部子体系），不再作为独立外部依赖。其原降级后果已并入 acceptance-discipline 的硬依赖降级链。skills-security 同理并入 trae-security-review。
 
 ### 完整协议
 

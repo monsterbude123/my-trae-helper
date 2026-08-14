@@ -50,4 +50,11 @@ fi
 echo "4️⃣ Build..."
 npm run build
 
+# 5. catalog-guard(只跑变更的 skill — 全量跑留给 L3 CI)
+PUSH_SKILLS=$(git diff --name-only @{push}..HEAD 2>/dev/null | grep '^skill-markets/' | awk -F/ '$2 {print $2}' | sort -u)
+if echo "$PUSH_SKILLS" | grep -q "agent-dev-control-kit"; then
+  echo "5️⃣ agent-dev-control-kit catalog-guard (L2) ..."
+  python scripts/run-agent-dev-control-kit-tests.py
+fi
+
 echo "✅ L2 Push Gate 通过"

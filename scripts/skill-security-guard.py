@@ -78,7 +78,7 @@ def run_security_guard(skill_path: str) -> Dict:
 
     result = subprocess.run(
         [
-            'python',
+            sys.executable,  # 用当前解释器(兼容 Windows Git Bash 仅有 python3 的场景)
             str(SECURITY_SCAN_SCRIPT),
             str(skill_dir),
             'auto_reports'

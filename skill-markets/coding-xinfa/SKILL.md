@@ -11,11 +11,29 @@ triggers:
   - "表达简洁"
   - "半成品"
   - "改动要小"
+related:
+  - "goal-mode"        # Goal Mode 完整协议 + Agent 编排（goal-mode, goal-auditor, goal-planner）
+  - "ponytail4Trae"    # 懒人开发模式 + 过度工程审查 + ponytail: 标记技术债
 ---
 
 # Coding Xinfa — 通用编码心法
 
 > 适用于所有项目。当 agent 需要完成任务验证、处理阻塞、或遵循表达风格时加载。
+
+---
+
+## 三角心法互引（2026-08-14 收敛说明）
+
+| 关注维度 | 推荐加载 | 本 skill 覆盖 |
+|---------|---------|---------------|
+| **目标追逐 / 完成审计**（六步门禁） | [`goal-mode`](../goal-mode/SKILL.md) — 完整协议 + Agent 编排 | §1（精简版）|
+| **懒人开发模式 / 过度工程审查 / ponytail: 标记技术债** | [`ponytail4Trae`](../ponytail4Trae/AGENTS.md) — 子 Skill 聚合（trae-ponytail, trae-ponytail-review, trae-ponytail-debt, trae-ponytail-help） | §3（仅风格规范）|
+| **通用编码心法 / 完成审计 / 阻塞处理 / 表达风格** | 本 skill | 全文 |
+
+**循环互引消除原则**：
+- 本 skill §1 Goal Mode 段是**精简提要**，完整六步门禁 + Agent 编排详见 `goal-mode/SKILL.md`。
+- 本 skill §3 表达风格是通用规范，**不重复** ponytail4Trae 的"懒人开发决策阶梯"。
+- 不在本 skill 重复 goal-mode / ponytail4Trae 的独有内容（目标追逐 Agent 编排 / 过度工程专项审查）。
 
 ---
 

@@ -1,0 +1,97 @@
+# agent-dev-control-kit CI — 子 skill 专属测试
+#
+# 触发时机:
+#   - PR 修改 skill-markets/agent-dev-control-kit/**
+#   - push 到 main 触发该目录
+#   - manual workflow_dispatch
+#
+# 对应门禁:
+#   - catalog-guard: catalog 覆盖测试(对应 L2 集成)
+#   - trap 反例: 固化 7 大反例(对应 L1 自验收)
+#   - 全量 pytest: 147 用例(对应 L2 集成)
+#
+# 反例自验收(§2.4):
+#   - 该 workflow 任何 step 必须有"passing 状态"与"failing 状态"反例
+#   - failing 状态:故意 git stash 一行 → 跑应当 fail
+#   - 由 tests 中已存在的 trap 测试固化
+
+name: agent-dev-control-kit CI
+
+on:
+  pull_request:
+    branches: [main, release/*]
+    paths:
+      - "skill-markets/agent-dev-control-kit/**"
+      - "scripts/run-agent-dev-control-kit-tests.sh"
+      - ".github/workflows/agent-dev-control-kit-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "skill-markets/agent-dev-control-kit/**"
+  workflow_dispatch:
+
+# 与 skill-market-gate.yml 共享并发槽(避免重复跑)
+concurrency:
+  group: agent-dev-control-kit-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: pytest + catalog-guard + trap 自验收
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies (pytest + pyyaml)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "pytest>=7.0" "pyyaml>=6.0"
+
+      - name: Show intended diff
+        run: |
+          echo "Files changed:"
+          git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E "agent-dev-control-kit" || echo "(无变更)"
+          echo "---"
+          echo "Catalog 测试数:"
+          grep -c "def test_" skill-markets/agent-dev-control-kit/tests/catalogs/test_catalog_coverage.py || true
+
+      - name: Run catalog-guard（覆盖测试）
+        # §2.4 自验收:catalog 缺文档/章节/schema 必阻断
+        run: |
+          cd skill-markets/agent-dev-control-kit
+          python scripts/catalog-guard.py
+
+      - name: Run trap 反例集（自验收 §2.4）
+        # §2.4 自验收:71 个 trap 反例必须通过
+        run: |
+          cd skill-markets/agent-dev-control-kit
+          python -m pytest tests -m trap -v --tb=short
+
+      - name: Run 全量 pytest
+        run: |
+          cd skill-markets/agent-dev-control-kit
+          python -m pytest tests --tb=short -q
+
+      - name: Aggregate hints 输出
+        # 即便全过,如果期间有 hint 触发(可能被 trap 用了又清掉),也聚合
+        if: always()
+        run: |
+          if [ -f skill-markets/agent-dev-control-kit/logs/agent-hints.jsonl ]; then
+            echo "�� 残留 hints:"
+            cd skill-markets/agent-dev-control-kit
+            python scripts/agent-hint-emit.py --group-by trap || true
+          else
+            echo "�� 无 hints 残留"
+          fi
+
+      - name: Upload pytest HTML report
+        if:

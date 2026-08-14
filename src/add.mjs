@@ -63,6 +63,17 @@ export async function runAdd(args) {
   }
   printInfo(`已选: ${skill.dirName}@${skill.version}`);
 
+  // DEPRECATED 拦截（2026-08-14 聚合归档）
+  // SKILL.md frontmatter 含 `status: deprecated` + `redirect_to` → BLOCK 并指向新 skill
+  if (skill.status === 'deprecated') {
+    const target = skill.redirectTo || 'unknown';
+    printError(`${skill.dirName} 已归档为 DEPRECATED`);
+    console.error(`重定向目标: ${target}`);
+    console.error(`说明: 能力已并入 ${target}，加载旧触发词时主 Agent 应改用 ${target}。`);
+    console.error(`如确认仍需安装兼容壳，可加 --force-redirect 跳过拦截（不推荐）。`);
+    process.exit(2);
+  }
+
   // 显示依赖提示
   if (skill.requires?.skills?.length) {
     printWarn(`此 skill 依赖: ${skill.requires.skills.join(', ')}（需单独装）`);

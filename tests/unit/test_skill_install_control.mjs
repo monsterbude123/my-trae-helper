@@ -52,6 +52,25 @@ await test('checkDependencies: trae-security-review (无硬依赖) → passed', 
   assert.equal(r.missing.length, 0);
 });
 
+// 1.b DEPRECATED 拦截（2026-08-14 聚合归档）
+await test('checkDependencies: test-experience (DEPRECATED → acceptance-discipline) → BLOCK', async () => {
+  const r = await checkDependencies({ skillName: 'test-experience' });
+  assert.equal(r.passed, false);
+  assert.ok(
+    r.missing.some((m) => m.includes('DEPRECATED') && m.includes('acceptance-discipline')),
+    `expected DEPRECATED message, got: ${JSON.stringify(r.missing)}`
+  );
+});
+
+await test('checkDependencies: skills-security (DEPRECATED → trae-security-review) → BLOCK', async () => {
+  const r = await checkDependencies({ skillName: 'skills-security' });
+  assert.equal(r.passed, false);
+  assert.ok(
+    r.missing.some((m) => m.includes('DEPRECATED') && m.includes('trae-security-review')),
+    `expected DEPRECATED message, got: ${JSON.stringify(r.missing)}`
+  );
+});
+
 // 2. checkInstalled
 await test('checkInstalled: 不存在的技能 → not installed', () => {
   const r = checkInstalled({ skillName: 'never-existed-zzz', agentName: 'trae-cn' });

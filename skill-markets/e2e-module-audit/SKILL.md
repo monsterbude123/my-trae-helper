@@ -1,6 +1,8 @@
 ---
 name: e2e-module-audit
-description: E2E 双模式验证 — 批量验收（模块级回归 + 诊断报告）+ 即时诊断（单页面灵敏修复）。截图组织 → vision-audit → 日志关联 → 结构化诊断。
+status: deprecated
+redirect_to: acceptance-discipline
+description: "[DEPRECATED → acceptance-discipline] E2E 双模式验证 — 批量验收（模块级回归 + 诊断报告）+ 即时诊断（单页面灵敏修复）。截图组织 → vision-audit → 日志关联 → 结构化诊断。"
 ---
 
 # e2e-module-audit

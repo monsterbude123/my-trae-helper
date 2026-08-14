@@ -1,0 +1,58 @@
+#!/bin/bash
+# Skill Market — post-commit hook (路径 C 落地,2026-08-14)
+#
+# 触发时机: git commit 成功之后
+# 职责: 把本次 commit 期间产生的跨会话经验沉淀到全局 self-improving-agent
+#        兜底 §5.3 推荐组合中的 C 路径
+#
+# 设计原则(对照 .trae/rules/learning.md §5):
+#   - 不阻断 commit(已 commit 成功,失败仅 warn)
+#   - 探测式降级(self-improving-agent 不存在时静默 skip)
+#   - 只在有变更时调用(--quiet 模式)
+#   - 把 stdout/stderr 全部丢 logs/,不污染 commit 输出
+
+set +e   # 关键:任何失败都不影响 commit 状态
+
+LOG_DIR="logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/post-commit-self-improve.log"
+
+echo "[post-commit] self-improving-agent 兜底启动 ($(date +%Y-%m-%dT%H:%M:%S))" >> "$LOG_FILE"
+
+# 1. 探测 self-improving-agent CLI 是否可用
+SIA="$(command -v self-improving-agent 2>/dev/null)"
+if [ -z "$SIA" ]; then
+  echo "[post-commit] skip: self-improving-agent 不在 PATH" >> "$LOG_FILE"
+  exit 0
+fi
+
+# 2. 探测全局 LEARNING 目录是否可写(避免只读容器破坏 commit 后体验)
+SIA_HOME="${SELF_IMPROVING_HOME:-$HOME/.self-improving-agent}"
+if [ ! -d "$SIA_HOME" ]; then
+  echo "[post-commit] skip: $SIA_HOME 不存在(用户未初始化 self-improving-agent)" >> "$LOG_FILE"
+  exit 0
+fi
+
+# 3. 调用 reflect:把上一次 commit 期间的 ERROR/LEARNING 落盘
+COMMIT_SHA="$(git rev-parse HEAD 2>/dev/null)"
+if [ -z "$COMMIT_SHA" ]; then
+  echo "[post-commit] skip: 无法解析 HEAD" >> "$LOG_FILE"
+  exit 0
+fi
+
+# --since <commit>: 只回放本次 commit 之前未持久化的会话级 hint
+# --auto: 非交互,自动合并重复条目
+# --quiet: 静默,只输出错误
+"$SIA" reflect \
+  --since "$COMMIT_SHA~1" \
+  --auto \
+  --quiet \
+  >> "$LOG_FILE" 2>&1
+
+RC=$?
+if [ $RC -ne 0 ]; then
+  echo "[post-commit] warn: self-improving-agent reflect 退出码 $RC(不阻断 commit)" >> "$LOG_FILE"
+fi
+
+echo "[post-commit] 完成 (rc=$RC)" >> "$LOG_FILE"
+exit 0

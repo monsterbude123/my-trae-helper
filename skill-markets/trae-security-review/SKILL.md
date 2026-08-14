@@ -26,7 +26,8 @@ trae-security-review/
     ├── rigor_scanner.py         ← 严谨扫描核心库
     ├── rigor_reporter.py        ← 严谨扫描报告输出
     └── lib/
-        └── rigor_patterns.py    ← 严谨用词词表（10 类 × 中英文）
+        ├── rigor_patterns.py    ← 严谨用词词表（10 类 × 中英文）
+        └── platform_detector.py ← Skill 平台兼容性识别（19 类平台）V2.2 NEW
 ```
 
 ## 双引擎工作流
@@ -89,7 +90,7 @@ trae-security-review/
 | 工具 | 用途 | 安装 |
 |------|------|------|
 | `github/awesome-copilot@security-review` | AI 驱动的全代码库安全扫描 | `npx skills add github/awesome-copilot@security-review` |
-| `skills-security`（Damond-Fung） | 纯本地 Skill 目录静态扫描 | `python main.py <skills_dir>` |
+| ~~`skills-security`（Damond-Fung）~~ | ~~纯本地 Skill 目录静态扫描~~ | **已整合**：能力（5 类风险 + 平台识别）已迁入本 skill `scripts/lib/platform_detector.py` + `scan_skills_dir.py V2.1`。原仓库保留 DEPRECATED 兼容壳 |
 
 ## 与 acceptance-discipline 的协作
 

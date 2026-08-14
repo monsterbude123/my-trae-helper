@@ -60,6 +60,15 @@ jobs:
             done
           fi
 
+          # 5. catalog-guard（agent-dev-control-kit 子套件 — PR 改它必跑）
+          if echo "$CHANGED_SKILLS" | grep -q "agent-dev-control-kit"; then
+            echo "🛡 agent-dev-control-kit catalog-guard ..."
+            python scripts/run-agent-dev-control-kit-tests.py || {
+              echo "❌ agent-dev-control-kit catalog-guard 失败"
+              exit 1
+            }
+          fi
+
       - name: Check CAPABILITY-MAP.md sync
         run: |
           git diff --exit-code skill-markets/CAPABILITY-MAP.md || {
@@ -83,6 +92,15 @@ jobs:
         with:
           name: security-report
           path: auto_reports/
+
+      - name: Upload agent-dev-control-kit hints + pytest log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-dev-control-kit-hints
+          path: skill-markets/agent-dev-control-kit/logs/
+          retention-days: 7
+          if-no-files-found: ignore
 
   # L4 发布门禁
   L4-publish-gate:
@@ -120,6 +138,15 @@ jobs:
               }
             fi
           done
+
+          # catalog-guard（agent-dev-control-kit L4 必跑）
+          if [ -d "skill-markets/agent-dev-control-kit" ]; then
+            echo "🛡 agent-dev-control-kit catalog-guard (release) ..."
+            python scripts/run-agent-dev-control-kit-tests.py || {
+              echo "❌ agent-dev-control-kit catalog-guard 失败"
+              exit 1
+            }
+          fi
 
       - name: Skill market integrity check
         run: |

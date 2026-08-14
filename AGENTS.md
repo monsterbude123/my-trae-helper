@@ -38,7 +38,7 @@ my-trae-helper/
 
 1. **YAML frontmatter**：SKILL.md 必带 `name` + `description`；推荐 `version` / `requires`
 2. **技能位置硬约束**：技能只能在 `skill-markets/<name>/` 下，不发明路径
-3. **Agent 文件 ≤150 行 + 铁律 ≤10 条**：超过立即精简（防上下文击穿）
+3. **行数与铁律数不设硬上限**——参考 [`vibe-coding-standards` SKILL](skill-markets/vibe-coding-standards/SKILL.md)（v2.5 弹性 100~350 行）决定是否提取 references/；行数超阈时按"指针引用"原则瘦身，而非裁剪内容。
 4. **安全审查必走**：新建/引入/变更 skill 必跑 `scan_skills_dir.py` + 更新 SECURITY-MAP.md
 5. **能力去重**：新增脚本/技能必先查 `CAPABILITY-MAP.md`「共享能力注册表」
 6. **临时产物落 `logs/` 或 `.publish/`**：不在项目路径之外写脚本
@@ -46,6 +46,8 @@ my-trae-helper/
 8. **任务明确时才用 fullstack 流程**：不加不必要的阶段
 9. **禁止自主部署**：不主动执行安装命令，除非用户明确要求
 10. **SKILL.md/agents 引用优先**：核心铁律 + 骨架流程内联，详细内容 references/ 引用
+
+**§1.4 经验沉淀路由(覆盖 §1.4 可能引入)**:仓库内不建 `.learnings/` 目录。ERR / LEARN / FEATURE_REQUESTS 用全局 `self-improving-agent` 统一管理。本仓库内反例 → `skill-markets/<pkg>/references/trap-instructions.yaml`。详见 [.trae/rules/learning.md](.trae/rules/learning.md)。
 
 **§1.1 路径位置**：`scripts/` 放 Node/Python 脚本；`logs/` 放临时输出。
 
@@ -55,6 +57,7 @@ my-trae-helper/
 
 ```
 1. Skill(name="project-rule-skill")  → 输出 needed_rules
+1.5. Skill(name="self-improving-agent")  → 加载全局经验上下文(详见 .trae/rules/learning.md §5 路径 A)
 2. 按场景关键词自动加载相关 skill：
    ├─ 测试/验收 → acceptance-discipline + test-experience
    ├─ 安全扫描 → trae-security-review
@@ -205,6 +208,7 @@ python skill-markets/trae-security-review/scripts/scan_skills_dir.py skill-marke
 | `SECURITY-MAP.md` | 加新 skill / 引入第三方 / 改脚本后 |
 | `README.md` | 改 CLI 行为 / 加新 agent 支持 |
 | `package.json` | 改依赖 / 版本号 |
+| `.trae/rules/*.md` | 加新规则 / 改 §1 铁律 / 路由经验沉淀前 |
 
 完整索引见 [skill-markets/CAPABILITY-MAP.md](skill-markets/CAPABILITY-MAP.md)。
 

@@ -1,6 +1,8 @@
 # agent-dev-control-kit — 反例库 (traps)
 
 > **本文件由 my-trae-helper 2026-08-14 会话蒸馏生成**。每个反例来自真实失败案例,可作为下次写 Gate 时的避坑参考。
+>
+> **更新**(2026-08-14 第二轮):本文件的反例已结构化为 [trap-instructions.yaml](trap-instructions.yaml) — 每条 AP-* 含 detect_signal / fix_template / next_skill / reclaim_steps。详细机器可读字段从 YAML 消费,人类阅读继续用本文件。
 
 ---
 

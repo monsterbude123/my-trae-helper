@@ -1,0 +1,172 @@
+# trap-instructions.yaml — 反例 → 指令映射(M3)
+#
+# 角色定位:
+#   - 仓库内不建 .learnings/ 目录(由全局 self-improving-agent 统一管理)
+#   - 本文件是仓库内"反例 → 修复指令"的机器可读源 — pytest trap 测试从这里校验字段
+#   - 字段命名刻意避开 ai-short-studio-monster .learnings/ 风格
+#     (Logged / Priority / Status / Reproducible / Related Files / Source),
+#     避免与 self-improving-agent 全局 schema 冲突
+#
+# 每条反例至少含:
+#   - id/title:                唯一标识 + 一句话标题
+#   - detect_signal:           触发该反例的检查函数 / 关键词
+#   - what_is_wrong:           反例的现象(为什么是错的)
+#   - fix_template_before:     ❌ 错误示例
+#   - fix_template_after:      ✅ 正确示例
+#   - next_skill:              agent 应当调用哪个 Skill
+#   - next_skill_action:       调用的具体动作
+#   - reclaim_steps:           agent 拿到该 hint 后应走的步骤
+#   - see_also:                交叉引用
+
+version: 1.0.0
+
+traps:
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-1
+    title: 过度流程化(单文件纯新增)
+    detect_signal: "改动文件数 ≤ 3 且无跨系统组件"
+    what_is_wrong: |
+      对单文件新增硬套三层控制(Execution + Guard + Gate),执行成本远高于风险。
+    fix_template_before: |
+      ❌ 对单文件新增:走完整 Execution CP1~CP6 + 4 个 Guard + 4 级 Gate
+    fix_template_after: |
+      ✅ 仅跑 lint,免 Execution / 备份 / 审计 / 结构 Guard
+    next_skill: trae-ponytail
+    next_skill_action: "识别为开发阶段 → 简化流程"
+    reclaim_steps:
+      - 评估改动文件数 < 3 且无跨系统 → 豁免三层控制
+      - 仅跑必要 gate(L1)
+      - 在 commit message 注明"single-file addition, gate waived"
+    see_also: ["agent-dev-control-kit §0.3 不适用场景"]
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-2
+    title: Gate 静默跳过不存在脚本
+    detect_signal: |
+      GATE_FAKE_BODY_PATTERNS 命中 / is_echo_skip() = True
+    what_is_wrong: |
+      pre-commit 用 `if command -v npm && grep -q 'lint' package.json` 形式的判断,
+      当 lint 缺失时**整体跳过**且不报错,exit 0,假通过。
+    fix_template_before: |
+      # ❌ pre-commit
+      if command -v npm &> /dev/null && grep -q '"lint"' package.json; then
+        echo "1️⃣ Lint..."
+        npm run lint
+      fi
+    fix_template_after: |
+      # ✅ pre-commit
+      if ! grep -q '"lint"' package.json; then
+        echo "❌ Gate 配置错误: package.json 缺少 lint 脚本"
+        exit 1
+      fi
+      echo "1️⃣ Lint..."
+      npm run lint
+    next_skill: trae-ponytail
+    next_skill_action: "最小修改 gate 脚本,把条件检查翻转"
+    reclaim_steps:
+      - 找到触发 Gate(pre-commit / pre-push / catalog-guard)
+      - 看是否存在 'echo skipping' 或 'if command -v X && ... then' 模式
+      - 改为 'if not ...; then echo err; exit 1; fi'
+      - 跑 pytest -m trap 验证
+    see_also:
+      - "agent-dev-control-kit §11.1.2"
+      - "scripts/validate-gate-integrity.py (含 V2-NODEJS-ECHO-SKIP 阻断)"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-3
+    title: Guard 缺 CLI 自执行入口
+    detect_signal: |
+      必填 CLI 脚本(来自 catalog.required_scripts.is_cli=true)缺 __main__ 块
+    what_is_wrong: |
+      Guard 脚本只有 export runXxx() 但无 main,
+      `python script.py` 仅加载模块,runXxx 从未被调用,exit 0 假通过。
+    fix_template_before: |
+      # ❌ src/guard.py
+      export async function runGuard(args) { ... }
+    fix_template_after: |
+      # ✅ src/guard.py
+      export async function runGuard(args) { ... }
+
+      const isMain = import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`;
+      if (isMain) runGuard(process.argv.slice(2));
+    next_skill: trae-ponytail
+    next_skill_action: "加 if __name__ == '__main__' 块"
+    reclaim_steps:
+      - 找到 catalog 中 is_cli=true 的脚本
+      - 确认末尾有 `if __name__ == '__main__': sys.exit(main())`
+      - ESM 用 `import.meta.url === 'file:///' + ...`
+      - 跑 pytest -m trap -k AP-3 验证
+    see_also:
+      - "agent-dev-control-kit §11.1.1"
+      - "tests/catalogs/test_catalog_coverage.py::test_required_scripts_have_cli_entry"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-CAT-DOCS
+    title: 缺管理/模块文档阻断
+    detect_signal: |
+      catalog.required_docs 中声明的 path 不存在
+    what_is_wrong: |
+      新功能/模块添加后未对应创建文档,导致知识缺口。
+    fix_template_before: |
+      # ❌ 新加 src/canvas/feature.ts 但没 docs/feature.md
+    fix_template_after: |
+      # ✅ 创建 docs/feature.md (≥ 50 行,含 API 列表 / 示例 / 验收)
+      # ✅ 在 tests/catalogs/skill-catalog.yaml 同步注册
+    next_skill: web-app-development
+    next_skill_action: "用 prose 模板起草功能文档"
+    reclaim_steps:
+      - 看 stderr HINT-AP-CAT-001,定位哪个 path 缺失
+      - 创建对应文件 + 起骨架内容
+      - 把 SKILL.md 章节补完(目录 / 适用 / API)
+      - 在 catalog 加 'required_docs' 条目
+      - 跑 pytest tests/catalogs 验证
+    see_also:
+      - "ai-short-studio-monster tests/contracts/route-catalog.ts"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-CAT-SECTIONS
+    title: 缺 page 元素(章节锚点)
+    detect_signal: |
+      catalog.required_sections 中声明的 heading 在 in_file 中不存在
+    what_is_wrong: |
+      文档有,但缺关键章节锚点,导致目录 / 索引失效。
+    fix_template_before: |
+      # ❌ SKILL.md 没有 ## §0 定位 章节
+    fix_template_after: |
+      # ✅ 在 SKILL.md 加
+      ## §0 定位
+
+      ...(≥ 50 字描述)
+    next_skill: web-app-development
+    next_skill_action: "用 prose 模板生成对应章节"
+    reclaim_steps:
+      - 看 stderr HINT-AP-CAT-004,定位缺哪个 heading
+      - 在 in_file 中加 `## <heading>` + 50+ 字正文
+      - 跑 pytest tests/catalogs 验证
+    see_also: []
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-CAT-SCHEMA
+    title: 缺某个新增 schema 字段
+    detect_signal: |
+      catalog.required_schema_fields 中 dotted path 不存在
+    what_is_wrong: |
+      新增 resource / gate / guard 时未在 registry 中登记。
+    fix_template_before: |
+      # ❌ src/lib/asset-hub/... 加了新 endpoint 但 registry 缺
+    fix_template_after: |
+      # ✅ registry/stacks.yaml 加新 stack
+      - id: my-stack
+        name: "我的栈"
+        scaffold: "scaffolds/my-stack"
+      # ✅ 在 catalog 加 required_schema_fields
+      - in_file: registry/stacks.yaml
+        path: "stacks[*].id"
+    next_skill: trae-ponytail
+    next_skill_action: "加 yaml 字段 + 同步 catalog"
+    reclaim_steps:
+      - 看 stderr HINT-AP-CAT-005,定位哪个 dotted path 缺失
+      - 在 in_file 中加对应字段(或在 catalog 移除过期声明)
+      - 跑 pytest -m trap 验证
+    see_also:
+      - "references/traps.md §AP-7"

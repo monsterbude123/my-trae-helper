@@ -40,6 +40,16 @@ export async function checkDependencies({ skillName, agentName }) {
   const content = readFileSync(skillPath, 'utf-8');
   const meta = parseYAMLFrontmatter(content);
 
+  // CP1.5: DEPRECATED 拦截（2026-08-14 聚合归档）
+  // SKILL.md frontmatter 含 `status: deprecated` + `redirect_to` → BLOCK 并指向新 skill
+  if (meta.status === 'deprecated') {
+    result.passed = false;
+    result.missing.push(
+      `DEPRECATED: ${skillName} 已归档，请改用 \`${meta.redirect_to || 'unknown'}\``
+    );
+    return result;
+  }
+
   if (!meta.requires) return result;
 
   if (meta.requires.skills) {

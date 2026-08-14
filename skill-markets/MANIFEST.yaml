@@ -1,0 +1,738 @@
+# skill-markets/MANIFEST.yaml
+# 自动生成 — 用 scripts/build-manifest.py 重建
+# 手工微调后请勿覆盖,除非重新跑 build-manifest.py
+
+schema_version: 1
+
+skills:
+  - name: acceptance-discipline
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §0 写在前面：验收是交付的必要铁律"
+      - path: references/ai-agent-protocol.md
+    tests: []
+
+  - name: agent-dev-control-kit
+    scripts:
+      - path: scripts/agent-hint-emit.py
+        cli_entry: agent-hint-emit
+        exit_codes: [0, 2]
+      - path: scripts/catalog-guard.py
+        cli_entry: catalog-guard
+        exit_codes: [0, 2]
+      - path: scripts/gate-check.py
+        cli_entry: gate-check
+        exit_codes: [0, 2]
+      - path: scripts/generate-skill-from-template.py
+        cli_entry: generate-skill-from-template
+        exit_codes: [0, 2]
+      - path: scripts/init-control-kit.py
+        cli_entry: init-control-kit
+        exit_codes: [0, 2]
+      - path: scripts/install-husky.py
+        cli_entry: install-husky
+        exit_codes: [0, 2]
+      - path: scripts/install-husky.test.py
+        cli_entry: install-husky.test
+        exit_codes: [0, 2]
+      - path: scripts/migrate-to-layered-structure.py
+        cli_entry: migrate-to-layered-structure
+        exit_codes: [0, 2]
+      - path: scripts/run-all-guards.py
+        cli_entry: run-all-guards
+        exit_codes: [0, 2]
+      - path: scripts/validate-execution-skill.py
+        cli_entry: validate-execution-skill
+        exit_codes: [0, 2]
+      - path: scripts/validate-gate-integrity.py
+        cli_entry: validate-gate-integrity
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §0 定位"
+      - path: references/execution-skills-guide.md
+    tests: []
+
+  - name: browser-use-cloud
+    scripts:
+      - path: scripts/api_check.py
+        cli_entry: api_check
+        exit_codes: [0, 2]
+      - path: scripts/batch_sessions.py
+        cli_entry: batch_sessions
+        exit_codes: [0, 2]
+      - path: scripts/structured_extract.py
+        cli_entry: structured_extract
+        exit_codes: [0, 2]
+      - path: scripts/webhook_server.py
+        cli_entry: webhook_server
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 技能加载策略"
+      - path: references/agent-tasks.md
+    tests: []
+
+  - name: coding-xinfa
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §1 Goal Mode 协议 · 目标追逐与完成验证"
+      - path: references/edit-economy.md
+    tests: []
+
+  - name: comfyui-api-skills
+    scripts:
+      - path: scripts/check_env.py
+        cli_entry: check_env
+        exit_codes: [0, 2]
+      - path: scripts/comfy_download.py
+        cli_entry: comfy_download
+        exit_codes: [0, 2]
+      - path: scripts/comfy_inject.py
+        cli_entry: comfy_inject
+        exit_codes: [0, 2]
+      - path: scripts/comfy_matrix.py
+        cli_entry: comfy_matrix
+        exit_codes: [0, 2]
+      - path: scripts/comfy_menu.py
+        cli_entry: comfy_menu
+        exit_codes: [0, 2]
+      - path: scripts/comfy_pipeline.py
+        cli_entry: comfy_pipeline
+        exit_codes: [0, 2]
+      - path: scripts/comfy_resolve.py
+        cli_entry: comfy_resolve
+        exit_codes: [0, 2]
+      - path: scripts/comfy_status.py
+        cli_entry: comfy_status
+        exit_codes: [0, 2]
+      - path: scripts/comfy_workflows.py
+        cli_entry: comfy_workflows
+        exit_codes: [0, 2]
+      - path: scripts/model_kb.py
+        cli_entry: model_kb
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 你的能力"
+      - path: references/lora-训练.md
+    tests: []
+
+  - name: deep-research
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 0. 何时激活"
+      - path: references/quality-rules.md
+    tests: []
+
+  - name: deepagents_teach_skill
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## What is DeepAgents"
+      - path: references/api-reference.md
+    tests: []
+
+  - name: doc-map-manager
+    scripts:
+      - path: scripts/build-index.py
+        cli_entry: build-index
+        exit_codes: [0, 2]
+      - path: scripts/query-index.py
+        cli_entry: query-index
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 五层架构"
+    tests: []
+
+  - name: docsify-doc-builder
+    scripts:
+      - path: scripts/check-env.sh
+        cli_entry: check-env
+        exit_codes: [0, 2]
+      - path: scripts/generate-sidebar.sh
+        cli_entry: generate-sidebar
+        exit_codes: [0, 2]
+      - path: scripts/init-docs.sh
+        cli_entry: init-docs
+        exit_codes: [0, 2]
+      - path: scripts/serve.sh
+        cli_entry: serve
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 适用场景"
+    tests: []
+
+  - name: e2e-module-audit
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 两种工作流"
+    tests: []
+
+  - name: fullstack-auto
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 定位"
+    tests: []
+
+  - name: fullstack-skill-architect
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §0 核心价值主张"
+      - path: references/methodology.md
+    tests: []
+
+  - name: fullstack4TraeV10
+    scripts:
+      - path: scripts/acceptance-audit.py
+        cli_entry: acceptance-audit
+        exit_codes: [0, 2]
+      - path: scripts/change-status.py
+        cli_entry: change-status
+        exit_codes: [0, 2]
+      - path: scripts/check_integration_contract.py
+        cli_entry: check_integration_contract
+        exit_codes: [0, 2]
+      - path: scripts/check_prerequisites.py
+        cli_entry: check_prerequisites
+        exit_codes: [0, 2]
+      - path: scripts/code-hygiene.py
+        cli_entry: code-hygiene
+        exit_codes: [0, 2]
+      - path: scripts/common.py
+        cli_entry: common
+        exit_codes: [0, 2]
+      - path: scripts/dispatch-agent.py
+        cli_entry: dispatch-agent
+        exit_codes: [0, 2]
+      - path: scripts/dist-hash-check.py
+        cli_entry: dist-hash-check
+        exit_codes: [0, 2]
+      - path: scripts/install-hooks.py
+        cli_entry: install-hooks
+        exit_codes: [0, 2]
+      - path: scripts/migrate-v9-to-v10.py
+        cli_entry: migrate-v9-to-v10
+        exit_codes: [0, 2]
+      - path: scripts/orphan-detector.py
+        cli_entry: orphan-detector
+        exit_codes: [0, 2]
+      - path: scripts/phase-gate.py
+        cli_entry: phase-gate
+        exit_codes: [0, 2]
+      - path: scripts/proactive-scan.py
+        cli_entry: proactive-scan
+        exit_codes: [0, 2]
+      - path: scripts/reason-classifier.py
+        cli_entry: reason-classifier
+        exit_codes: [0, 2]
+      - path: scripts/scan-templates.py
+        cli_entry: scan-templates
+        exit_codes: [0, 2]
+      - path: scripts/scenario-dispatch.py
+        cli_entry: scenario-dispatch
+        exit_codes: [0, 2]
+      - path: scripts/self-diagnose.py
+        cli_entry: self-diagnose
+        exit_codes: [0, 2]
+      - path: scripts/setup-feature.py
+        cli_entry: setup-feature
+        exit_codes: [0, 2]
+      - path: scripts/spec-knowledge-extract.py
+        cli_entry: spec-knowledge-extract
+        exit_codes: [0, 2]
+      - path: scripts/spec-purge.py
+        cli_entry: spec-purge
+        exit_codes: [0, 2]
+      - path: scripts/visual-content-check.py
+        cli_entry: visual-content-check
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 哲学"
+      - path: references/acceptance-gates-v10.md
+    tests: []
+
+  - name: fullstack4TraeV11
+    scripts:
+      - path: scripts/acceptance-audit.py
+        cli_entry: acceptance-audit
+        exit_codes: [0, 2]
+      - path: scripts/change-status.py
+        cli_entry: change-status
+        exit_codes: [0, 2]
+      - path: scripts/check_integration_contract.py
+        cli_entry: check_integration_contract
+        exit_codes: [0, 2]
+      - path: scripts/code-hygiene.py
+        cli_entry: code-hygiene
+        exit_codes: [0, 2]
+      - path: scripts/dispatch-agent.py
+        cli_entry: dispatch-agent
+        exit_codes: [0, 2]
+      - path: scripts/dist-hash-check.py
+        cli_entry: dist-hash-check
+        exit_codes: [0, 2]
+      - path: scripts/hooks-fidelity.py
+        cli_entry: hooks-fidelity
+        exit_codes: [0, 2]
+      - path: scripts/init-from-zero.py
+        cli_entry: init-from-zero
+        exit_codes: [0, 2]
+      - path: scripts/install-hooks.py
+        cli_entry: install-hooks
+        exit_codes: [0, 2]
+      - path: scripts/orphan-detector.py
+        cli_entry: orphan-detector
+        exit_codes: [0, 2]
+      - path: scripts/phase-gate.py
+        cli_entry: phase-gate
+        exit_codes: [0, 2]
+      - path: scripts/proactive-scan.py
+        cli_entry: proactive-scan
+        exit_codes: [0, 2]
+      - path: scripts/prototype-backfill-check.py
+        cli_entry: prototype-backfill-check
+        exit_codes: [0, 2]
+      - path: scripts/reason-classifier.py
+        cli_entry: reason-classifier
+        exit_codes: [0, 2]
+      - path: scripts/scan-templates.py
+        cli_entry: scan-templates
+        exit_codes: [0, 2]
+      - path: scripts/script-threshold-audit.py
+        cli_entry: script-threshold-audit
+        exit_codes: [0, 2]
+      - path: scripts/self-diagnose.py
+        cli_entry: self-diagnose
+        exit_codes: [0, 2]
+      - path: scripts/setup-feature.py
+        cli_entry: setup-feature
+        exit_codes: [0, 2]
+      - path: scripts/spec-knowledge-extract.py
+        cli_entry: spec-knowledge-extract
+        exit_codes: [0, 2]
+      - path: scripts/spec-purge.py
+        cli_entry: spec-purge
+        exit_codes: [0, 2]
+      - path: scripts/stage-gate.py
+        cli_entry: stage-gate
+        exit_codes: [0, 2]
+      - path: scripts/state-card-validator.py
+        cli_entry: state-card-validator
+        exit_codes: [0, 2]
+      - path: scripts/sync-after-upgrade.py
+        cli_entry: sync-after-upgrade
+        exit_codes: [0, 2]
+      - path: scripts/upgrade-from-v10.py
+        cli_entry: upgrade-from-v10
+        exit_codes: [0, 2]
+      - path: scripts/visual-content-check.py
+        cli_entry: visual-content-check
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 哲学（V10 传承 + V11 升级）"
+      - path: references/agent-error-diagnosis.md
+    tests: []
+
+  - name: fullstack4TraeV9
+    scripts:
+      - path: scripts/change-status.py
+        cli_entry: change-status
+        exit_codes: [0, 2]
+      - path: scripts/install-hooks.py
+        cli_entry: install-hooks
+        exit_codes: [0, 2]
+      - path: scripts/migrate-v8-to-v9.py
+        cli_entry: migrate-v8-to-v9
+        exit_codes: [0, 2]
+      - path: scripts/spec-knowledge-extract.py
+        cli_entry: spec-knowledge-extract
+        exit_codes: [0, 2]
+      - path: scripts/spec-merge.py
+        cli_entry: spec-merge
+        exit_codes: [0, 2]
+      - path: scripts/spec-validate.py
+        cli_entry: spec-validate
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 哲学（内化自 OpenSpec）"
+      - path: references/acceptance-gates.md
+    tests: []
+
+  - name: game-production-kit
+    scripts:
+      - path: scripts/export-collaborator-brief.py
+        cli_entry: export-collaborator-brief
+        exit_codes: [0, 2]
+      - path: scripts/gap_detect.py
+        cli_entry: gap_detect
+        exit_codes: [0, 2]
+      - path: scripts/gen_voice.py
+        cli_entry: gen_voice
+        exit_codes: [0, 2]
+      - path: scripts/gen_voice_vas.py
+        cli_entry: gen_voice_vas
+        exit_codes: [0, 2]
+      - path: scripts/import-external-assets.py
+        cli_entry: import-external-assets
+        exit_codes: [0, 2]
+      - path: scripts/inject_vocal.py
+        cli_entry: inject_vocal
+        exit_codes: [0, 2]
+      - path: scripts/sync_version_tracking.py
+        cli_entry: sync_version_tracking
+        exit_codes: [0, 2]
+      - path: scripts/validate_scenes.py
+        cli_entry: validate_scenes
+        exit_codes: [0, 2]
+      - path: scripts/verify_voices.py
+        cli_entry: verify_voices
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §-1 模式自动检测（新会话第一步）"
+      - path: references/add-engine-guide.md
+    tests: []
+
+  - name: goal-mode
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 三大铁律"
+    tests: []
+
+  - name: langgraph_teach_skill
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## What is LangGraph"
+      - path: references/api-reference.md
+    tests: []
+
+  - name: learn-plan-skill
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 用途"
+    tests: []
+
+  - name: meeting-minutes-taker
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## Quick Start"
+      - path: references/completeness_review_checklist.md
+    tests: []
+
+  - name: mini-game-p2p-room
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §0 P2P 连接必修 6 条"
+      - path: references/css-backgrounds.md
+    tests: []
+
+  - name: modelscope-assistant
+    scripts:
+      - path: scripts/mymodelscope.py
+        cli_entry: mymodelscope
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 铁律"
+      - path: references/aigc-workflow.md
+    tests: []
+
+  - name: openapi-doc-exporter
+    scripts:
+      - path: scripts/render_md.py
+        cli_entry: render_md
+        exit_codes: [0, 2]
+      - path: scripts/split_by_prefix.py
+        cli_entry: split_by_prefix
+        exit_codes: [0, 2]
+      - path: scripts/validate_openapi.py
+        cli_entry: validate_openapi
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 何时使用"
+      - path: references/export-guide.md
+    tests: []
+
+  - name: project-rules-gate
+    scripts:
+      - path: scripts/forge_project_rules_skill.py
+        cli_entry: forge_project_rules_skill
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §0 铁律(10 条)"
+      - path: references/agent-delegate-protocol.md
+    tests: []
+
+  - name: screenshot
+    scripts:
+      - path: scripts/screenshot.mjs
+        cli_entry: screenshot
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 前置条件"
+    tests: []
+
+  - name: security-review
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## When to Use This Skill"
+      - path: references/language-patterns.md
+    tests: []
+
+  - name: session-distiller
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §0 去重检查协议 (V2.1 强制 — 避免重复技能)"
+      - path: references/apology-diagnosis.md
+    tests: []
+
+  - name: shuxia-novel-engine
+    scripts:
+      - path: scripts/check.py
+        cli_entry: check
+        exit_codes: [0, 2]
+      - path: scripts/check_chapters.py
+        cli_entry: check_chapters
+        exit_codes: [0, 2]
+      - path: scripts/combat_narrative.py
+        cli_entry: combat_narrative
+        exit_codes: [0, 2]
+      - path: scripts/discover.py
+        cli_entry: discover
+        exit_codes: [0, 2]
+      - path: scripts/drama_narrative.py
+        cli_entry: drama_narrative
+        exit_codes: [0, 2]
+      - path: scripts/enumerate.py
+        cli_entry: enumerate
+        exit_codes: [0, 2]
+      - path: scripts/evaluate.py
+        cli_entry: evaluate
+        exit_codes: [0, 2]
+      - path: scripts/export_subculture_package.py
+        cli_entry: export_subculture_package
+        exit_codes: [0, 2]
+      - path: scripts/init_db.py
+        cli_entry: init_db
+        exit_codes: [0, 2]
+      - path: scripts/init_world_index.py
+        cli_entry: init_world_index
+        exit_codes: [0, 2]
+      - path: scripts/ripple.py
+        cli_entry: ripple
+        exit_codes: [0, 2]
+      - path: scripts/theme_check.py
+        cli_entry: theme_check
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §0 快速启动（每个新会话必读）"
+      - path: references/architecture.md
+    tests: []
+
+  - name: skill-acceptance
+    scripts:
+      - path: scripts/verify.py
+        cli_entry: verify
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §0 定位"
+      - path: references/checks.md
+    tests: []
+
+  - name: skill-creator-claude
+    scripts:
+      - path: scripts/aggregate_benchmark.py
+        cli_entry: aggregate_benchmark
+        exit_codes: [0, 2]
+      - path: scripts/generate_report.py
+        cli_entry: generate_report
+        exit_codes: [0, 2]
+      - path: scripts/improve_description.py
+        cli_entry: improve_description
+        exit_codes: [0, 2]
+      - path: scripts/package_skill.py
+        cli_entry: package_skill
+        exit_codes: [0, 2]
+      - path: scripts/quick_validate.py
+        cli_entry: quick_validate
+        exit_codes: [0, 2]
+      - path: scripts/run_eval.py
+        cli_entry: run_eval
+        exit_codes: [0, 2]
+      - path: scripts/run_loop.py
+        cli_entry: run_loop
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## Communicating with the user"
+      - path: references/schemas.md
+    tests: []
+
+  - name: skills-security
+    status: deprecated
+    redirect_to: trae-security-review
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "已并入 trae-security-review"
+    tests: []
+
+  - name: test-experience
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §1 核心原则"
+      - path: references/pytest-traps.md
+    tests: []
+
+  - name: test-partition-runner
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## Core Principle"
+    tests: []
+
+  - name: trae-local-data-export
+    scripts:
+      - path: scripts/decrypt_db.py
+        cli_entry: decrypt_db
+        exit_codes: [0, 2]
+      - path: scripts/export_sessions.py
+        cli_entry: export_sessions
+        exit_codes: [0, 2]
+      - path: scripts/extract_key.py
+        cli_entry: extract_key
+        exit_codes: [0, 2]
+      - path: scripts/extract_key_frida.py
+        cli_entry: extract_key_frida
+        exit_codes: [0, 2]
+      - path: scripts/extract_trae_jsonl.py
+        cli_entry: extract_trae_jsonl
+        exit_codes: [0, 2]
+      - path: scripts/sanitize_export.py
+        cli_entry: sanitize_export
+        exit_codes: [0, 2]
+      - path: scripts/verify_decrypted_db.py
+        cli_entry: verify_decrypted_db
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §0 何时加载本技能"
+      - path: references/db-location.md
+    tests: []
+
+  - name: trae-professional
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 如何使用这个技能"
+      - path: references/agent.md
+    tests: []
+
+  - name: trae-security-review
+    scripts:
+      - path: scripts/scan_rigor.py
+        cli_entry: scan_rigor
+        exit_codes: [0, 2]
+      - path: scripts/scan_skills_dir.py
+        cli_entry: scan_skills_dir
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 架构概览"
+      - path: references/checklists.md
+    tests: []
+
+  - name: vibe-coding-standards
+    scripts:
+      - path: scripts/validate_vibe_docs.sh
+        cli_entry: validate_vibe_docs
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §1 通用铁律（适用于所有组件类型）"
+      - path: references/rule-writing-craft.md
+    tests: []
+
+  - name: vision-audit
+    scripts:
+      - path: scripts/vision-audit.py
+        cli_entry: vision-audit
+        exit_codes: [0, 2]
+      - path: scripts/vision-audit.mjs
+        cli_entry: vision-audit
+        exit_codes: [0, 2]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## AI Agent 强制前置检查"
+    tests: []
+
+  - name: window-process-skills
+    scripts: []
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## 一、端口管理 (Port)"
+    tests: []

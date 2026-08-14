@@ -30,8 +30,8 @@ triggers:
   - "PR check"
   - "门禁"
 requires:
-  skills: [test-experience, e2e-module-audit, test-partition-runner]
-  note: "三者均已整合为 acceptance-discipline 的子体系，通过 agents/ 目录提供统一验收能力。根级独立 SKILL.md 为向后兼容入口，实际逻辑已迁移至 agents/。"
+  skills: []
+  note: "test-experience / e2e-module-audit / test-partition-runner 三个能力已整合至本 skill（agents/ 目录 + references/）。三个根级 SKILL.md 保留为 DEPRECATED 兼容壳，加载时跳转到本 skill。"
 ---
 
 # Acceptance Discipline — 高质量验收铁律
@@ -178,13 +178,15 @@ requires:
 
 ## 子 Skill（向后兼容）
 
-本 skill 整合并扩展了三份原始沉淀，保留轻量 wrapper 以兼容旧触发词：
+本 skill 整合并扩展了三份原始沉淀，保留**根级独立 SKILL.md**（DEPRECATED 标记）+ `skills/` 子壳（redirect 入口）双重兼容：
 
-| 子 Skill | 对应 Agent |
-|---------|-----------|
-| [test-experience](skills/test-experience/SKILL.md) | [unit-test-agent](agents/unit-test-agent.md) + [integration-test-agent](agents/integration-test-agent.md) |
-| [e2e-module-audit](skills/e2e-module-audit/SKILL.md) | [e2e-audit-agent](agents/e2e-audit-agent.md) |
-| [test-partition-runner](skills/test-partition-runner/SKILL.md) | [blockage-resolver-agent](agents/blockage-resolver-agent.md) |
+| 旧 Skill | DEPRECATED 根级入口 | 兼容壳 | 实际加载 |
+|---------|-------------------|--------|---------|
+| `test-experience` | [test-experience/SKILL.md](../test-experience/SKILL.md) | [skills/test-experience/SKILL.md](skills/test-experience/SKILL.md) | [unit-test-agent](agents/unit-test-agent.md) + [integration-test-agent](agents/integration-test-agent.md) |
+| `e2e-module-audit` | [e2e-module-audit/SKILL.md](../e2e-module-audit/SKILL.md) | [skills/e2e-module-audit/SKILL.md](skills/e2e-module-audit/SKILL.md) | [e2e-audit-agent](agents/e2e-audit-agent.md) |
+| `test-partition-runner` | [test-partition-runner/SKILL.md](../test-partition-runner/SKILL.md) | [skills/test-partition-runner/SKILL.md](skills/test-partition-runner/SKILL.md) | [blockage-resolver-agent](agents/blockage-resolver-agent.md) |
+
+**加载协议**：碰到 `status: deprecated` + `redirect_to` 字段 → 主 agent 应改加载 `redirect_to` 指向的 skill。
 
 ---
 
@@ -290,10 +292,10 @@ acceptance-discipline/
 │   ├── toolchain-guide.md           # §13 工具链推荐
 │   ├── roadmap.md                   # §14 落地路线图
 │   └── faq.md                       # §15 FAQ
-└── skills/                          # 子 Skill（向后兼容）
-    ├── test-experience/SKILL.md
-    ├── e2e-module-audit/SKILL.md
-    └── test-partition-runner/SKILL.md
+└── skills/                          # 兼容壳 — 旧 skill 的 redirect 入口（DEPRECATED）
+    ├── test-experience/SKILL.md       # → unit-test-agent
+    ├── e2e-module-audit/SKILL.md      # → e2e-audit-agent
+    └── test-partition-runner/SKILL.md # → blockage-resolver-agent
 ```
 
 ---

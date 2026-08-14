@@ -76,8 +76,8 @@ class ValidationResult:
     def add_warning(self, message: str, location: str = None, suggestion: str = None):
         self.issues.append(ValidationIssue('WARNING', message, location, suggestion))
     
-    def add_info(self, message: str, location: str = None):
-        self.issues.append(ValidationIssue('INFO', message, location))
+    def add_info(self, message: str, location: str = None, suggestion: str = None):
+        self.issues.append(ValidationIssue('INFO', message, location, suggestion))
 
 
 class ExecutionSkillValidator:

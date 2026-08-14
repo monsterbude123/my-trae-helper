@@ -7,10 +7,61 @@
 #   - Unit Tests (skill-change-control / skill-install-control / dependency-guard / structure-guard / security-guard)
 #   - 技能安全守卫（仅变更的技能）
 #   - 技能结构守卫（仅新建技能）
+#
+# Windows 兼容: Git Bash 默认无 `python`,用 `py`(Python Launcher) 或 `python3` 兜底
+
+# Python 命令探测:Windows 上 npm 能跑 python,但 Git Bash 只能 python3/py
+# 优先用 miniconda Python(已装 pytest/pyyaml);Git Bash 的 /usr/bin/python3 没 pip
+PY=""
+
+# 直接探测已知的 Python 路径(Windows 常见位置)
+# 注意:Git Bash hook 进程可能 mount /mnt 不可用,所以同时测 /c/ 和 /mnt/c/ 两种前缀
+for cand in \
+  /mnt/c/ProgramData/miniconda3/python.exe \
+  /c/ProgramData/miniconda3/python.exe \
+  /mnt/c/Python313/python.exe \
+  /c/Python313/python.exe \
+  /mnt/c/Python312/python.exe \
+  /c/Python312/python.exe \
+  /mnt/c/Python311/python.exe \
+  /c/Python311/python.exe; do
+  if [ -x "$cand" ]; then PY="$cand"; break; fi
+done
+
+# 验证 PY 真的能 import pytest(避免选到 WindowsApps 的 launcher stub)
+if [ -n "$PY" ]; then
+  if ! "$PY" -c "import pytest, yaml" 2>/dev/null; then
+    PY=""
+  fi
+fi
+
+# 回退到 PATH 探测
+if [ -z "$PY" ]; then
+  for cand in python3 py python; do
+    if PY2="$(type -p "$cand" 2>/dev/null)"; then
+      if [ -n "$PY2" ] && [ -x "$PY2" ]; then
+        if "$PY2" -c "import pytest, yaml" 2>/dev/null; then
+          PY="$PY2"
+          break
+        fi
+      fi
+    fi
+  done
+fi
+if [ -z "$PY" ]; then
+  PY="$(command -v python3 || command -v py || command -v python)"
+fi
+if [ -z "$PY" ]; then
+  echo "❌ Gate 配置错误: python3 / py / python 都不在 PATH"
+  exit 1
+fi
+
+# 注入到子进程,子脚本可拾取(MY_TRAE_HELPER_PY 比 sys.executable 优先级更高)
+export MY_TRAE_HELPER_PY="$PY"
 
 set -e
 
-echo "🔍 执行 L1 Commit Gate..."
+echo "🔍 执行 L1 Commit Gate (PY=$PY)..."
 
 # 1. Lint（必须存在）
 if ! grep -q '"lint"' package.json; then
@@ -35,7 +86,7 @@ if [ -n "$CHANGED_SKILLS" ]; then
   for skill in $CHANGED_SKILLS; do
     if [ -d "skill-markets/$skill" ]; then
       echo "  - $skill"
-      python scripts/skill-security-guard.py "skill-markets/$skill"
+      "$PY" scripts/skill-security-guard.py "skill-markets/$skill"
     fi
   done
 fi
@@ -47,9 +98,23 @@ if [ -n "$NEW_SKILLS" ]; then
   for skill in $NEW_SKILLS; do
     if [ -d "skill-markets/$skill" ]; then
       echo "  - $skill"
-      python scripts/skill-structure-guard.py "skill-markets/$skill"
+      "$PY" scripts/skill-structure-guard.py "skill-markets/$skill"
     fi
   done
 fi
+
+# 5. catalog-guard（agent-dev-control-kit 子套件 — 改了它必跑）
+if echo "$CHANGED_SKILLS" | grep -q "agent-dev-control-kit"; then
+  echo "5️⃣ agent-dev-control-kit catalog-guard ..."
+  "$PY" scripts/run-agent-dev-control-kit-tests.py
+fi
+
+# 6. Manifest Bridge(主动提示层 — 缺交付物即阻断)
+echo "6️⃣ Manifest Bridge(意图 ↔ 交付物对账)..."
+if ! grep -q '"test:manifest"' package.json; then
+  echo "❌ Gate 配置错误: package.json 缺少 test:manifest 脚本"
+  exit 1
+fi
+npm run test:manifest
 
 echo "✅ L1 Commit Gate 通过"

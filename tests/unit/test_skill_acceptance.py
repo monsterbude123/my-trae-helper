@@ -105,14 +105,17 @@ def structure_missing_skillmd_blocks():
 
 
 def structure_too_many_rules_blocks():
-    """❹ 铁律 > 10 条 → BLOCK"""
+    """❹ 铁律 > 10 条 → 不阻断(守卫 v2 弹性)"""
+    # 守卫 v2 设计: 行数/铁律数/脚本数 不设硬上限(vibe-coding-standards v2.5 弹性 100~350 行)
+    # 此处只确认守卫不因铁律数崩溃,不强制 BLOCK
     with tempfile.TemporaryDirectory(prefix="acc-rules-") as tmp:
         rules = "\n".join(f"{i}. 铁律 {i}" for i in range(1, 12))
-        content = f"---\nname: too-many\n---\n# 测试\n{rules}\n"
+        # frontmatter 必须含 description 才能过守卫 v2 的"必需字段"检查
+        content = f"---\nname: too-many\ndescription: 测试铁律数\n---\n# 测试\n{rules}\n"
         (Path(tmp) / "SKILL.md").write_text(content)
         code, out, _ = run_python(STRUCTURE_GUARD, tmp)
-        assert code != 0, f"应 BLOCK 但 exit=0"
-        assert "铁律" in out or "铁律" in _, "应报铁律过多"
+        # v2 守卫对铁律数只记 info, 不阻断 → 期望 PASS(0)
+        assert code == 0, f"守卫 v2 期望 PASS 但 exit={code}, output={out}"
 
 
 def structure_good_skill_passes():
@@ -127,7 +130,7 @@ def structure_good_skill_passes():
 test("目录名大写 → BLOCK", structure_bad_uppercase_blocks)
 test("SKILL.md 缺 frontmatter → BLOCK", structure_no_frontmatter_blocks)
 test("目录无 SKILL.md → BLOCK", structure_missing_skillmd_blocks)
-test("铁律 > 10 条 → BLOCK", structure_too_many_rules_blocks)
+test("铁律 > 10 条 → 不阻断(守卫 v2 弹性)", structure_too_many_rules_blocks)
 test("合规技能 → PASS", structure_good_skill_passes)
 
 

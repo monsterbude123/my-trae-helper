@@ -1,0 +1,137 @@
+# skill-catalog.yaml — 声明本 skill 应包含什么
+#
+# 对应 ai-short-studio-monster 的 tests/contracts/route-catalog.ts:
+#   - route-catalog 声明 API routes 应有尽有
+#   - 这里声明 SKILL 应有尽有(版本、文档、脚本、子 skill、schema 字段、章节锚点)
+#
+# 用法:
+#   pytest tests/catalogs/test_catalog_coverage.py   # 跑 catalog 覆盖
+#   python scripts/catalog-guard.py                  # commit gate 阻断
+#
+# 任何字段缺失/不匹配都会触发 trap 测试 fail,并通过 emit_agent_hint
+# 给出"缺什么 / 在哪补 / 调用哪个 Skill"的指引。
+
+version: 1.0.0
+
+# ─────────────────────────────────────────────────────────────────────
+# 文档层 — 对应你描述的"缺管理的模块文档阻断"
+# ─────────────────────────────────────────────────────────────────────
+required_docs:
+  - path: SKILL.md
+    purpose: 主入口规范文档(API + 适用)
+    must_contain:
+      - "三层控制体系"
+      - "Execution"
+      - "Guard"
+      - "Gate"
+    min_lines: 50
+
+  - path: CHANGELOG.md
+    purpose: 变更日志(语义化)
+    must_contain_regex: "## \\["   # 必须含 ## [vX.Y.Z] 格式
+
+  - path: README.md
+    purpose: 项目概览 + 链接
+    min_lines: 20
+
+  - path: references/traps.md
+    purpose: 反例库(必须含 AP-* 条目)
+    must_contain_regex: "## §AP-"
+
+  - path: tests/README.md
+    purpose: 测试运行指南(对应 references/traps.md)
+    must_contain:
+      - "pytest"
+
+# ─────────────────────────────────────────────────────────────────────
+# 必填脚本(子 skill 入口 + 自有 CLI)— 对应 AP-3(防 Guard 缺 CLI 入口)
+# ─────────────────────────────────────────────────────────────────────
+required_scripts:
+  - path: scripts/validate-gate-integrity.py
+    role: gate-integrity-checker
+    is_cli: true
+    must_have_main: true
+  - path: scripts/install-husky.py
+    role: husky-installer
+    is_cli: true
+    must_have_main: true
+  - path: scripts/validate-execution-skill.py
+    role: skill-template-validator
+    is_cli: true
+    must_have_main: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Page-like 元素:章节锚点 — 对应你描述的"缺 page 元素"
+# ─────────────────────────────────────────────────────────────────────
+required_sections:
+  - in_file: SKILL.md
+    level: 2
+    heading: "§0"
+    purpose: 定位 + 适用场景
+  - in_file: SKILL.md
+    level: 2
+    heading: "§1"
+    purpose: 三层控制总览
+  - in_file: SKILL.md
+    level: 2
+    heading: "§11"
+    purpose: Gate 自验收强制
+  - in_file: skills/execution-control/SKILL.md
+    level: 2
+    heading: "适用场景"
+  - in_file: skills/execution-control/SKILL.md
+    level: 2
+    heading: "执行流程"
+  - in_file: skills/execution-control/SKILL.md
+    level: 2
+    heading: "验收标准"
+  - in_file: skills/guard-control/SKILL.md
+    level: 2
+    heading: "适用场景"
+  - in_file: skills/guard-control/SKILL.md
+    level: 2
+    heading: "执行流程"
+  - in_file: skills/guard-control/SKILL.md
+    level: 2
+    heading: "验收标准"
+  - in_file: skills/gate-control/SKILL.md
+    level: 2
+    heading: "适用场景"
+  - in_file: skills/gate-control/SKILL.md
+    level: 2
+    heading: "执行流程"
+  - in_file: skills/gate-control/SKILL.md
+    level: 2
+    heading: "验收标准"
+
+# ─────────────────────────────────────────────────────────────────────
+# Schema 字段 — 对应你描述的"缺某个新增 schema 阻断"
+# ─────────────────────────────────────────────────────────────────────
+required_schema_fields:
+  - in_file: registry/stacks.yaml
+    path: "stacks[*].id"
+    purpose: 每个 stack 必有 id
+    distinct: true
+  - in_file: registry/stacks.yaml
+    path: "stacks[*].scaffold"
+    purpose: 每个 stack 必须有 scaffold 路径
+  - in_file: registry/gates.yaml
+    path: "gates[*].guards[*]"
+    purpose: 每个 gate 引用的 guard id 必须存在于 guards.yaml
+    must_resolve_in_guards: true
+  - in_file: registry/guards.yaml
+    path: "guards[*].id"
+    purpose: 每个 guard 必有 id
+    distinct: true
+  - in_file: scaffolds/nodejs/scaffold.yaml
+    path: "required_scripts.pre_commit"
+    purpose: nodejs scaffold 必含 pre_commit 阶段
+  - in_file: scaffolds/python/scaffold.yaml
+    path: "required_scripts.pre_commit"
+    purpose: python scaffold 必含 pre_commit 阶段
+  - in_file: scaffolds/go/scaffold.yaml
+    path: "required_scripts.pre_commit"
+    purpose: go scaffold 必含 pre_commit 阶段
+  - in_file: scaffolds/java-maven/scaffold.yaml
+    path: "required_scripts.pre_commit"
+    purpose: java-maven scaffold 必含 pre_commit 阶段

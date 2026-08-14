@@ -52,6 +52,8 @@ function parseSkill(skillMdPath, rootDir, dirName) {
     dirName,
     version: String(fm.version || '0.0.0').replace(/^["']|["']$/g, ''),
     description: String(fm.description || '').replace(/^["']|["']$/g, ''),
+    status: fm.status || null,           // "deprecated" 时被 add.mjs 拦截
+    redirectTo: fm.redirect_to || null,  // 重定向目标 skill 名
     requires: fm.requires || {},
     sourcePath: join(rootDir, dirName),
   };
