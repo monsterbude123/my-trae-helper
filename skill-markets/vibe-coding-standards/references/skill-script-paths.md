@@ -48,3 +48,25 @@
 | `skills/xxx/scripts/y.ps1` | workspace 根 |
 | `./scripts/y.ps1` | 当前工作目录（cwd） |
 | `y.ps1`（纯文件名） | 按 §1 搜索链查找 |
+
+---
+
+## §4 Context Engineering 5 Pillar — 路径解析维度（2026-08-14 增量）
+
+> 来源：[external-report 2026-08-14 §M-04](../2026-08-14/external-report.md)
+
+`gitnexus4Trae` 已实装:`impact` / `cypher` 是 **语义搜索**(`query`),不是 grep。但本文件 §1 的"先查 .codebuddy/skills/"仍可能让 agent 退化到 **路径搜索 → 多 read 文件 → 95k token** 的老路。
+
+**5 Pillar 第 4 (相关代码示例) 在此处的应用**:
+
+```
+✅ 好 (语义优先):
+   agent 想知道 skill 是否有 scripts/: 用 gitnexus.query({query:"skill-load-script-paths"})
+                                       → 1.9k token,返回结构化清单
+
+❌ 差 (grep 退化):
+   agent 跑 find .trae/skills -name 'scripts' -type d + read SKILL.md
+                                       → 95k token 扫大半个 monorepo
+```
+
+**结论**:脚本路径解析,应**优先**用 gitnexus / skill-dependency-check(语义)而非 `find -name`(grep)。详见 [skill-dependency-check.md §7 Pillar 4 示例](skill-dependency-check.md)。

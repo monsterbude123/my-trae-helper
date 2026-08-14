@@ -195,3 +195,23 @@ provider:
 | 硬编码项目名/路径 | 概念描述或变量化 |
 | 新增规则前不检测是否与已有规则重叠 | 先用自检清单 + 搜索已有规则中的关键词 |
 | 规则使用 .md 而非 .mdc | .mdc 才有 frontmatter 触发控制 |
+
+---
+
+## §12 Context Engineering 5 Pillar 联动（2026-08-14 增量）
+
+> 来源：[external-report 2026-08-14 §M-03](../2026-08-14/external-report.md)
+
+规则文件最容易踩 **5 Pillar 之 4.相关代码示例** 缺失——只写抽象约束("必须重命名")不写 good/bad 对比,agent 看不懂"什么样的算合格"。
+
+**最小可行示例**(每个 MUST/NEVER 至少配 1 个):
+
+```markdown
+✅ 允许:  §GitNexus: rename symbolName → 用 call graph 批量替换调用点
+❌ 禁止:  §GitNexus: rename symbolName → 用 shell sed -i 全仓替换
+反例:     上一季度因为 sed -i 重命名,跨 8 个文件的动态调用未更新,CI 全红
+```
+
+**反例**:只写 "用 gitnexus rename" → agent 不知道"为什么不用 sed" → 还是会选错的。**对比 + 反例 = 真实可参考的范例,胜过抽象描述 10×**。
+
+**关联**:本文件 §1 结构铁律的 5 Pillar 维度——示例属于"内容质量"而非"结构"。结构对了但内容空,agent 仍然失灵。

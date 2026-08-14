@@ -214,3 +214,19 @@ Explorer（探索者）         Worker（执行者）          Reviewer（审查
 3. 确保所有子代理声明了 `timeout` 与结构化输出协议。
 4. 检查是否存在"无地图的 AGENTS.md"——即缺少技术栈、目录结构或启动命令的 AGENTS.md，给出警告。
 5. （v2.5 新增）Rule `.mdc` 文件硬上限 ≤ 120 行；超过则建议拆分为多个 .mdc 或拆 references/。
+
+### 5.4 Context Engineering 5 Pillar 联动（2026-08-14 增量）
+
+> 来源：[external-report 2026-08-14 §M-03](../2026-08-14/external-report.md) + [GitHub Copilot context handling 2026-06](https://github.blog/ai-and-ml/github-copilot/getting-more-from-each-token-how-copilot-improves-context-handling-and-model-routing/)
+
+v2.5 已经覆盖「分层治理 / 地图 vs 规范」。**5 Pillar** 补的是 **"内容质量"维度**——光有结构,没有优质 context 一样失灵。
+
+| Pillar | v2.5 已覆盖? | 增量动作 |
+|--------|---------------|----------|
+| 1. 项目结构 | ✅ (§5.2 references 索引 / §3.3.1 自检) | 无 |
+| 2. 代码风格 | ⚠️ 部分(子代理协作提及) | 在 AGENTS.md §2 加 **命名/缩进/异常处理/提交信息** 4 行约定 |
+| 3. 领域知识 | ❌ 缺失 | 新增 §X "Domain Glossary" 章节,列出项目关键术语(SPEC / stage / harness 等) |
+| 4. 相关代码示例 | ⚠️ 部分 | rule 文件加 "good / bad" 2 段对比(胜过抽象描述 10×) |
+| 5. 反馈循环 | ✅ (Self-improvement loop §1) | 无 |
+
+**反例**:只写角色("你是资深工程师")不写技术栈 → agent 每次重新猜 → 输出漂移。前 30 分钟写好 5 Pillar 远比调 prompt 划算。

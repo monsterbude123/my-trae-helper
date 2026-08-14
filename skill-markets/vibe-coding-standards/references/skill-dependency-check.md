@@ -122,4 +122,51 @@ requires:
   [ ] requires.optional 中的每个依赖都标注了降级影响？
   [ ] CAPABILITY-MAP.md 的依赖图已更新？
   [ ] 技能加载后首段逻辑是依赖检查？（应用 §3 流程）
+
+---
+
+## §7 Context Engineering 5 Pillar — 依赖检查维度（2026-08-14 增量）
+
+> 来源：[external-report 2026-08-14 §M-03](../2026-08-14/external-report.md) + §M-04 Token 效率
+
+依赖检查协议对应 5 Pillar 的两个关键 Pillar:
+
+### Pillar 3 (领域知识) — depends 语义清晰度
+
+```
+✅ 好 requires.skills:
+   - [acceptance-discipline]   # agent 知道"这是验收守门人"
+   - [ponytail4Trae]            # agent 知道"这是懒人模式"
+
+❌ 差 requires.skills:
+   - [ad]                       # agent 不知道"ad"是什么
+   - [lazy]                     # 不知道 lazy 指代什么
+```
+
+**规则**:声明依赖时,**name 字段与目录名一致**(Kebab-case + 完整词),让 agent 不靠记忆就能查 `~/.trae-cn/skills/<name>/`。
+
+### Pillar 4 (相关代码示例) — 降级影响说明
+
+`requires.optional` 必须给"示例降级后果",不要只说"可选":
+
+```
+✅ 好:
+   optional:
+     - gitnexus4Trae: 缺失 → 影响面分析降级为 grep,盲区 ↑,
+                         monorepo > 100 文件时代价 > $0.5/查询
+
+❌ 差:
+   optional:
+     - gitnexus4Trae    # 没标降级代价,agent 不告诉用户
+```
+
+→ 这是 **M-04 Token 效率** 的直接落地: 95k token grep vs 1.9k token 语义搜索,代价差 50×,用户必须知道。
+
+### 自验清单(增量)
+
+```
+依赖检查维度(5 Pillar 视角):
+  [ ] Pillar 3: requires.skills / requires.optional 中每个名字 agent 一眼能看懂
+  [ ] Pillar 4: optional 都标注了"降级后用户承受什么代价"
+  [ ] 整张图: CAPABILITY-MAP.md §共享能力注册表 与本协议的依赖声明一致
 ```

@@ -121,4 +121,52 @@ echo "扫描完成: $checked_files 文件 | $errors 阻断 | $warnings 警告"
 echo "阈值: AGENTS/SKILL ${TH_PURE} 行 / Rule ${TH_RULE} 行 (v2.5)"
 echo "================================================="
 
+# ---------- 5 Pillar 联动检查（2026-08-14 增量）----------
+# 检查每个 SKILL.md frontmatter 是否声明了:
+#   Pillar 1 (项目结构): description 含"文件/目录/模块"关键词
+#   Pillar 2 (代码风格): description 含"风格/规范/约定"关键词
+#   Pillar 4 (相关代码示例): SKILL.md 至少 1 个 Examples 章节
+# 检查每个 requires.optional 是否带"降级影响"说明
+# (这是 §M-03 + §M-04 的可机检落地)
+
+echo ""
+echo "--- 5 Pillar 联动检查 ---"
+pillar_count=0
+pillar_warn=0
+
+# 扫所有 SKILL.md
+while IFS= read -r skill_md; do
+    [ -z "$skill_md" ] && continue
+    fm=$(sed -n '/^---$/,/^---$/p' "$skill_md" 2>/dev/null | sed '1d;$d')
+
+    # P1: 检查 optional 是否有降级说明(粗略:含"→"或"降级"或"代价")
+    if echo "$fm" | grep -qE '^requires:' ; then
+        optional_block=$(echo "$fm" | awk '/^optional:/,/^[a-z]/' | head -20)
+        if echo "$optional_block" | grep -qE 'optional:' ; then
+            # 任意 optional 缺降级说明 → WARN
+            missing_degrade=$(echo "$optional_block" | grep -vE '(降级|→|代价|影响)' | grep -vE '^\s*#' | grep -E '^\s*-' | grep -v '^\s*-\s*$' | head -5)
+            if [ -n "$missing_degrade" ]; then
+                rel=$(echo "$skill_md" | sed "s|$PWD/||")
+                echo "  ⚠  $rel — optional 缺降级影响说明(Pillar 4)"
+                pillar_warn=$((pillar_warn + 1))
+            fi
+        fi
+    fi
+
+    # P2: 检查 SKILL.md 是否有 Examples 章节(Pillar 4)
+    if ! grep -qE '^## (Examples|示例)' "$skill_md" 2>/dev/null; then
+        rel=$(echo "$skill_md" | sed "s|$PWD/||")
+        echo "  ℹ  $rel — 缺 Examples 章节(可选增强,但建议加)"
+        pillar_count=$((pillar_count + 1))
+    fi
+done < <(find . -name SKILL.md -not -path "./node_modules/*" 2>/dev/null)
+
+echo ""
+if [ "$pillar_warn" -gt 0 ]; then
+    echo "5 Pillar 检查: $pillar_warn 警告 (optional 缺降级说明) / $pillar_count 信息"
+    warnings=$((warnings + pillar_warn))
+else
+    echo "5 Pillar 检查: 0 警告 / $pillar_count 信息"
+fi
+
 [ "$errors" -gt 0 ] && exit 1 || exit 0
