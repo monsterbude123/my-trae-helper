@@ -364,3 +364,47 @@ traps:
       - ".trae/skills/project-rule-skill/SKILL.md §7"
       - "AGENTS.md §3.1 表态信号清单"
       - "scripts/agent-signal-detect.mjs"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-14
+    title: 给 P0/P1/P2 配硬性条数(无出处的分组配额)
+    detect_signal: |
+      文本含模式 `P1.*\d+\s*(条|个)` / `P2.*\d+\s*(条|个)` /
+      `几条落地` / `几条留空` / `每档.*≥\s*\d+` /
+      `P1.*两条.*P2.*三条` 等任意优先级 + 数字配额短语
+    what_is_wrong: |
+      给 P0/P1/P2 优先级配硬性条数(例 "P1 两条落地 + P2 三条留空"),
+      全仓 0 命中出处(2026-08-14 会话已 grep 验证),
+      属于临时口头约定误传成规则。违反:
+      - AGENTS.md §4 #2 "不挂 P0/P1/P2/P3 backlog"
+      - AGENTS.md §4 #6 (2026-08-14 新增) "不给 P0/P1/P2 配硬性条数"
+      - ponytail §过度工程(无意义限制)
+    fix_template_before: |
+      # ❌ 给优先级配数字(全仓无出处,反例)
+      user: "P1 两条落地 + P2 三条留空"
+      agent: <默默按 2+3 做,无核对,无质疑>
+      agent: "P1 完成 2 条,P2 留 3 条"   # 把临时话当规则
+    fix_template_after: |
+      # ✅ 第一轮就质疑无出处的硬数字
+      user: "P1 两条落地 + P2 三条留空"
+      agent: "先核:仓库无此规则出处(全仓 0 命中)。
+              - AGENTS.md §4 #2 是'不挂 P0/P1/P2/P3 backlog'
+              - fullstack4TraeV11 §16.1 是'P0/P1 修复或升级方案
+                必走质疑性校验'(不是分条数量)
+              建议:回归 §4 #2,完成/部分/失败三选一,
+              不挂分档配额。如要落地新规则,先沉淀到
+              global self-improving-agent LEARNING(2026-08-14 §1 路由)。"
+    next_skill: trae-ponytail
+    next_skill_action: "无意义限制清理 + §4.1.1 数字证据核对"
+    reclaim_steps:
+      - 触发:用户给出 "P1/P2/P3 + 几条/几个/≥N" 组合
+      - 第一轮动作:Grep `P[0-3].*\d+\s*(条|个)|几条落地` 全仓,验证无出处
+      - 无出处 → 在响应中明确标注 "全仓 0 命中,无规则出处",不默默执行
+      - 出处存在 → 走对应规则原文,不在响应中改写数字
+      - 净化方向:回归 §4 #2 三选一(完成/部分/失败),不挂分档配额
+      - 反向钉死:见 AGENTS.md §4 #6 + 本条 detect_signal;pytest trap 测试用 detect_signal 模式断言
+    see_also:
+      - "AGENTS.md §4 #2 不挂 P0/P1/P2/P3 backlog"
+      - "AGENTS.md §4 #6 不给 P0/P1/P2 配硬性条数(2026-08-14 新增)"
+      - "AGENTS.md §4.1.1 数字必须第一轮带证据"
+      - ".trae/rules/learning.md §1 全局自管经验沉淀"
