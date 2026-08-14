@@ -325,3 +325,42 @@ traps:
     see_also:
       - "AGENTS.md §4 行为规约 数据精度"
       - "session-distiller §3.5"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-13
+    title: 主 agent 漏调 signal-detect(用户纠正/不耐慎/特性请求永久丢失)
+    detect_signal: |
+      $HOME/.self-improving-agent/.learnings/ERRORS.md 长时间无新增 /
+      FEATURE_REQUESTS.md 长时间无新增 但用户消息含 AGENTS.md §3.1 表态信号
+      (懂了吗/你确定/不对/能 XXX 吗/应该/为什么/怎么)
+    what_is_wrong: |
+      主 agent 接收用户消息后未调 `scripts/agent-signal-detect.mjs`,
+      用户表态信号(纠正/不耐慎/特性请求)未落入 logs/agent-hints.jsonl,
+      post-commit 钩子也无 hint 可消费 → 用户真实反馈永久丢失。
+      违反 .trae/skills/project-rule-skill/SKILL.md §7 强制契约。
+    fix_template_before: |
+      # ❌ 主 agent 自作主张跳 signal-detect(2026-08-14 本会话踩坑)
+      user: "懂了吗" / "你确定这样行吗" / "能自动调 signal 吗"
+      agent: <直接答>   # 跳过 signal-detect → hint 永久丢失
+    fix_template_after: |
+      # ✅ 每个新 turn 第一条响应前 + 含表态信号时 + commit/test 失败回显前
+      #    都必须调 signal-detect(参考 SKILL.md §7.1 触发时机表)
+      user: "懂了吗"
+      agent:
+        # Step 1: 立即调 signal-detect(stdin 模式)
+        result=$(echo "懂了吗" | node scripts/agent-signal-detect.mjs 2>&1)
+        hits=$(echo "$result" | grep -c "detected")
+        # Step 2: 响应开头声明 [signal-scanned] 标记
+        echo "[signal-scanned] hits=$hits files=[agent-hints.jsonl]"
+        # Step 3: 正常回应用户
+    next_skill: trae-ponytail
+    next_skill_action: "响应开头必含 [signal-scanned] 标记"
+    reclaim_steps:
+      - 触发时机(强制): 每个新 turn 第一条响应前 / 含表态信号时 / 工具失败回显前 / 用户消息末尾是问号
+      - 调用方式: argv 模式 `node scripts/agent-signal-detect.mjs "$msg"` 或 stdin `echo "$msg" | node ...`
+      - 漏调检测: $HOME/.self-improving-agent/.learnings/ERRORS.md 长时间无新增 + ERRORS.md 比 FEATURE_REQUESTS.md 少
+      - 已漏调: 立即跑一次 `node scripts/self-improving-agent.mjs scan-hints --home "$WIN_HOME"` 补救 + 在响应中声明 "[signal-recovery]"
+    see_also:
+      - ".trae/skills/project-rule-skill/SKILL.md §7"
+      - "AGENTS.md §3.1 表态信号清单"
+      - "scripts/agent-signal-detect.mjs"
