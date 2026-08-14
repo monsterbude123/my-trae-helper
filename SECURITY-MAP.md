@@ -39,6 +39,7 @@
 | shuxia-novel-engine | 1 md + 5 agent + 12 py + 9 wf | 0 | 1 | 0 | **4.8** | 🟢 | 1 个 MEDIUM 为 export_subculture_package.py 中的 subprocess 调用 |
 | Voice-Acting-Script-Skill | 1 md + 5 skill + 20 py | 0 | 7 | 0 | **3.6** | 🟡 | 7 个 MEDIUM：HTTP 引用 + 少量 Shell 调用（TTS adapter 网络请求） |
 | modelscope-assistant | 1 md + 12 ref + 4 py | 1 | 0 | 0 | **4.5** | 🟢 | 1 个 HIGH 为 api-inference.md 中的示例 API Key（文档引用） |
+| **minimax-multimodal** (V1.0 NEW 2026-08-14) | 1 md + 7 ref + 8 py + 1 test | 0 | 7 | 0 | **3.9** | 🟢 | **实跑扫描（2026-08-14，最新）**：trae-security-review scan_skills_dir.py → **HIGH 0 + MEDIUM 7 + LOW 0 → PASS**。**MiniMax(海螺 AI)开放平台多模态技能包**：6 大模态 Python 客户端(文本/图像/视频/语音/音乐/视觉) + 28 pytest 单元测试。**7 个 MEDIUM 均为 HTTP 调用面**：每个模态脚本都要 POST MiniMax API(用户配置 base_url,通过环境变量注入 API Key,无硬编码)。**脚本安全性**：(1) 全部依赖标准库 + `requests`,无 subprocess / 无 eval-exec / 无 os.system;(2) API Key 仅从环境变量读取,不写入文件、不打印到 stdout(只有 `mask_key` 脱敏末 4 位);(3) 双区域支持国内 `api.minimaxi.com` / 国际 `api.minimax.io`,可显式覆盖 `MINIMAX_BASE_URL`;(4) 3 次指数退避内置,401/429 立即抛错不重试;(5) 异步任务轮询独立可超时,视频 600-900s、音乐 300s。**差异化**：与 modelscope-assistant 区分(后者覆盖 ModelScope + HuggingFace 模型仓库,前者专攻 MiniMax 平台 API)。**与现有能力不重复**：comfyui-api-skills 专攻 ComfyUI 本地工作流,minimax-multimodal 专攻 MiniMax 远程 API;两者无功能交集 |
 | test-experience | 1 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档 |
 | test-partition-runner | 1 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档 |
 | e2e-module-audit | 1 md + 5 ref | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档 |
@@ -170,5 +171,6 @@ code auto_reports\{package_name}_{timestamp}.md
 
 
 | guard-approver | 1 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯规范文档;关联 scripts/change-guard-approver.mjs(Node,0 网络面);Tier 4 路径保护清单防止 agent 改守卫自绕过 |
+| **guard-gate-smith** (NEW 2026-08-14 §3 收紧方案 A) | 1 md (SKILL) | 0 | 0 | 0 | **5.0** | 🟢 | **实跑扫描（2026-08-14 15:14,最新）**：scan_skills_dir.py V2.1 → HIGH 0 + MEDIUM 0 + LOW 0 → PASS。**纯规范文档类**：1 SKILL.md,0 脚本,0 网络面。**职责**：registry/skills.yaml 中央注册表 + scripts/<name>-guard.* 自治 guard + .husky/<name>-gate gate 路由的"唯一维护 agent"。**实现**：src/guards/skill-registration-guard.mjs(Node,0 网络面,纯 fs/yaml 操作) + scripts/guard-router.mjs(纯 spawn 派发,不引入新执行面)。**安全收益**：消除"agent 改 guard/gate 自绕过"漏洞(原 3 个共享 guard 脚本可被任意 agent Edit,现 5 类白名单路径通过 guard-approver Tier 3 + 注册表守卫自举)。**与 guard-approver 关系**:guard-smith = guard-approver 的"guard/gate 路由"特化版本 |
 
 | daily-vibe-coding | 2 md (SKILL + installation-prompt) | 0 | 0 | 0 | **5.0** | 🟢 | 纯规范+prompt 文档,无脚本,无网络面;agent 部署在 TRAE Work 云端定时任务 |

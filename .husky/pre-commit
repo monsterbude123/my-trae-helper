@@ -3,10 +3,20 @@
 #
 # 触发时机: git commit
 # 检查项（必须全部执行,失败即阻断）:
-#   - Lint (node --check 所有 JS 文件)
-#   - Unit Tests (skill-change-control / skill-install-control / dependency-guard / structure-guard / security-guard)
-#   - 技能安全守卫（仅变更的技能）
-#   - 技能结构守卫（仅新建技能）
+#   0. 注册表守卫（最严 — 每个 skill 必带同名 guard + gate 路由）
+#   1. Lint (node --check 所有 JS 文件)
+#   2. Unit Tests
+#   3. guard-router（按变更的 skill 名,从 registry/skills.yaml 取其 guards,按序执行）
+#   4. 技能安全守卫（仅新建技能,创建时一次性扫描）
+#   5. 技能结构守卫（仅新建技能,创建时一次性校验）
+#   6. catalog-guard（agent-dev-control-kit 子套件 — 改了它必跑）
+#   7. Manifest Bridge(主动提示层 — 缺交付物即阻断)
+#
+# 兼容说明（2026-08-14 §3 收紧方案 A）:
+#   - 第 3 步用 scripts/guard-router.mjs 替代原"对所有变更 skill 调 3 个 python"
+#   - 每个 skill 在 registry/skills.yaml 注册其专属 guards（暂可指向 3 个共享脚本）
+#   - 未来 guard-smith 拆分专属 <name>-guard.*,只改注册表即可生效
+#   - 详见 skill-markets/guard-gate-smith/SKILL.md
 #
 # Windows 兼容: Git Bash 默认无 `python`,用 `py`(Python Launcher) 或 `python3` 兜底
 
@@ -63,6 +73,12 @@ set -e
 
 echo "🔍 执行 L1 Commit Gate (PY=$PY)..."
 
+# 0. 注册表守卫（最严 — 每个 skill 必带同名 guard + gate 路由）
+# 任何 skill-markets/<x>/ 新建/删除/重命名都必须先在 registry/skills.yaml 注册,
+# 否则此处 BLOCK。仅 guard-smith agent 可维护注册表。
+echo "0️⃣ 注册表守卫 (registry/skills.yaml 完整性)..."
+node src/guards/skill-registration-guard.mjs
+
 # 1. Lint（必须存在）
 if ! grep -q '"lint"' package.json; then
   echo "❌ Gate 配置错误: package.json 缺少 lint 脚本"
@@ -79,26 +95,26 @@ fi
 echo "2️⃣ Unit Tests..."
 npm run test:unit
 
-# 3. 技能安全守卫（仅变更的技能目录）
+# 3. guard-router（按变更的 skill 名,从 registry/skills.yaml 取其 guards,按序执行）
+# 替代原"对所有变更 skill 调 3 个 python"的散落调用,统一由 router 按注册表分发
 CHANGED_SKILLS=$(git diff --name-only --cached | grep '^skill-markets/' | awk -F/ '$2 && $2 !~ /\.md$/ {print $2}' | sort -u)
 if [ -n "$CHANGED_SKILLS" ]; then
-  echo "3️⃣ 技能安全守卫..."
+  echo "3️⃣ guard-router (变更的 skill: $(echo $CHANGED_SKILLS | wc -w) 个)..."
   for skill in $CHANGED_SKILLS; do
     if [ -d "skill-markets/$skill" ]; then
-      echo "  - $skill"
-      "$PY" scripts/skill-security-guard.py "skill-markets/$skill"
+      node scripts/guard-router.mjs "$skill"
     fi
   done
 fi
 
-# 4. 技能结构守卫（仅新建技能目录）
-NEW_SKILLS=$(git diff --name-only --cached --diff-filter=A | grep '^skill-markets/[^/]*/SKILL\.md$' | awk -F/ '{print $2}' | sort -u)
-if [ -n "$NEW_SKILLS" ]; then
-  echo "4️⃣ 技能结构守卫..."
-  for skill in $NEW_SKILLS; do
+# 4. 技能安全守卫（仅新建技能,创建时一次性扫描）
+# 注:此步骤保留作为快速 fail-fast,深度扫描仍由 router 统一调度
+CHANGED_SKILL_DIRS=$(git diff --name-only --cached --diff-filter=A | grep '^skill-markets/[^/]*/SKILL\.md$' | awk -F/ '{print $2}' | sort -u)
+if [ -n "$CHANGED_SKILL_DIRS" ]; then
+  echo "4️⃣ 技能安全守卫 (新建 skill)..."
+  for skill in $CHANGED_SKILL_DIRS; do
     if [ -d "skill-markets/$skill" ]; then
-      echo "  - $skill"
-      "$PY" scripts/skill-structure-guard.py "skill-markets/$skill"
+      "$PY" scripts/skill-security-guard.py "skill-markets/$skill"
     fi
   done
 fi

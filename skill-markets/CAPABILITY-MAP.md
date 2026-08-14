@@ -26,6 +26,7 @@
 | [vision-audit](vision-audit/SKILL.md) | 纯Skill | UI/UX 视觉验收 — Qwen3-VL 分析截图 | vision-audit.mjs, vision-audit.py |
 | [shuxia-novel-engine](shuxia-novel-engine/SKILL.md) | Agent驱动 | 小说创作引擎 — 世界观构建、剧情编织、一致性审计 | 12 脚本（check, combat, drama, enumerate, evaluate, ripple 等） |
 | [modelscope-assistant](modelscope-assistant/SKILL.md) | 纯Skill | 魔搭社区助手 — 模型搜索、SDK 调用、微调指导 | mymodelscope/ Python 库 + scan-models.ps1 |
+| [minimax-multimodal](minimax-multimodal/SKILL.md) | 纯Skill | MiniMax(海螺 AI)开放平台多模态 — 6 大模态可跑通 Python 客户端(文本/图像/视频/语音/音乐/视觉) | 8 脚本(_client + 6 模态 + verify_all + run_all) + 7 references + 28 pytest 测试 |
 | [test-experience](test-experience/SKILL.md) | 纯Skill | **⚠ DEPRECATED** → acceptance-discipline（兼容壳）| 无 |
 | [test-partition-runner](test-partition-runner/SKILL.md) | 纯Skill | **⚠ DEPRECATED** → acceptance-discipline（兼容壳）| 无 |
 | [e2e-module-audit](e2e-module-audit/SKILL.md) | 纯Skill | **⚠ DEPRECATED** → acceptance-discipline（兼容壳）| 无 |
@@ -110,6 +111,8 @@
 | 技能结构守卫 | `scripts/skill-structure-guard.py` | verify 命令 + Git hooks | Python 脚本 | 目录命名 + SKILL.md frontmatter + 铁律数量 |
 | 技能依赖守卫 | `src/guards/skill-dependency-guard.mjs` | verify 命令 + Git hooks | Node.js 模块 | 硬依赖完整性 + 软依赖降级影响 |
 | 技能能力守卫 | `scripts/skill-capability-guard.py` | verify 命令 + Git hooks | Python 脚本 | 脚本去重 + CAPABILITY-MAP.md 同步 |
+| **技能注册表守卫**（NEW 2026-08-14 §3 收紧方案 A）| `src/guards/skill-registration-guard.mjs` | pre-commit / pre-push / L3 PR | Node.js + yaml 包 | 校验 `registry/skills.yaml` 完整性:每个根 skill 必带同名 guard + gate 注册,script/hook 文件存在,maintainer=guard-smith 白名单 |
+| **Guard 路由器**（NEW 2026-08-14 §3 收紧方案 A）| `scripts/guard-router.mjs` | pre-commit step 3 + verify | Node.js + yaml 包 | 按 skill 名查 `registry/skills.yaml` → 依次执行该 skill 注册的 guards(每个 skill 自治 guard 雏形) |
 
 ---
 

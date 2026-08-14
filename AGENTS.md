@@ -52,8 +52,15 @@ my-trae-helper/
 8. **任务明确时才用 fullstack 流程**：不加不必要的阶段
 9. **禁止自主部署**：不主动执行安装命令，除非用户明确要求
 10. **SKILL.md/agents 引用优先**：核心铁律 + 骨架流程内联，详细内容 references/ 引用
+11. **guard/gate 注册表强制（2026-08-14 §3 收紧方案 A）**：
+    - 每个 skill 必须在 `registry/skills.yaml` 按同名条目注册 guard + gate 路由（src/guards/skill-registration-guard.mjs 自动校验）
+    - 每个 skill 必带 `scripts/<name>-guard.<ext>`（**项目侧**，禁止放 `skill-markets/<name>/scripts/`）
+    - 每个 skill 的 gate 必须挂到正确的 `.husky/<name>-gate` 或 `.github/workflows/<name>-gate`
+    - **仅 `guard-smith` sub-agent** 可改 `registry/skills.yaml` / `scripts/<name>-guard.*` / `scripts/guard-router.mjs` / `.husky/<name>-gate` / `src/guards/skill-registration-guard.mjs` / `.github/workflows/skill-market-gate.yml`
+    - 其他 agent 试图 Edit 这些路径 → guard-approver Tier 3 拦截 + 注册表守卫自举
+    - 详见 `skill-markets/guard-gate-smith/SKILL.md`
 
-**§1.4 经验沉淀路由(覆盖 §1.4 可能引入)**:仓库内不建 `.learnings/` 目录。ERR / LEARN / FEATURE_REQUESTS 用全局 `self-improving-agent` 统一管理。本仓库内反例 → `skill-markets/<pkg>/references/trap-instructions.yaml`。详见 [.trae/rules/learning.md](.trae/rules/learning.md)。
+**§1.4 经验沉淀路由(覆盖 §1.4 可能引入)**:仓库内不建 `.learnings/` 目录。ERR / LEARN / FEATURE_REQUESTS 用全局 `self-improving-agent` 统一管理。本仓库内反例 → `skill-markets/<pkg>/references/trap-instructions.yaml`。详见 [.agents/rules/learning.md](.agents/rules/learning.md)。
 
 **§1.1 路径位置**：`scripts/` 放 Node/Python 脚本；`logs/` 放临时输出。
 
@@ -63,7 +70,7 @@ my-trae-helper/
 
 ```
 1. Skill(name="project-rule-skill")  → 输出 needed_rules
-1.5. Skill(name="self-improving-agent")  → 加载全局经验上下文(详见 .trae/rules/learning.md §5 路径 A)
+1.5. Skill(name="self-improving-agent")  → 加载全局经验上下文(详见 .agents/rules/learning.md §5 路径 A)
 2. 按场景关键词自动加载相关 skill：
    ├─ 测试/验收 → acceptance-discipline + test-experience
    ├─ 安全扫描 → trae-security-review
@@ -74,7 +81,7 @@ my-trae-helper/
 4. 委派 sub-agent → 头部注入 [PROJECT-RULE-GATE]
 ```
 
-详见 [project-rule-skill/SKILL.md](.trae/skills/project-rule-skill/SKILL.md) §1 Step 5。
+详见 [project-rule-skill/SKILL.md](.agents/skills/project-rule-skill/SKILL.md) §1 Step 5。
 
 ---
 

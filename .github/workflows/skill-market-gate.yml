@@ -35,6 +35,10 @@ jobs:
       - name: L2 checks (L1 + 集成测试)
         run: |
           echo "Running L2 checks..."
+          # 0. 注册表守卫（最严 — 每个 skill 必带同名 guard + gate 路由）
+          # 仅 guard-smith agent 可改 registry/skills.yaml,此处 BLOCK = 阻止 PR merge
+          node src/guards/skill-registration-guard.mjs
+
           # 1. 安全扫描（全部技能）
           python skill-markets/trae-security-review/scripts/scan_skills_dir.py skill-markets auto_reports
 
@@ -133,6 +137,9 @@ jobs:
       - name: L3 checks (全量扫描)
         run: |
           echo "Running L3 checks (full scan)..."
+          # 0. 注册表守卫
+          node src/guards/skill-registration-guard.mjs
+
           python skill-markets/trae-security-review/scripts/scan_skills_dir.py skill-markets auto_reports
 
           # 检查所有技能的结构

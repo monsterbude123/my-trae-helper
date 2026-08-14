@@ -57,6 +57,10 @@ set -e
 
 echo "🔍 执行 L2 Push Gate (PY=$PY)..."
 
+# 0. 注册表守卫（与 L1 一致 — push 也要拦截,防 --no-verify 绕过）
+echo "0️⃣ 注册表守卫..."
+node src/guards/skill-registration-guard.mjs
+
 # 1. Integration Tests（必须存在）
 if ! grep -q '"test:integration"' package.json; then
   echo "❌ Gate 配置错误: package.json 缺少 test:integration 脚本"
