@@ -170,3 +170,32 @@ traps:
       - 跑 pytest -m trap 验证
     see_also:
       - "references/traps.md §AP-7"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: AP-8
+    title: post-commit 假阻断(SIA 不可用时 exit 0)
+    detect_signal: |
+      git commit 之后,post-commit 钩子退出码非 0 / "command not found" 报错
+    what_is_wrong: |
+      post-commit 调 self-improving-agent reflect 时,如果 SIA CLI 不在 PATH,
+      直接 exit 1,会让 git 误以为提交后动作失败,污染 commit 体验。
+      反过来:如果 SIA 存在但 HOME 不存在,盲目调用会导致写入失败。
+    fix_template_before: |
+      # ❌ post-commit (直接调用,失败 exit)
+      "$SIA" reflect --auto || exit 1   # 阻断 commit
+    fix_template_after: |
+      # ✅ post-commit (探测式降级,不阻断)
+      SIA="$(command -v self-improving-agent)" || exit 0
+      [ -d "${SELF_IMPROVING_HOME:-$HOME/.self-improving-agent}" ] || exit 0
+      "$SIA" reflect --auto --quiet || true   # 失败仅 warn,不阻断
+    next_skill: trae-ponytail
+    next_skill_action: "探测 + 失败降级"
+    reclaim_steps:
+      - 必须 `set +e`(默认不阻断)
+      - 用 `command -v` 探测 SIA 可用性
+      - 用 `[ -d "$HOME/.self-improving-agent" ]` 探测 HOME 可写性
+      - 失败一律 `exit 0`,仅写 logs/post-commit-self-improve.log
+      - 跑 bash tests/unit/test_post_commit_self_improving.sh 自验收
+    see_also:
+      - ".trae/rules/learning.md §5 路径 C"
+      - "AGENTS.md §2.4 Gate 自验收强制"
