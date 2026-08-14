@@ -17,12 +17,17 @@ metadata: {"openclaw":{"emoji":"🎙️","os":["darwin","linux","win32"],"primar
 
 | 用户意图关键词 | 路由目标 | 子技能入口 |
 |----------------|----------|------------|
-| 解析剧本 / 剧本格式 / Markdown 表格 / 分镜 | 剧本解析 | `skills/script-parser/SKILL.md` |
-| 角色音色 / 方言 / QwenTTS 音色 / 角色映射 | 音色分配 | `skills/voice-assigner/SKILL.md` |
-| 批次切分 / 15 秒 / 批次大小 / tilt / 倾斜 | 批次管理 | `skills/batch-manager/SKILL.md` |
-| 注音生成 / QwenTTS 情感标签 / CosyVoice 指令 / OmniVoice 拼音 / TTS 规则 | 注音生成 | `skills/annotation-generator/SKILL.md` |
-| 配音合成 / TTS 引擎 / Gradio / HTTP / 声音 | 合成执行 | `skills/tts-synthesizer/SKILL.md` |
+| 解析剧本 / 剧本格式 / Markdown 表格 / 分镜 | 剧本解析 | `../voice-acting-script-parser/SKILL.md` |
+| 角色音色 / 方言 / QwenTTS 音色 / 角色映射 | 音色分配 | `../voice-acting-voice-assigner/SKILL.md` |
+| 批次切分 / 15 秒 / 批次大小 / tilt / 倾斜 | 批次管理 | `../voice-acting-batch-manager/SKILL.md` |
+| 注音生成 / QwenTTS 情感标签 / CosyVoice 指令 / OmniVoice 拼音 / TTS 规则 | 注音生成 | `../voice-acting-annotation-generator/SKILL.md` |
+| 配音合成 / TTS 引擎 / Gradio / HTTP / 声音 | 合成执行 | `../voice-acting-tts-synthesizer/SKILL.md` |
 | 完整流程 / 一站式 / 全流程 / 端到端 | **全部串行** | 5 个子技能全部加载 |
+
+> 路径说明(2026-08-14 拆扁): 5 个子 skill 原嵌套在 `skills/skills/<sub>/` 下,
+> 按 BND-005 单层协议拆扁到 `game-production-kit/skills/voice-acting-<sub>/` 平铺。
+> 从本 SKILL.md 看是 `../voice-acting-<sub>/` (因为 voice-acting-skill 自己也是
+> game-production-kit 的子 skill)。
 
 ## 快速使用
 

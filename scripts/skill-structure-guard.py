@@ -184,6 +184,17 @@ def check_structure_for_skill(skill_path: str) -> Dict:
 
 
 if __name__ == '__main__':
+    # Windows cp1252 codec 不能 encode 中文(守卫输出含中文提示), 强制 utf-8
+    # 参考 b1942be commit(test 文件已强制 utf-8,守卫自身漏改)
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except (AttributeError, ValueError):
+        pass  # Python < 3.7 或已 reconfigure 过
+    try:
+        sys.stderr.reconfigure(encoding='utf-8')
+    except (AttributeError, ValueError):
+        pass
+
     if len(sys.argv) < 2:
         print("用法: python scripts/skill-structure-guard.py skill-markets/<skill_name>")
         sys.exit(1)
