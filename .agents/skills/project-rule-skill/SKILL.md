@@ -69,6 +69,7 @@ reason: "<本任务场景关键词>"
 | `安全` / `secret` / `扫描` / `audit` | `trae-security-review` |
 | `新建技能` / `skill` / `create` / `verify` | `skill-acceptance` |
 | `Gate` / `pre-commit` / `pre-push` / `CI` | `skill-acceptance §7` + `agent-dev-control-kit §11` |
+| `GH Actions` / `workflow` / `push` / `force-push` / `workflow_dispatch` | `skill-acceptance §7` + `.github/workflows/*.yml` 必读 + 必走 guard-smith 委派(白名单) |
 | `重构` / `升级` / `V{N}` | `fullstack-skill-architect` |
 | `AGENTS.md` / `README` / `文档` | 不自动加载,改 docs/ 即可 |
 

@@ -508,3 +508,47 @@ traps:
       - "AGENTS.md §4.1.3 跨平台 Python 探测 + 自愈依赖"
       - "scripts/detect-python.sh _try_bootstrap"
       - "ponytail §矫枉过正(从反例变正例)"
+
+  # ─────────────────────────────────────────────────────────────────
+  # 2026-08-14 第三轮蒸馏(force-push 闭环反例)
+  - id: AP-16
+    title: 改 workflow file force-push 后未触发 CI 闭环验证
+    detect_signal: |
+      git log 显示 force-push 后 GitHub Actions run list 没有对应新 run /
+      响应中无 `[ci-closed-loop]` 标记 /
+      gh workflow run <name> --ref main 未跑过
+    what_is_wrong: |
+      force-push 默认不重跑 workflow file(GitHub Actions 视为"无内容变化")。
+      即使改了 .github/workflows/*.yml,GitHub Actions 也不会自动 validate
+      该 workflow file 本身的语法。导致 truncated 字段(如 if: 无 value、
+      step 缺 run/uses)逃过检测,推到远端后 GitHub UI 报错但本地不知道。
+      本会话真实发生过:agent-dev-control-kit-ci.yml line 96 Upload step
+      truncated `if:`,push 后 GitHub Actions 报 "Line 96 Col 9" 但
+      没人看 GitHub UI,直到下次 workflow_dispatch 才暴露。
+    fix_template_before: |
+      # ❌ force-push 后直接"任务完成"
+      git push --force-with-lease --no-verify origin main
+      echo "✅ 已 push,任务完成"
+      # ↑ 实际:workflow file truncated if: 还在远端,GitHub Actions 不会自动 validate
+    fix_template_after: |
+      # ✅ force-push + workflow_dispatch 闭环
+      git push --force-with-lease --no-verify origin main
+      # 1. 强制 trigger workflow(force-push 不触发 push trigger)
+      gh workflow run agent-dev-control-kit-ci.yml --ref main
+      # 2. 等 + 验
+      RUN_ID=$(gh run list --limit 1 --workflow=agent-dev-control-kit-ci.yml --json databaseId -q '.[0].databaseId')
+      gh run watch "$RUN_ID" --exit-status
+      # 3. 标记
+      echo "[ci-closed-loop] workflow=agent-dev-control-kit-ci.yml run_id=$RUN_ID conclusion=$(gh api repos/$REPO/actions/runs/$RUN_ID --jq .conclusion)"
+    next_skill: project-rule-skill
+    next_skill_action: "读 §9 CI 闭环验证铁律 + self-bootstrap 设计"
+    reclaim_steps:
+      - 触发:force-push to main / 改 .github/workflows/*.yml / 改 .husky/pre-*
+      - 第一轮动作:跑 `gh workflow run <workflow> --ref main` 强制 trigger
+      - 等 run 完成(gh run watch / check status)
+      - 在响应中加 `[ci-closed-loop]` 标记(含 run_id + conclusion)
+      - 反向钉死:任何 push 后响应都必须含 `[ci-closed-loop]`,否则视同未完成
+    see_also:
+      - ".agents/skills/project-rule-skill/SKILL.md §9 CI 闭环验证铁律"
+      - ".github/workflows/agent-dev-control-kit-ci.yml (self-bootstrap 已落地)"
+      - "AGENTS.md §4 完成报告必须含闭环证据"
