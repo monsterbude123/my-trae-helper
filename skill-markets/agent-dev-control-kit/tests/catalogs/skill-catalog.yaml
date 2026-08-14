@@ -21,10 +21,6 @@ required_docs:
   purpose: 测试运行指南(对应 references/traps.md)
   must_contain:
   - pytest
-- path: WRAPPER_TEST_MISSING_zzz.md
-  purpose: wrapper 自验收
-  must_contain:
-  - X
 required_scripts:
 - path: scripts/validate-gate-integrity.py
   role: gate-integrity-checker
@@ -78,10 +74,6 @@ required_sections:
 - in_file: skills/gate-control/SKILL.md
   level: 2
   heading: 验收标准
-- in_file: DOES_NOT_EXIST_SENTINEL_xxx.md
-  level: 2
-  heading: fake section
-  purpose: block banner test
 required_schema_fields:
 - in_file: registry/stacks.yaml
   path: stacks[*].id

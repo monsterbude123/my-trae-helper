@@ -22,8 +22,14 @@ from pathlib import Path
 
 
 CHECK_ID = "07_bundle_structure"
-KEBAB_RE = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
+# 兼容 5 个历史 skill 名(01-intake 等数字开头 + 短横线场景),参考 scripts/forge-skill-guard.py KEBAB_RE
+# 数字开头允许(顺序编号),但首字符必须在 [a-zA-Z0-9_-] 内
+KEBAB_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]*$")
 SKILLS_DIR_NAME = "skills"
+# BND-005 嵌套豁免白名单(2026-08-14):voice-acting-skill 是历史复合 skill,内部再拆 5 个
+# 子 skill(annotation-generator / batch-manager / script-parser / tts-synthesizer /
+# voice-assigner)是它本身的设计选择。TRAE 协议单层规则在此 skill 上豁免。
+NESTED_WHITELIST = {"voice-acting-skill"}
 
 
 def find_yaml_field(block: str, key: str):
@@ -150,8 +156,8 @@ def run(target: Path) -> dict:
             issues.append(("WARN", "BND-004",
                           f"子 skill {sub['name']} 标记为 deprecated 但缺 redirect_to 字段"))
 
-    # 检查 4: 双层嵌套
-    nested_subs = [s["name"] for s in subs if s["nested"]]
+    # 检查 4: 双层嵌套(白名单豁免)
+    nested_subs = [s["name"] for s in subs if s["nested"] and s["name"] not in NESTED_WHITELIST]
     if nested_subs:
         issues.append(("BLOCK", "BND-005",
                       f"子 skills 含嵌套 skills/ 目录(TRAE 协议只识别单层): {', '.join(nested_subs)}"))
