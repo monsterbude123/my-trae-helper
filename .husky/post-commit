@@ -1,5 +1,5 @@
 #!/bin/bash
-# Skill Market — post-commit hook (路径 C 落地,2026-08-14)
+# Skill Market — post-commit hook (路径 C 落地,2026-08-14 v3)
 #
 # 触发时机: git commit 成功之后
 # 职责: 把本次 commit 期间产生的跨会话经验沉淀到全局 self-improving-agent
@@ -8,7 +8,8 @@
 # 设计原则(对照 .trae/rules/learning.md §5):
 #   - 不阻断 commit(已 commit 成功,失败仅 warn)
 #   - 探测式降级(self-improving-agent 不存在时静默 skip)
-#   - 只在有变更时调用(--quiet 模式)
+#   - 优先级: 全局 PATH → node 探测 → 仓库内 shim
+#   - 用 bash 数组存命令,正确处理带空格路径(node.exe 可能在 C:\Program Files\)
 #   - 把 stdout/stderr 全部丢 logs/,不污染 commit 输出
 
 set +e   # 关键:任何失败都不影响 commit 状态
@@ -19,21 +20,60 @@ LOG_FILE="$LOG_DIR/post-commit-self-improve.log"
 
 echo "[post-commit] self-improving-agent 兜底启动 ($(date +%Y-%m-%dT%H:%M:%S))" >> "$LOG_FILE"
 
-# 1. 探测 self-improving-agent CLI 是否可用
-SIA="$(command -v self-improving-agent 2>/dev/null)"
-if [ -z "$SIA" ]; then
-  echo "[post-commit] skip: self-improving-agent 不在 PATH" >> "$LOG_FILE"
+# 1. 探测 self-improving-agent CLI
+#    用 bash 数组存命令,正确处理带空格路径
+declare -a SIA_CMD
+if command -v self-improving-agent >/dev/null 2>&1; then
+  SIA_CMD=("self-improving-agent")
+elif [ -f "scripts/self-improving-agent.mjs" ]; then
+  # 探测 node 路径(WSL bash / Git Bash 都不在默认 PATH)
+  # 优先级: PATH → where.exe → WSL 风格硬编码路径
+  NODE_BIN="$(command -v node 2>/dev/null || true)"
+  if [ -z "$NODE_BIN" ] && command -v where.exe >/dev/null 2>&1; then
+    # where.exe 返回 Windows 路径(如 C:\Program Files\nodejs\node.exe)
+    WIN_NODE="$(where.exe node 2>/dev/null | head -n 1 | tr -d '\r' || true)"
+    if [ -n "$WIN_NODE" ]; then
+      # 转换: C:\Program Files\...  →  /mnt/c/Program Files/...
+      # 也支持 Git Bash 的 /c/... 格式
+      if [[ "$WIN_NODE" =~ ^([A-Za-z]):\\(.*)$ ]]; then
+        DRIVE_LOWER="$(echo "${BASH_REMATCH[1]}" | tr '[:upper:]' '[:lower:]')"
+        REST="${BASH_REMATCH[2]//\\//}"
+        NODE_BIN="/mnt/${DRIVE_LOWER}/${REST}"
+      fi
+    fi
+  fi
+  if [ -z "$NODE_BIN" ] && [ -f "/mnt/c/Program Files/nodejs/node.exe" ]; then
+    NODE_BIN="/mnt/c/Program Files/nodejs/node.exe"
+  fi
+  if [ -z "$NODE_BIN" ]; then
+    echo "[post-commit] skip: 仓库内 shim 存在但找不到 node(node 未装或 PATH 异常)" >> "$LOG_FILE"
+    exit 0
+  fi
+  SIA_CMD=("$NODE_BIN" "scripts/self-improving-agent.mjs")
+else
+  echo "[post-commit] skip: self-improving-agent 不在 PATH 且仓库内 shim 缺失" >> "$LOG_FILE"
   exit 0
 fi
+echo "[post-commit] resolved: SIA=${SIA_CMD[*]}" >> "$LOG_FILE"
 
-# 2. 探测全局 LEARNING 目录是否可写(避免只读容器破坏 commit 后体验)
-SIA_HOME="${SELF_IMPROVING_HOME:-$HOME/.self-improving-agent}"
-if [ ! -d "$SIA_HOME" ]; then
-  echo "[post-commit] skip: $SIA_HOME 不存在(用户未初始化 self-improving-agent)" >> "$LOG_FILE"
-  exit 0
+# 2. 探测全局 LEARNING 目录
+#    shim 在 Windows 原生 node 跑,读 Windows 路径 — 需把 WSL 路径转换
+SIA_HOME_LINUX="${SELF_IMPROVING_HOME:-$HOME/.self-improving-agent}"
+# 转换 /mnt/c/Users/foo → C:\Users\foo(让 shim 写对位置)
+if [[ "$SIA_HOME_LINUX" =~ ^/mnt/([a-z])/(.*)$ ]]; then
+  DRIVE_UPPER="$(echo "${BASH_REMATCH[1]}" | tr '[:lower:]' '[:upper:]')"
+  REST="${BASH_REMATCH[2]//\//\\}"
+  SIA_HOME_WIN="${DRIVE_UPPER}:\\${REST}"
+else
+  SIA_HOME_WIN="$SIA_HOME_LINUX"
+fi
+export SELF_IMPROVING_HOME="$SIA_HOME_WIN"
+echo "[post-commit] HOME: linux=$SIA_HOME_LINUX → win=$SIA_HOME_WIN" >> "$LOG_FILE"
+if [ ! -d "$SIA_HOME_LINUX" ] && [ ! -d "$SIA_HOME_WIN" ]; then
+  echo "[post-commit] init: $SIA_HOME_WIN 不存在,shim 首次跑会创建" >> "$LOG_FILE"
 fi
 
-# 3. 调用 reflect:把上一次 commit 期间的 ERROR/LEARNING 落盘
+# 3. 调用 reflect:把上一次 commit 期间的 commit 信息落盘
 COMMIT_SHA="$(git rev-parse HEAD 2>/dev/null)"
 if [ -z "$COMMIT_SHA" ]; then
   echo "[post-commit] skip: 无法解析 HEAD" >> "$LOG_FILE"
@@ -43,7 +83,7 @@ fi
 # --since <commit>: 只回放本次 commit 之前未持久化的会话级 hint
 # --auto: 非交互,自动合并重复条目
 # --quiet: 静默,只输出错误
-"$SIA" reflect \
+"${SIA_CMD[@]}" reflect \
   --since "$COMMIT_SHA~1" \
   --auto \
   --quiet \
