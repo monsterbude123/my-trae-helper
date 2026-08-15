@@ -4,6 +4,49 @@
 
 ---
 
+## [V11.8.1] - 2026-08-15
+
+### ✨ 新增（V11.8.1 bug-hunt / E2E 跨阶段实战报告）
+
+> 用户理念：**bug-hunt / E2E 工序横跨 Stage 3.5 + 4 + 6 三个 stage，V11 13 stage 流水线虽然完整但缺乏"跨 stage 实战段"的工具脚本集合 + 委派头部模板 + 反例库**。本报告蒸馏自 2026-08-15 单次 90 min / 14 模块 / 16 bug 全流程 + V11.5 跨项目适配 5 个 V11 缺漏。
+>
+> **版本号说明**：CAPABILITY-MAP.md 已用 V11.8.0 标 CI gate（v11-doc-check.yml / v11-security-check.yml），故本实战报告用 V11.8.1 区分；同次 8 月 15 日发布。
+
+#### ✨ 新增
+
+- **references/stage-08-real-verify-battle-report.md** — V11 跨 stage bug-hunt / E2E 实战范本（10 段齐全 + 6 反例 + V11.5 5 缺漏吸收）
+  - §1 bug-hunt / E2E 在 V11 13 stage 的位置（跨 3 stage 映射）
+  - §2 真登录取证 7 步（V11 §3.7 #6 反 AI 描述≠像素）
+  - §3 4 维度观察法（visual/behavior/data/console + 交叉判定表）
+  - §4 5 项证据独立抽检（M6 — V11 §3.7 #7 盲信反例）
+  - §5 sub-agent 委派头部 6 字段 + [TOOL-HINTS]（V11 §0.5 + bug-hunt-tooling 对齐）
+  - §6 bug 单状态机守恒 + 三文件同步（V11 §8 + state-card-protocol）
+  - §7 工具脚本清单（4 工具 + fixture — 引用 bug-hunt-tooling 不重复造轮子）
+  - §8 6 反例库（蒸馏自 90 min 全流程，每条带 file:line + 根因 + 教训）
+  - §9 V11.5 5 个 V11 缺漏吸收（MUST/NEVER/ROLLBACK + 贾维斯 PR 建议）
+  - §10 验证矩阵 7 项 + V11 gate 矩阵对接
+
+#### 📊 价值评估
+
+- **下次 bug hunt 预期节约 ~50 min**（已实证 2026-08-15 90 min → 40 min）
+- **覆盖 Stage 3.5/4/6 3 stage 反虚假交付痛点**（视觉抽检 + 状态机守恒 + sub-agent 头部）
+- **V11.5 5 缺漏项目级补救**（run-all-guards / hooks-fidelity / proactive-scan / gitnexus hook / registry-dir 探测）
+
+#### ⚠️ 不破坏性变更
+
+- 不动 V11 总编排器 SKILL.md（保持 V11.7.0 完整）
+- 不新建 stage skill（bug-hunt 跨 stage，不属于单 stage workflow）
+- 不新建脚本（脚本由 bug-hunt-tooling skill 提供，本报告只引用）
+- 不新建 guard（gate 走 registry/gates.yaml 现有机制）
+
+#### 🔗 关联引用
+
+- [references/stage-08-real-verify-battle-report.md](references/stage-08-real-verify-battle-report.md)
+- 用户工作区 `D:\workspace\ai-collaborate\ai-short-studio-monster\docs\specs\sessions\2026-08-15-v11.5-fullstack-upgrade-distillation-report.md`（V11.5 5 缺漏来源）
+- [skill-markets/bug-hunt-tooling/SKILL.md](../../bug-hunt-tooling/SKILL.md)（工具脚本层）
+
+---
+
 ## [V11.7.0] - 2026-08-15
 
 ### 🛡️ 贾维斯体系(防 agent 改标准通过自己)

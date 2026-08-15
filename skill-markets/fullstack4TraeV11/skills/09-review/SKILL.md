@@ -10,6 +10,7 @@ depends_on:
     - ../../references/state-card-protocol.md
     - ../../references/stage-interaction-protocol.md
     - ../../references/common-iron-rules.md
+    - ../../references/stage-08-real-verify-battle-report.md
   scripts:
     - ../../scripts/stage-gate.py
     - ../../scripts/ac-gate.py

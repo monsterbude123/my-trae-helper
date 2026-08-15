@@ -16,6 +16,7 @@ depends_on:
     - ./references/bug-state-machine.md
     - ../../references/stage-interaction-protocol.md
     - ../../references/common-iron-rules.md
+    - ../../references/stage-08-real-verify-battle-report.md
   scripts:
     - ../../scripts/stage-gate.py
     - ../../scripts/gate-integrity-guard.py   # V11.7.0 NEW hash 锁校验

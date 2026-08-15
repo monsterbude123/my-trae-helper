@@ -9,6 +9,7 @@ depends_on:
   references:
     - ../../references/state-card-protocol.md
     - ../../references/stage-interaction-protocol.md
+    - ../../references/stage-08-real-verify-battle-report.md
   scripts:
     - ../../scripts/stage-gate.py
     - ../../scripts/gate-integrity-guard.py   # V11.7.0 NEW hash 锁校验

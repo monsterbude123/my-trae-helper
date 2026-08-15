@@ -78,6 +78,7 @@ reason: "<本任务场景关键词>"
 | 场景关键词 | 自动加载的 skill |
 |------------|----------------|
 | `测试` / `test` / `E2E` / `验收` / `verify` | `acceptance-discipline` / `test-experience` |
+| **`bug-hunt` / `HMR` / `受 auth 保护路由` / `真登录取证` / `bug 单 status` / `可见证据抽检`**(V11.8.0 NEW) | `bug-hunt-tooling`(工具脚本) + **[`stage-08-real-verify-battle-report.md`](../../skill-markets/fullstack4TraeV11/references/stage-08-real-verify-battle-report.md)**(V11 跨 stage 实战段) |
 | `安全` / `secret` / `扫描` / `audit` | `trae-security-review` |
 | `新建技能` / `skill` / `create` / `verify` | `skill-acceptance` + **V11.8.0.1** [`references/skill-creation-workflow.md`](references/skill-creation-workflow.md)(协议先行 + 多维度一致) + [`references/skills-development-rules.md`](references/skills-development-rules.md)(短细则) |
 | `protocol` / `协议先行` / `*-protocol.md` | **V11.8.0.1** [`references/protocol-coverage-protocol.md`](references/protocol-coverage-protocol.md)+ `python scripts/_check_protocol_coverage.py --protocol <path> --check` |
@@ -94,6 +95,7 @@ reason: "<本任务场景关键词>"
 | 场景关键词 | 必加载 references/ |
 |------------|-------------------|
 | `cli` / `bin/` / `src/` / `打包` / `发布` / `npm` | [project-iron-laws.md §E](../../skill-markets/fullstack4TraeV11/references/project-iron-laws.md) |
+| **`bug-hunt` / `E2E` / `HMR` / `真登录取证` / `bug 单 status` / `受 auth 保护路由` / `可见证据抽检`**(V11.8.0 NEW) | **[stage-08-real-verify-battle-report.md](../../skill-markets/fullstack4TraeV11/references/stage-08-real-verify-battle-report.md)**(V11 实战段:6 反例 + 5 V11 缺漏 + 4 工具脚本引用) + [bug-hunt-tooling skill](../../bug-hunt-tooling/SKILL.md)(工具脚本入口) |
 | 新建 / 修改 / 删除 skill | [project-iron-laws.md §F](../../skill-markets/fullstack4TraeV11/references/project-iron-laws.md) + [.agents/rules/README.md](../../rules/README.md) + **[references/skill-creation-workflow.md](references/skill-creation-workflow.md)**(V11.8.0.1 路径迁移 + 多维度一致) + [references/skills-development-rules.md](references/skills-development-rules.md)(V11.8.0.1 短细则) |
 | 反例 / 回滚 / 被质问 / 不耐慎 | [project-iron-laws.md §A R-1~R-3](../../skill-markets/fullstack4TraeV11/references/project-iron-laws.md) |
 | 升级 / P0 / P1 / 决策 / ADR | [project-iron-laws.md §B L0~L9](../../skill-markets/fullstack4TraeV11/references/project-iron-laws.md) + [skeptical-validation-protocol.md](../../skill-markets/fullstack4TraeV11/references/skeptical-validation-protocol.md) |
