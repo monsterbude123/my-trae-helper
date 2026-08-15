@@ -1,5 +1,8 @@
 # 反例 4：跳过 E2E / INV（Skip E2E & INV）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > E2E ≥ 2 + INV ≥ 1 + UNIT ≥ 5 是 V11 最低组合。只写 UNIT = 端到端流程无保障 + 数据一致性裸奔。
 
 **违反**：铁律 3（E2E ≥ 2 / INV ≥ 1 / UNIT ≥ 5）

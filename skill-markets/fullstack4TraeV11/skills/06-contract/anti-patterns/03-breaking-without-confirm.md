@@ -1,5 +1,8 @@
 # 反例 3：BREAKING 变更不走用户确认（Breaking Without Confirm）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > BREAKING 变更（删除字段 / 改类型 / 改路径）必走用户确认 + major 版本号 + 三方同步。跳过 = 客户端崩溃 + 6h 排错（V10 D-009 实战）。
 
 **违反**：铁律 4（ADDITIVE OVER BREAKING）
@@ -14,12 +17,12 @@
 
 # 旧契约
 config:
-  api_key: "sk-xxx"           # 全小写
+<!-- scan-whitelist -->  api_key: "sk-xxx"           # 全小写<!-- /scan-whitelist -->
   api_url: "https://api.example.com"
 
 # 新契约（反例：BREAKING 变更未通知）
 config:
-  API_KEY: "sk-xxx"           # 改为大写 ← BREAKING
+<!-- scan-whitelist -->  API_KEY: "sk-xxx"           # 改为大写 ← BREAKING<!-- /scan-whitelist -->
   apiUrl: "https://api.example.com"   # 改驼峰 ← BREAKING
 
 # ❌ 反例：未走用户确认 + 未走 major 版本号
@@ -117,8 +120,8 @@ python ../../../templates/hooks/drift-detect.py
 
 # 不删除旧字段，而是 deprecated
 config:
-  api_key: "sk-xxx"           # 保留（deprecated: true）
-  API_KEY: "sk-xxx"           # 新字段（推荐使用）
+<!-- scan-whitelist -->  api_key: "sk-xxx"           # 保留（deprecated: true）<!-- /scan-whitelist -->
+<!-- scan-whitelist -->  API_KEY: "sk-xxx"           # 新字段（推荐使用）<!-- /scan-whitelist -->
   apiUrl: "https://api.example.com"   # 新字段
 
 deprecation_policy:

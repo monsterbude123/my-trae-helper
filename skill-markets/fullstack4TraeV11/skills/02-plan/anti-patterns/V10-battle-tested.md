@@ -1,5 +1,8 @@
 # V10 实战蒸馏（Battle-Tested Patterns）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 0 Plan 在 V10 中由 planner role 承担，能力散落在 SKILL.md §5 探索 + §6 委派子代理 + scenarios.md §1 §2 §3。本节蒸馏 V10 实战智慧。
 
 ---

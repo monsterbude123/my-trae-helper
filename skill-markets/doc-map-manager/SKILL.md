@@ -1,5 +1,7 @@
 ---
 name: doc-map-manager
+version: 1.0.0
+version: 1.0.0
 description: "文档知识图谱管理器 — 为 docs/ 目录构建结构化索引（.docmap/docmap.db SQLite + 链接图谱 + 新鲜度评分），
 支持精确匹配、模糊搜索、ChromaDB / Zvec 语义向量检索、文档间链接查询（context）、影响面分析（impact）、
 新鲜度反幻觉验证。当用户需要 \"文档索引\"、\"搜索文档\"、\"文档地图\"、\"docmap\"、\"查找某篇文档的章节\"、

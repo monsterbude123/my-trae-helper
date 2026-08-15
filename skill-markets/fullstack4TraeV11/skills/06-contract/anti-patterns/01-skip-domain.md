@@ -1,5 +1,8 @@
 # 反例 1：跳过 DOMAIN FIRST 直接写 API（Skip Domain First）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 契约必须先写 domain-models.md（含 INV），后写 api-contracts.md。先 API 后 domain = INV 字段缺失 + Stage 3 实施返工。
 
 **违反**：铁律 2（DOMAIN FIRST）

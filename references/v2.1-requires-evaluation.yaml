@@ -1,0 +1,273 @@
+# Catalog V2.1 requires 评估清单(2026-08-15)
+# 由 catalog-v21-evaluate-requires.py 自动生成
+# 31 个 SKILL 评估, 按 confidence 排序:
+#   HIGH: 多证据自动识别, --auto-fill 可批量填
+#   MEDIUM: 有引用, 但可能不全, 需人工 review
+#   LOW: 无自动证据, 全部人工补
+
+version: 2.1
+total_skills: 31
+high_confidence: 2
+medium_confidence: 8
+low_confidence: 21
+
+- skill: daily-vibe-coding
+  confidence: HIGH
+  status: auto
+  auto_detected:
+    - guard-approver
+    - trae-professional
+    - trae-security-review
+    - vibe-coding-standards
+  suggestion:
+    - guard-approver
+    - trae-professional
+    - trae-security-review
+    - vibe-coding-standards
+
+- skill: skill-bundle
+  confidence: HIGH
+  status: auto
+  auto_detected:
+    - acceptance-discipline
+    - agent-dev-control-kit
+    - skill-acceptance
+    - trae-professional
+  suggestion:
+    - acceptance-discipline
+    - agent-dev-control-kit
+    - skill-acceptance
+    - trae-professional
+
+- skill: browser-use-cloud
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: comfyui-api-skills
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: deep-research
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: deepagents_teach_skill
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: doc-map-manager
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: docsify-doc-builder
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: goal-mode
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: langgraph_teach_skill
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: learn-plan-skill
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: meeting-minutes-taker
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: mini-game-p2p-room
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: minimax-multimodal
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: modelscope-assistant
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: openapi-doc-exporter
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: project-rules-gate
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: screenshot
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: shuxia-novel-engine
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: skill-creator-claude
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: trae-professional
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: vision-audit
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: window-process-skills
+  confidence: LOW
+  status: manual_review
+  auto_detected:
+    []  # 无自动证据, 需人工补
+  suggestion:
+    []  # 留空
+
+- skill: coding-xinfa
+  confidence: MEDIUM
+  status: manual_review
+  auto_detected:
+    - goal-mode
+  suggestion:
+    - goal-mode
+
+- skill: e2e-module-audit
+  confidence: MEDIUM
+  status: manual_review
+  auto_detected:
+    - acceptance-discipline
+  suggestion:
+    - acceptance-discipline
+
+- skill: guard-approver
+  confidence: MEDIUM
+  status: manual_review
+  auto_detected:
+    - skill-acceptance
+  suggestion:
+    - skill-acceptance
+
+- skill: session-distiller
+  confidence: MEDIUM
+  status: manual_review
+  auto_detected:
+    - test-partition-runner
+  suggestion:
+    - test-partition-runner
+
+- skill: skills-security-scan
+  confidence: MEDIUM
+  status: manual_review
+  auto_detected:
+    - trae-security-review
+  suggestion:
+    - trae-security-review
+
+- skill: test-experience
+  confidence: MEDIUM
+  status: manual_review
+  auto_detected:
+    - acceptance-discipline
+  suggestion:
+    - acceptance-discipline
+
+- skill: test-partition-runner
+  confidence: MEDIUM
+  status: manual_review
+  auto_detected:
+    - acceptance-discipline
+  suggestion:
+    - acceptance-discipline
+
+- skill: vibe-coding-standards
+  confidence: MEDIUM
+  status: manual_review
+  auto_detected:
+    - acceptance-discipline
+  suggestion:
+    - acceptance-discipline
+

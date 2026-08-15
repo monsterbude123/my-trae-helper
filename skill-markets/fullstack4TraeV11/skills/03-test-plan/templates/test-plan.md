@@ -1,7 +1,12 @@
 # Test Plan: {change_id}
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 位置: `docs/specs/changes/{change_id}/test-plan.md`
-> 编制依据: plan.md Capabilities + 验收维度拆解 + 覆盖率门槛
+> 编制依据: plan.md Capabilities + spec.md AC 全集 + 验收维度拆解 + 覆盖率门槛
+>
+> **V11.6.0 必填**:每个测试用例含 `ac` 字段(AC-ID,禁止自由文本) + `ui_flow` 字段(null 或 ui-ux-logic 流-ID)。ac-gate.py 的 G5 将以此断言。
 
 ---
 

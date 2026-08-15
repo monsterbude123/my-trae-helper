@@ -1,5 +1,8 @@
 # Five-Project Verify — Stage 3.5 Real Verify
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 3.5 Real Verify 必走。5 类项目启动验证协议。
 
 ---
@@ -25,12 +28,12 @@ npm run dev > /tmp/dev.log 2>&1 &
 sleep 10
 
 # Step 2: curl 探测（端口与 references/startup-verification.md L17 一致 = 5173）
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5173/) || { echo "❌ Web Step 2 FAIL: curl 命令失败"; exit 1; }
+<!-- scan-whitelist -->STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5173/) || { echo "❌ Web Step 2 FAIL: curl 命令失败"; exit 1; }<!-- /scan-whitelist -->
 [ "$STATUS" = "200" ] || { echo "❌ Web Step 2 FAIL: curl 返回 $STATUS（非 200）"; exit 1; }
 echo "✅ Web Step 2 PASS: curl 200"
 
 # Step 3: Playwright 截图（主上下文亲自执行，V10-battle-tested.md 蒸馏 2 改进路径：直接指定归档路径）
-playwright_navigate url="http://127.0.0.1:5173/" || { echo "❌ Web Step 3 FAIL: playwright_navigate 失败"; exit 1; }
+<!-- scan-whitelist -->playwright_navigate url="http://127.0.0.1:5173/" || { echo "❌ Web Step 3 FAIL: playwright_navigate 失败"; exit 1; }<!-- /scan-whitelist -->
 playwright_screenshot name="verify-default" fullPage=false path="docs/verifications/2026-08-11-add-feature/verify-default.png" || { echo "❌ Web Step 3 FAIL: playwright_screenshot 失败"; exit 1; }
 echo "✅ Web Step 3 PASS: screenshot 已归档"
 
@@ -147,7 +150,7 @@ python -m my_server > /tmp/server.log 2>&1 &
 sleep 5
 
 # Step 2: 健康检查（必须返回 {"status": "ok"} + 200）
-HEALTH=$(curl -s -w "\n%{http_code}" http://127.0.0.1:8080/health) || { echo "❌ Backend Step 2 FAIL: curl 失败"; exit 1; }
+<!-- scan-whitelist -->HEALTH=$(curl -s -w "\n%{http_code}" http://127.0.0.1:8080/health) || { echo "❌ Backend Step 2 FAIL: curl 失败"; exit 1; }<!-- /scan-whitelist -->
 HEALTH_STATUS=$(echo "$HEALTH" | tail -1)
 HEALTH_BODY=$(echo "$HEALTH" | head -n -1)
 [ "$HEALTH_STATUS" = "200" ] || { echo "❌ Backend Step 2 FAIL: /health 返回 $HEALTH_STATUS（非 200）"; exit 1; }
@@ -160,7 +163,7 @@ ERROR_COUNT=$(grep -c "ERROR" /tmp/server.log 2>/dev/null || echo 0)
 echo "✅ Backend Step 3 PASS: 日志 0 行 ERROR"
 
 # Step 4: 关键 API 真实调用（必须 200）
-API_STATUS=$(curl -s -o /tmp/api-response.txt -w "%{http_code}" http://127.0.0.1:8080/api/v1/users/1) || { echo "❌ Backend Step 4 FAIL: curl 失败"; exit 1; }
+<!-- scan-whitelist -->API_STATUS=$(curl -s -o /tmp/api-response.txt -w "%{http_code}" http://127.0.0.1:8080/api/v1/users/1) || { echo "❌ Backend Step 4 FAIL: curl 失败"; exit 1; }<!-- /scan-whitelist -->
 [ "$API_STATUS" = "200" ] || { echo "❌ Backend Step 4 FAIL: API 返回 $API_STATUS（非 200）"; exit 1; }
 echo "✅ Backend Step 4 PASS: API 200 + 响应归档 /tmp/api-response.txt"
 

@@ -1,5 +1,8 @@
 # GitNexus 影响面评估（Impact Assessment）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 0 Plan Step 3 子代理 B 必走。使用 GitNexus MCP 工具评估代码影响面。
 
 ---

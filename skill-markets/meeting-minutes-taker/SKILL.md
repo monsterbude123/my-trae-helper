@@ -1,5 +1,7 @@
 ---
 name: meeting-minutes-taker
+version: 1.0.0
+version: 1.0.0
 description: "Transforms raw meeting transcripts into high-fidelity, structured meeting minutes
 (notes / summaries). Use when (1) a meeting transcript is provided and meeting
 minutes, notes, or a summary are requested; (2) multiple versions of minutes must be

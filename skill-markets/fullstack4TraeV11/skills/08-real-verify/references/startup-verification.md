@@ -1,5 +1,8 @@
 # 5 类项目启动验证（Startup Verification）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 3.5 Real Verify Step 3 必走。V10 §0.10 NEW 5 类项目分类。
 
 ---
@@ -12,11 +15,11 @@ pnpm exec vite --port 5173 --host 127.0.0.1 &
 sleep 5
 
 # 2. curl 探测（端口与 workflows/five-project-verify.md L29 一致 = 5173）
-curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5173/
+<!-- scan-whitelist -->curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5173/<!-- /scan-whitelist -->
 # 必须 200（端口以本项目 package.json 实际 dev server 端口为准，演示用 Vite 默认 5173）
 
 # 3. Playwright 截图（主上下文亲自执行）
-playwright_navigate(url="http://127.0.0.1:5173/")
+<!-- scan-whitelist -->playwright_navigate(url="http://127.0.0.1:5173/")<!-- /scan-whitelist -->
 playwright_resize(width=1440, height=900)
 playwright_screenshot(name="evidence-default", fullPage=false)
 
@@ -79,14 +82,14 @@ python -m my_server &
 sleep 5
 
 # 2. 健康检查端点
-curl -s http://127.0.0.1:8080/health
+<!-- scan-whitelist -->curl -s http://127.0.0.1:8080/health<!-- /scan-whitelist -->
 # 必须 200 + JSON 含 {"status": "ok"}
 
 # 3. 日志无 ERROR
 grep ERROR server.log  # 必须 0 行
 
 # 4. 关键 API 真实调用
-curl -s http://127.0.0.1:8080/api/v1/users/1
+<!-- scan-whitelist -->curl -s http://127.0.0.1:8080/api/v1/users/1<!-- /scan-whitelist -->
 ```
 
 ## 关联引用

@@ -99,5 +99,7 @@ test("真实技能警告通过 (agent-dev-control-kit)", test_real_skill_warn_on
 test("不存在技能阻断", test_nonexistent_skill_blocks)
 test("根 .md 文件阻断 (CAPABILITY-MAP.md)", test_root_md_only_blocks)
 
-print(f"\n━━━ 通过: {passed} / 失败: {failed} ━━━")
-sys.exit(1 if failed > 0 else 0)
+# V11.8.0 P0 修复(2026-08-15):pytest collect 时触发 sys.exit 导致 INTERNALERROR
+if __name__ == "__main__":
+    print(f"\n━━━ 通过: {passed} / 失败: {failed} ━━━")
+    sys.exit(1 if failed > 0 else 0)

@@ -1,5 +1,8 @@
 # 反例 1：INV 凭空臆造（INV Fabrication）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > INV（不变量）必须基于业务规则（订单一致性 / 资金安全 / 认证前置）。凭空写 INV = Stage 4 Review REJECT + 实施后用户拒绝需求。
 
 **违反**：铁律 6（NEVER 凭空 INV）

@@ -1,5 +1,8 @@
 # 反例 3：Spec 写实施（Spec Write Implementation）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Spec 只写 What + Why，不写 How（代码 / 类名 / 函数签名 / 库名）。含代码 = Stage 2 Contract 矛盾 + Stage 3 实施者失去判断空间。
 
 **违反**：铁律 7（NEVER 写实施）

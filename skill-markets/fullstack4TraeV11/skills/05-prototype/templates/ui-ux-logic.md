@@ -1,5 +1,8 @@
 # {Feature} — UI/UX 交互逻辑（给开发者）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > **位置**: `docs/specs/changes/{id}/prototypes/ui-ux-logic.md`
 > **编制依据**: V11.2 NEW 双产物机制，蒸馏自 V10 prototype.md §文档二
 > **必含门禁**: 组件树 ≥ 1 + 交互流 ≥ 2 + 状态表 ≥ 3 + 错误处理 ≥ 3

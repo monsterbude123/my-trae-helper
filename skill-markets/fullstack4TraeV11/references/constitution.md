@@ -1,5 +1,8 @@
 # Constitution — 17 Articles 宪法
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > V11 总编排器与所有 stage skill 必读的宪法文件。V10.10 增 XV/XVI，V11 全数继承。
 
 ---

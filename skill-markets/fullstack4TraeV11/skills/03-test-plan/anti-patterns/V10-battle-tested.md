@@ -1,5 +1,8 @@
 # V10 实战蒸馏 — Stage 0.5 Test Plan 战役反例
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > **定位**:V10 `templates/test-plan-example.md` L62-64 + `references/reviewer-templates.md` L172-176 蒸馏出的 2 条实战反例集。与 01-04 反例聚焦"做错事"互补,本文件聚焦"实施者假装做对了"。
 >
 > **薄版说明**(V11.5 自检缩窄):V10 关于 Stage 0.5 实战素材偏弱(模板反例演示而非战役蒸馏),**仅 2 条 15-20 行**。Stage 0.5 入口的实战反例集仍以 01-04 为主,本文件作为补充。

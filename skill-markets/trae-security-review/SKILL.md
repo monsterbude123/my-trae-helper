@@ -1,5 +1,7 @@
 ---
 name: trae-security-review
+version: 1.0.0
+version: 1.0.0
 description: 双引擎安全审查能力包 — Agent 驱动的代码安全审查 + 本地 Skill 目录静态扫描 + 严谨用词扫描。当用户需要代码安全审计、项目安全扫描、依赖漏洞检查、密钥泄露检测、三方 Skill 准入审查、文档用词严谨性检查时加载。
 requires:
 intent: 双引擎安全审查能力包 — Agent 驱动的代码安全审查 + 本地 Skill 目录静态扫描 + 严谨用词扫描

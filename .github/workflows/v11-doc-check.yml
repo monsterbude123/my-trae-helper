@@ -1,0 +1,61 @@
+# V11 Doc Check — V11.7.0+ 文档入口标记 CI gate
+#
+# 每次 PR 修改 V11 文档时,自动跑 v11-doc-sync.py --check;
+# missing 数 > 0 → FAIL(阻止合并),确保全 V11 文档都带 V11.x 设计入口标记。
+
+name: V11 Doc Check
+
+on:
+  pull_request:
+    branches: [main, release/*]
+    paths:
+      - "skill-markets/fullstack4TraeV11/**/*.md"
+      - ".github/workflows/v11-doc-check.yml"
+      - "skill-markets/fullstack4TraeV11/scripts/v11-doc-sync.py"
+  push:
+    branches: [main]
+    paths:
+      - "skill-markets/fullstack4TraeV11/**/*.md"
+      - ".github/workflows/v11-doc-check.yml"
+      - "skill-markets/fullstack4TraeV11/scripts/v11-doc-sync.py"
+  workflow_dispatch:
+
+jobs:
+  v11-doc-check:
+    name: V11 文档入口标记校验
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: 跑 v11-doc-sync.py --check
+        id: check
+        run: |
+          python skill-markets/fullstack4TraeV11/scripts/v11-doc-sync.py \
+            --v11-root skill-markets/fullstack4TraeV11 \
+            --check
+          rc=$?
+          if [ $rc -eq 0 ]; then
+            echo "✅ 所有 V11 文档均含 V11.7.0+ 入口标记"
+            exit 0
+          elif [ $rc -eq 2 ]; then
+            echo "🛑 发现未含入口标记的文档(详见上方输出)"
+            exit 1
+          else
+            echo "❌ 脚本执行失败 (exit=$rc)"
+            exit $rc
+          fi
+
+      - name: 提示修复命令
+        if: failure()
+        run: |
+          echo "修复方法: 跑以下命令补全入口标记,再 commit"
+          echo "  python skill-markets/fullstack4TraeV11/scripts/v11-doc-sync.py"
+          echo "或把新文档加入 v11-doc-sync.py ALWAYS_SKIP 白名单(若是用户模板)"
+          echo "白名单机制: scripts/v11-doc-sync.py 顶部 ALWAYS_SKIP 列表"

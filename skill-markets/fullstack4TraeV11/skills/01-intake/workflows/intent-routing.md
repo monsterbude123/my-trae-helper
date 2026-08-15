@@ -1,5 +1,8 @@
 # 意图路由工作流（Intent Routing）— 总览
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage -1 Intake 的核心工作流。识别用户意图 + 路由决策 + 状态卡初始化。
 >
 > **本文件为索引**，按 7 步流程拆分到 `intent-routing-detail/` 子文件。所有内容保真保留。

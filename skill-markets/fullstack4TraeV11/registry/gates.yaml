@@ -1,9 +1,15 @@
-version: 1.0.0
-description: V11 门禁注册表（13 个 stage 每个必登记一门禁）
+version: 1.2.0
+description: V11 门禁注册表（13 个 stage 每个必登记一门禁）— V11.6.0 stage-review 升级为 ac-gate；V11.7.0 新增 layer 分层字段（module/app/system/docs，贾维斯体系）
+# layer 语义（V11.7.0 贾维斯分层模型）:
+#   docs    — 流程前置层（文档完整性，按 stage 顺序跑，不属技术分层）
+#   module  — 模块基础层（CRUD 单元级）→ 挂 L1 pre-commit
+#   app     — 应用层（模块间集成 + 契约）→ 挂 L2 pre-push
+#   system  — 系统层（全局验收 + 发布 + 健康）→ 挂 L3 merge / L4 release
 gates:
   - id: stage-intake
     stage: -1/intake
     name: 需求摄取门禁
+    layer: docs
     script: setup-feature.py
     host: stage-gate
     guards: [state-card-valid]
@@ -13,6 +19,7 @@ gates:
   - id: stage-plan
     stage: 0/plan
     name: 规划门禁
+    layer: docs
     script: change-status.py
     host: stage-gate
     guards: [state-card-valid]
@@ -22,6 +29,7 @@ gates:
   - id: stage-test-plan
     stage: 0.5/test-plan
     name: 测试计划门禁
+    layer: docs
     script: stage-gate.py
     host: stage-gate
     guards: [state-card-valid]
@@ -31,6 +39,7 @@ gates:
   - id: stage-spec
     stage: 1/spec
     name: Spec 门禁
+    layer: docs
     script: spec-validate-hook.py
     host: husky-pre-commit
     guards: [spec-frontmatter]
@@ -40,6 +49,7 @@ gates:
   - id: stage-prototype
     stage: 1.5/prototype
     name: 原型门禁
+    layer: docs
     script: prototype-backfill-check.py
     host: stage-gate
     guards: [state-card-valid]
@@ -49,6 +59,7 @@ gates:
   - id: stage-contract
     stage: 2/contract
     name: 契约门禁
+    layer: app
     script: check_integration_contract.py
     host: stage-gate
     guards: [contract-integrity]
@@ -58,6 +69,7 @@ gates:
   - id: stage-implement
     stage: 3/implement
     name: 实施门禁
+    layer: module
     script: code-hygiene.py
     host: stage-gate
     guards: [code-hygiene]
@@ -67,6 +79,7 @@ gates:
   - id: stage-real-verify
     stage: 3.5/real-verify
     name: 真实验证门禁
+    layer: app
     script: visual-content-check.py
     host: husky-pre-push
     guards: [visual-content]
@@ -75,16 +88,21 @@ gates:
 
   - id: stage-review
     stage: 4/review
-    name: 评审门禁
-    script: acceptance-audit.py
-    host: manual
-    guards: [acceptance-audit]
-    required_artifacts: ["docs/reviews/review-report.md"]
+    name: "评审门禁(V11.6.0: AC 核销门禁,取代评分)"
+    layer: system
+    script: ac-gate.py
+    host: stage-gate
+    guards: [ac-gate]
+    required_artifacts:
+      - "docs/specs/changes/{change_id}/review-report.md"
+      - "docs/specs/changes/{change_id}/spec.md"
+      - "docs/specs/changes/{change_id}/test-plan.md"
     fail_action: BLOCK
 
   - id: stage-rot-scan
     stage: 4.5/rot-scan
     name: 腐化扫描门禁
+    layer: system
     script: proactive-scan.py
     host: stage-gate
     guards: [rot-scan]
@@ -94,6 +112,7 @@ gates:
   - id: stage-accept
     stage: 5/accept
     name: 验收门禁
+    layer: system
     script: pre-accept.sh
     host: manual
     guards: [spec-purge]
@@ -103,6 +122,7 @@ gates:
   - id: stage-bug-fix
     stage: 6/bug-fix
     name: Bug 修复门禁
+    layer: system
     script: reason-classifier.py
     host: manual
     guards: [reason-classification]
@@ -112,6 +132,7 @@ gates:
   - id: stage-health
     stage: 7/health
     name: 项目健康门禁
+    layer: system
     script: stage-gate.py
     host: stage-gate
     guards: [state-card-valid]

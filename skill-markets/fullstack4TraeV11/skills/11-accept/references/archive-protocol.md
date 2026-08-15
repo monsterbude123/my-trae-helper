@@ -1,5 +1,8 @@
 # 归档不可变协议（Archive Protocol）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 5 Accept Step 1+3 必走。V10 Article VIII + artifact-lifecycle.md 蒸馏。
 
 ---

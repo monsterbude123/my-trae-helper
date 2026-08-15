@@ -1,5 +1,8 @@
 # 反例 2：Clarify 跳过（Skip Clarify Rounds）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Spec 写之前必走 ≥ 2 轮 AskUserQuestion（每轮 < 4 题）。单轮 = 关键决策点未确认 + Stage 4 Review REJECT。
 
 **违反**：铁律 5（CLARIFY ≥ 2 ROUNDS，每轮 < 4 题）

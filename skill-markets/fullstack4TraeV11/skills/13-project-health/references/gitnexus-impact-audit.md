@@ -1,5 +1,8 @@
 # GitNexus 项目健康度审计 — Stage 7 Project Health
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 7 Project Health 输出前必走 (V10 project-health-auditor.md Step 4 蒸馏)。
 > 注: V11 Stage 13 SKILL.md 4 步骨架中 Step 4 = "输出 report",本文档的 GitNexus 5 调用作为 Step 4 的子步 (Step 4.1 启动前影响面评估) 嵌入输出流程。
 > 用 GitNexus MCP 工具评估项目健康度的影响面。

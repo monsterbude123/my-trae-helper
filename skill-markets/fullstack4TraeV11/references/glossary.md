@@ -1,5 +1,8 @@
 # 术语表 — V11
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 完整继承 V10 `references/glossary.md` 64 行 + V11 新增 5 大类术语。
 > 来源:V10 references/glossary.md(基础+V10.4/10.5/10.6/10.8 蒸馏)+ V11 子代理扫描报告。
 

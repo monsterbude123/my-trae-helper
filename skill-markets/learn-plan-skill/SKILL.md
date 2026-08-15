@@ -1,5 +1,7 @@
 ---
 name: learn-plan-skill
+version: 1.0.0
+version: 1.0.0
 description: Create structured technical learning plans (导学 + 实操 lab) for any topic. Invoke when user asks to create learning roadmaps, study plans, skill trees, or course outlines. Follows study-guide.md as theory + lab-*.md as hands-on pattern with numbered progressive directories.
 intent: Create structured technical learning plans (导学 + 实操 lab) ...
 category: other

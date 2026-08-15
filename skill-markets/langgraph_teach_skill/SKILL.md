@@ -1,5 +1,7 @@
 ---
 name: langgraph_teach_skill
+version: 1.0.0
+version: 1.0.0
 description: "Teaches how to use the LangGraph framework for building stateful, multi-actor agent systems with graphs, nodes, edges, checkpointing, streaming, and human-in-the-loop. This skill should be used when the user needs to build LangGraph-based agent workflows, implement multi-agent patterns (Supervisor/Swarm/Map-Reduce), configure checkpoints, set up streaming, or design stateful graph-based agents. Triggers on: LangGraph, StateGraph, agent graph, multi-agent workflow, checkpoint, streaming agent, human-in-the-loop, LangGraph Platform, langgraph.json."
 intent: Teaches how to use the LangGraph framework for building s...
 category: orchestration

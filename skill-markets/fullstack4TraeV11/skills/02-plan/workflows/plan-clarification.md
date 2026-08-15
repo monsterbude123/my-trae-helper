@@ -1,5 +1,8 @@
 # 计划追问点工作流（Plan Clarification）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 0 Plan 在 3 路探索后、产出 plan.md 前必走。识别未明确的追问点 + AskUserQuestion 澄清。
 
 ---

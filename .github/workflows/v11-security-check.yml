@@ -1,0 +1,138 @@
+# V11 Security Check — V11.7.0+ trae-security-review 实扫 CI gate
+#
+# 每次 PR 修改 V11 代码时,自动跑 trae-security-review scan_skills_dir.py;
+# - verdict=PASS: 报告上传为 artifact, PR 评论一句话通过
+# - verdict=BLOCKED/WARNING: PR 评论列出 HIGH/MEDIUM/LOW 统计 + 整改建议
+
+name: V11 Security Check
+
+on:
+  pull_request:
+    branches: [main, release/*]
+    paths:
+      - "skill-markets/fullstack4TraeV11/**"
+      - ".github/workflows/v11-security-check.yml"
+  push:
+    branches: [main]
+    paths:
+      - "skill-markets/fullstack4TraeV11/**"
+      - ".github/workflows/v11-security-check.yml"
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    name: V11 安全扫描
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write  # 评论 PR
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: 跑 trae-security-review scan_skills_dir.py
+        id: scan
+        run: |
+          set +e
+          python skill-markets/trae-security-review/scripts/scan_skills_dir.py \
+            skill-markets/fullstack4TraeV11 > scan_output.json 2>&1
+          rc=$?
+          set -e
+          # 提取 verdict 与统计
+          verdict=$(python -c "import json; d=json.load(open('scan_output.json')); print(d['verdict'])")
+          summary=$(python -c "import json; d=json.load(open('scan_output.json')); print(d['summary'])")
+          echo "verdict=$verdict" >> $GITHUB_OUTPUT
+          echo "summary=$summary" >> $GITHUB_OUTPUT
+          echo "rc=$rc" >> $GITHUB_OUTPUT
+          # 输出报告 md 文件名供 artifact 上传
+          report_md=$(python -c "import json; d=json.load(open('scan_output.json')); print(d['report_files']['md'])")
+          echo "report_md=$report_md" >> $GITHUB_OUTPUT
+          echo "::notice title=V11 Security::verdict=$verdict  $summary"
+          # 失败非阻断(只是 PASS/WARNING/BLOCKED 都会跑通), 报告交给下一步
+          exit 0
+
+      - name: 上传扫描报告 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v11-security-report
+          path: |
+            scan_output.json
+            ${{ steps.scan.outputs.report_md }}
+          retention-days: 30
+
+      - name: PR 评论 — 扫描结果
+        if: github.event_name == 'pull_request'
+        env:
+          VERDICT: ${{ steps.scan.outputs.verdict }}
+          SUMMARY: ${{ steps.scan.outputs.summary }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python - <<'PYEOF'
+          import json, os, subprocess, sys
+          verdict = os.environ["VERDICT"]
+          summary = os.environ["SUMMARY"]
+          d = json.load(open("scan_output.json"))
+
+          # emoji 映射
+          emoji = {"PASS": "✅", "WARNING": "⚠️", "BLOCKED": "🛑"}.get(verdict, "❓")
+          marker = {"PASS": "✅", "WARNING": "⚠️", "BLOCKED": "❌"}.get(verdict, "❓")
+
+          # 评分(按 SECURITY-MAP 计算公式: 5.0 - 0.5×HIGH - 0.2×MEDIUM - 0.1×LOW)
+          score = max(0.0, 5.0 - 0.5 * d["high"] - 0.2 * d["medium"] - 0.1 * d["low"])
+
+          body = f"""## {emoji} V11 安全扫描: {verdict}
+
+          **判定**: {marker} **{verdict}**
+          **统计**: {summary}
+          **评分**: **{score:.1f}** / 5.0
+
+          | 维度 | 数量 | 豁免 |
+          |------|------|------|
+          | HIGH | {d['high']} | {d['whitelist_stats']['by_code'].get('CMD_RM_RF', 0) + d['whitelist_stats']['by_code'].get('HARDCODED_SECRET', 0) + d['whitelist_stats']['by_code'].get('DYN_EVAL', 0)} |
+          | MEDIUM | {d['medium']} | {d['whitelist_stats']['by_code'].get('SHELL_EXEC', 0) + d['whitelist_stats']['by_code'].get('HTTP_INSECURE', 0)} |
+          | LOW | {d['low']} | {d['whitelist_stats']['by_code'].get('STACK_LEAK', 0)} |
+          | 白名单行数 | — | {d['whitelist_stats']['lines_whitelisted']} |
+
+          **整改路径**(若未 PASS):
+          1. .md 文档命中: 加 `<!-- scan-whitelist -->` ... `<!-- /scan-whitelist -->` 包裹命中行
+          2. .py 真可执行命中: 在模块 docstring 内加 `<!-- scan-whitelist:CODE -->`(V10.12.5 同款)
+          3. 真风险: 修改代码消除 subprocess 调用 / HTTP 引用 / 栈追踪泄露
+
+          详细报告: 见 workflow artifact `v11-security-report`
+          """
+
+          # 调 GitHub API 发评论(PR)
+          repo = os.environ.get("GITHUB_REPOSITORY")
+          pr_num = os.environ.get("GITHUB_PR_NUMBER") or os.environ.get("GITHUB_REF_NAME", "").split("/")[-1]
+          token = os.environ["GITHUB_TOKEN"]
+          url = f"https://api.github.com/repos/{repo}/issues/{pr_num}/comments"
+          r = subprocess.run(
+              ["curl", "-X", "POST", "-H", f"Authorization: token {token}",
+               "-H", "Content-Type: application/json",
+               "-d", json.dumps({"body": body}), url],
+              capture_output=True, text=True
+          )
+          if r.returncode != 0:
+              print(f"comment post failed: {r.stderr}", file=sys.stderr)
+              sys.exit(1)
+          print(f"comment posted (rc={r.returncode})")
+          PYEOF
+
+      - name: 阻断(若 BLOCKED 或 WARNING)
+        if: steps.scan.outputs.verdict != 'PASS'
+        run: |
+          echo "🛑 V11 安全扫描未 PASS — 阻断合并"
+          echo "verdict=${{ steps.scan.outputs.verdict }}"
+          echo "整改: 修改后重跑, 或跑白名单脚本 logs/v11-7-1-fix.py"
+          exit 1
+
+      - name: 通过(若 PASS)
+        if: steps.scan.outputs.verdict == 'PASS'
+        run: |
+          echo "✅ V11 安全扫描 PASS — 评分 5.0"

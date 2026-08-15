@@ -2,6 +2,12 @@
 
 > V11 全栈文档驱动开发项目
 
+> **V11.7.0+ 项目级规则加载(必读)**:
+> - **AC 核销门禁(Stage 4 Review)** → `scripts/ac-gate.py`
+> - **贾维斯门禁守护** → `skills/00-boot/SKILL.md` + `agents/jarvis.md`
+> - **Gate 修改必经 [JARVIS-DELEGATION] 委派** + `gate-integrity-guard.py --verify` PASS
+> - **layer 分层字段**:本项目 gate 应在 `gates/gate-config.json` levels[*].layer 标注 module/app/system
+
 ---
 
 ## §0 项目定位

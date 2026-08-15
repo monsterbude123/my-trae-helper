@@ -1,5 +1,8 @@
 # 反例 20：甩锅用户模式（User Orchestration Pattern）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 蒸馏自 V11 实战反馈。Agent 用"请你去做 X"代替自己能做的部分，把责任推给用户。
 
 **违反**：Article V（Verifiable Claims）+ Article IX（Cross-Session Verify）

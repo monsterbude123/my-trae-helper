@@ -1,5 +1,8 @@
 # 状态卡协议
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 13 个 stage 的状态卡统一协议。状态卡是任务真相源之一，不允许说谎（Article XII）。
 
 ---

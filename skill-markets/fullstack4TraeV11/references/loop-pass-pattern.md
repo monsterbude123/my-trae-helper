@@ -1,5 +1,8 @@
 # 反例 19：循环 PASS 模式（Loop PASS Pattern）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 蒸馏自 V10.12 + V11 实战反馈。Agent 反复"我搞错了"+重新委派，无具体改进。
 
 **违反**：Article V（Verifiable Claims）+ Article IX（Cross-Session Verify）+ Article XV.4（禁止抽象理由）

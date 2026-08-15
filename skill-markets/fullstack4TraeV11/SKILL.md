@@ -114,6 +114,8 @@ ls docs/specs/.state-card.md
 
 ## §0 三层架构（Gate / Guard / Execution）
 
+> **V11.7.0 贾维斯体系**:为防 agent 改标准通过自己,新增 pre-stage 角色贾维斯(jarvis)+ hash 锁机制(详见 [skills/00-boot/SKILL.md](skills/00-boot/SKILL.md))。会话启动必先委派贾维斯铺三层 gate + 签锁;任何 gate 文件改动必经 [JARVIS-DELEGATION] 委派 + gate-integrity-guard.py 机械校验。
+
 > **V11.4 新增**：从 V11.0 的"门禁链 + Hook 生命周期"两层，升级为三层控制体系（Gate / Guard / Execution），实现"硬化门禁 + 自动化守卫 + 标准化执行"的完整控制闭环。
 
 ### §0.0 架构总览
@@ -141,6 +143,24 @@ ls docs/specs/.state-card.md
 - Gate PASS → Guard 层启动
 - Guard PASS → Execution 层启动
 - 任一层 FAIL → 阻断 + 5 字段阻塞报告（见 Article XV）
+
+### §0.0.5 贾维斯分层模型（V11.7.0 NEW — 防 agent 改标准）
+
+> 详见 [skills/00-boot/agents/jarvis.md](skills/00-boot/agents/jarvis.md)。三层防线 + 三层 guard/gate,详见 [references/gate-configuration-protocol.md](references/gate-configuration-protocol.md)。
+
+```
+防线三(由软到硬):
+  协议层 — [JARVIS-DELEGATION] 委派头部(挡守规矩的 agent)
+  白名单层 — jarvis.md §3 路径白名单(挡越权直改的 agent)
+  机械层 — gate-integrity-guard.py hash 锁(挡一切绕过行为,事前拦截)
+
+分层三(L-module / L-app / L-system,docs 流程前置层按 stage 顺序跑):
+  L-module 模块基础层 — CRUD 单测 + 模块结构      → 挂 L1 pre-commit
+  L-app    应用层      — 契约对齐 + 模块集成 + E2E → 挂 L2 pre-push
+  L-system 系统层      — AC 核销 + 腐化扫描 + 发布 → 挂 L3 merge / L4 release
+
+唯一写权: 贾维斯 sub-agent(白名单机制 + 委派协议 + hash 锁兜底)
+```
 
 **硬化状态（V11.5 更新）**：
 - **Gate 层**：部分硬化（husky pre-commit/pre-push 绑定 L1→Stage 1 + L2→Stage 3.5）；**13 个 stage 门禁已全部声明式登记**到 [registry/gates.yaml](registry/gates.yaml)（flow 层），`run-all-guards.py` 可程序化断言每 stage 门禁存在性

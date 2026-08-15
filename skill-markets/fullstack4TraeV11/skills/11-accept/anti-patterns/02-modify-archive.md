@@ -1,5 +1,8 @@
 # 反例 2：修改归档文件（Stage 5 Accept）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 5 Accept 后归档不可变（V11 Article VIII + V10 Article VIII）。
 
 ## 现象

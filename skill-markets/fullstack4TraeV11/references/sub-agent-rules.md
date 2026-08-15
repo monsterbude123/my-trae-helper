@@ -1,5 +1,8 @@
 # 子代理通用铁律（V11 — 蒸馏自 V10.8 实操）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > V11 全 agent 通用，主上下文委派时引用本文件路径（不内联全文）。
 > 关联: [stage-skill-agent-protocol.md](stage-skill-agent-protocol.md) 委派速查 + [bug-workflow](../skills/12-bug-fix/references/bug-state-machine.md) 任务路由 + [document-layer.md](document-layer.md) 索引器范围 + [acceptance-gates-v10.md](stage-interaction-protocol.md) 通过依据 + [agent-error-diagnosis.md](agent-error-diagnosis.md) 错误诊断。
 
@@ -201,7 +204,7 @@ Step 3 发现 AI 描述与实际不符 → 立即停止，不编造事实
 
 ## §12. 破坏性操作 4 步强制流程（V11 NEW）
 
-适用: `rmtree` / `rm -rf` / `Remove-Item -Recurse -Force` / 跨盘整目录 mv / 不在 git 跟踪的大文件 Delete / 任何外接盘整目录操作。
+<!-- scan-whitelist -->适用: `rmtree` / `rm -rf` / `Remove-Item -Recurse -Force` / 跨盘整目录 mv / 不在 git 跟踪的大文件 Delete / 任何外接盘整目录操作。<!-- /scan-whitelist -->
 
 ```
 Step 1 列清单（强制）: 输出"将影响路径列表 + 估算字节数"（find/ls/Get-ChildItem | measure）
@@ -236,7 +239,7 @@ C. 风险可见: 字节数/路径/影响范围能执行前列出
 ```
 
 红线清单（即使事后追认也视为结构性失败）:
-- 任何 `rmtree` / `rm -rf` / `Remove-Item -Recurse -Force`
+<!-- scan-whitelist -->- 任何 `rmtree` / `rm -rf` / `Remove-Item -Recurse -Force`<!-- /scan-whitelist -->
 - 不在 git 跟踪的大文件 Delete（阈值项目化）+ mv 后不保留 trash
 - 外接盘整目录 mv 或 Delete（即使"目录看起来是空的"）
 - 不可逆数据变换（覆写原文件 / sha256 改变原文件）

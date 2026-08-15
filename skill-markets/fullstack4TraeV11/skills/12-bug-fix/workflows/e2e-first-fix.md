@@ -1,5 +1,8 @@
 # E2E-First Fix — Stage 6 Bug Fix
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 6 Bug Fix 必走。e2e 先行 + 5 步修复协议。
 
 ---

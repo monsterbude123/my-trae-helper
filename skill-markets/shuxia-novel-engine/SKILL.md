@@ -1,5 +1,7 @@
 ---
 name: subculture-novel-engine
+version: 1.0.0
+version: 1.0.0
 description: "General fiction world-building engine. Use for novel writing, chapter planning,
 world-building consistency checks, character arc verification, foreshadow tracking,
 plot enumeration, ripple analysis, combat/drama evaluation, and creative workflows.

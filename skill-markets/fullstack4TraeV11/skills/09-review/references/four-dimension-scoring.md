@@ -1,6 +1,11 @@
-# 4 维评分算法（Four-Dimension Scoring）
+# 4 维评分算法（Four-Dimension Scoring）— V11.6.0 起已废弃
 
-> Stage 4 Review Step 3 必走。V10 reviewer 铁律 2 + acceptance-gates-v10.md 蒸馏。
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
+> **V11.6.0 废弃声明**:本文档提供的里程碑/打分/权重体系已废除,门禁替代为 [acceptance-baseline-extract.md](../workflows/acceptance-baseline-extract.md) + [ac-gate.py](../../../scripts/ac-gate.py) 的 AC 核销判定。本文档保留作历史摘要,不再用于判定。
+>
+> 归档用途: dim1-dim4 详情文件现在作为**条件触发附加检查**的输入(详见 [SKILL.md §附加检查](../SKILL.md)),不受评分公式约束。
 
 ---
 

@@ -1,5 +1,11 @@
 # V11 公共脚本说明
 
+> **V11.7.0+ 设计入口**:
+> - **AC 核销门禁(Stage 4 Review)** → [skills/09-review/SKILL.md](../skills/09-review/SKILL.md) + [acceptance-baseline-extract.md](../skills/09-review/workflows/acceptance-baseline-extract.md)
+> - **贾维斯门禁守护(防 agent 改标准)** → [skills/00-boot/SKILL.md](../skills/00-boot/SKILL.md) + [agents/jarvis.md](../skills/00-boot/agents/jarvis.md) + [gate-configuration-protocol.md](../references/gate-configuration-protocol.md)
+> - **新增脚本**: `scripts/ac-gate.py` (AC 核销 G1-G5) / `scripts/gate-installer.py` (贾维斯 installer) / `scripts/gate-integrity-guard.py` (hash 锁 --verify/--generate/--force)
+> - **变更**: 评分制废除 → 门禁制;4 维详情转附加检查;`registry/gates.yaml` v1.2.0 加 layer 分层字段(docs/module/app/system)
+
 > 22 个公共脚本 + 各 stage 内部脚本。脚本失败 = 🛑 REJECT，不接受 AI 自评字符串。
 > 主上下文亲自调用脚本（不委派给子代理，Article IV）。
 
@@ -14,7 +20,7 @@
 | `setup-feature.py` / `change-status.py` | 创建 change 骨架 / 读取 change 真实状态 | Stage -1 / 0 |
 | `code-hygiene.py` / `orphan-detector.py` | 代码卫生 / 孤儿测试 | Stage 3 / 4 / 4.5 |
 | `dist-hash-check.py` / `visual-content-check.py` | Bundle 一致性 / 视觉内容校验 | Stage 3.5 / 4 |
-| `acceptance-audit.py` | 4 维验收审计 | Stage 4 |
+| `acceptance-audit.py` | 4 维验收审计(**V11.7.0 归档**,V11.6.0 起由 ac-gate.py 取代) | Stage 4 |
 | `proactive-scan.py` / `self-diagnose.py` | 10 项腐化扫描包 / Meta 自我诊断 | Stage 4.5 |
 | `spec-purge.py` / `spec-knowledge-extract.py` | Spec 清除归档 / 知识沉淀 | Stage 5 |
 | `reason-classifier.py` | 抽象理由分类器（6 类） | 所有 stage（被质疑时） |
@@ -23,6 +29,9 @@
 | `install-hooks.py` | Hook 安装到项目 .trae/ | 项目首次接入 V11 |
 | `hooks-fidelity.py` | Hook 完整性验证 | 项目首次接入 + 验收 |
 | `upgrade-from-v10.py` | V10→V11 升级兼容性检查 | V10 项目升级 |
+| **`ac-gate.py`** (**V11.6.0 NEW**) | AC 核销门禁(G1-G5:矩阵存在 / ≥1 行 / 逐行通过 / spec 全覆盖 / TC 防编造) | Stage 4 唯一权威 |
+| **`gate-installer.py`** (**V11.7.0 NEW**) | 贾维斯 installer — 读 registry/gates.yaml 按 layer 铺目标项目 .husky/hooks + gates/gate-config.json | 项目初始化 / 新增分层 |
+| **`gate-integrity-guard.py`** (**V11.7.0 NEW**) | 贾维斯 hash 锁 — `--verify` / `--generate` / `--force --reason`(防 agent 改标准通过自己) | 跑任何 gate 前必调 |
 | `scan-templates.py` | 模板扫描 | 模板变更时 |
 | `phase-gate.py` | 阶段门禁（V10 兼容） | V10 项目兼容 |
 | `check_integration_contract.py` | 集成契约检查（项目级配置，按需启用） | Stage 3 Implement / Stage 4 Review |

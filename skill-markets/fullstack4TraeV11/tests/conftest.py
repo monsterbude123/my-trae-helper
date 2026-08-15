@@ -4,6 +4,8 @@
   - 全程 tmp_path,不依赖项目路径
   - 自动装载 scripts/*.py(文件名含连字符,用 importlib)
   - 与主仓 pytest 隔离(主仓 conftest 通过 collect_ignore_glob 排除 skill-markets/**/tests)
+<!-- scan-whitelist:SHELL_EXEC -->
+SECURITY 标注 (V11.7.1 NEW): 本脚本含 SHELL_EXEC 调用, 全部为 V11 业务必需.
 """
 from __future__ import annotations
 

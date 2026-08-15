@@ -4,7 +4,16 @@ Trae IDE 技能包开发工程 + 跨 Agent 技能市场 CLI。
 
 > 这个仓库既是「技能包开发工程」也是「技能市场 CLI 源码」：
 > - `skill-markets/` —— 23+ 个技能包
-> - `bin/` + `src/` —— `@my-trae-helper/cli`（已发布到 npm）
+> - `bin/` + `src/` —— `@my-trae-helper/cli`(已发布到 npm)
+
+## 🛡️ 协议先行 + 多维度一致(2026-08-15 NEW)
+
+- **`.agents/skills/project-rule-skill/references/skill-creation-workflow.md`** (V11.8.0.1 路径迁移)— skill 创建/更新工作流(协议先行 + 多维度一致)
+- **`.agents/skills/project-rule-skill/references/protocol-coverage-protocol.md`** (V11.8.0.1 路径迁移)— 协议覆盖度协议(程序化配套)
+- **`tests/catalogs/catalog-protocol.md`** — Skill Catalog 校验协议(V1 report-only)
+- **`scripts/_check_protocol_coverage.py`** — 多维度同步检测(std lib,200+ 行)
+- **`tests/catalogs/_check_skill_catalog.py`** — Catalog 元数据校验(200+ 行)
+- **CI gate**:`.github/workflows/skill-market-gate.yml` §5.7 protocol coverage + §5.8 skill catalognpm）
 
 ## �� 工作流指南
 

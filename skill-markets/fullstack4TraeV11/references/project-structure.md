@@ -1,5 +1,8 @@
 # 项目目录结构（V11 强制 — 蒸馏自 V10）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 主上下文加载 skill 后必查：项目实际目录 vs V11 默认 vs 蒸馏需求。
 > 来源：V10 `references/project-structure.md`（V10 实战反馈：项目目录不一致导致子代理找不到 artifacts）。
 

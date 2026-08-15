@@ -90,6 +90,17 @@ Step 7: 交接给下一 stage（更新 next_stage 字段）
 | **bug-fix** | Stage 6 Bug Fix（独立支线）| bug |
 | **project-health** | Stage 7 Project Health（异步自检）| project |
 
+**V11.7.0 NEW — project-init 必先委派贾维斯**:
+
+```
+项目初始化意图识别后,第一步不是跑 Stage 0 Plan,而是:
+  ① 主 agent 委派贾维斯(subagent_type=general-purpose + [JARVIS-DELEGATION] 头部)
+  ② 贾维斯跑 gate-installer.py --target <项目根> --preset <栈> --layers module,app,system
+  ③ 贾维斯跑 gate-integrity-guard.py --generate 生成 lock
+  ④ 主 agent 兜底: gate-integrity-guard.py --verify PASS 后,才进入 Stage 0 Plan
+```
+详见 [../00-boot/agents/jarvis.md](../00-boot/agents/jarvis.md)
+
 **详细分类**: [references/intent-types.md](references/intent-types.md)
 
 ## 关键产物

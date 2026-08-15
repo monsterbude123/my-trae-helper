@@ -1,5 +1,8 @@
 # {Feature} — 设计提示词（给 Trae Work）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > **Fidelity 等级（V11.3 NEW 必填）**: [ ] L1 wireframe / [ ] L2 mockup / [ ] L3 pixel-perfect
 > **默认值**: 未标注 = L2 mockup（中保真）
 > **约束范围**: L1 = 仅布局 + 组件 + 5 状态;L2 = L1 + 主色板 + 字号 + 间距;L3 = L2 + 动效 + 阴影 + 圆角 + hover

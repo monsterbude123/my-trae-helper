@@ -1,5 +1,7 @@
 ---
 name: vibe-coding-standards
+version: 1.0.0
+version: 1.0.0
 description: Vibe Coding 核心组件编写原则 v2.5 — AGENTS.md、Rules、Skills、Subagents 的结构规范、体积弹性范围（100~350 行）和防上下文击穿策略。v2.5 放宽体积阈值 +30%（AGENTS/SKILL/Subagent 100~350、> 350 才拆；Rule ≤ 120），校验脚本同步调整。
 triggers: [编写AGENTS.md, 写规则, 编写skill, 写子代理, vibe coding, 防上下文击穿, 体积红线, 子代理设计, 系统提示词, agent prompt, 项目地图, 地图内联, 防机械指针化]
 intent: Vibe Coding 核心组件编写原则 v2

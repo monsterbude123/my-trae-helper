@@ -1,5 +1,8 @@
 # Stage Physical Isolation — 阶段物理隔离规范（V12 NEW）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > **核心思想（借鉴 husky）**: 每个 stage 是独立"提交门",stage 之间通过物理目录隔离而非软链接 / 逻辑层。
 > **必读**: V11 SKILL.md §0.5 + document-layer.md + state-card-protocol.md
 > **替代**: V11 document-layer.md §4 层架构（保留为逻辑概念,本文件为物理映射）

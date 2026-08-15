@@ -1,5 +1,7 @@
 ---
 name: trae-professional
+version: 1.0.0
+version: 1.0.0
 description: TRAE IDE / TRAE Work 专业知识库。回答任何关于 TRAE（TraeCode、TraeWork、TRAE APP、字节跳动 AI 原生产品）的问题——功能特性、开发模式、智能体、CUE 引擎、技能系统、规则系统、MCP Server、沙箱安全、Hook 钩子、三端协同、计费、Design 模式、语音讨论、电脑控制、办公助理、产物管理、问题排查等。当用户提到 TRAE、Trae、TRAE IDE、Trae 编辑器、TraeWork、TraeCode、TRAE APP、SOLO、CUE、Trae 技能、Trae 插件、AI 编程工具或询问 Trae 能否做某事时使用此技能。即使问题不完整或不直接点名 TRAE，只要涉及 AI IDE 或 AI 编程助手的能力和用法，也应主动加载。
 intent: TRAE 专业知识库
 category: guard

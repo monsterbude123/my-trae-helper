@@ -1,5 +1,8 @@
 # 代码卫生（Code Hygiene）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 3 Implement 必走。V10 implementer 铁律 6 + Ponytail First。
 
 ---
@@ -58,7 +61,7 @@ if retry_count > MAX_RETRY:
 ### 反例 C：硬编码 API Key
 
 ```python
-api_key = "sk-1234567890"  # ❌ L0 硬编码
+<!-- scan-whitelist -->api_key = "sk-1234567890"  # ❌ L0 硬编码<!-- /scan-whitelist -->
 正确: api_key = os.environ["API_KEY"]
 ```
 

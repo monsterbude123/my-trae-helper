@@ -1,0 +1,39 @@
+version: 2.0.0
+scope: skill-metadata
+
+# V11.8.0 NEW — Skill Catalog 校验协议(2026-08-15)
+# 详见 tests/catalogs/catalog-protocol.md
+#
+# V1 → V2 升级要点(2026-08-15):
+#   - 必填字段:name + description + version(原 V1: name + description)
+#   - 推荐字段(声明时 WARN,不阻断):requires(等各 SKILL 评估依赖后,V2.1 升级为必填)
+#   - 其他字段:沿用 V1
+#
+# 数据基础(2026-08-15 14:42 实扫 43 SKILL):
+#   - name 100%(42/42)
+#   - description 100%(42/42)
+#   - version 31% → 100%(已批量补 29 个,version: 1.0.0)
+#   - requires 26.2%(11/42,语义复杂,V2 留作推荐,V2.1 升级)
+
+required_metadata:
+  - name                  # 必填:SKILL 标识
+  - description           # 必填:描述(AGENTS.md §1.1 铁律 #1)
+  - version               # V2 升级为必填:版本号(批量补 29 个 1.0.0)
+
+# V2 渐进式推荐字段 — 缺则 WARN,不阻断
+# V2.1 计划:requires 全量评估后升级为必填
+recommended_metadata:
+  - requires              # 推荐:依赖声明
+
+# 可选字段(声明时跑子校验)
+optional_metadata:
+  - protocols             # 声明时跑 _check_protocol_coverage.py
+  - workflows             # 声明时跑 _check_protocol_coverage.py
+
+# 结构守卫约束(沿用 vibe-coding-standards v2.5)
+structural_rules:
+  max_skill_md_lines: 500             # 推荐上限(放宽),> 500 提取 references/
+  min_yaml_frontmatter_fields: 3      # V2 升级:至少 name + description + version
+
+# 反例库(可选声明,留待后续扩展)
+anti_patterns: []

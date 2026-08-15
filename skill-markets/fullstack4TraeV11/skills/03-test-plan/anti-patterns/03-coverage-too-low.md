@@ -1,5 +1,8 @@
 # 反例 3：覆盖率门槛宽松（Coverage Too Low）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 行 ≥ 90% / 分支 ≥ 85% / 函数 ≥ 95% 是 V11 硬门槛。宽松 = Stage 3 必补风险 + Stage 4 Review 质疑（REJECT）。
 
 **违反**：铁律 2（覆盖率 ≥ 90%）+ 铁律 8（不跳门槛）

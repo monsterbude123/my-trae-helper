@@ -97,5 +97,7 @@ test("agent-dev-control-kit 应 PASS/WARN", test_agent_dev_control_passes)
 test("不存在技能阻断", test_nonexistent_skill)
 test("真实风险代码 BLOCK", test_real_risk_detected)
 
-print(f"\n━━━ 通过: {passed} / 失败: {failed} ━━━")
-sys.exit(1 if failed > 0 else 0)
+# V11.8.0 P0 修复(2026-08-15):pytest collect 时触发 sys.exit 导致 INTERNALERROR
+if __name__ == "__main__":
+    print(f"\n━━━ 通过: {passed} / 失败: {failed} ━━━")
+    sys.exit(1 if failed > 0 else 0)

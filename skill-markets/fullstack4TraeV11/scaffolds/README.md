@@ -1,5 +1,11 @@
 # fullstack4TraeV11 Scaffolds
 
+> **V11.7.0+ 设计入口**:
+> - **AC 核销门禁(Stage 4 Review)** → [skills/09-review/SKILL.md](../skills/09-review/SKILL.md)
+> - **贾维斯门禁守护(防 agent 改标准)** → [skills/00-boot/SKILL.md](../skills/00-boot/SKILL.md) + [agents/jarvis.md](../skills/00-boot/agents/jarvis.md)
+> - **本目录脚手架用户须知**: V11.7.0 起,gates/gate-config.json + .husky/{pre-commit, pre-push} 由贾维斯 `scripts/gate-installer.py` 生成,**不再手抄本目录**。本目录 templates 作为参考快照存在,初装项目运行 installer 一键铺三层 gate + 签 hash 锁。
+> - **变更**: 评分制废除 → 门禁制;本目录 AGENTS.md 模板建议加 `Layer 字段: module/app/system`
+
 > V11 全栈文档驱动开发脚手架模板集
 
 ## 概述

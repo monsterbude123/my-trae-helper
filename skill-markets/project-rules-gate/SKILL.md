@@ -1,5 +1,7 @@
 ---
 name: project-rules-gate
+version: 1.0.0
+version: 1.0.0
 description: 项目级 Rules 强制加载与子代理门禁 — 把项目 .trae/rules/ 锻造为 project_rules_skills 入口 skill，并强制任何 sub-agent 行动前必走该入口 + Completion Report 声明 rules_loaded/skipped。完全独立于 fullstack4TraeV11，可单独安装使用。命中：想给子代理强制装一个项目级规则加载门禁 / 想把散落的 rules 文件收纳成一个可按需加载的 skill / 不想让 sub-agent 绕开 rules 直接 read 文件。
 intent: 项目级 Rules 强制加载与子代理门禁 — 把项目
 category: gate

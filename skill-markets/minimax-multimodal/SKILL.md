@@ -1,5 +1,7 @@
 ---
 name: minimax-multimodal
+version: 1.0.0
+version: 1.0.0
 description: MiniMax 开放平台多模态技能包 — 文本对话(M2.7/M3)、文生图(image-01)、视频生成(Hailuo-2.3 / MiniMax-H3)、语音合成(speech-2.8-hd)、音乐生成(music-3.0)、图像理解(vision)。覆盖 6 大模态,每个模态提供一个可独立跑通的 Python 脚本 + 全量 verify 入口。当用户提到 MiniMax、海螺 AI、多模态、语音克隆、视频生成、音乐生成、图像生成、M2.7、M3、H3、Hailuo、image-01、speech-2.8、music-3.0 时主动加载。
 user-invocable: true
 metadata: '{"openclaw":{"emoji":"🐉","os":["darwin","linux","win32"],"primaryEnv":"MINIMAX_API_KEY"}}'

@@ -1,5 +1,10 @@
 # Python Scaffold (V11)
 
+> **V11.7.0+ 脚手架使用须知**:
+> - **本目录为参考快照**:V11.7.0 起,初装项目应运行 `python scripts/gate-installer.py --target . --preset python --layers module,app,system` 一键生成 gates/ + .husky/ + hash 锁,不必手抄本目录文件
+> - **AC 核销门禁**:Stage 4 Review 走 `scripts/ac-gate.py`,取代 4 维评分
+> - **Hash 锁**:每个 gate 文件修改必经贾维斯 `[JARVIS-DELEGATION]` 委派,否则 `--verify` BLOCK
+
 > Python 项目脚手架（V11 全栈流程，支持 FastAPI/Django/Flask）
 
 ## 概述
