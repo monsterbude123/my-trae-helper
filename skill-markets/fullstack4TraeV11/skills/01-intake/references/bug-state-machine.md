@@ -1,5 +1,8 @@
 # Bug 单状态机 + 编号规则
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage -1 Intake 创建 Bug 单 + Stage 6 Bug Fix 全程维护的状态机。
 
 ---

@@ -1,5 +1,7 @@
 ---
 name: screenshot
+version: 1.0.0
+version: 1.0.0
 description: 通用 Playwright 截图工具 — 快速截取任意页面状态，用于 vision-audit 分析。每次只截一张，模拟人类操作节奏。
 intent: 通用 Playwright 截图工具 — 快速截取任意页面状态，用于 vision-audit 分析
 category: other

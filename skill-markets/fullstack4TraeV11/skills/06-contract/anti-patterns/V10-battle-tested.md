@@ -1,5 +1,8 @@
 # V10 实战蒸馏（Battle-Tested Patterns）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 2 Contract 从 V10 agents/contract-writer.md + contract-first.md + 配置治理 D-009 蒸馏。
 
 ---

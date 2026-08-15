@@ -1,5 +1,7 @@
 ---
 name: coding-xinfa
+version: 1.0.0
+version: 1.0.0
 description: 通用编码心法 — Goal Mode 目标追逐协议、完成审计、阻塞处理、表达风格规范。适用于所有项目。
 triggers: [完成任务, 目标, 验证完成, blocked, 阻塞, 卡住, 表达简洁, 半成品, 改动要小]
 related: [goal-mode"        # Goal Mode 完整协议 + Agent 编排（goal-mode, goal-auditor, goal-planner）, ponytail4Trae"    # 懒人开发模式 + 过度工程审查 + ponytail: 标记技术债]

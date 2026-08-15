@@ -1,5 +1,8 @@
 # Agent 错误诊断手册（V11 — 5 模式根因 → 现有铁律映射）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > V11 实战反馈蒸馏。任何 agent 失败先查此手册，**避免重复创建新铁律**。
 > 原则（Article XVI §1.4 重叠校验）：V11 现有 16 + 1 Articles + 22 反例已覆盖常见失败模式，新增铁律必先查此手册。
 

@@ -1,5 +1,8 @@
 # 反例 3：重构不 purge
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 重构场景必走 spec-purge.py 清除旧产物。跳过 = 旧产物污染 + 后续 spec.md 漂移。
 
 ## 现象

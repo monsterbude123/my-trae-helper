@@ -1,10 +1,13 @@
 # Acceptance Criteria Extract — Stage 1 Spec
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 1 Spec 必走。验收标准提取协议。
 
 ---
 
-## 5 类 AC
+## 6 类 AC（V11.6.0 新增第 6 类 UI 交互 AC）
 
 | 类型 | 描述 | 示例 |
 |------|------|------|
@@ -13,6 +16,7 @@
 | **错误 AC** | 失败场景处理 | "密码错误提示不暴露用户是否存在" |
 | **兼容性 AC** | 浏览器/版本兼容 | "支持 Chrome 100+" |
 | **集成 AC** | 与外部系统集成 | "SSO 与 Okta 集成成功" |
+| **UI 交互 AC** (V11.6.0 NEW) | 用户与 UI 交互能触达预期后端行为 | "点击新增按钮 → 弹表单 → POST 201 → 列表刷新",必填 `ui_flow_ref` 指向 ui-ux-logic 交互流 |
 
 ---
 
@@ -53,6 +57,15 @@ AC-3: 登录性能
   then:
     - "P99 响应 < 200ms"
     - "成功率 ≥ 99%"
+
+AC-UI-1: 新增按钮可见并触发新增（V11.6.0 NEW — 第 6 类 UI 交互 AC）
+  given: "列表页加载完成"
+  when: "用户点击 Header 右侧'新增'按钮"
+  then:
+    - "弹出新增表单(对应 ui-ux-logic 流-1)"
+    - "提交后 POST /items 返回 201(对应 TC-001)"
+    - "列表刷新且含新条目(对应 TC-010, E2E)"
+  ui_flow_ref: "ui-ux-logic.md#流-1"
 ```
 
 ---

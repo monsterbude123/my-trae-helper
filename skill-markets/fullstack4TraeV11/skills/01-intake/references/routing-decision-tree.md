@@ -1,5 +1,8 @@
 # 路由决策树
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage -1 Intake Step 5 路由决策的完整决策树。从用户输入到路由目标的完整映射。
 
 ---

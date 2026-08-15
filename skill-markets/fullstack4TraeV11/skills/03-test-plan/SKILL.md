@@ -15,6 +15,11 @@ depends_on:
     - ../../scripts/stage-gate.py  # 主上下文跑(状态卡字段校验);agent 调用跑 state-card-validator.py(见 stage-skill-agent-protocol.md L113)
 ---
 
+> **V11.7.0+ 设计入口**:
+> - **AC 核销门禁(Stage 4 Review)** → [skills/09-review/SKILL.md](../09-review/SKILL.md) + [acceptance-baseline-extract.md](../09-review/workflows/acceptance-baseline-extract.md)
+> - **贾维斯门禁守护(防 agent 改标准)** → [skills/00-boot/SKILL.md](../00-boot/SKILL.md) + [agents/jarvis.md](../00-boot/agents/jarvis.md) + [gate-configuration-protocol.md](../../references/gate-configuration-protocol.md)
+> - **变更**: 评分制废除 → 门禁制;4 维详情转附加检查;`registry/gates.yaml` v1.2.0 加 layer 分层字段(docs/module/app/system)
+
 # Stage 0.5 Test Plan — 测试覆盖映射
 
 > 第一性原则：**验收维度决定测试覆盖，测试覆盖决定交付质量**。Test Plan 把 plan.md 的 Capabilities 拆解为可执行的测试用例。
@@ -34,7 +39,7 @@ depends_on:
 2. 覆盖率门槛 ≥ 90% — 测试覆盖率硬门槛
 3. E2E ≥ 2 / INV ≥ 1 / UNIT ≥ 5 — 最低测试组合
 4. 测试用例可追溯 — 每条测试映射到 plan.md Capability
-5. 测试在 spec 前 — test-plan.md 必在 spec.md 之前
+5. 测试在 spec 前 — test-plan.md 必在 spec.md 之前(**V11.6.0 锚定**:AC 可由 spec 产出后补交,但测试用例 ac 字段需在 spec AC 稳定后锁定)
 6. 测试命名规范 — test_{module}_{scenario}_{expected}
 7. NEVER 空测试 — 每个测试必有断言
 8. NEVER 跳覆盖率门槛 — 覆盖率不达标不进入 Stage 1

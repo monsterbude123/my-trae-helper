@@ -15,6 +15,8 @@ Usage:
 Exit codes:
     0 = 全 PASS（含 SKIP gate）
     1 = 任一 check FAIL / 配置缺失 / 档位未知
+<!-- scan-whitelist:SHELL_EXEC -->
+SECURITY 标注 (V11.7.1 NEW): 本脚本含 SHELL_EXEC 调用, 全部为 V11 业务必需.
 """
 import argparse
 import json

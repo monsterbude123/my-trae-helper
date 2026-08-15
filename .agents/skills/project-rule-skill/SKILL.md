@@ -1,13 +1,25 @@
 ---
 name: project-rule-skill
 description: 项目级规则加载网关 — 任何任务开始前调用本 skill 获取本会话所需 rules，再按需 Read。Use when any task requires loading project rules — paths / governance / code-style / stack / git / 反例库 / 决策层级 / 路径权限 / 分支规则.
+version: 2.0.0
+updatedAt: 2026-08-15
+requires:
+  - skill-creation-workflow
+  - skills-development-rules
+  - protocol-coverage-protocol
 ---
 
 # project-rule-skill — 项目级规则加载网关
 
-> **强制**：本 skill 是项目内 `Skill` 工具的入口。任何主 agent / sub-agent 在本项目执行任务前，**必须**先调用本 skill 获取本会话需要的 rules，再按需 Read。
+> **强制**:本 skill 是项目内 `Skill` 工具的入口。任何主 agent / sub-agent 在本项目执行任务前,**必须**先调用本 skill 获取本会话需要的 rules,再按需 Read。
 >
-> **禁止**：直接 Read `.agents/rules/*.md` 或 `skill-markets/fullstack4TraeV11/references/*.md` 而不走本 skill — 会污染上下文 + 绕过强制协议。
+> **禁止**:直接 Read `references/*.md`(本目录之外)或 `skill-markets/fullstack4TraeV11/references/*.md` 而不走本 skill — 会污染上下文 + 绕过强制协议。
+>
+> **V11.8.0.1 升级说明(2026-08-15 NEW)**:
+> - **本目录新增 `references/` 子目录**,与 SKILL.md 同包统一管理协议规范文件
+> - 三个 V11.8.0 协议(`skill-creation-workflow.md` / `skills-development-rules.md` / `protocol-coverage-protocol.md`)已从 `.agents/rules/` 迁移到本目录
+> - 原 `.agents/rules/` 路径保留 redirect stub(防死链)
+> - frontmatter 新增 `version: 2.0.0` + `requires` 字段声明本 skill 依赖的协议
 
 ---
 
@@ -67,7 +79,9 @@ reason: "<本任务场景关键词>"
 |------------|----------------|
 | `测试` / `test` / `E2E` / `验收` / `verify` | `acceptance-discipline` / `test-experience` |
 | `安全` / `secret` / `扫描` / `audit` | `trae-security-review` |
-| `新建技能` / `skill` / `create` / `verify` | `skill-acceptance` |
+| `新建技能` / `skill` / `create` / `verify` | `skill-acceptance` + **V11.8.0.1** [`references/skill-creation-workflow.md`](references/skill-creation-workflow.md)(协议先行 + 多维度一致) + [`references/skills-development-rules.md`](references/skills-development-rules.md)(短细则) |
+| `protocol` / `协议先行` / `*-protocol.md` | **V11.8.0.1** [`references/protocol-coverage-protocol.md`](references/protocol-coverage-protocol.md)+ `python scripts/_check_protocol_coverage.py --protocol <path> --check` |
+| `catalog` / `Skill catalog` / `skill-catalog.yaml` | **V11.8.0.1** [`tests/catalogs/catalog-protocol.md`](../../../tests/catalogs/catalog-protocol.md)+ `python tests/catalogs/_check_skill_catalog.py` |
 | `Gate` / `pre-commit` / `pre-push` / `CI` | `skill-acceptance §7` + `agent-dev-control-kit §11` |
 | `GH Actions` / `workflow` / `push` / `force-push` / `workflow_dispatch` | `skill-acceptance §7` + `.github/workflows/*.yml` 必读 + 必走 guard-smith 委派(白名单) |
 | `重构` / `升级` / `V{N}` | `fullstack-skill-architect` |
@@ -80,7 +94,7 @@ reason: "<本任务场景关键词>"
 | 场景关键词 | 必加载 references/ |
 |------------|-------------------|
 | `cli` / `bin/` / `src/` / `打包` / `发布` / `npm` | [project-iron-laws.md §E](../../skill-markets/fullstack4TraeV11/references/project-iron-laws.md) |
-| 新建 / 修改 / 删除 skill | [project-iron-laws.md §F](../../skill-markets/fullstack4TraeV11/references/project-iron-laws.md) + [.agents/rules/README.md](../../rules/README.md) |
+| 新建 / 修改 / 删除 skill | [project-iron-laws.md §F](../../skill-markets/fullstack4TraeV11/references/project-iron-laws.md) + [.agents/rules/README.md](../../rules/README.md) + **[references/skill-creation-workflow.md](references/skill-creation-workflow.md)**(V11.8.0.1 路径迁移 + 多维度一致) + [references/skills-development-rules.md](references/skills-development-rules.md)(V11.8.0.1 短细则) |
 | 反例 / 回滚 / 被质问 / 不耐慎 | [project-iron-laws.md §A R-1~R-3](../../skill-markets/fullstack4TraeV11/references/project-iron-laws.md) |
 | 升级 / P0 / P1 / 决策 / ADR | [project-iron-laws.md §B L0~L9](../../skill-markets/fullstack4TraeV11/references/project-iron-laws.md) + [skeptical-validation-protocol.md](../../skill-markets/fullstack4TraeV11/references/skeptical-validation-protocol.md) |
 | 分支 / commit / release | [project-iron-laws.md §D](../../skill-markets/fullstack4TraeV11/references/project-iron-laws.md) |
@@ -97,11 +111,12 @@ reason: "<本任务场景关键词>"
 | 内容 | 在哪里 |
 |------|--------|
 | AGENTS.md §1.5 会话启动协议 | 主 agent 启动时调用本 skill 的引用源 |
-| AGENTS.md §2 铁律（10 条） | 主 agent 必读 → 本 skill 负责路由 |
+| AGENTS.md §2 铁律(10 条) | 主 agent 必读 → 本 skill 负责路由 |
 | AGENTS.md §3 行为规约 + §3.1 表态信号 | 反例库 R-3 联动 → 本 skill 反例路由命中 |
-| AGENTS.md §7 项目级方法论 | 9 个 references/ 引用，本 skill §2 路由表覆盖 |
+| AGENTS.md §7 项目级方法论 | 9 个 references/ 引用,本 skill §2 路由表覆盖 |
 | **本 skill — 项目 rules 加载网关** | `.agents/skills/project-rule-skill/SKILL.md` |
-| 实际 rule 内容（single source of truth） | `.agents/rules/*.md` + `skill-markets/fullstack4TraeV11/references/*.md` |
+| **实际 rule 内容(single source of truth,V11.8.0.1 NEW)** | **本目录 `references/` 子目录**(`skill-creation-workflow.md` / `skills-development-rules.md` / `protocol-coverage-protocol.md`)+ `skill-markets/fullstack4TraeV11/references/*.md` |
+| ~~V11.8.0 旧路径(已迁移)~~ | ~~`.agents/rules/skill-creation-workflow.md` 等~~ — 现 redirect stub |
 
 ---
 
@@ -121,11 +136,12 @@ reason: "<本任务场景关键词>"
 
 ## §5 反模式
 
-- ❌ 跳过本 skill 直接 Read `.agents/rules/*.md`
-- ❌ Read 全部 rules（即使本项目只有 1 个 .agents/rules + N 个 references）
+- ❌ 跳过本 skill 直接 Read `.agents/rules/*.md`(V11.8.0.1 后只读 redirect stub,真内容在本目录 `references/`)
+- ❌ 跳过本 skill 直接 Read `references/*.md`(本目录 `references/` 下的协议)— 仍要走本 skill 路由
+- ❌ Read 全部 rules(即使本项目只有 N 个 references)
 - ❌ 在用户未确认新场景时复用旧会话的 rules 列表
 - ❌ 把 `Skill(name="project-rule-skill")` 当成"可选"——它是强制
-- ❌ 把本 skill 退化为可选（vvicat 上游是 fallback，本项目主 agent 启动时优先用本 skill）
+- ❌ 把本 skill 退化为可选(vvicat 上游是 fallback,本项目主 agent 启动时优先用本 skill)
 
 ---
 

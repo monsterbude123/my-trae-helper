@@ -1,5 +1,7 @@
 ---
 name: skills-security-scan
+version: 1.0.0
+version: 1.0.0
 status: deprecated
 redirect_to: trae-security-review
 description: [DEPRECATED → trae-security-review] 本地优先版 Skill 安全审查能力已整合。扫描功能由 trae-security-review/scripts/scan_skills_dir.py V2.1 提供（8 类风险 + 三层白名单）；平台兼容性识别已迁至 trae-security-review/scripts/lib/platform_detector.py。

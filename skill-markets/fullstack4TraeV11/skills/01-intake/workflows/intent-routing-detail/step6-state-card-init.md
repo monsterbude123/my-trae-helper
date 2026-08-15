@@ -1,5 +1,8 @@
 # Step 6：初始化状态卡 — intent-routing.md 详情
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 父文件：[../intent-routing.md](../intent-routing.md)
 > 来源：原 intent-routing.md 第 155-261 行（保留信息密度）
 

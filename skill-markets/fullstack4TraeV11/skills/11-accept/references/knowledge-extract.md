@@ -1,5 +1,8 @@
 # 知识沉淀协议（Knowledge Extract）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 5 Accept Step 2 必走。V10 prd-integration-workflow.md + spec-knowledge-extract.py 蒸馏。
 
 ---

@@ -51,6 +51,7 @@
 | [fullstack4TraeV9](fullstack4TraeV9/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v8 — 10 Agent 流水线 + 驾驶舱 + 圆桌 + 漂移回流 + 依赖自检 | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager |
 | [fullstack4TraeV9](fullstack4TraeV9/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v9 — OpenSpec 驱动 + 7 阶段流水线 + Contract-First + TDD + 漂移检测（⚠ V10 已替代） | **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager |
 | [fullstack4TraeV10](fullstack4TraeV10/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v10 — 复用 Trae 内置 Plan/Spec + 5 阶段 + 四维验收 + 铁律分层（V10.12.2 含：§0.5.1 同类约定 10 项 + §0.10 启动验证可见产物 + skeptical-validation-protocol 质疑性校验 + reviewer §Step 2.4/2.5/2.6 Test Plan Gate + 产品侧验收 + 自动循环 + reason-classifier.py 抽象理由检测 + test-plan.md + test-plan-example.md）| **硬依赖**: acceptance-discipline；**软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager, visual-evidence-discipline, screenshot, frontend-backend-contract-alignment, playwright-best-practices, browser-use-cloud |
+| [fullstack4TraeV11](fullstack4TraeV11/SKILL.md) | Agent驱动 | 全栈文档驱动开发 v11 — 13 stage + Flow 层 Registry(五表) + 3 层控制(Gate/Guard/Execution) + V11.6.0 AC 核销门禁(取代评分) + V11.7.0 贾维斯门禁守护(防 agent 改标准,协议+白名单+hash锁)+ Stage 4 Review → ac-gate.py + L-module/app/system 分层模型 + 17 反例(3 贾维斯)| **硬依赖**: acceptance-discipline; **软引用**: ponytail4Trae, gitnexus4Trae, doc-map-manager; **内化**: visual-evidence-discipline, frontend-backend-contract-alignment, ui-ux-pro-max |
 | [game-production-kit](game-production-kit/SKILL.md) | 纯Skill | 游戏制作工具箱 — 7 阶段编排器（引擎确认→剧情→素材→脚本→门禁→构建→部署），引擎可替换架构。内含 7 子技能 | 子技能: game-story-design, game-asset-pipeline, game-quality-gate, voice-character-design, voice-acting-skill, webgal-scripting, webgal-engine-build |
 
 ### L3 配置模板（绑定 L0~L2）
@@ -116,6 +117,12 @@
 | **Skill 专属守卫 wrapper**（NEW 2026-08-14 §3 拆分方案 A）| `scripts/<name>-guard.py` × 47 | guard-router 调用 | Python wrapper + importlib | 每个 skill 自带一个 guard wrapper,通过 importlib 加载共享的 structure/security 守卫并合并结果。模板由 `scripts/forge-skill-guard.py` 生成,杜绝 47 份风格漂移 |
 | **Forge 模板生成器**（NEW 2026-08-14 §3 拆分方案 A）| `scripts/forge-skill-guard.py` | 手动 / guard-smith agent | Python | 接收 skill 名列表 → 生成对应的 scripts/<name>-guard.py。支持 `--all` 批量 / `--dry-run` 预览 |
 | **守卫共享工具**（NEW 2026-08-14 §3 拆分方案 A）| `scripts/_guard_lib.py` | wrapper 内部使用 | Python | 提供 `cli_main(check_fn, label)` 统一入口:JSON 输出 + exit 0/1 + 自动去重 warnings |
+| **AC 核销门禁**（V11.6.0+ NEW）| `skill-markets/fullstack4TraeV11/scripts/ac-gate.py` | V11 Stage 4 Review + 任何用 V11 的项目 | Python | 6 列矩阵 G1-G5 校验(G1 矩阵段存在 / G2 ≥1 行有效 / G3 逐行核销 / G4 spec 全覆盖 / G5 TC 防编造),任一 FAIL = BLOCK,取代 4 维评分制 |
+| **贾维斯 gate installer**（V11.7.0+ NEW）| `skill-markets/fullstack4TraeV11/scripts/gate-installer.py` | V11 目标项目初始化 / 分层新增 | Python | 读 V11 `registry/gates.yaml` 按 layer(docs/module/app/system)生成 `gates/gate-config.json` + `.husky/pre-{commit,push}`(已注入 hash 锁 prelude),仅贾维斯 sub-agent 可调 |
+| **贾维斯 hash 锁**（V11.7.0+ NEW）| `skill-markets/fullstack4TraeV11/scripts/gate-integrity-guard.py` | V11 hooks 前置 + 贾维斯 `gate-installer` 时机② | Python | `--generate` 签 sha256 锁 / `--verify` 校验(V11.7.0 P0 漏洞堵:BLOCK 状态下默认拒绝重签,需 `--force --reason "[JARVIS-DELEGATION] 编号"`)|
+| **V11 文档入口同步工具**（V11.7.0+ NEW）| `skill-markets/fullstack4TraeV11/scripts/v11-doc-sync.py` | V11 升级时 + CI `v11-doc-check.yml` | Python | `--sync` 批量给文档加 V11.x 入口标记(L1 完整 8 行 / L4 极简 1 行) / `--check` 校验全 V11 文档含标记 / `--mark` 自定义入口文本 |
+| **V11 PR 文档入口标记 CI**（V11.8.0+ NEW）| `.github/workflows/v11-doc-check.yml` | V11 改动 PR 自动跑 | yml | paths filter `skill-markets/fullstack4TraeV11/**` → `python v11-doc-sync.py --check` → missing=0 PASS / missing>0 BLOCK |
+| **V11 PR 安全扫描 CI**（V11.8.0+ NEW）| `.github/workflows/v11-security-check.yml` | V11 改动 PR 自动跑 | yml | paths filter `skill-markets/fullstack4TraeV11/**` → `python trae-security-review scan_skills_dir.py` → PASS fail = exit 0 / BLOCKED/WARNING = 评论 + exit 1 |
 
 ---
 

@@ -1,5 +1,8 @@
 # Async Health Check — Stage 7 Project Health
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 7 Project Health 必走。异步健康度自检协议。
 
 ---

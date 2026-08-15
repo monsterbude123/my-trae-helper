@@ -1,6 +1,11 @@
 ---
 name: skill-bundle
 version: 1.0.0
+requires:
+  - acceptance-discipline
+  - agent-dev-control-kit
+  - skill-acceptance
+  - trae-professional
 description: 子 skills 装载规范 — 规定 TRAE 父包(含 skills/<sub>/SKILL.md)的目录结构、命名空间、一键装/卸/更新闸门。触发词:子 skills、bundle、批量装载、bundle install、子包结构。
 intent: 子 skills 装载规范(目录结构 / 命名空间 / 三道闸)
 category: standard

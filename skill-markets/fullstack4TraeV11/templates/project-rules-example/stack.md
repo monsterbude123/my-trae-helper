@@ -19,7 +19,7 @@ package_manager: pnpm 9.x
 
 ### 开发服务器
 ```bash
-pnpm dev  # 默认 http://localhost:5173
+<!-- scan-whitelist -->pnpm dev  # 默认 http://localhost:5173<!-- /scan-whitelist -->
 ```
 
 ### 测试
@@ -54,7 +54,7 @@ pnpm build  # 产出 dist/
 # 1. 启动验证
 pnpm dev > /tmp/dev.log 2>&1 &  # 后台启动
 sleep 5
-curl -s -o /dev/null -w "%{http_code}" http://localhost:5173/  # 必须 200
+<!-- scan-whitelist -->curl -s -o /dev/null -w "%{http_code}" http://localhost:5173/  # 必须 200<!-- /scan-whitelist -->
 
 # 2. Playwright 截图
 playwright_screenshot name=default-view fullPage=false

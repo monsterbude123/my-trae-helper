@@ -1,5 +1,8 @@
 # 反例 3：删归档目录（Stage 5 Accept）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 5 Accept 后归档目录不可删除。来源：V11 Article VIII + V10 反例 §3。
 
 ## 现象

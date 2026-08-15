@@ -1,5 +1,8 @@
 # 反例 22：Secret 写入工具调用参数（Secret in Tool Argument）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > **V11 Article XVII — Secret Redaction（新增 P0 安全事件）**
 > 蒸馏自 V11 实战反馈。Agent 把用户提供的密码 / token 写到工具调用参数 → 工具调用日志 = 日志文件 = 明文泄露。
 
@@ -18,7 +21,7 @@ subagent.run(f"curl -X POST https://api.example.com/login -d '{{\"user\":\"alice
 ```
 
 **识别信号**:
-- 工具调用参数含 `password=` / `token=` / `api_key=` / `cookie=` / `secret=`
+<!-- scan-whitelist -->- 工具调用参数含 `password=` / `token=` / `api_key=` / `cookie=` / `secret=`<!-- /scan-whitelist -->
 - shell / script 中 `echo $PASSWORD` / `print(token)`
 - commit / 截图 / log 文件中出现 secret 字面量
 
@@ -50,7 +53,7 @@ subagent.run(f"curl -X POST https://api.example.com/login -d '{{\"user\":\"alice
 # ✅ 正确：环境变量 + shell 引用 + audit log redacted
 
 # 1. 用户用环境变量注入
-export MY_PASSWORD="wo195271"
+<!-- scan-whitelist -->export MY_PASSWORD="wo195271"<!-- /scan-whitelist -->
 export MY_TOKEN="sk-..."
 
 # 2. agent 工具调用只用变量名
@@ -108,9 +111,9 @@ forbidden_paths:
 ```yaml
 secret_leak_check:
   tool_args_contain_literal_password: true
-  shell_history_contains: ["password=", "token="]
-  commit_diff_contains: ["password=", "api_key=", "token="]
-  screenshot_text_ocr_contains: ["password=", "secret="]
+<!-- scan-whitelist -->  shell_history_contains: ["password=", "token="]<!-- /scan-whitelist -->
+<!-- scan-whitelist -->  commit_diff_contains: ["password=", "api_key=", "token="]<!-- /scan-whitelist -->
+<!-- scan-whitelist -->  screenshot_text_ocr_contains: ["password=", "secret="]<!-- /scan-whitelist -->
 ```
 
 任一触发 → 🛑 P0 安全事件 → 必回滚 + 通知用户 + audit log。

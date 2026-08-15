@@ -7,7 +7,7 @@ Unit tests for skill-registration-guard.mjs (Guard Layer, 2026-08-14 §3 新增)
   - BLOCK : 真反例（缺注册 / 缺 guards / 幻影 skill / maintainer 不当）→ 期望 exit 1
   - 边界 : 极小化注册表 + 真 skill → 验证 schema 校验正确性
 
-运行: python tests/unit/test_registration_guard.py
+运行: python tests/unit/run_registration_guard.py
 """
 
 import os
@@ -327,10 +327,13 @@ finally:
 
 
 # ─── 汇总 ───────────────────────────────────────────────
-print(f"\n{'='*50}")
-print(f"结果: ✅ {passed} 通过  ❌ {failed} 失败")
-print(f"{'='*50}")
+# V11.8.0 P0 修复(2026-08-15):pytest collect 时触发 sys.exit 导致全 INTERNALERROR
+# 改成 __main__ 包裹:脚本式独立运行时仍按 0/1 退出,pytest 导入时不触发
+if __name__ == "__main__":
+    print(f"\n{'='*50}")
+    print(f"结果: ✅ {passed} 通过  ❌ {failed} 失败")
+    print(f"{'='*50}")
 
-if failed > 0:
-    sys.exit(1)
-sys.exit(0)
+    if failed > 0:
+        sys.exit(1)
+    sys.exit(0)

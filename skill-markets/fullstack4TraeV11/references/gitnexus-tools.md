@@ -1,5 +1,8 @@
 # GitNexus MCP 工具集（V11 核心）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > V11 **核心技能**（Article V GitNexus First — 不可降级）。
 > 4 个 MCP 工具 + 双端 hook（SessionStart + Stop）+ Stage 2/3/6/7 必走。
 

@@ -157,3 +157,44 @@ traps:
       - 统一命名格式
       - 跑 validate-gate-config.py 校验
     see_also: ["scaffolds/nodejs/files/gates/gate-config.json", "registry/gates.yaml"]
+
+  # ─────────────────────────────────────────────────────────────────
+  # V11.7.0 贾维斯体系反例（防 agent 改标准通过自己）
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-JARVIS-BYPASS-LOCK
+    title: 跳过贾维斯委派直接改 gate-config.json
+    severity: HIGH
+    what_is_wrong: "未走 [JARVIS-DELEGATION] 委派,直接 Edit gates/gate-config.json(白名单路径),意图放宽 gate"
+    detect_signal: "agent 改了 gate-config.json/.husky/* 但没产出 [JARVIS-DELEGATION] 头部 + lock 未重签"
+    next_skill_action: "拒绝改动,要求委派贾维斯;若已发生篡改,跑 gate-integrity-guard.py --verify 必 BLOCK"
+    reclaim_steps:
+      - 主 agent 拒绝接收后续 gate 相关请求
+      - 跑 gate-integrity-guard.py --verify,确认已被篡改 → 记录全局 self-improving-agent ERROR
+      - 恢复文件 → gate-integrity-guard.py --generate(干净状态下生成新 lock)
+      - 真要改 → 走 [JARVIS-DELEGATION] 头部委派贾维斯
+    see_also: ["skills/00-boot/agents/jarvis.md §3 白名单", "scripts/gate-integrity-guard.py"]
+
+  - id: V11-JARVIS-FORCE-WITHOUT-AUDIT
+    title: 强制 --generate 未附 --reason 审计
+    severity: HIGH
+    what_is_wrong: "verify BLOCK 状态下跑 gate-integrity-guard.py --generate 试图固化为新基线(漏洞),或在篡改态加 --force 但不附 --reason"
+    detect_signal: "lock.yaml 含 '# forced: true' 但 reason 字段为空/占位"
+    next_skill_action: "拒绝接收 lock,要求附 [JARVIS-DELEGATION] 委派编号(可追溯到会话审计)"
+    reclaim_steps:
+      - 不接受该 lock,要求重签附 reason='[JARVIS-DELEGATION] 委派编号 + 阈值变更描述'
+      - 若 reason 是 'test' / '临时' / '调试' 等占位 → 打回重写
+      - 强制重签理由必须含用户原话或合规变更证据
+    see_also: ["scripts/gate-integrity-guard.py --force --reason", "skills/00-boot/agents/jarvis.md §5"]
+
+  - id: V11-JARVIS-OVERRIDE-LAYER
+    title: 改 L-module 检查项跨层挂到 L-system
+    severity: MEDIUM
+    what_is_wrong: "把模块 CRUD 单测(L-module)塞进 L3 merge gate(L-system),使小改动也跑全量 E2E,要么浪费时间要么让重跑变难"
+    detect_signal: "gate-config.json 中 L3.checks 含 lint/typecheck/test:unit 等 L-module 项"
+    next_skill_action: "贾维斯按分层模型拒绝,要求各检查项回到正确层"
+    reclaim_steps:
+      - 把 L-module 检查项移回 L1(L-module)
+      - L2(L-app)放模块集成 + 契约对齐
+      - L3(L-system)放 E2E + AC 核销 + 腐化扫描
+      - 重签 lock
+    see_also: ["skills/00-boot/agents/jarvis.md §2 分层模型", "registry/gates.yaml layer 字段"]

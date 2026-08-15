@@ -30,6 +30,7 @@
     "test:bundle:diff": "node -e \"process.exit(0)\"  # placeholder; 真实调用见 pre-commit Step 4.5",
     "test:approver:status": "node scripts/change-guard-approver.mjs status",
     "lint": "node scripts/lint.mjs && python -m pytest tests/unit/test_agent_dev_control_kit_wrapper.py -q",
+    "typecheck": "node --check bin/cli.mjs && node --check src/add.mjs && node --check src/list.mjs && node --check src/remove.mjs && node --check src/update.mjs && node --check src/init.mjs && node --check src/create.mjs && node --check src/verify.mjs && node --check src/scanner.mjs && node --check src/installer.mjs && node --check src/agents.mjs && node --check src/utils.mjs && node --check src/execution/skill-change-control.mjs && node --check src/execution/skill-install-control.mjs && node --check src/guards/skill-dependency-guard.mjs",
     "build": "node scripts/validate-config.mjs"
   },
   "dependencies": {

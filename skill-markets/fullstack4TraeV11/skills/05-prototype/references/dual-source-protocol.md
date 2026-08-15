@@ -1,5 +1,8 @@
 # 双源兼容协议（Dual-Source Protocol）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 1.5 Prototype 核心协议。设计稿 + 代码原型双源必须一致。
 
 ## 协议

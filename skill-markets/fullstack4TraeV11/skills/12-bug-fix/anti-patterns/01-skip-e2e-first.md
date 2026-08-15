@@ -1,5 +1,8 @@
 # 反例 1：跳过 e2e 先行直接修（Stage 6 Bug Fix）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 6 Bug Fix Step 2 必走：**e2e 先行 → 初始 FAIL → 证明 bug 真实存在 → 才修**。
 > 来源：V10 references/debugger-methodology.md §Step 2 + agents/debugger.md 铁律 2。
 

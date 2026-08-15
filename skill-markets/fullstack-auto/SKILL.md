@@ -1,3 +1,9 @@
+---
+name: fullstack-auto
+description: 自动驾驶项目配置 — 一站式部署 fullstack + coding-xinfa + goal-mode + GitNexus + ponytail 的完整项目级配置模板。从 shuxia-project 实战验证中通用化提取,不是另一个技能包,而是项目初始化时可复制的 .trae/ 配置。
+version: 1.0.0
+---
+
 # fullstack-auto — 自动驾驶项目配置
 
 > 一站式部署 fullstack + coding-xinfa + goal-mode + GitNexus + ponytail 的完整项目级配置模板。

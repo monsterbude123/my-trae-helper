@@ -1,5 +1,8 @@
 # Stage -1 Intake — 总览
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 第一性原则：**意图不明不路由，未勘察项目惯例不初始化**。
 >
 > **本文件 ≤ 80 行**，按 H2 章节拆分到 `README-detail/` 子文件。所有内容保真保留，仅按章节切分。

@@ -1,0 +1,57 @@
+feat(v11): V11.7.0+ 贾维斯门禁守护 + AC 核销门禁 + 4 个 V11 内部脚本 + CI 双 gate
+
+本次升级覆盖 V11.7.0+ 设计入口的落地实现,核心新增 5 项能力:
+
+1. 贾维斯门禁守护 (skills/00-boot/ + agents/jarvis.md)
+   - 防 agent 改标准通过自己的最终兜底机制
+   - hash 锁 (gate-integrity-guard.py) + installer (gate-installer.py) 双链路
+
+2. AC 核销门禁 (Stage 4 Review, 取代评分制)
+   - scripts/ac-gate.py 逐 AC 核销,任一 FAIL = BLOCK
+   - G1-G5 五道防线(矩阵存在/有效行/TC 结果/spec 对齐/test-plan 对齐)
+
+3. V11 文档入口标记同步 (scripts/v11-doc-sync.py)
+   - 自动给 V11 全量文档追加 "V11.7.0+ 设计入口" 标记
+   - --check 用于 CI 校验,白名单 (templates/00-boot/CHANGELOG) 跳过
+
+4. CI 双 gate (.github/workflows/v11-doc-check.yml + v11-security-check.yml)
+   - V11 Doc Check: PR 修改 V11 文档时强制跑 v11-doc-sync.py --check
+   - V11 Security Check: PR 修改 V11 代码时跑 trae-security-review,失败阻断
+
+5. registry 同步
+   - registry/skills.yaml 新增 2 个 L3 gate 路由(v11-doc-check / v11-security-check)
+   - skill-markets/fullstack4TraeV11/registry/guards.yaml 新增 ac-gate 条目
+   - skill-markets/fullstack4TraeV11/registry/gates.yaml 修复 YAML 解析错误
+
+6. 新增 skill 占位 (待 SKILL.md 补全)
+   - gitnexus4Trae (已有 README,缺 SKILL.md)
+   - ponytail4Trae (已有 README,缺 SKILL.md)
+   - product-teardown (已有 README,缺 SKILL.md)
+
+7. 注册表总数 43 → 46,新增 3 条目已注册到 registry/skills.yaml
+
+主 agent 兜底验证 (§1.12 Step 6):
+- node src/guards/skill-registration-guard.mjs → PASS 46/46
+- node scripts/guard-router.mjs --all → 45 PASS / 1 FAIL (minimax-multimodal 历史硬编码 Key,与本次无关)
+- node scripts/guard-router.mjs fullstack4TraeV11 → PASS 4/4
+- node tests/unit/test_guard_router.mjs → PASS 4/4
+- python tests/unit/run_registration_guard.py → PASS 9/9
+- node scripts/lint.mjs → PASS 29/29
+
+guard-smith 委派产物:
+- 4 个白名单路径 (v11-doc-check.yml / v11-security-check.yml / skill-market-gate.yml / scripts/skill-structure-guard.py) 全部合规
+- registry/skills.yaml 同步补全 fullstack4TraeV11 条目的 2 个 L3 gate 路由
+- CAPABILITY-MAP.md / SECURITY-MAP.md / CHANGELOG.md 同步更新
+
+关联文件:
+- skill-markets/fullstack4TraeV11/CHANGELOG.md (V11.7.0+ 版本说明)
+- skill-markets/fullstack4TraeV11/README.md (贾维斯守护说明)
+- skill-markets/fullstack4TraeV11/references/gate-configuration-protocol.md (gate 配置协议)
+
+CRLF 处理:
+- ~30 个 SKILL.md 出现 CRLF→LF 警告,按用户决策保持原样 commit,不主动规范化
+- 后续如需批量规范化,跑 .gitattributes 强制 LF 策略单独提交
+
+后续待办 (本次不做):
+- minimax-multimodal tests/test_minimax.py 硬编码 API Key 8 处(历史遗留)
+- gitnexus4Trae / ponytail4Trae / product-teardown 3 个新 skill 的 SKILL.md 补全

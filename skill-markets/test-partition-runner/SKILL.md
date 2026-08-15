@@ -1,5 +1,7 @@
 ---
 name: test-partition-runner
+version: 1.0.0
+version: 1.0.0
 status: deprecated
 redirect_to: acceptance-discipline
 description: [DEPRECATED → acceptance-discipline] 测试阻塞解决策略 - 分区测试+坏测试识别。当全局测试挂起/失败或用户报告测试阻塞问题时调用。支持逐步分区定位坏测试，而非盲目重试整个套件。

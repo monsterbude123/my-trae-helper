@@ -77,3 +77,10 @@ guards:
     category: quality
     config_schema: null
     default_threshold: null
+
+  - id: ac-gate
+    name: AC 核销门禁（V11.6.0 取代评分制，逐 AC 核销无权重）
+    script: ac-gate.py
+    category: quality
+    config_schema: null
+    default_threshold: null

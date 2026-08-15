@@ -95,7 +95,7 @@ my-trae-helper/
 2. 按场景关键词自动加载相关 skill：
    ├─ 测试/验收 → acceptance-discipline + test-experience
    ├─ 安全扫描 → trae-security-review
-   ├─ 新建/验收技能 → skill-acceptance §7
+   ├─ **新建/升级 skill → [`.agents/skills/project-rule-skill/references/skill-creation-workflow.md`](.agents/skills/project-rule-skill/references/skill-creation-workflow.md) 必读(V11.8.0.1 路径迁移到 project-rule-skill 网关,协议先行 + 多维度一致)** + skill-acceptance §7
    ├─ Gate/CI 配置 → skill-acceptance §7 + agent-dev-control-kit §11
    └─ 重构/升级 → fullstack-skill-architect
 3. 只 Read needed_rules + 加载的 skill 列出的文件
@@ -262,12 +262,15 @@ python skill-markets/trae-security-review/scripts/scan_skills_dir.py skill-marke
 ## §7 能力地图（新建/修改前必读）
 
 | 文件 | 何时读 |
-|------|------|
+|------|--------|
 | `skill-markets/CAPABILITY-MAP.md` | 加新技能 / 新脚本前 |
 | `SECURITY-MAP.md` | 加新 skill / 引入第三方 / 改脚本后 |
 | `README.md` | 改 CLI 行为 / 加新 agent 支持 |
 | `package.json` | 改依赖 / 版本号 |
 | `.trae/rules/*.md` | 加新规则 / 改 §1 铁律 / 路由经验沉淀前 |
+| **`.agents/skills/project-rule-skill/references/skill-creation-workflow.md`** (V11.8.0.1 路径迁移) | **任何 skill 创建 / 升级 / 合并 / 废弃操作前必读**(协议先行 + 多维度一致) |
+| **`.agents/skills/project-rule-skill/references/protocol-coverage-protocol.md`** (V11.8.0.1 路径迁移) | **任何协议规范 (`*-protocol.md`) 创建后必跑 `python scripts/_check_protocol_coverage.py --protocol <path> --check`**;CI gate L3/L4 已自动检 |
+| **`tests/catalogs/catalog-protocol.md`** (2026-08-15 NEW) | **任何 SKILL 创建/修改必跑 `python tests/catalogs/_check_skill_catalog.py`**(V1 report-only);CI gate L3/L4 §5.8 自动检 |
 
 完整索引见 [skill-markets/CAPABILITY-MAP.md](skill-markets/CAPABILITY-MAP.md)。
 

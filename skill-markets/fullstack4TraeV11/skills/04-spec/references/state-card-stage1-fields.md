@@ -1,5 +1,8 @@
 # Stage 1 Spec 状态卡字段约束(V11.2 NEW — 蒸馏自 04-spec 自检报告)
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 04-spec 完成时,change 级状态卡 (`docs/specs/changes/{id}/.state-card.md`) 必含以下字段,缺一即腐烂点 16 状态卡陈旧。
 >
 > 完整协议见 [state-card-protocol.md §二](../../../references/state-card-protocol.md) + [references/state-card-protocol.md §三 必更新场景](../../../references/state-card-protocol.md)。

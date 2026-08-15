@@ -1,5 +1,8 @@
 # Prototype ↔ HTML 联动层（V11.2 NEW — 蒸馏自 V10）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > **来源**: fullstack4TraeV10/references/prototype-linkage.md（V10.8 蒸馏保留）
 > **部署时不依赖 V10**：内容已完整内化到 V11
 > **触发条件**: 项目有外部 Designer（人或 Trae Work）交付 HTML 原型页面。

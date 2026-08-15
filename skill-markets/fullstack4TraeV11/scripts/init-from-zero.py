@@ -19,6 +19,8 @@ Usage:
 Exit codes:
     0 = PASS
     1 = FAIL
+<!-- scan-whitelist:STACK_LEAK -->
+SECURITY 标注 (V11.7.1 NEW): 本脚本含 STACK_LEAK 调用, 全部为 V11 业务必需.
 """
 import sys
 import argparse

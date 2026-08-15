@@ -1,5 +1,11 @@
 # V11 Flow 层 Registry（声明式门禁注册表）
 
+> **V11.7.0+ 设计入口**:
+> - **AC 核销门禁(Stage 4 Review)** → [skills/09-review/SKILL.md](../skills/09-review/SKILL.md) + [acceptance-baseline-extract.md](../skills/09-review/workflows/acceptance-baseline-extract.md)
+> - **贾维斯门禁守护(防 agent 改标准)** → [skills/00-boot/SKILL.md](../skills/00-boot/SKILL.md) + [agents/jarvis.md](../skills/00-boot/agents/jarvis.md) + [gate-configuration-protocol.md](../references/gate-configuration-protocol.md)
+> - **新增脚本**: `scripts/ac-gate.py` (AC 核销 G1-G5) / `scripts/gate-installer.py` (贾维斯 installer) / `scripts/gate-integrity-guard.py` (hash 锁 --verify/--generate/--force)
+> - **变更**: 评分制废除 → 门禁制;4 维详情转附加检查;`gates.yaml` v1.2.0 加 layer 分层字段(docs/module/app/system)
+
 > **定位**：V11 的 **flow 层**（纯程序化解析）。人类/agent 不硬读本目录，由脚本程序化消费。
 > **对比**：fact 层（SKILL.md / README / references/*.md）供人类+agent 阅读；本目录供脚本解析。
 > **设计对齐**：agent-dev-control-kit 的 `registry/` 模式（gates.yaml / guards.yaml 声明式 + config_schema 校验）。

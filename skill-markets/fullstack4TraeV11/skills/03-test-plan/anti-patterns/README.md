@@ -1,5 +1,8 @@
 # Anti-patterns — Stage 0.5 Test Plan 反例库
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 4 条核心反例 + 1 份 V10 实战蒸馏(2 条战役反例) + 主上下文自检清单。
 
 ## 反例索引

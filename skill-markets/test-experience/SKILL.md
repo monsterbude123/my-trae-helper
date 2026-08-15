@@ -1,5 +1,7 @@
 ---
 name: test-experience
+version: 1.0.0
+version: 1.0.0
 status: deprecated
 redirect_to: acceptance-discipline
 description: [DEPRECATED → acceptance-discipline] 测试开发与质量经验库 — 编写/修改测试代码时加载，覆盖 mock 策略、fixture 设计、异步陷阱、超时控制、bad-test 反模式、E2E 最小门禁、跳过 TDD 的真实代价。适用 Python + pytest + asyncio + Playwright E2E 技术栈。

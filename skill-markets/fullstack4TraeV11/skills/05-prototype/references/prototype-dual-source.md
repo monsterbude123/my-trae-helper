@@ -1,5 +1,8 @@
 # Prototype 双产物机制（V11.2 NEW — 蒸馏自 V10）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > **来源**: fullstack4TraeV10/references/prototype.md（V10.9 蒸馏保留，V11.2 NEW 强化）
 > **部署时不依赖 V10**：内容已完整内化到 V11
 > **关联**: [prototype-linkage.md](prototype-linkage.md)（HANDOFF 联动）+ ⚠️ V10 来源溯源,部署前可删:[designer-handoff.md](../../../../fullstack4TraeV10/references/designer-handoff.md)（外部 Designer 协议）

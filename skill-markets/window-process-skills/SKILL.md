@@ -1,5 +1,7 @@
 ---
 name: window-process-skills
+version: 1.0.0
+version: 1.0.0
 description: Windows process and port management toolkit (kill by port/PID/name, query, free port). Invoke when user needs to manage Windows processes, free occupied ports, or perform related Windows system operations.
 intent: Windows process and port management toolkit (kill by port...
 category: other

@@ -1,5 +1,7 @@
 ---
 name: docsify-doc-builder
+version: 1.0.0
+version: 1.0.0
 description: 为任何项目搭建虚幻引擎 5 风格的 docsify 文档系统。集成顶栏 + 多级分类 + 面包屑 + 右侧页内目录 + Mermaid 全屏 + Markmap 思维导图（默认全部展开）。当用户要求建立文档、搭建文档系统、初始化文档站点、配置 docsify、UE 风格文档站时自动加载。
 intent: 为任何项目搭建虚幻引擎 5 风格的 docsify 文档系统
 category: other

@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://my-trae-helper/schemas/skill-catalog.schema.json",
+  "title": "Skill Catalog",
+  "description": "V11.8.0 NEW — 声明式 catalog,定义 SKILL 包必填元数据 + V2 渐进式推荐字段",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "协议版本"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["skill-metadata", "workflow", "protocol-coverage", "catalog-diff"]
+    },
+    "required_metadata": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["name", "description", "version", "requires"]
+      }
+    },
+    "recommended_metadata": {
+      "description": "V2 NEW — 渐进式推荐字段(声明时 WARN,不阻断)",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["name", "description", "version", "requires"]
+      }
+    },
+    "optional_metadata": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["protocols", "workflows"]
+      }
+    },
+    "structural_rules": {
+      "type": "object",
+      "properties": {
+        "max_skill_md_lines": { "type": "integer", "minimum": 100, "maximum": 1000 },
+        "min_yaml_frontmatter_fields": { "type": "integer", "minimum": 1, "maximum": 10 }
+      }
+    },
+    "anti_patterns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^AP-[0-9]+$" },
+          "description": { "type": "string", "minLength": 1 },
+          "detect": { "type": "string" }
+        },
+        "required": ["id", "description"]
+      }
+    }
+  },
+  "required": ["version", "scope", "required_metadata"]
+}

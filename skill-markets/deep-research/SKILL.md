@@ -1,5 +1,7 @@
 ---
 name: deep-research
+version: 1.0.0
+version: 1.0.0
 description: Multi-source deep research with firecrawl/exa MCPs. Searches the web, synthesizes findings, delivers cited reports. Use when the user wants thorough research with evidence and citations.
 intent: Multi-source deep research with firecrawl/exa MCPs
 category: other

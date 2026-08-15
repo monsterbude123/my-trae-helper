@@ -7,6 +7,8 @@
 用法:
     python scripts/script-threshold-audit.py --project-root . [--check-git-diff --base-ref main] [--json]
     python scripts/script-threshold-audit.py --project-root . --scripts visual-content-check.py
+<!-- scan-whitelist:SHELL_EXEC -->
+SECURITY 标注 (V11.7.1 NEW): 本脚本含 SHELL_EXEC 调用, 全部为 V11 业务必需.
 """
 import argparse
 import json

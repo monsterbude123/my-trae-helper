@@ -1,5 +1,8 @@
 # 反例 4：漂移静默
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 **违反**: V10 铁律 3 漂移必报告
 
 **现象**: 实现与契约不一致 → implementer 静默修改契约文档。

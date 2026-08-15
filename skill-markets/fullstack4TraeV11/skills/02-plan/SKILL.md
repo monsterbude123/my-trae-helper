@@ -11,10 +11,17 @@ depends_on:
     - ../../references/stage-interaction-protocol.md
     - ../../references/common-iron-rules.md
     - ../../references/common-anti-patterns.md
+    - ../../references/gate-configuration-protocol.md   # V11.7.0 NEW 贾维斯 SOP
   scripts:
     - ../../scripts/stage-gate.py
     - ../../scripts/spec-purge.py
+    - ../../scripts/gate-integrity-guard.py   # V11.7.0 NEW hash 锁校验
 ---
+
+> **V11.7.0+ 设计入口**:
+> - **AC 核销门禁(Stage 4 Review)** → [skills/09-review/SKILL.md](../09-review/SKILL.md) + [acceptance-baseline-extract.md](../09-review/workflows/acceptance-baseline-extract.md)
+> - **贾维斯门禁守护(防 agent 改标准)** → [skills/00-boot/SKILL.md](../00-boot/SKILL.md) + [agents/jarvis.md](../00-boot/agents/jarvis.md) + [gate-configuration-protocol.md](../../references/gate-configuration-protocol.md)
+> - **变更**: 评分制废除 → 门禁制;4 维详情转附加检查;`registry/gates.yaml` v1.2.0 加 layer 分层字段
 
 # Stage 0 Plan — 探索 + 规划
 

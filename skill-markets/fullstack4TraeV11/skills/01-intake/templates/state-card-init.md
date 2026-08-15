@@ -1,5 +1,8 @@
 # 状态卡初始化模板 — 总览
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage -1 Intake 初始化状态卡的标准模板。3 类（project / change / bug）共用一份骨架，按需替换字段。
 >
 > **本文件为索引**，按章节拆分到 `state-card-init-detail/` 子文件。所有内容保真保留。

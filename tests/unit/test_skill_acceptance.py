@@ -243,5 +243,7 @@ test("不存在技能 → BLOCK", dependency_nonexistent_blocks)
 
 
 # ─── 总结 ──────────────────────────────────────────────────
-print(f"\n━━━ 通过: {passed} / 失败: {failed} ━━━")
-sys.exit(1 if failed > 0 else 0)
+# V11.8.0 P0 修复(2026-08-15):pytest collect 时触发 sys.exit 导致 INTERNALERROR
+if __name__ == "__main__":
+    print(f"\n━━━ 通过: {passed} / 失败: {failed} ━━━")
+    sys.exit(1 if failed > 0 else 0)

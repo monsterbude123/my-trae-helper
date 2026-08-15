@@ -1,5 +1,7 @@
 ---
 name: browser-use-cloud
+version: 1.0.0
+version: 1.0.0
 description: Browser Use 浏览器自动化技能——开源版（browser-use[core]）优先，Cloud API（browser-use-sdk）辅助。覆盖本地 Agent 运行、LLM 配置（ChatBrowserUse/local llm/OpenAI/Anthropic）、Chrome Profile 认证、CLI 交互、结构化提取、多步工作流、MCP 集成、Webhook 异步。当用户提到 browser-use、浏览器自动化、网页抓取、网页数据提取、网站自动操作、网页表单填写、browser agent 时主动加载。配置从项目根目录 .env.browseruse 读取。
 status: observing
 intent: Browser Use 浏览器自动化技能——开源版（browser-use[core]）优先，Cloud API（...

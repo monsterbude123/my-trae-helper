@@ -1,5 +1,8 @@
 # 反例 2：跨层过度修复（Stage 6 Bug Fix）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 6 Bug Fix 跨层修复最小化。来源：V10 debugger-methodology.md §跨层修复 + agents/debugger.md 铁律 6。
 
 ## 现象

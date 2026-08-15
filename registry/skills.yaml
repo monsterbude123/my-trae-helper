@@ -29,7 +29,7 @@
 version: 1.0.0
 description: My Trae Helper 技能注册表 — 每个 skill 必带同名 guard + gate 路由
 updated: 2026-08-14
-total_skills: 43
+total_skills: 46
 
 skills:
 
@@ -323,8 +323,14 @@ skills:
       - { id: fullstack4TraeV11-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack4TraeV11-structure, fullstack4TraeV11-flow] }
       - { id: fullstack4TraeV11-pre-push, level: L2, hooks: [.husky/fullstack4TraeV11-pre-push, .husky/pre-push], runs_guards: [fullstack4TraeV11-flow, fullstack4TraeV11-gate-config] }
       - { id: fullstack4TraeV11-l3, level: L3, hooks: [.github/workflows/skill-market-gate.yml], runs_guards: [fullstack4TraeV11-structure, fullstack4TraeV11-flow, fullstack4TraeV11-gate-config] }
+      - { id: fullstack4TraeV11-l3-doc-check, level: L3, hooks: [.github/workflows/v11-doc-check.yml], runs_guards: [fullstack4TraeV11-structure] }
+      - { id: fullstack4TraeV11-l3-security-check, level: L3, hooks: [.github/workflows/v11-security-check.yml], runs_guards: [fullstack4TraeV11-structure] }
       - { id: fullstack4TraeV11-l4, level: L4, hooks: [.husky/fullstack4TraeV11-l4, .github/workflows/skill-market-gate.yml], runs_guards: [fullstack4TraeV11-flow, fullstack4TraeV11-trap] }
     maintainer: guard-smith
+    notes: |
+      V11.7.0+ 升级:V11.7.0 贾维斯门禁守护(jarvis sub-agent + 三层防线 + hash 锁) + V11.6.0 AC 核销门禁(ac-gate.py 取代评分制)。
+      V11.8.0+:新增 L3 专用 PR 触发 gate — v11-doc-check.yml(文档入口标记校验,扫 v11-doc-sync.py --check)
+      + v11-security-check.yml(改动 V11 时跑 trae-security-review 扫描,PASS/WARNING/BLOCKED 报告评论)。
 
   - skill: game-production-kit
     status: active

@@ -1,5 +1,8 @@
 # 反例 2：跳过状态卡初始化
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage -1 Intake 必须初始化状态卡（project / change / bug 之一）。跳过 = 任务真相源缺失。
 
 ---

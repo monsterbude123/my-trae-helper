@@ -1,5 +1,8 @@
 # 反例 2：测试不可追溯（Test Not Traceable）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 测试与 Capability 必须双向追溯。缺映射 = Stage 4 Review 失败定位 + 实施阶段变更追踪不可逆。
 
 **违反**：铁律 4（测试用例可追溯）

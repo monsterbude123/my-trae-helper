@@ -34,6 +34,26 @@ from typing import Dict, List
 # vibe-coding-standards v2.5 软上限（仅作为 info 提示，不阻断）
 SOFT_LINE_LIMIT = 350  # SKILL.md 超过此行 → 提示考虑提取 references/，但不阻断
 
+# V11.8.0 标注:非 SKILL 包目录白名单(2026-08-15)
+# 这些目录是项目级配置模板(命名带 4Trae 后缀,见各自 README.md),
+# 不是真的 SKILL 包,守卫全量跑时跳过,避免误报
+EXCLUDED_NON_SKILL_DIRS = {
+    "gitnexus4Trae",       # GitNexus 项目级配置模板
+    "ponytail4Trae",       # ponytail 项目级配置模板
+    "product-teardown",    # product-teardown 项目级配置模板
+}
+
+# V11.8.0 标注:历史命名兼容包(2026-08-15)
+# 这些 skill 目录名带 V11/V10/V9 大写 V,不严格符合 kebab-case 但有历史原因
+# (注册表 registry/skills.yaml + AGENTS.md 大量引用,改名校验成本极高)
+# 降级为 info 提示,不阻断
+LEGACY_NAMING_DIRS = {
+    "fullstack4TraeV9",
+    "fullstack4TraeV10",
+    "fullstack4TraeV11",
+    "shuxia-novel-engine",   # V11.8.1 留待:agents 用 snake_case 文件名,需迁移到 kebab-case
+}
+
 
 def check_structure(skill_path: str) -> Dict:
     """
@@ -57,9 +77,18 @@ def check_structure(skill_path: str) -> Dict:
         return {'passed': False, 'errors': errors, 'warnings': warnings, 'info': info}
 
     dir_name = skill_dir.name
+
+    # V11.8.0 标注:非 SKILL 包白名单(项目级配置模板) → 跳过校验
+    if dir_name in EXCLUDED_NON_SKILL_DIRS:
+        info.append(f'非 SKILL 包,已跳过白名单(V11.8.0): {dir_name}')
+        return {'passed': True, 'errors': errors, 'warnings': warnings, 'info': info}
     # kebab-case + 容忍 tempfile 的 '_' 后缀(tempfile.mkdtemp 在 Windows 会生成 name_xxxxx)
     if not re.match(r'^[a-z][a-z0-9_-]*$', dir_name):
-        errors.append(f'目录名不合规: {dir_name}（应为 kebab-case，小写字母开头）')
+        # V11.8.0 标注:历史命名兼容包 → 降级为 info,不阻断
+        if dir_name in LEGACY_NAMING_DIRS:
+            info.append(f'目录名含大写 V: {dir_name}（V11.8.0 标注历史命名兼容,不阻断）')
+        else:
+            errors.append(f'目录名不合规: {dir_name}（应为 kebab-case，小写字母开头）')
     elif '_' in dir_name:
         # 含下划线 → 通常是 tempfile 临时目录,只记 info(不阻断),不污染 PASS 状态
         info.append(f'目录名 {dir_name!r} 含下划线 — 真 skill 目录建议纯 kebab-case')
@@ -137,12 +166,20 @@ def check_skill_md(skill_md: Path, errors: List[str], warnings: List[str], info:
 
 def check_agents_dir(agents_dir: Path, errors: List[str], warnings: List[str], info: List[str]):
     """检查 agents 目录"""
+    parent_skill = agents_dir.parent.name
     for agent_file in agents_dir.glob('*.md'):
         file_name = agent_file.stem
 
         # 命名规范：kebab-case（硬错误）
         if not re.match(r'^[a-z][a-z0-9-]*$', file_name):
-            errors.append(f'agents 文件名不合规: {agent_file.name}（应为 kebab-case）')
+            # V11.8.0 标注:历史命名兼容包 → 降级为 info
+            if parent_skill in LEGACY_NAMING_DIRS:
+                info.append(
+                    f'agents 文件名 {agent_file.name} 不是 kebab-case '
+                    f'(V11.8.0 标注 {parent_skill} 历史命名兼容,V11.8.1 留待迁移)'
+                )
+            else:
+                errors.append(f'agents 文件名不合规: {agent_file.name}（应为 kebab-case）')
 
         # `-agent` 后缀：仅 info（acceptance-discipline 全用 `-agent` 命名是合理实践）
         if file_name.endswith('-agent'):
@@ -197,9 +234,31 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2:
         print("用法: python scripts/skill-structure-guard.py skill-markets/<skill_name>")
+        print("  或: python scripts/skill-structure-guard.py skill-markets  (全量批量)")
         sys.exit(1)
 
     skill_path = sys.argv[1]
+    skill_dir = Path(skill_path)
+
+    # V11.8.0 标注:批量模式 — 给定 skill-markets 根目录,遍历所有子目录
+    if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists() is False and not skill_path.endswith(".md"):
+        # 不是具体 skill 而是根目录 → 全量扫
+        all_results = []
+        for sub_dir in sorted(skill_dir.iterdir()):
+            if not sub_dir.is_dir():
+                continue
+            r = check_structure(str(sub_dir))
+            all_results.append({"skill": sub_dir.name, **r})
+        # 输出汇总
+        passed_count = sum(1 for r in all_results if r["passed"])
+        failed_skills = [r["skill"] for r in all_results if not r["passed"]]
+        print(f"\n[STRUCTURE-GUARD] 批量扫 {len(all_results)} 个目录:")
+        print(f"  ✅ 通过: {passed_count}")
+        print(f"  ❌ 失败: {len(failed_skills)} → {failed_skills}")
+        if failed_skills:
+            sys.exit(1)
+        sys.exit(0)
+
     result = check_structure(skill_path)
 
     print(json.dumps(result, indent=2, ensure_ascii=False))

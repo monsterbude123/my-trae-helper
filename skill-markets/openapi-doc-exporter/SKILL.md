@@ -1,5 +1,7 @@
 ---
 name: openapi-doc-exporter
+version: 1.0.0
+version: 1.0.0
 description: "通用 OpenAPI 文档导出工具。当用户提到\"导出 API 文档\"\"生成接口 spec\"\"openapi 转 markdown\"\"API 协议文档\"\"前后端接口契约\"\"FastAPI openapi\"\"Swagger 转 markdown\"等场景时主动使用。框架无关，只消费 openapi.json，支持一体导出和按路由前缀分模块导出两种模式。适合任何能产出 OpenAPI 3.0/3.1 规范的 Web 框架（FastAPI/Flask/Express/Spring/NestJS 等）。"
 intent: 通用 OpenAPI 文档导出工具
 category: other

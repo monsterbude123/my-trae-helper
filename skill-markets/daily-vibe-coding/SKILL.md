@@ -1,6 +1,11 @@
 ---
 name: daily-vibe-coding
 version: 1.0.0
+requires:
+  - guard-approver
+  - trae-professional
+  - trae-security-review
+  - vibe-coding-standards
 description: 每日 09:00 定时 vibe coding 调研 + 自检任务(v1.1 三层改造: 审批 gate + 建议分级 + 不自动改仓库)。外部调研 + 仓库自检 + 升级指导三份产物 + 自我评估的"建议清单"(🟢/🟡/🔴 三色)。触发词:daily vibe coding、定时调研、自检、upgrade guidance。
 intent: 每日 vibe coding 定时调研 + 自检 + 建议清单(审批 gate)
 category: orchestration

@@ -14,6 +14,12 @@ on:
       - "src/**"
       - "package.json"
       - "package-lock.json"
+      - ".agents/rules/**"
+      - ".agents/skills/**"
+      - "AGENTS.md"
+      - "README.md"
+      - "CHANGELOG.md"
+      - "SECURITY-MAP.md"
       - ".github/workflows/skill-market-gate.yml"
       - ".github/workflows/agent-dev-control-kit-ci.yml"
   push:
@@ -24,6 +30,12 @@ on:
       - "src/**"
       - "package.json"
       - "package-lock.json"
+      - ".agents/rules/**"
+      - ".agents/skills/**"
+      - "AGENTS.md"
+      - "README.md"
+      - "CHANGELOG.md"
+      - "SECURITY-MAP.md"
       - ".github/workflows/skill-market-gate.yml"
       - ".github/workflows/agent-dev-control-kit-ci.yml"
   release:
@@ -123,6 +135,63 @@ jobs:
             exit 1
           }
 
+      # 5.7 protocol-coverage 检查(V11.8.0+ 协议先行 + 多维度一致,2026-08-15 NEW)
+      #     检测 protocols/<topic>-protocol.md 是否被 6 维度(SKILL/ref/workflow/script/guard/other-refs)全引用
+      #     任一维度缺失 → BLOCK
+      - name: Protocol coverage gate (protocol-first + multi-dim sync)
+        run: |
+          echo "5.7️⃣ Protocol coverage 检查(协议先行 + 多维度一致)..."
+          CHANGED_PROTOCOLS=$(git diff --name-only HEAD~1 HEAD | grep -E '(references|skills)/.*-protocol\.md$' || true)
+          CHANGED_RULES=$(git diff --name-only HEAD~1 HEAD | grep -E '^\.agents/rules/.*\.md$' || true)
+          CHANGED_TARGETS="$CHANGED_PROTOCOLS $CHANGED_RULES"
+          if [ -n "$CHANGED_TARGETS" ]; then
+            echo "   检测到的协议/规则变更:"
+            echo "$CHANGED_TARGETS" | sed 's/^/     - /'
+            for target in $CHANGED_TARGETS; do
+              if [ -f "$target" ]; then
+                # 包内协议 (.md 在 skill-markets/) → --scope package
+                # 项目级规则 (.agents/rules/) → --scope global
+                if echo "$target" | grep -qE '^\.agents/rules/'; then
+                  SCOPE="global"
+                else
+                  SCOPE="package"
+                fi
+                python scripts/_check_protocol_coverage.py \
+                  --protocol "$target" \
+                  --scope "$SCOPE" \
+                  --check || {
+                  echo "❌ Protocol coverage gate BLOCK: $target (scope=$SCOPE) 缺维度引用"
+                  echo "   处置: 参考 .agents/skills/project-rule-skill/references/skill-creation-workflow.md §2 多维度同步约束(V11.8.0.1 路径迁移)"
+                  exit 1
+                }
+              fi
+            done
+          else
+            echo "   无协议/规则变更,跳过"
+          fi
+
+      # 5.8 skill-catalog 检查(V11.8.0+ 协议先行 + 多维度一致,2026-08-15 NEW)
+      #     校验变更的 SKILL.md 满足 tests/catalogs/skill-catalog.yaml 必填字段
+      #     V1 report-only 模式 — 仅报告,不阻断;--strict 才 FAIL
+      - name: Skill catalog gate (metadata validation, V1 report-only)
+        run: |
+          echo "5.8️⃣ Skill catalog 元数据校验(report-only 模式)..."
+          CHANGED_SKILLS_MD=$(git diff --name-only HEAD~1 HEAD | grep -E 'skill-markets/.*/SKILL\.md$' || true)
+          if [ -n "$CHANGED_SKILLS_MD" ]; then
+            for skill_md in $CHANGED_SKILLS_MD; do
+              skill_dir=$(dirname "$skill_md")
+              skill_name=$(basename "$skill_dir")
+              echo "   检查: $skill_name"
+            done
+          fi
+          # 全量跑(report-only)
+          python tests/catalogs/_check_skill_catalog.py \
+            --catalog tests/catalogs/skill-catalog.yaml \
+            --skills-root skill-markets || {
+            echo "⚠ skill-catalog 报告发现错误,但 V1 report-only 不阻断"
+            echo "  → 处置见 tests/catalogs/catalog-protocol.md §3 + SKILL.md frontmatter 补全"
+          }
+
       - name: Build CLI
         run: npm run build || echo "No build script defined"
 
@@ -211,6 +280,44 @@ jobs:
               exit 1
             }
           fi
+
+      # 5.7 protocol-coverage 全量检查(L4 publish 前 — 全部包内协议 + 项目级规则跑一遍)
+      - name: Protocol coverage gate (L4 full scan)
+        run: |
+          echo "🛡 protocol-coverage 全量检查(L4 publish 前)..."
+          # 全部包内协议
+          PROTOCOLS=$(find skill-markets -type f -name '*-protocol.md' 2>/dev/null || true)
+          # 全部项目级规则
+          RULES=$(find .agents/rules -type f -name '*.md' 2>/dev/null || true)
+          ALL_TARGETS="$PROTOCOLS $RULES"
+          if [ -n "$ALL_TARGETS" ]; then
+            for target in $ALL_TARGETS; do
+              if [ -f "$target" ]; then
+                if echo "$target" | grep -qE '^\.agents/rules/'; then
+                  SCOPE="global"
+                else
+                  SCOPE="package"
+                fi
+                python scripts/_check_protocol_coverage.py \
+                  --protocol "$target" \
+                  --scope "$SCOPE" \
+                  --check || {
+                  echo "❌ L4 protocol coverage BLOCK: $target (scope=$SCOPE)"
+                  exit 1
+                }
+              fi
+            done
+          fi
+
+      # 5.8 skill-catalog L4 全量(L4 publish 前 — 全量 catalog 检查 + report-only)
+      - name: Skill catalog gate (L4 full scan)
+        run: |
+          echo "🛡 skill-catalog L4 全量(publish 前最后一次 metadata 校验)..."
+          python tests/catalogs/_check_skill_catalog.py \
+            --catalog tests/catalogs/skill-catalog.yaml \
+            --skills-root skill-markets || {
+            echo "⚠ L4 skill-catalog 报告发现错误,但 V1 report-only 不阻断"
+          }
 
       - name: Skill market integrity check
         run: |

@@ -1,5 +1,8 @@
 # 反例 1：跳过知识沉淀直接归档（Stage 5 Accept）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 5 Accept Step 必走：**先知识沉淀，再归档**。来源：V10 references/prd-integration-workflow.md + agents/spec-knowledge-extract.py。
 
 ## 现象

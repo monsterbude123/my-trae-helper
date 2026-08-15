@@ -1,5 +1,8 @@
 # 反例 1：跳过 RED 直接 GREEN
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 **违反**: V10 铁律 8 禁止虚假绿灯
 
 **现象**: implementer 直接写实现 → 测试通过 → 但实际是 GREEN-only。

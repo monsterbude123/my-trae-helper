@@ -1,6 +1,6 @@
 ---
 name: agent-dev-control-kit
-version: 1.1.0
+version: 1.2.0
 description: Agent 开发控制体系技能包 — 通过 Execution+Guard+Gate 三层控制实现标准化执行、自动检查与质量门禁
 requires:
 intent: Agent 开发控制体系技能包 — 通过 Execution+Guard+Gate 三层控制实现标准化执行、自动检...
@@ -8,6 +8,15 @@ category: guard
 audience: [agent]
 ---
 # Agent Development Control Kit
+
+> **V11.8.0 NEW 与 fullstack4TraeV11 互斥说明(V11.7 贾维斯 vs 本 kit L1-L4 Gate)**:
+> - **本 kit 的 Gate 层**:安装 `.husky/pre-commit` / `.husky/pre-push` 命令级钩子(L1-L4)
+> - **fullstack4TraeV11 贾维斯**:使用 hash 锁(文件级),不在 git hooks 层操作
+> - **互斥机制**:同时装两个 → 命令级钩子冲突,需手动取舍
+>   - 选项 A:用本 kit(传统命令级 lint/test/coverage 钩子)
+>   - 选项 B:用 V11 贾维斯(hash 锁防 agent 改标准,本仓库已装)
+>   - **本仓库默认选项 B**(已装 fullstack4TraeV11 + 贾维斯);装本 kit 时建议 `--check-only` 模式
+> - 详见 references/section-index.md + `skill-markets/fullstack4TraeV11/skills/00-boot/SKILL.md`(贾维斯注入点)
 
 > **核心理念**：通过**制度 + 工具**强制执行质量标准,不依赖人的自觉性。
 

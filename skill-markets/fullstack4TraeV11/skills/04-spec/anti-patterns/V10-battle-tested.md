@@ -1,5 +1,8 @@
 # 反例 V10-battle-tested — Stage 1 Spec 实战蒸馏(V11.2 NEW)
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > V10 实战蒸馏的 Stage 1 Spec 专项反例集。区别于现有 3 条"理论分类"反例(INV 凭空 / Clarify 跳过 / Spec 写实施),本文件聚焦"主流程走完但状态卡/产物仍漏字段"等系统性缺陷。
 >
 > **来源**:V10.10-V10.16 实战 casebook(已蒸馏到 V11 references)+ 03-test-plan / 04-spec 自检报告(2026-08-12 / 2026-08-15)实战案例。

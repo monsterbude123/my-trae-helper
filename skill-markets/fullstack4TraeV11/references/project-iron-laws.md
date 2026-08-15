@@ -1,5 +1,8 @@
 # Project Iron Laws — 项目级方法论（my-trae-helper）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 本文件收纳 my-trae-helper 项目**项目级独有**的方法论。
 > 与 V11 references/ 区别：V11 是通用全栈开发方法论；本文是 my-trae-helper 元项目的治理 + 反例 + 分支 + 路径权限。
 > 适用对象：主 Agent + 委派到本项目的子 Agent。
@@ -28,7 +31,7 @@
 ### R-2 路径拼接用 `Path.resolve` 误删源
 
 - **触发输入**：uninstall / clean / replace / move / remove 等破坏性操作
-- **错误操作**：`Path.resolve(root / name)` 后 `shutil.rmtree(dst)` 或 `rm -rf`
+<!-- scan-whitelist -->- **错误操作**：`Path.resolve(root / name)` 后 `shutil.rmtree(dst)` 或 `rm -rf`<!-- /scan-whitelist -->
 - **正确操作**：
   1. 用 `os.path.abspath(root / name)`（不解 symlink）或 `Path.resolve(strict=False)`
   2. 必走 `--dry-run` 预演，先打印目标路径
@@ -37,7 +40,7 @@
 - **关键词路由**：
   - "uninstall" / "dry-run" / "remove" / "rm" / "rmtree" → §1 铁律 + §A R-2
 - **验证**：rm 操作前必跑 dry-run；dry-run 必打印目标 + 校验"非源"
-- **适用语言**：Python（`shutil.rmtree` 跟随后会删源）/ Node（`rmSync` 已安全）/ Bash（`rm -rf`）
+<!-- scan-whitelist -->- **适用语言**：Python（`shutil.rmtree` 跟随后会删源）/ Node（`rmSync` 已安全）/ Bash（`rm -rf`）<!-- /scan-whitelist -->
 - **一句话铁律**：任何 rm 树操作前，先 dry-run + 校验目标不是 symlink 到源
 
 ### R-3 用户表态信号未结构化

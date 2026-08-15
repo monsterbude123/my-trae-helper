@@ -1,5 +1,8 @@
 # 原型-代码差距分析（Prototype-Code Gap）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 1.5 Prototype 双源校验时识别 GAP 的方法。
 
 ## GAP 类型

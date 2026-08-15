@@ -1,5 +1,8 @@
 # Stage 6 Bug Fix — 元信息
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 第一性原则：**根因不明不修复，e2e 先行证明 bug 真实存在**。
 
 ## 完整骨架（5 步）

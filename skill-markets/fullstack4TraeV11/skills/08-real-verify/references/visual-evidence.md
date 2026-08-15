@@ -1,5 +1,8 @@
 # 视觉证据 3 层校验（Visual Evidence 3-Layer）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > Stage 3.5 Real Verify + Stage 4 Review 必走。V10 视觉证据铁律 + 项目级 `.trae/rules/视觉证据铁律.md` 蒸馏。
 
 ---

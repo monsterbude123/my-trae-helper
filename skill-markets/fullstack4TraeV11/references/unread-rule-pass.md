@@ -1,5 +1,8 @@
 # 反例 21：未读 rule 就自评 PASS（Unread Rule PASS Pattern）
 
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+
+
 > 蒸馏自 V11 实战反馈。rule 太长没读完 + 反复踩同一雷 + 自评 PASS。
 
 **违反**：Article V（Verifiable Claims）+ Article XI（Self-Contained Constraints）
