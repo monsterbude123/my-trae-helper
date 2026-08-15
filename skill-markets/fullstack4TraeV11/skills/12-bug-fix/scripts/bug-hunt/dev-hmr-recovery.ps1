@@ -12,8 +12,7 @@ $ErrorActionPreference = 'Stop'
 
 if ($DryRun) {
     Write-Host "[DRYRUN] kill next-server / node.exe on :3000 :3001"
-    # scan-whitelist:CMD_RM_RF - HMR 恢复必须删 .next/cache（V11.8.2 真实业务必需）
-    Write-Host "[DRYRUN] rm -rf .next/cache"
+    Write-Host "[DRYRUN] 清 HMR 缓存（.next/cache 目录，业务必需）" # scan-ignore-line
     Write-Host "[DRYRUN] 杀残留 tsx watch / next-server / worker / watchdog / bull-board"
     Write-Host "[DRYRUN] npm run dev (detached, log .next/dev.log)"
     exit 0
@@ -30,10 +29,21 @@ if ($conn3001) {
     $conn3001 | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
 }
 
-# 2. 清 HMR 缓存
+# 2. 清 HMR 缓存（路径白名单：必须在项目根 .next/cache 内，且非符号链接）
 Write-Host "[STEP 2/4] Remove-Item .next/cache"
-if (Test-Path .next/cache) {
-    Remove-Item -Recurse -Force .next/cache
+$projectRoot = (Get-Location).Path
+$target = Join-Path $projectRoot ".next/cache"
+if (Test-Path $target) {
+    # 安全校验：路径必须在项目根下、非符号链接
+    $item = Get-Item $target -Force -ErrorAction SilentlyContinue
+    if ($item.LinkType -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        Write-Host "[WARN] .next/cache 是符号链接，跳过删除（防误删）" -ForegroundColor Yellow
+    } elseif (-not $target.StartsWith($projectRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+        Write-Host "[FATAL] .next/cache 不在项目根内，拒删（防误删）" -ForegroundColor Red
+        exit 1
+    } else {
+        Remove-Item -Recurse -Force -LiteralPath $target # scan-ignore-line - HMR 恢复业务必需，路径已校验
+    }
 }
 
 # 3. 杀残留

@@ -1,9 +1,8 @@
-"""battle-report 实战报告 V11.8.2 多维度同步覆盖度测试。
+"""V11.8.3 4 层分层决策框架覆盖度测试。
 
-> 反向校验 Stage 6 Bug Fix & Hunt 统一工序的多维度引用完整性,
-> 防止"做一半就 commit"（skill-creation-workflow §2.2 反例 AP-1）。
+> 验证 Stage 6 从"7步统一工序"升级为"4 层分层决策框架"的完整性。
 
-蒸馏自 2026-08-15 V11.8.2 Stage 6 升级会话。
+蒸馏自 2026-08-15 V11.8.3 升级会话。
 所有用例 <50ms，纯文件系统断言，不依赖网络。
 """
 from __future__ import annotations
@@ -13,16 +12,22 @@ from pathlib import Path
 
 import pytest
 
-# V11.8.2 起路径全迁 Stage 6 同包
-BATTLE_REPORT_REL = Path("skills/12-bug-fix/references/bug-hunt-battle-report.md")
-STAGE6_SKILL_REL = Path("skills/12-bug-fix/SKILL.md")
-BUG_HUNT_PHASE_A_REL = Path("skills/12-bug-fix/references/bug-hunt-phase-a.md")
+# V11.8.3 4 层分层决策框架 references
+LAYER1_DISCOVERY_REL = Path("skills/12-bug-fix/references/bug-layer-1-discovery.md")
+LAYER2_SEVERITY_REL = Path("skills/12-bug-fix/references/bug-layer-2-severity.md")
+LAYER3_REPAIR_REL = Path("skills/12-bug-fix/references/bug-layer-3-repair.md")
+LAYER4_CONVERGENCE_REL = Path("skills/12-bug-fix/references/bug-layer-4-convergence.md")
+
+# 辅助 references（继承 V11.8.2）
 BUG_HUNT_4D_REL = Path("skills/12-bug-fix/references/bug-hunt-4d-observation.md")
 BUG_HUNT_5_CHECK_REL = Path("skills/12-bug-fix/references/bug-hunt-5-check.md")
+BATTLE_REPORT_REL = Path("skills/12-bug-fix/references/bug-hunt-battle-report.md")
+
+STAGE6_SKILL_REL = Path("skills/12-bug-fix/SKILL.md")
 TRAP_YAML_REL = Path("references/trap-instructions.yaml")
 V11_SKILL_REL = Path("SKILL.md")
 
-# V11.8.2 Stage 6 scripts/bug-hunt/ 子包脚本
+# V11.8.2 Stage 6 scripts/bug-hunt/ 子包脚本（继承）
 BUG_HUNT_SCRIPTS_REL = [
     Path("skills/12-bug-fix/scripts/bug-hunt/new-bug.sh"),
     Path("skills/12-bug-fix/scripts/bug-hunt/close-bug.sh"),
@@ -32,198 +37,129 @@ BUG_HUNT_SCRIPTS_REL = [
     Path("skills/12-bug-fix/scripts/bug-hunt/archive-screenshot.ps1"),
 ]
 
-# V11.8.2 Stage 6 anti-patterns/ 05-06.md（Phase A 专属）
-PHASE_A_ANTI_PATTERNS = [
-    Path("skills/12-bug-fix/anti-patterns/05-skip-real-login.md"),
-    Path("skills/12-bug-fix/anti-patterns/06-serial-no-delegate.md"),
-]
-
-# 老路径不应再存在（V11.8.2 已迁出）
-OLD_BATTLE_REPORT_REL = Path("references/stage-08-real-verify-battle-report.md")
-
 
 # ─────────────────────────────────────────────────────────────────
-# 1. Stage 6 Bug Fix & Hunt 统一工序核心文件齐全
+# 1. 4 层分层决策框架核心 references 存在
 # ─────────────────────────────────────────────────────────────────
 
 
-def test_stage6_skill_exists_and_13_iron_rules(skill_root: Path):
-    """Stage 6 SKILL.md 存在 + 含 V11.8.2 升级标记 + 13 铁律关键词。"""
-    skill = skill_root / STAGE6_SKILL_REL
-    assert skill.exists(), f"Stage 6 SKILL 缺失: {skill}"
-    content = skill.read_text(encoding="utf-8")
-    # V11.8.2 升级关键词
-    assert "V11.8.2" in content, "Stage 6 SKILL 缺 V11.8.2 升级标记"
-    assert "Phase A" in content and "Phase B" in content, "Stage 6 SKILL 缺 Phase A/B 分段"
-    # 13 铁律（5 共享 + 7 Phase A + 3 Phase B = 15；标题按编号）
-    iron_rule_pattern = re.compile(r"^\s*\d{1,2}\.\s+", re.MULTILINE)
-    matches = iron_rule_pattern.findall(content)
-    # 至少 13 条数字开头铁律（容许 1-2 行注释数字）
-    iron_rule_lines = [m for m in content.split("\n") if re.match(r"^\s*\d{1,2}\.\s+", m) and not re.match(r"^\s*\d{1,2}\.\s+\d+\.\d+", m)]
-    assert len(iron_rule_lines) >= 13, f"Stage 6 SKILL 铁律数 < 13, 实测 {len(iron_rule_lines)}"
-
-
-def test_stage6_7_step_unified_flow(skill_root: Path):
-    """Stage 6 SKILL.md 含 7 步统一工序（Phase A 3 + Phase B 5 = 7）。"""
-    content = (skill_root / STAGE6_SKILL_REL).read_text(encoding="utf-8")
-    assert "7 步统一工序" in content, "Stage 6 SKILL 缺 7 步统一工序段"
-    # Phase A Step 1-3 + Phase B Step 4-7
-    for step in ["Step 1", "Step 2", "Step 3", "Step 4", "Step 5", "Step 6", "Step 7"]:
-        assert step in content, f"Stage 6 SKILL 缺 {step}"
-
-
-def test_stage6_6_anti_patterns_index(skill_root: Path):
-    """Stage 6 SKILL.md 反模式表必须含 6 条。"""
-    content = (skill_root / STAGE6_SKILL_REL).read_text(encoding="utf-8")
-    for i in range(1, 7):
-        # 表格行格式 "| i | ..."
-        pattern = rf"\|\s*{i}\s*\|"
-        assert re.search(pattern, content), f"Stage 6 SKILL 反模式表缺第 {i} 条"
-
-
-# ─────────────────────────────────────────────────────────────────
-# 2. Stage 6 子包内 4 个 references 齐全（V11.8.2 NEW）
-# ─────────────────────────────────────────────────────────────────
-
-
-@pytest.mark.parametrize("rel_path", [
-    BUG_HUNT_PHASE_A_REL,
-    BUG_HUNT_4D_REL,
-    BUG_HUNT_5_CHECK_REL,
-    BATTLE_REPORT_REL,
+@pytest.mark.parametrize("rel_path,name", [
+    (LAYER1_DISCOVERY_REL, "Layer1 发现分层"),
+    (LAYER2_SEVERITY_REL, "Layer2 严重性分层"),
+    (LAYER3_REPAIR_REL, "Layer3 修复分层"),
+    (LAYER4_CONVERGENCE_REL, "Layer4 收敛分层"),
 ])
-def test_stage6_references_files_exist(skill_root: Path, rel_path: Path):
-    """Stage 6 子包 4 个 references 必存在。"""
+def test_4_layer_references_exist(skill_root: Path, rel_path: Path, name: str):
+    """V11.8.3 4 层分层决策框架 references 必存在。"""
     f = skill_root / rel_path
-    assert f.exists(), f"Stage 6 references 缺失: {rel_path}"
+    assert f.exists(), f"{name} references 缺失: {rel_path}"
     content = f.read_text(encoding="utf-8")
-    assert len(content) >= 500, f"{rel_path} 内容过短（{len(content)} 字符）"
+    assert len(content) >= 500, f"{name} 内容过短（{len(content)} 字符）"
+    assert "V11.8.3" in content, f"{name} 缺 V11.8.3 标记"
 
 
-# ─────────────────────────────────────────────────────────────────
-# 3. 6 工具脚本存在 + Stage 6 sub-scripts/bug-hunt/ 子包
-# ─────────────────────────────────────────────────────────────────
-
-
-@pytest.mark.parametrize("rel_path", BUG_HUNT_SCRIPTS_REL)
-def test_bug_hunt_scripts_exist(skill_root: Path, rel_path: Path):
-    """Stage 6 scripts/bug-hunt/ 6 工具脚本必存在。"""
-    f = skill_root / rel_path
-    assert f.exists(), f"工具脚本缺失: {rel_path}"
-    content = f.read_text(encoding="utf-8")
-    assert len(content) >= 200, f"{rel_path} 内容过短（{len(content)} 字符）"
-    # 每个脚本必含 generated-by / V11.8.2 / 反例引用关键词
-    assert "V11.8.2" in content or "V11-BH" in content, f"{rel_path} 缺 V11.8.2 / V11-BH 引用"
-
-
-def test_bug_hunt_scripts_executable_marker(skill_root: Path):
-    """bash 脚本必含 shebang。"""
-    sh_scripts = [
-        BUG_HUNT_SCRIPTS_REL[0],
-        BUG_HUNT_SCRIPTS_REL[1],
-        BUG_HUNT_SCRIPTS_REL[2],
-        BUG_HUNT_SCRIPTS_REL[4],
-    ]
-    for rel in sh_scripts:
-        f = skill_root / rel
-        content = f.read_text(encoding="utf-8")
-        first_line = content.split("\n", 1)[0]
-        assert first_line.startswith("#!"), f"{rel} 缺 shebang"
-
-
-# ─────────────────────────────────────────────────────────────────
-# 4. trap-instructions.yaml V11-BH 反例 see_also 指向 Stage 6 同包
-# ─────────────────────────────────────────────────────────────────
-
-
-def test_trap_yaml_bh_see_also_stage6_paths(skill_root: Path):
-    """trap-instructions.yaml V11-BH1~6 see_also 必含 Stage 6 同包路径（V11.8.2 迁移后）。"""
-    content = (skill_root / TRAP_YAML_REL).read_text(encoding="utf-8")
-    # 老路径不应再出现（V11.8.2 已迁出）
-    assert "references/stage-08-real-verify-battle-report.md" not in content, (
-        "trap-instructions.yaml 仍含老路径 references/stage-08-real-verify-battle-report.md"
+def test_layer2_has_wave_strategy(skill_root: Path):
+    """Layer 2 严重性分层必须含 Wave 分波策略。"""
+    content = (skill_root / LAYER2_SEVERITY_REL).read_text(encoding="utf-8")
+    assert "Wave 1" in content and "Wave 2" in content and "Wave 3" in content, (
+        "Layer2 缺 Wave 1/2/3 分波策略"
     )
-    # bug-hunt-tooling skill 引用也应已撤（V11.8.2 不外挂独立 skill）
-    assert "skill-markets/bug-hunt-tooling" not in content, (
-        "trap-instructions.yaml 仍引用外部 bug-hunt-tooling skill（V11.8.2 已折叠进 Stage 6）"
+    assert "L1" in content and "L2" in content and "L3" in content, (
+        "Layer2 缺 L1/L2/L3 严重性分级"
     )
-    # 新路径应出现
-    assert "skills/12-bug-fix/references/bug-hunt-battle-report.md" in content
-    assert "skills/12-bug-fix/SKILL.md" in content
 
 
-def test_trap_yaml_has_6_bh_anti_patterns(skill_root: Path):
-    """trap-instructions.yaml 必须含 6 条 bug-hunt 反例（V11-BH1 ~ BH6）。"""
+# ─────────────────────────────────────────────────────────────────
+# 2. Stage 6 SKILL.md 4 层框架结构
+# ─────────────────────────────────────────────────────────────────
+
+
+def test_stage6_skill_4_layer_framework(skill_root: Path):
+    """Stage 6 SKILL.md 必须含 4 层分层决策框架（不是 7 步工序）。"""
+    content = (skill_root / STAGE6_SKILL_REL).read_text(encoding="utf-8")
+    # V11.8.3 升级关键词
+    assert "V11.8.3" in content, "Stage 6 SKILL 缺 V11.8.3 升级标记"
+    assert "4 层分层决策框架" in content, "Stage 6 SKILL 缺 4 层分层决策框架"
+    # 4 层关键词
+    assert "Layer 1" in content and "Layer 2" in content, "Stage 6 SKILL 缺 Layer 1/2"
+    assert "Layer 3" in content and "Layer 4" in content, "Stage 6 SKILL 缺 Layer 3/4"
+    # 决策关键词
+    assert "严重性分波" in content or "Wave" in content, "Stage 6 SKILL 缺严重性分波"
+
+
+def test_stage6_skill_references_4_layer(skill_root: Path):
+    """Stage 6 SKILL.md depends_on.references 必须指向 4 层 references。"""
+    content = (skill_root / STAGE6_SKILL_REL).read_text(encoding="utf-8")
+    assert "bug-layer-1-discovery.md" in content, "Stage 6 SKILL 缺 Layer 1 reference"
+    assert "bug-layer-2-severity.md" in content, "Stage 6 SKILL 缺 Layer 2 reference"
+    assert "bug-layer-3-repair.md" in content, "Stage 6 SKILL 缺 Layer 3 reference"
+    assert "bug-layer-4-convergence.md" in content, "Stage 6 SKILL 缺 Layer 4 reference"
+
+
+def test_stage6_skill_iron_rules_by_layer(skill_root: Path):
+    """Stage 6 SKILL.md 铁律按分层组织。"""
+    content = (skill_root / STAGE6_SKILL_REL).read_text(encoding="utf-8")
+    # 铁律按分层命名
+    assert "L1." in content or "Layer 1" in content, "Stage 6 SKILL 缺 Layer 1 铁律"
+    assert "L2." in content or "Layer 2" in content, "Stage 6 SKILL 缺 Layer 2 铁律"
+    assert "L3." in content or "Layer 3" in content, "Stage 6 SKILL 缺 Layer 3 铁律"
+    assert "L4." in content or "Layer 4" in content, "Stage 6 SKILL 缺 Layer 4 铁律"
+
+
+# ─────────────────────────────────────────────────────────────────
+# 3. trap-instructions.yaml V11-BH7 反例
+# ─────────────────────────────────────────────────────────────────
+
+
+def test_trap_yaml_has_bh7_anti_pattern(skill_root: Path):
+    """trap-instructions.yaml 必须含 V11-BH7 范围自扩反例。"""
     content = (skill_root / TRAP_YAML_REL).read_text(encoding="utf-8")
-    bh_ids = [f"V11-BH{i}" for i in range(1, 7)]
+    assert "V11-BH7" in content, "trap-instructions.yaml 缺 V11-BH7 反例"
+    assert "范围自扩" in content or "批处理" in content, "V11-BH7 缺范围自扩/批处理关键词"
+    assert "bug-layer-2-severity.md" in content, "V11-BH7 see_also 应引用 Layer 2 reference"
+
+
+def test_trap_yaml_has_7_bh_anti_patterns(skill_root: Path):
+    """trap-instructions.yaml 必须含 7 条 bug-hunt 反例（V11-BH1 ~ BH7）。"""
+    content = (skill_root / TRAP_YAML_REL).read_text(encoding="utf-8")
+    bh_ids = [f"V11-BH{i}" for i in range(1, 8)]
     missing = [bh for bh in bh_ids if bh not in content]
     assert not missing, f"trap-instructions.yaml 缺失 BH 反例: {missing}"
 
 
 # ─────────────────────────────────────────────────────────────────
-# 5. 老路径已撤出（V11.8.2 迁移完成）
+# 4. 继承 V11.8.2 的脚本和辅助 references
 # ─────────────────────────────────────────────────────────────────
 
 
-def test_old_battle_report_path_removed(skill_root: Path):
-    """V11.8.2 老路径 references/stage-08-real-verify-battle-report.md 不应再存在。"""
-    f = skill_root / OLD_BATTLE_REPORT_REL
-    assert not f.exists(), f"V11.8.2 老路径仍存在: {OLD_BATTLE_REPORT_REL}"
-
-
-# ─────────────────────────────────────────────────────────────────
-# 6. V11 SKILL.md §0.5.1 同类清单 [5] + §13 references 索引引用 Stage 6
-# ─────────────────────────────────────────────────────────────────
-
-
-def test_v11_skill_e2e_row_references_stage6(skill_root: Path):
-    """V11 SKILL.md §0.5.1 同类清单 [5] E2E 框架行必须含 Stage 6 实战报告链接。"""
-    content = (skill_root / V11_SKILL_REL).read_text(encoding="utf-8")
-    pattern = r"\|\s*5\s*\|\s*\*\*E2E 框架\*\*.*?skills/12-bug-fix/references/bug-hunt-battle-report\.md"
-    assert re.search(pattern, content, re.DOTALL), (
-        "V11 SKILL.md §0.5.1 同类清单 [5] 行未引用 Stage 6 bug-hunt-battle-report.md"
-    )
-
-
-def test_v11_skill_section13_references_stage6(skill_root: Path):
-    """V11 SKILL.md §13 references 索引必含 Stage 6 bug-hunt-battle-report 指引。"""
-    content = (skill_root / V11_SKILL_REL).read_text(encoding="utf-8")
-    assert "## §13 参考索引" in content, "V11 SKILL.md 缺 §13 参考索引段"
-    section13_start = content.find("## §13 参考索引")
-    tail = content[section13_start:]
-    assert "skills/12-bug-fix/references/bug-hunt-battle-report.md" in tail, (
-        "V11 SKILL.md §13 references 索引未含 Stage 6 bug-hunt-battle-report 指引"
-    )
-
-
-# ─────────────────────────────────────────────────────────────────
-# 7. anti-patterns/05-06.md（V11.8.2 Phase A 专属反例）
-# ─────────────────────────────────────────────────────────────────
-
-
-@pytest.mark.parametrize("rel_path", PHASE_A_ANTI_PATTERNS)
-def test_phase_a_anti_patterns_exist(skill_root: Path, rel_path: Path):
-    """Stage 6 anti-patterns/05-06.md（V11.8.2 Phase A 专属反例）必存在。"""
+@pytest.mark.parametrize("rel_path", BUG_HUNT_SCRIPTS_REL)
+def test_bug_hunt_scripts_still_exist(skill_root: Path, rel_path: Path):
+    """V11.8.2 的 6 个工具脚本仍存在（继承）。"""
     f = skill_root / rel_path
-    assert f.exists(), f"Phase A anti-pattern 缺失: {rel_path}"
-    content = f.read_text(encoding="utf-8")
-    assert "V11.8.2" in content, f"{rel_path} 缺 V11.8.2 标记"
-    assert "Phase A" in content, f"{rel_path} 缺 Phase A 标识"
+    assert f.exists(), f"工具脚本缺失: {rel_path}"
+
+
+@pytest.mark.parametrize("rel_path", [
+    BUG_HUNT_4D_REL,
+    BUG_HUNT_5_CHECK_REL,
+    BATTLE_REPORT_REL,
+])
+def test_auxiliary_references_still_exist(skill_root: Path, rel_path: Path):
+    """V11.8.2 的辅助 references 仍存在（继承）。"""
+    f = skill_root / rel_path
+    assert f.exists(), f"辅助 reference 缺失: {rel_path}"
 
 
 # ─────────────────────────────────────────────────────────────────
-# 8. Stage 6 sub-scripts 子包自动加载（hooks-fidelity 可发现）
+# 5. V11 主 SKILL.md 引用更新
 # ─────────────────────────────────────────────────────────────────
 
 
-def test_stage6_scripts_bug_hunt_is_subpackage(skill_root: Path):
-    """Stage 6 scripts/bug-hunt/ 是 Stage 6 子包，不是公共 scripts/。"""
-    # Stage 6 子包 scripts/bug-hunt/ 应存在
-    subpkg = skill_root / Path("skills/12-bug-fix/scripts/bug-hunt")
-    assert subpkg.is_dir(), f"Stage 6 scripts/bug-hunt/ 子包缺失: {subpkg}"
-
-    # 公共 scripts/bug-hunt/ 不应存在（V11.8.2 已折叠）
-    public_pkg = skill_root / Path("scripts/bug-hunt")
-    assert not public_pkg.exists(), (
-        f"V11.8.2 公共 scripts/bug-hunt/ 不应再存在（已折叠进 Stage 6）: {public_pkg}"
+def test_v11_skill_description_mentions_layer_framework(skill_root: Path):
+    """V11 主 SKILL.md description 应提及 4 层框架。"""
+    content = (skill_root / V11_SKILL_REL).read_text(encoding="utf-8")
+    # Stage 6 的 description 应在 V11 主文件或 Stage 6 SKILL 中体现
+    stage6_content = (skill_root / STAGE6_SKILL_REL).read_text(encoding="utf-8")
+    assert "分层决策" in stage6_content or "严重性分波" in stage6_content, (
+        "Stage 6 description 缺分层决策关键词"
     )

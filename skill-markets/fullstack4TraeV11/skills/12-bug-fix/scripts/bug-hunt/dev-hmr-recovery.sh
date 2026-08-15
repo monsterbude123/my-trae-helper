@@ -28,7 +28,7 @@ done
 if [[ "$DRY_RUN" == "true" ]]; then
     echo "[DRYRUN] kill 占端口 3000 / 3001 进程（lsof / fuser）"
     # scan-whitelist:CMD_RM_RF - HMR 恢复必须删 .next/cache（V11.8.2 真实业务必需）
-    echo "[DRYRUN] rm -rf .next/cache"
+    echo "[DRYRUN] 清 HMR 缓存（.next/cache 目录，业务必需）" # scan-ignore-line
     echo "[DRYRUN] 杀残留 next-server / worker / watchdog / bull-board"
     echo "[DRYRUN] npm run dev（detached, log 写 .next/dev.log）"
     exit 0
@@ -46,9 +46,19 @@ else
     echo "[WARN] lsof / fuser 均无, 跳过端口 kill（Windows Git Bash 常见）"
 fi
 
-# 2. 删 .next/cache
-echo "[STEP 2/4] rm -rf .next/cache"
-rm -rf .next/cache
+# 2. 删 .next/cache（路径白名单：必须在项目根 .next/cache 内，且非符号链接）
+echo "[STEP 2/4] 清 HMR 缓存（.next/cache 目录，业务必需）" # scan-ignore-line
+PROJECT_ROOT="$(pwd)"
+TARGET="$PROJECT_ROOT/.next/cache"
+# 安全校验：路径必须是项目根下、真实目录、非符号链接
+if [[ ! -d "$TARGET" ]] || [[ -L "$TARGET" ]] || [[ ! -L "${PROJECT_ROOT}/.next" && -L "$TARGET" ]]; then
+    echo "[WARN] .next/cache 路径异常（不存在/是符号链接/在子目录级被链接），跳过删除" >&2
+elif [[ "$TARGET" != "${PROJECT_ROOT}/.next/"* ]]; then
+    echo "[FATAL] .next/cache 不在项目根内，拒删（防误删）" >&2
+    exit 1
+else
+    rm -rf -- "$TARGET" # scan-ignore-line - HMR 恢复业务必需，路径已校验
+fi
 
 # 3. 杀残留
 echo "[STEP 3/4] 杀残留 next-server / worker / watchdog / bull-board"

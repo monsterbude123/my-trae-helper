@@ -4,6 +4,65 @@
 
 ---
 
+## [V11.8.4] - 2026-08-15
+
+### ✨ commit 准入最小集与全量验收分层（V11.8.4 NEW — 蒸馏自 2026-08-15 merged-commits）
+
+> **背景**：2026-08-15 uiux-redesign + api-timing 合并 commit 卡死，根因是 V11 §0.3 Stage 3.5 没明示"可异步、不阻塞 commit"，agent 把全量视觉验证塞入阻塞路径，反复"修一点跑一次"循环 5+ 仍不收敛。
+
+#### ✨ 新增
+
+- **SKILL.md §0.3 Stage 3.5/4.5 异步性声明** — 默认异步、不阻塞 Stage 5 commit
+  - commit 准入最小集：`tsc --noEmit` 0 错 + 关键 5 路由 spot-check + admin 探针 200 + lint 预存问题入 BUG
+  - 全量验收移到 commit 后异步
+  - 放行依据 cross-link §3.7.3 §8.4 工具-人类分层判定
+- **SKILL.md §1.6 视觉验证豁免** — 默认异步，不入流线化判定
+- **SKILL.md §3.7 #10 范围盲目扩大**（反向 #5 陷阱）— 为避免"假完成"反模式而把范围扩大到不可能完成
+- **references/common-anti-patterns.md §7**（新增 6 个子段）：
+  - §7.1 视觉证据"至少 1 张"（V11.5+ 原条款）
+  - §7.2 视觉证据"几张是过度"
+  - §7.3 commit 准入最小集 vs 全量验收（必读）
+  - §7.4 "修一点跑一次"循环反模式（必读）
+  - §7.5 fixture timeout ≠ 登录失败（必读）
+  - §7.6 自检清单
+
+#### 🔗 关联
+
+- 报告：`d:\workspace\ai-collaborate\ai-short-studio-monster\docs\reports\2026-08-15-merged-commits-retrospective.md`
+- V11.8.3 bug-hunt 4 层框架
+
+---
+
+## [V11.8.3] - 2026-08-15
+
+### ✨ Stage 6 重构为 4 层分层决策框架（V11.8.3 NEW）
+
+> Stage 6 从"7 步统一工序"升级为"4 层分层决策框架"，提供通用决策模型（适用于任何项目规模）。
+
+#### ✨ 新增
+
+- **skills/12-bug-fix/references/bug-layer-{1-4}-*.md** — 4 层分层决策框架 references
+  - Layer 1 发现分层：4D 观察 + 覆盖策略 + 委派决策
+  - Layer 2 严重性分层：L1/L2/L3 + Wave 分波 + 时间预算分配（核心）
+  - Layer 3 修复分层：6 层排查 + Ponytail 最小化 + e2e 先行
+  - Layer 4 收敛分层：预算驱动停止 + 产物落盘 + 遗留上报
+- **references/trap-instructions.yaml V11-BH7** — 范围自扩反例（批处理 vs 波次分修）
+- **tests/unit/test_battle_report_coverage.py** — 重写为 4 层框架覆盖度测试（20 cases）
+- **scripts/bug-hunt/dev-hmr-recovery.{sh,ps1}** — 加路径白名单 + scan-ignore-line（V11.8.3 安全修复）
+- **docs/v10-to-v11-upgrade-guide.md** — 加 scan-whitelist 块级标记（V11.8.3 安全修复）
+
+#### 🔧 修改
+
+- **skills/12-bug-fix/SKILL.md** — 从 7 步工序重构为 4 层分层决策框架
+
+---
+
+## [V11.8.2] - 2026-08-15
+
+### ✨ Stage 6 Bug Fix & Hunt 统一工序（V11.8.2）
+
+---
+
 ## [V11.8.1] - 2026-08-15
 
 ### ✨ 新增（V11.8.1 bug-hunt / E2E 跨阶段实战报告）

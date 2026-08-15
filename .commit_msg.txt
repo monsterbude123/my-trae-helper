@@ -1,50 +1,47 @@
-feat(guard): 新增技能文档同步门禁(doc-sync-guard)
+V11.8.4 — commit 准入最小集与全量验收分层（蒸馏自 2026-08-15 merged-commits）
 
-每次 commit 检查:若改了某个 skill 的"实质性内容",要保证项目侧
-6 项说明文档 + skill 一级"给人类看的说明性文档"同步更新,
-否则硬阻断(exit 1)。
+背景：
+2026-08-15 uiux-redesign + api-timing 合并 commit 卡死，
+根因是 V11 §0.3 Stage 3.5 没明示"可异步、不阻塞 commit"，
+agent 把全量视觉验证塞入阻塞路径，反复"修一点跑一次"循环 5+ 仍不收敛。
 
-实质性变更判定:
-  - diff 排除空行 / Markdown & 代码注释 / 纯格式(标点/缩进)
-  - 剩余语义行数 > 7 → 触发
-  - SKILL.md frontmatter 关键字段(name/description/version/requires)
-    值变更 → 强制触发(无论行数)
+改动：
 
-同步检查范围:
-  - 项目侧 6 项: README.md / AGENTS.md / CHANGELOG.md /
-    skill-markets/CAPABILITY-MAP.md / SECURITY-MAP.md /
-    registry/skills.yaml(staged 出现即视为已同步)
-  - skill 一级人类入口文档: README.md / AGENTS.md / CHANGELOG.md /
-    INDEX.md / GUIDE.md(存在则要求同步,缺失则跳过,反向不强制新建)
+1. V11 主 SKILL.md §0.3 Stage 3.5/4.5 行：
+   - 补充"默认异步、不阻塞 Stage 5 commit"声明
+   - 定义 commit 准入最小集（tsc 0 错 + 5 路由 spot-check + admin 探针 200）
+   - 全量验收（60+ 路由视觉证据 / 完整 vitest / rot-scan）移到 commit 后异步
+   - 放行依据交叉引用 §3.7.3 §8.4 工具-人类分层判定
 
-变更清单(8 文件):
-  A. scripts/doc-sync-guard.py              (新建,609 行,含 --self-test 6 反例)
-  A. tests/unit/test_doc_sync_guard.py     (新建,9 个断言式单测)
-  M. .husky/pre-commit                     (Step 7 挂载)
-  M. registry/skills.yaml                  (新增 doc-sync meta 条目)
-  M. src/guards/skill-registration-guard.mjs (META_GUARD_SKILLS 白名单)
-  M. SECURITY-MAP.md                       (doc-sync-guard 评分行)
-  M. skill-markets/CAPABILITY-MAP.md       (共享能力注册表追加)
-  M. skill-markets/fullstack4TraeV10/references/process-rot-analysis.md
-                                          (前置依赖,sub-agent 文档修复)
+2. V11 主 SKILL.md §1.6：
+   - 视觉验证豁免：默认异步，不入流线化判定
+   - 即使 60+ 路由也允许主代理亲自跑（按 wave 拆分异步）
 
-验证(主 agent Step 6 兜底):
-  ✓ src/guards/skill-registration-guard.mjs: PASS (47 条目 / 46 skill)
-  ✓ scripts/doc-sync-guard.py --self-test: 6/6 PASS
-  ✓ tests/unit/test_doc_sync_guard.py: 9/9 PASS
-  ✓ tests/unit/test_guard_router.mjs: 4/4 PASS
-  ✓ 真实仓库负向测试: coding-xinfa 追加 8 行实质 → exit 1 BLOCK ✅
-  ✓ 真实仓库正向测试: 本次提交 process-rot-analysis.md 单行空白微调
-    → 不触发(非实质性) → exit 0 PASS ✅
+3. V11 主 SKILL.md §3.7 #10（新增）：
+   - 范围盲目扩大（反向 #5 陷阱）
+   - 为避免"假完成"反模式而把范围扩大到不可能完成
 
-反模式自查:
-  ✓ 仅 stdlib + subprocess(无 HTTP / 无 eval / 无 os.system)
-  ✓ 不硬编码任何 key / token / 个人路径
-  ✓ 守卫脚本在 scripts/(项目侧),未污染 skill-markets/<pkg>/scripts/
-  ✓ Windows cp1252 兜底(stream.reconfigure)
-  ✓ "存在则要求同步,缺失则跳过" — 不强制反向新建缺失文档
-  ✓ 注释判定用纯字符串方法避开正则 + PowerShell 转义陷阱
+4. V11 references/common-anti-patterns.md §7（新增 5 个子段）：
+   - §7.1 视觉证据"至少 1 张"（V11.5+ 原条款）
+   - §7.2 视觉证据"几张是过度"（NEW）
+   - §7.3 commit 准入最小集 vs 全量验收（NEW — 必读）
+   - §7.4 "修一点跑一次"循环反模式（NEW — 必读）
+   - §7.5 fixture timeout ≠ 登录失败（NEW — 必读）
+   - §7.6 自检清单
 
-留待(可选,后续 L3 PR gate):
-  - 把 doc-sync-guard.py 加到 .github/workflows/skill-market-gate.yml
-    (本任务 §四 "不碰 lint/pre-push/CI 之外 gate",未动)
+5. trap-instructions.yaml（继承 V11.8.3）已含 V11-BH7 范围自扩反例
+   cross-link 已加
+
+验证：
+- pytest 69 passed (skill-markets/fullstack4TraeV11/tests/unit/)
+- node src/guards/skill-registration-guard.mjs PASS
+- 安全扫描 HIGH = 0（继承 V11.8.3 修复）
+
+未做（明确越权）：
+- ❌ 项目侧 fixture SignInPage.waitForURL 改写（ai-short-studio-monster 仓库）
+- ❌ 项目级 rules anti-patterns §7（项目级仓库）
+- ❌ 修整个 lint 80 problems（项目预存债务）
+
+关联：
+- 报告：d:\workspace\ai-collaborate\ai-short-studio-monster\docs\reports\2026-08-15-merged-commits-retrospective.md
+- V11.8.3 bug-hunt 4 层框架（已 commit 52ab395）

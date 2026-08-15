@@ -5,6 +5,20 @@
 
 ## [Unreleased]
 
+### fullstack4TraeV11 升级(2026-08-15)
+
+- **V11.8.4** — commit 准入最小集与全量验收分层
+  - SKILL.md §0.3 Stage 3.5/4.5 异步化声明(cross-link §3.7.3 §8.4 工具-人类分层判定)
+  - SKILL.md §1.6 视觉验证豁免(默认异步,不入流线化判定)
+  - SKILL.md §3.7 #10 反虚假交付反向陷阱(范围盲目扩大)
+  - references/common-anti-patterns.md §7 新增 6 个子段(7.1-7.6)
+- **V11.8.3** — Stage 6 重构为 4 层分层决策框架
+  - skills/12-bug-fix/references/bug-layer-{1-4}-*.md
+  - trap-instructions.yaml V11-BH7 范围自扩反例
+  - tests/unit/test_battle_report_coverage.py 重写(20 cases)
+  - scripts/bug-hunt/dev-hmr-recovery.{sh,ps1} 安全修复(路径白名单 + scan-ignore-line)
+- **V11.8.2** — Stage 6 Bug Fix & Hunt 统一工序(7 步 + 13 铁律 + 6 反例 + 6 工具脚本)
+
 ### guard/gate 路由(V11.7.0+ 升级,guard-smith 委派完成)
 
 **本节记录 guard-smith 委派(2026-08-15)对白名单路径的增量改动**:

@@ -409,3 +409,40 @@ traps:
       - "skills/12-bug-fix/references/bug-hunt-battle-report.md §8 反例 6"
       - "skills/12-bug-fix/references/bug-hunt-5-check.md §C"
       - "V11 SKILL.md §3.7 反虚假交付禁止项 #7"
+
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-BH7
+    title: 范围自扩（批处理 vs 波次分修）
+    severity: MEDIUM
+    what_is_wrong: |
+      Bug 处理采用"批处理"模式：先发现所有 bug → 再串行修完所有 bug → 最后回归。
+      导致 L1 阻断未优先处理，时间预算耗尽在 L3 细节上，核心阻断仍未修。
+      V11.8.2 设计继承了批处理模式，失去波次敏捷性。
+    detect_signal: |
+      Bug-hunt 时间线：发现 N 个 bug → 修完 N 个 → 回归验证
+      缺少 Layer 2 严重性分波（Wave 1/2/3）决策
+      L1 bug 和 L3 bug 在同一队列串行处理
+    fix_template_before: |
+      # ❌ 批处理模式（V11.8.2 设计）
+      Phase A: 发现 16 个 bug（L1: 2, L2: 8, L3: 6）
+      Phase B: 修 BUG-001 → BUG-002 → ... → BUG-016（按发现顺序）
+      回归: 修完 16 个后才跑
+    fix_template_after: |
+      # ✅ 波次分修模式（V11.8.3 Layer 2）
+      Layer 1 发现: 16 个 bug
+      Layer 2 分波:
+        Wave 1: 只修 L1（BUG-003, BUG-012）→ 回归 → L1 清零
+        Wave 2: 分批修 L2（每批 ≤ 3）→ 每批回归
+        Wave 3: 批量修 L3 → 回归
+      时间预算: 预算耗尽即停止，上报剩余
+    next_skill: fullstack-12-bug-fix
+    next_skill_action: "按 Layer 2 严重性分波决策，L1 阻断优先，每波回归"
+    reclaim_steps:
+      - 发现 bug 后先判定严重性（L1/L2/L3）
+      - L1 阻断立即单独修，修完回归，再继续
+      - L2 按模块分批修，每批回归
+      - 时间预算耗尽即停止，统计剩余上报
+      - 不在 L3 细节上浪费预算
+    see_also:
+      - "skills/12-bug-fix/references/bug-layer-2-severity.md §L2.2 波次分配"
+      - "skills/12-bug-fix/references/bug-layer-4-convergence.md §L4.1 停止条件"

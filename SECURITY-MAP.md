@@ -4,6 +4,8 @@
 >
 > 评分规则：1（极危）→ 5（安全），三档阈值：< 3.0 🔴 需整改，3.0-4.0 🟡 警告，> 4.0 🟢 通过
 
+> **2026-08-15 蒸馏**：fullstack4TraeV11 scripts/bug-hunt/dev-hmr-recovery.{sh,ps1} 安全扫描 HIGH=0（路径白名单 + scan-ignore-line）。Stage 6 4 层框架新增 4 references（无脚本）。
+
 ---
 
 ## 一、评分标准

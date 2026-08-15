@@ -327,6 +327,14 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 | -1 ~ 1.5 | `skills/01-intake` ~ `skills/05-prototype` | [gitnexus4Trae] / [ui-ux-pro-max]（按需） | 状态卡 → plan.md → test-plan.md → spec.md → prototypes/ |
 | 2 ~ 3 | `skills/06-contract` ~ `skills/07-implement` | [frontend-backend-contract-alignment] / [ponytail4Trae, gitnexus4Trae] | contracts/ 四件套 → 代码 + 测试 + 模块文档 |
 | 3.5 ~ 4.5 | `skills/08-real-verify` ~ `skills/10-rot-scan` | [visual-evidence-discipline, screenshot, playwright-best-practices] / [acceptance-discipline] / [goal-mode] | verify-report → review-report → rot-scan |
+
+> **💡 Stage 3.5 / 4.5 异步性声明（V11.8.4 NEW — 蒸馏自 2026-08-15 merged-commits）**:
+> - Stage 3.5（visual-evidence / real-verify）和 Stage 4.5（rot-scan）**默认异步、不阻塞 Stage 5 commit**
+> - **commit 准入最小集**: `tsc --noEmit` 0 错 + 关键 5 路由 spot-check + admin 探针 200 + lint 预存问题入 BUG
+> - 全量视觉证据（60+ 路由）/ 完整 rot-scan / 完整 vitest / build → **commit 后异步执行**
+> - **放行依据**：§3.7.3 §8.4 工具-人类分层判定（工具 FAIL 不阻塞 commit，仅作提示）
+> - **反例（V11.8.4 §3.7 #10）**：为避免"假完成"反模式而把范围扩大到不可能完成（60 路由全量截图塞 commit 阻塞路径），是反向陷阱，V11 反虚假交付 #5 的镜像
+> - 详见 [references/common-anti-patterns.md §7.3](references/common-anti-patterns.md)（commit 准入 ≠ 全量验收）
 | 5 ~ 7 | `skills/11-accept` ~ `skills/13-project-health` | [doc-map-manager] / [gitnexus4Trae] | archive/done → bug 单 CLOSED → project-health |
 
 ### 委派注入头部（coding-task 强制）
@@ -356,6 +364,11 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 - Phase 4.5 rot-detector 必跑
 
 跳过且不声明 = 🛑 流程违规。
+
+> **💡 §1.6 视觉验证豁免（V11.8.4 NEW — 蒸馏自 2026-08-15 merged-commits）**:
+> - **视觉验证类任务（Stage 3.5 visual-evidence / screenshot）默认异步，不入流线化判定**
+> - 即使视觉验证需要 60+ 路由，主代理仍可亲自跑（不强制委派），但**必须按 wave 拆分异步推进**
+> - 详见 [references/common-anti-patterns.md §7.3](references/common-anti-patterns.md)
 
 ---
 
@@ -492,6 +505,7 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 7. **盲信子代理"已完成"**: 不抽检 evidence / 不跑 pass_count 命令 / 不 Glob 产物（Article IX）
 8. **Visual = API PASS**: 用 vitest PASS 充作 UI 任务"完成"（V10.12 教训）
 9. **"启动 = 完成"软指标**: 启动进程即声称"完成"，无可见产物（V10 §0.10 启动验证）
+10. **范围盲目扩大（反向 #5 陷阱）**（V11.8.4 NEW — 蒸馏自 2026-08-15 merged-commits）: 为避免"假完成"反模式而把范围扩大到不可能完成（60 路由全量截图塞 commit 阻塞路径；5 个 spec 版本反复改仍不收敛）。这是反虚假交付 #5 的镜像陷阱。**commit 准入最小集 ≠ 全量验收**，详见 [references/common-anti-patterns.md §7.3](references/common-anti-patterns.md)
 
 #### V11.2.1 NEW — 蒸馏自 canvas-asset-folders Stage 4 Round 1/2 失败案例引用
 

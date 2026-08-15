@@ -6,6 +6,8 @@ Trae IDE 技能包开发工程 + 跨 Agent 技能市场 CLI。
 > - `skill-markets/` —— 43 个技能包
 > - `bin/` + `src/` —— `@my-trae-helper/cli`(已发布到 npm)
 
+> **2026-08-15 fullstack4TraeV11 升级**：V11.8.4 提交准入最小集与全量验收分层（Stage 3.5/4.5 异步化）+ V11.8.3 Stage 6 重构为 4 层分层决策框架。详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md](skill-markets/fullstack4TraeV11/CHANGELOG.md)。
+
 ## 📑 目录
 
 - 🗺️ [仓库全景(Mindmap)](#-仓库全景mindmap)

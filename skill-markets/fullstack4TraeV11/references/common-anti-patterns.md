@@ -89,8 +89,105 @@ anti_patterns_checklist:
 
 ---
 
+## §7 commit 准入与全量验收分层反模式（V11.8.4 NEW — 蒸馏自 2026-08-15 merged-commits）
+
+> **核心**: commit 准入最小集 ≠ 全量验收，二者必须解耦。这是 V11 §3.7 反虚假交付 #5 的镜像陷阱（反向 #10）。
+
+### §7.1 视觉证据"至少 1 张"原则（V11.5+ 原条款）
+
+```markdown
+MUST: 任何 change 推进 Stage 4 之前,必须有真实浏览器截图证明 UI 集成层可见。
+要求清单:
+- 至少 1 张真实浏览器截图
+- 截图必须包含本 change 实施的关键 UI 组件
+- 截图必须证明端到端可交互(点击 → API 调用 → 状态变化)
+- 截图必须由 Playwright MCP / Chrome DevTools MCP / 真实浏览器驱动
+- 截图必须落盘到 docs/verifications/web/<change-id>/
+```
+
+### §7.2 视觉证据"几张是过度"原则（V11.8.4 NEW）
+
+```markdown
+NEVER: 把"至少 1 张"过度推论为"必须全量"
+触发条件: 一个 change 涉及 >10 路由视觉验证
+错误代价: 测试 30+ min,失败改 5 个 spec 版本仍卡,阻塞 commit
+正确替代:
+  - 关键 5 路由 spot-check(L3 真实浏览器截图,证明 UI 集成可见)
+  - 60+ 路由视觉证据按 wave 拆模块 spec 异步跑(commit 后执行)
+  - 用 §7.1 "至少 1 张" 作为下限,而非全量
+```
+
+### §7.3 commit 准入最小集 vs 全量验收（V11.8.4 NEW — 必读）
+
+```markdown
+MUST: commit 准入最小集 ≠ Stage 3.5 全量验收,二者解耦
+
+commit 准入最小集(阻塞 commit):
+  - typecheck 0 错(`tsc --noEmit`)
+  - 关键 5 路由 spot-check(L3 真实浏览器截图)
+  - 涉及 admin/auth/数据接口:1 个 admin 探针端点 200
+  - lint 预存问题不阻塞(入 BUG-XX,后续单独修)
+
+全量验收(commit 之后异步):
+  - 60+ 路由视觉证据(按 wave 拆模块 spec 异步跑)
+  - rot-scan / self-diagnose
+  - 完整 vitest / build
+
+NEVER: 把 Stage 3.5 全量视觉验证塞入 commit 阻塞路径
+NEVER: 为避免"假完成"反例(V11 §3.7 #5)而把范围扩大到不可能完成(V11 §3.7 #10 反向陷阱)
+```
+
+### §7.4 测试"修一点跑一次"循环反模式（V11.8.4 NEW — 必读）
+
+```markdown
+NEVER: 失败 → 改一行 → 重跑 → 又失败 → 再改(无 Read 失败证据)
+触发条件: 同一 spec 连续修改 ≥3 次仍失败
+错误代价: 浪费 ~30 min,spec 文件 5 个版本未收敛
+
+正确替代(模块化测试铁律):
+  1. 立刻 StopCommand
+  2. Read error-context.md / trace.zip
+  3. Read fixture 实际行为(不能假设 timeout = 失败)
+  4. Read 已有 PASS 视觉证据(如果存在)
+  5. 列出"失败 vs 实际"差异表
+  6. 一个 spec 一个模块,失败独立反馈,不耦合其他模块(模块化是反循环核心武器)
+  7. 才改 spec
+```
+
+### §7.5 fixture timeout ≠ 登录失败（V11.8.4 NEW — 必读）
+
+```markdown
+NEVER: 假设 fixture timeout = 登录失败
+触发条件: fixture 用 waitForURL 等路由跳转超时
+错误代价: 反复修改无关 spec,浪费 5 个迭代版本
+
+正确替代:
+  1. Read fixture 实现(了解实际行为,如 supabase client-side 是否自动 redirect)
+  2. Read 视觉 spec 已 PASS 的截图(证明登录成功)
+  3. 检查 supabase/next-auth session 实际建立情况(cookie 是否落地)
+  4. 用 page.waitForAuthed(email) 验证 cookie 已落地(项目侧约定)
+  5. 跨 context cookie 必须用 page.evaluate(fetch) 而非 page.request(APIRequestContext 隔离)
+```
+
+### §7.6 自检清单（V11.8.4 NEW）
+
+```yaml
+commit_readiness_check:
+  P0:
+    - [ ] 不把"至少 1 张"推论为"必须全量"?
+    - [ ] commit 准入最小集与全量验收已解耦?
+    - [ ] 不为避免假完成而盲目扩大范围?
+    - [ ] 同一 spec 失败 ≥3 次后立即 Read 失败证据?
+    - [ ] fixture 状态用证据验证,不假设?
+    - [ ] 跨 context cookie 用 page.evaluate(fetch)?
+```
+
+---
+
 ## 关联引用
 
 - [constitution.md](constitution.md) — 17 Articles 宪法
 - [common-iron-rules.md](common-iron-rules.md) — 公共铁律
 - 各 stage anti-patterns/: skills/{NN}-{name}/anti-patterns/README.md
+- [../SKILL.md §0.3 Stage 3.5 异步性声明](../SKILL.md) — V11.8.4 蒸馏同步
+- [../SKILL.md §3.7 #10 范围盲目扩大](../SKILL.md) — 反虚假交付镜像陷阱
