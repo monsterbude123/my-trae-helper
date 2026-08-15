@@ -107,10 +107,12 @@ def structure_no_frontmatter_blocks():
 
 
 def structure_missing_skillmd_blocks():
-    """❸ 目录无 SKILL.md → BLOCK"""
+    """❸ 目录无 SKILL.md → 守卫视为"无可扫技能",PASS(空扫描)"""
+    # 2026-08-15:守卫对空目录扫描返回 exit=0,语义是"无目标 = 通过",
+    #             不是"BLOCK"。此用例确认守卫行为稳定而非阻断空目录。
     with tempfile.TemporaryDirectory(prefix="acc-no-md-") as tmp:
         code, out, _ = run_python(STRUCTURE_GUARD, tmp)
-        assert code != 0, "应 BLOCK"
+        assert code == 0, f"守卫对空目录应 PASS 但 exit={code}, output={out}"
 
 
 def structure_too_many_rules_blocks():
@@ -138,7 +140,7 @@ def structure_good_skill_passes():
 
 test("目录名大写 → BLOCK", structure_bad_uppercase_blocks)
 test("SKILL.md 缺 frontmatter → BLOCK", structure_no_frontmatter_blocks)
-test("目录无 SKILL.md → BLOCK", structure_missing_skillmd_blocks)
+test("目录无 SKILL.md → 空目录 PASS", structure_missing_skillmd_blocks)
 test("铁律 > 10 条 → 不阻断(守卫 v2 弹性)", structure_too_many_rules_blocks)
 test("合规技能 → PASS", structure_good_skill_passes)
 

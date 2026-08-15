@@ -3,8 +3,31 @@
 Trae IDE 技能包开发工程 + 跨 Agent 技能市场 CLI。
 
 > 这个仓库既是「技能包开发工程」也是「技能市场 CLI 源码」：
-> - `skill-markets/` —— 23+ 个技能包
+> - `skill-markets/` —— 43 个技能包
 > - `bin/` + `src/` —— `@my-trae-helper/cli`(已发布到 npm)
+
+## 📑 目录
+
+- 🗺️ [仓库全景(Mindmap)](#-仓库全景mindmap)
+- 📚 [工作流指南](#-工作流指南)
+- 🔁 [安装流(Flowchart)](#-安装流flowchart)
+- ⚡ [快速开始](#-快速开始推荐用-npx)
+- 🎯 [支持的 Agent(24 种)](#-支持的-agent24-种)
+- 📦 [技能市场(43 个,分类 Mindmap)](#-技能市场43-个分类-mindmap)
+- 🛠️ [CLI 命令](#-cli-命令)
+- 🔧 [安装机制](#-安装机制)
+- 🛠️ [本地开发](#-本地开发这个仓库)
+- 📦 [发布到 npm](#-发布到-npm)
+- 🔗 [与 npx skills 的关系](#-与-npx-skills-vercel-labsskills-的关系)
+- 📚 [技能格式](#-技能格式skillmd)
+- ⚙️ [项目自维护机制](#-项目自维护机制防止遗忘清单)
+  - 🪝 A. [TRAE 用户级钩子](#-a-trae-用户级钩子ide-会话侧)
+  - 🪝 B. [Git 钩子](#-b-git-钩子--门禁执行器husky)
+  - 🪝 C. [GitHub Actions](#-c-github-actions--远程门禁githubworkflows)
+  - 🛡️ D. [守卫脚本](#-d-守卫脚本scriptspy--srguardsmjs)
+  - 📊 E. [仓库内日志](#-e-仓库内日志--临时产物)
+  - 🤖 F. [self-improving-agent 自动化路径](#-f-self-improving-agent-自动化路径-treruleslearningmd)
+  - 🚫 G. [不自动触发的清单](#-g-不自动触发的清单手动)
 
 ## 🛡️ 协议先行 + 多维度一致(2026-08-15 NEW)
 
@@ -15,11 +38,44 @@ Trae IDE 技能包开发工程 + 跨 Agent 技能市场 CLI。
 - **`tests/catalogs/_check_skill_catalog.py`** — Catalog 元数据校验(200+ 行)
 - **CI gate**:`.github/workflows/skill-market-gate.yml` §5.7 protocol coverage + §5.8 skill catalognpm）
 
-## �� 工作流指南
+## 📚 工作流指南
 
 不同身份读者走读指南：
 
 - [docs/GUIDE.md](file:///d:/workspace/my-trae-helper/docs/GUIDE.md) — 四类受众全景工作流（仓库开发者 / 安装使用者 / 调研者 / vibecoding 配置者）
+
+## 🔁 安装流（Flowchart）
+
+```mermaid
+flowchart TD
+    A["用户<br/>npx @my-trae-helper/cli add &lt;name&gt;"] --> B{"参数校验<br/>CP2 前置检查"}
+    B -->|"参数非法"| X1["❌ 阻断 + 提示"]
+    B -->|"合法"| C["CP1 风险判定<br/>HIGH/MEDIUM/LOW"]
+    C -->|"HIGH/MEDIUM"| D["CP3 备份<br/>_archived_&lt;ts&gt;/"]
+    C -->|"LOW"| E["直接进入 CP4"]
+    D --> E["CP4 执行变更<br/>symlink / copy"]
+    E --> F["target dir<br/>~/.trae-cn/skills/&lt;name&gt;"]
+    F --> G{"symlink 成功?"}
+    G -->|"否"| H["回退 copy 模式"]
+    H --> G
+    G -->|"是"| I["CP5 后置验证<br/>完整性 + 结构守卫"]
+    I --> J{"通过?"}
+    J -->|"否"| K["CP6 回滚<br/>删除 symlink"]
+    K --> X2["❌ 失败 + 审计日志"]
+    J -->|"是"| L["CP6 审计<br/>logs/execution-audit.jsonl"]
+    L --> M["✅ 完成"]
+
+    style A fill:#e1f5e1
+    style M fill:#e1f5e1
+    style X1 fill:#ffe1e1
+    style X2 fill:#ffe1e1
+    style C fill:#fff4e1
+    style D fill:#fff4e1
+    style E fill:#fff4e1
+    style I fill:#fff4e1
+```
+
+> 详见 [`src/execution/skill-install-control.mjs`](src/execution/skill-install-control.mjs) CP1~CP6 控制点。
 
 ## ⚡ 快速开始（推荐：用 npx）
 
@@ -40,46 +96,114 @@ npx @my-trae-helper/cli list
 npx @my-trae-helper/cli remove fullstack4TraeV11
 ```
 
-## 🎯 支持的 Agent（22+）
+## 🎯 支持的 Agent（24 种）
 
-| Agent | 路径前缀 | 说明 |
+> 完整定义见 [`src/agents.mjs`](src/agents.mjs) 第 22~193 行,精确 24 个。
+
+| Agent | 项目级 skills 路径 | 说明 |
 |---|---|---|
-| **trae-cn** | `~/.trae-cn/skills/` | Trae CN（项目核心） |
-| **trae** | `~/.trae/skills/` | Trae 国际版 |
-| **claude-code** | `~/.claude/skills/` | Claude Code |
-| **codex** | `~/.codex/skills/` | OpenAI Codex |
-| **cursor** | `~/.cursor/skills/` | Cursor |
-| **gemini-cli** | `~/.gemini/skills/` | Gemini CLI |
-| **opencode** | `~/.config/opencode/skills/` | OpenCode |
-| **windsurf** | `~/.windsurf/skills/` | Windsurf |
-| **cline** | `~/.agents/skills/` | Cline |
-| **kimi-code-cli** | `~/.kimi-code/skills/` | Kimi Code |
-| **github-copilot** | `~/.copilot/skills/` | GitHub Copilot |
-| ... | | 还有 10+ (antigravity, kiro-cli, qwen-code, roo, devin, ... ) |
+| **trae-cn** | `.trae-cn/skills/` | Trae CN（项目核心） |
+| **trae** | `.trae/skills/` | Trae 国际版 |
+| **claude-code** | `.claude/skills/` | Claude Code |
+| **codex** | `.agents/skills/` | OpenAI Codex |
+| **cursor** | `.agents/skills/` | Cursor |
+| **gemini-cli** | `.agents/skills/` | Gemini CLI |
+| **github-copilot** | `.github/skills/` | GitHub Copilot |
+| **opencode** | `.opencode/skills/` | OpenCode |
+| **kimi-code-cli** | `.agents/skills/` | Kimi Code |
+| **amp** | `.agents/skills/` | Amp |
+| **openhands** | `.openhands/skills/` | OpenHands |
+| **cline** | `.agents/skills/` | Cline |
+| **windsurf** | `.windsurf/skills/` | Windsurf |
+| **continue** | `.continue/skills/` | Continue |
+| **roo** | `.roo/skills/` | Roo Code |
+| **aider-desk** | `.aider-desk/skills/` | Aider Desk |
+| **zed** | `.zed/skills/` | Zed |
+| **warp** | `.warp/skills/` | Warp |
+| **devin** | `.devin/skills/` | Devin |
+| **qwen-code** | `.qwen/skills/` | Qwen Code |
+| **kiro-cli** | `.kiro/skills/` | Kiro CLI |
+| **augment** | `.augment/skills/` | Augment |
+| **hermes-agent** | `.hermes/skills/` | Hermes Agent |
+| **antigravity** | `.agents/skills/` | Antigravity |
 
-## 📦 技能市场
+## 📦 技能市场(43 个,分类 Mindmap)
 
-```text
-skill-markets/
-├── fullstack4TraeV11/      # 全栈文档驱动开发 V11
-├── fullstack4TraeV10/      # V10 旧版
-├── fullstack4TraeV9/       # V9
-├── coding-xinfa/           # 编码心法
-├── browser-use-cloud/      # 浏览器自动化云
-├── acceptance-discipline/  # 验收铁律
-├── goal-mode/              # 目标追逐模式
-├── gitnexus4Trae/          # GitNexus 知识图谱
-├── ponytail4Trae/          # 懒人开发
-├── trae-professional/      # Trae IDE 专业知识
-├── product-teardown/       # 产品拆解
-├── security-review/        # 安全审查
-├── playwright-best-practices/
-├── screenshot/             # 截图工具
-├── vision-audit/           # 视觉审计
-├── doc-map-manager/        # 文档知识图谱
-├── game-production-kit/    # 游戏制作工具箱
-├── comfyui-api-skills/     # ComfyUI 视频/图片生成
-└── ... (23+ skills)
+```mermaid
+mindmap
+  root((skill-markets<br/>43 skills))
+    全栈文档驱动
+      fullstack4TraeV11
+        13 stage skills
+        registry/guards/gates
+      fullstack4TraeV10
+      fullstack4TraeV9
+      fullstack-skill-architect
+      fullstack-auto
+    编码心法 & 质量
+      coding-xinfa
+      ponytail4Trae
+        trae-ponytail
+        trae-ponytail-debt
+        trae-ponytail-help
+        trae-ponytail-review
+      trae-professional
+      trae-local-data-export
+      trae-security-review
+      skills-security-scan
+      acceptance-discipline
+      goal-mode
+      vibe-coding-standards
+    工程辅助 & CI/CD
+      agent-dev-control-kit
+        presets
+          nodejs
+          python
+          go
+          java-maven
+        scaffolds
+        registry
+      guard-gate-smith
+      guard-approver
+      skill-acceptance
+      project-rules-gate
+      session-distiller
+    知识图谱 & 文档
+      gitnexus4Trae
+      doc-map-manager
+      docsify-doc-builder
+    测试 & 验证
+      test-experience
+      test-partition-runner
+      e2e-module-audit
+      vision-audit
+      screenshot
+    AI 能力 & 多模态
+      minimax-multimodal
+      comfyui-api-skills
+        comfyui-api
+        project-manager
+        video-assembly
+        video-publisher
+      modelscope-assistant
+      langgraph_teach_skill
+      deepagents_teach_skill
+      deep-research
+    浏览器自动化
+      browser-use-cloud
+      mini-game-p2p-room
+    游戏 & 产品 & 内容
+      game-production-kit
+      product-teardown
+      shuxia-novel-engine
+      daily-vibe-coding
+    工具 & 导出
+      openapi-doc-exporter
+      meeting-minutes-taker
+      window-process-skills
+      skill-bundle
+      skill-creator-claude
+      learn-plan-skill
 ```
 
 ## 🛠️ CLI 命令
@@ -153,8 +277,8 @@ npm publish --access public
 | 维度 | `npx skills` (vercel) | `npx @my-trae-helper/cli` (本仓库) |
 |---|---|---|
 | 来源 | 从任何 GitHub 仓库 clone | 本仓库 `skill-markets/` 内置 |
-| 技能数 | 178+ (搜索) | 23+ (本仓库精选) |
-| Agent | 70+ | 22+（专注 Trae 系 + 主流） |
+| 技能数 | 178+ (搜索) | 43 (本仓库精选) |
+| Agent | 70+ | 24（专注 Trae 系 + 主流） |
 | 特色 | 跨平台开源标准 | Trae CN 原生 + 中文化 |
 | YAML 解析 | `yaml` | `yaml`（同款） |
 | 交互 | `@clack/prompts` | `@inquirer/prompts` |
@@ -200,7 +324,10 @@ requires:
 | 设计原则 | 零依赖 / 写入失败不抛错（exit 0）/ NDJSON 流式追加 / 隐私脱敏（sk- / Bearer / ghp_ / AKID）/ 跨 session 并行无冲突 |
 | 卸载 | `node scripts/trae-prompt-logger.install.mjs --op uninstall --file <hooks.json> --script <logger.mjs> --marker <mark>` |
 
-**查找历史 prompt**：
+**查找历史 prompt**（默认折叠,日志在 `.gitignore` 中）:
+
+<details>
+<summary>查询示例 — 展开查看</summary>
 
 ```bash
 # 单项目
@@ -209,6 +336,8 @@ cat .trae/prompt-logs/index.ndjson | jq -r '. | "\(.ts)  \(.session_id[0:8])  \(
 # 跨 session 检索关键词
 grep -r "TODO" .trae/prompt-logs/sessions/
 ```
+
+</details>
 
 ---
 
@@ -250,6 +379,18 @@ grep -r "TODO" .trae/prompt-logs/sessions/
 | WSL 兼容 | 自动把 `/root/...` 重定向到 `/mnt/c/Users/septe/...`，`/mnt/c/...` → `C:\...` |
 | 日志 | `logs/post-commit-self-improve.log`（**所有 stdout/stderr 丢这里**，不污染 commit 输出） |
 
+#### B4. `fullstack4TraeV11-pre-push` — V11 pre-push 专项（2026-08-15 NEW）
+
+- 触发：`git push` 时，仅当本次变更触达 `skill-markets/fullstack4TraeV11/**`
+- 步骤：`skill-markets/fullstack4TraeV11/scripts/validate-gate-config.py` 校验 gate-config 与 registry/gates.yaml 一致 + `_check_protocol_coverage.py` 跑 V11 维度
+- 失败：阻断 push + 报告 gate drift
+
+#### B5. `fullstack4TraeV11-l4` — V11 L4 发布前 hook（2026-08-15 NEW）
+
+- 触发：手动（发布前 dry-run）/ `release: published` GitHub event 同步本地时
+- 步骤：`ac-gate.py`（验收清单核销）→ `gate-integrity-guard.py`（gate 完整性）→ `run-all-guards.py`（全量守卫）→ `repair-flow-gate.py`（修复流门禁）
+- 失败：阻断 + 报告未核销 AC 编号
+
 ---
 
 ### 🪝 C. GitHub Actions — 远程门禁（`.github/workflows/`）
@@ -257,7 +398,7 @@ grep -r "TODO" .trae/prompt-logs/sessions/
 #### C1. `skill-market-gate.yml` — L3 合并 + L4 发布
 
 - **L3 merge gate**（PR → `main` / `release/*`）：
-  全量 `scan_skills_dir.py` → 变更技能 `skill-structure-guard` → 变更技能 `skill-dependency-guard` → 变更技能 `skill-capability-guard` → `CAPABILITY-MAP.md` 与 `SECURITY-MAP.md` diff 检查 → 构建 CLI
+  全量 `scan_skills_dir.py` → 变更技能 `skill-structure-guard` → 变更技能 `skill-dependency-guard` → 变更技能 `skill-capability-guard` → `CAPABILITY-MAP.md` 与 `SECURITY-MAP.md` diff 检查 → `_check_protocol_coverage.py` §5.7 → `_check_skill_catalog.py` §5.8 → 构建 CLI
 - **L4 publish gate**（`release: published`）：
   L3 + 全量结构守卫 + 全量能力守卫 + `npm publish --tag next` + 灰度 5 分钟 → `dist-tag add latest`
 
@@ -266,6 +407,102 @@ grep -r "TODO" .trae/prompt-logs/sessions/
 - 触发：PR 改 `skill-markets/agent-dev-control-kit/**` / push main / manual
 - 步骤：`catalog-guard.py` → trap 反例集（pytest `-m trap`） → 全量 pytest → hint 聚合
 - 自验收：trap 反例必须 PASS/FAIL 双态都跑过（对应 `AGENTS.md §2.4`）
+
+#### C3. `v11-doc-check.yml` — V11 文档同步门禁（2026-08-15 NEW）
+
+- 触发：PR 改 `skill-markets/fullstack4TraeV11/**` / push main / manual
+- 步骤：调用 `skill-markets/fullstack4TraeV11/scripts/v11-doc-sync.py` 校验各 stage skill 文档 ↔ registry/state-machine/repair-flow 一致
+- 失败：阻断 PR + 报告不一致位置（文件名 + 行号）
+
+#### C4. `v11-security-check.yml` — V11 安全门禁（2026-08-15 NEW）
+
+- 触发：PR 改 `skill-markets/fullstack4TraeV11/**` / push main / manual
+- 步骤：调用 `skill-markets/fullstack4TraeV11/scripts/gate-integrity-guard.py` 校验 scaffold / hook 模板无硬编码密钥 + ac-gate.py 验收清单完整
+- 失败：阻断 PR + 报告可疑路径
+
+#### C5. 三层控制体系总览（Flowchart）
+
+```mermaid
+flowchart LR
+    subgraph Execution["⚙️ Execution Layer<br/>(CP1~CP6 风险/备份/回滚/审计)"]
+        E1["CLI 命令<br/>add/create/remove/update"]
+        E2["skill-install-control"]
+        E3["skill-change-control"]
+        E1 --> E2
+        E1 --> E3
+    end
+
+    subgraph Guard["🛡️ Guard Layer<br/>(程序化检查 + 阻断)"]
+        G1["skill-security-guard"]
+        G2["skill-structure-guard"]
+        G3["skill-capability-guard"]
+        G4["skill-dependency-guard"]
+        G5["skill-registration-guard"]
+        G6["_check_protocol_coverage"]
+        G7["_check_skill_catalog"]
+    end
+
+    subgraph Gate["🚦 Gate Layer<br/>(commit / push / merge / publish)"]
+        GT1["L1 pre-commit<br/>.husky/pre-commit"]
+        GT2["L2 pre-push<br/>.husky/pre-push"]
+        GT3["L3/L4 CI<br/>skill-market-gate.yml"]
+        GT4["V11 专项<br/>v11-doc-check.yml<br/>v11-security-check.yml"]
+    end
+
+    E2 -->|"变更后"| G1
+    E2 -->|"变更后"| G2
+    E3 -->|"变更后"| G1
+    G1 --> GT1
+    G2 --> GT1
+    G3 --> GT2
+    G4 --> GT2
+    G5 --> GT3
+    G6 --> GT3
+    G7 --> GT3
+
+    GT1 -->|"git commit"| GT2
+    GT2 -->|"git push"| GT3
+    GT3 -->|"PR merge"| GT4
+
+    style Execution fill:#e1f0ff
+    style Guard fill:#fff4e1
+    style Gate fill:#e1ffe1
+```
+
+#### C6. Commit → Push → CI 验证流（Flowchart）
+
+```mermaid
+flowchart TD
+    Start["开发者 git commit -m ..."] --> L1["L1 .husky/pre-commit<br/>lint + unit + security + structure"]
+    L1 -->|"任意失败"| BLOCK1["🛑 阻断 commit"]
+    L1 -->|"全过"| OK1["✅ commit 成功"]
+    OK1 --> PC[".husky/post-commit<br/>self-improving-agent reflect"]
+    PC --> Push["git push origin &lt;branch&gt;"]
+    Push --> L2["L2 .husky/pre-push<br/>integration + coverage + dependency"]
+    L2 -->|"任意失败"| BLOCK2["🛑 阻断 push"]
+    L2 -->|"全过"| OK2["✅ push 成功"]
+    OK2 --> V11H{"触达 V11?"}
+    V11H -->|"是"| V11Push[".husky/fullstack4TraeV11-pre-push<br/>validate-gate-config"]
+    V11H -->|"否"| PR["开 PR → main"]
+    V11Push --> PR
+    PR --> L3["L3 CI skill-market-gate.yml<br/>scan + 5 guards + catalog + protocol"]
+    L3 --> L3a{"通过?"}
+    L3a -->|"否"| BLOCK3["🛑 PR fail + 报告"]
+    L3a -->|"是"| L4merge["merge to main"]
+    L4merge --> L4V11{"V11 文件?"}
+    L4V11 -->|"是"| L4doc["v11-doc-check.yml<br/>v11-security-check.yml"]
+    L4V11 -->|"否"| L4release["release 事件触发"]
+    L4doc --> L4release
+    L4release --> L4pub["L4 publish<br/>npm publish --tag next<br/>灰度 5min"]
+    L4pub --> L4final["dist-tag add latest ✅"]
+
+    style BLOCK1 fill:#ffe1e1
+    style BLOCK2 fill:#ffe1e1
+    style BLOCK3 fill:#ffe1e1
+    style L4final fill:#e1ffe1
+    style OK1 fill:#e1f5e1
+    style OK2 fill:#e1f5e1
+```
 
 ---
 
@@ -277,13 +514,23 @@ grep -r "TODO" .trae/prompt-logs/sessions/
 | `scripts/skill-structure-guard.py` | 结构 | pre-commit |
 | `scripts/skill-capability-guard.py` | 能力去重 | pre-push / L3 / L4 |
 | `scripts/manifest-assert.py` | Manifest 对账 | pre-commit（`test:manifest`） |
+| `scripts/_check_protocol_coverage.py` | 协议覆盖度 | L3 CI §5.7 |
+| `tests/catalogs/_check_skill_catalog.py` | Catalog 元数据 | L3 CI §5.8 |
 | `src/guards/skill-dependency-guard.mjs` | 依赖 | pre-push / L3 / L4 |
+| `src/guards/skill-registration-guard.mjs` | 注册表 | verify / L3 |
 | `src/execution/skill-change-control.mjs` | 变更控制（CP1~CP6） | `create` / `update` 子命令 |
 | `src/execution/skill-install-control.mjs` | 安装控制（CP1~CP6） | `add` / `remove` 子命令 |
+| `skill-markets/fullstack4TraeV11/scripts/ac-gate.py` | V11 AC 核销 | V11 专项 CI |
+| `skill-markets/fullstack4TraeV11/scripts/gate-integrity-guard.py` | V11 gate 完整性 | V11 专项 CI |
+| `skill-markets/fullstack4TraeV11/scripts/v11-doc-sync.py` | V11 文档同步 | V11 专项 CI |
+| `skill-markets/fullstack4TraeV11/scripts/validate-gate-config.py` | V11 gate 配置 | V11 专项 CI |
 
 ---
 
 ### 📊 E. 仓库内日志 / 临时产物
+
+<details>
+<summary>运行时落盘（`.gitignore` 已屏蔽，不进 git）— 展开查看</summary>
 
 > 这些是 **运行时落盘**，不进 git（按需清理）。
 
@@ -295,6 +542,8 @@ grep -r "TODO" .trae/prompt-logs/sessions/
 | `.trae/prompt-logs/**/*.ndjson` | `trae-prompt-logger.mjs` | 用户发言存档（每个 IDE 项目） |
 | `auto_reports/` | `scan_skills_dir.py` | 安全扫描报告（CI artifact） |
 | `.publish/` | `scripts/prepare-publish.mjs` | 发布预处理（npm pack 前） |
+
+</details>
 
 ---
 

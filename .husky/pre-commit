@@ -25,9 +25,101 @@
 . "$(dirname "$0")/../scripts/detect-python.sh" || exit 1
 PY="$MY_TRAE_HELPER_PY"
 
+# 跨平台 Node/npm 探测(Git for Windows MSYS fork 子进程时只塞精简 PATH,
+# `command -v node` 找不到 — 必须主动探测)。设计原则与 detect-python.sh 一致:
+#   1. 不硬编码任何具体路径,只信 PATH + 平台典型位置 + 能力校验(AGENTS.md §4.1.3)
+#   2. Windows MSYS 用文件可达性判定(覆盖 Git for Windows 新版 uname 返回 Linux 的情况)
+#   3. 用 shell 函数 node()/npm() + export -f 强制走探测到的完整路径
+#      (MSYS bash 的 alias 在非交互 shell 默认不展开,函数 + export -f 才跨子进程生效)
+_detect_node() {
+  NODE=""
+  NPM=""
+
+  # 第一轮: PATH 上的命令
+  for cand in node npm; do
+    local _bin
+    _bin="$(command -v "$cand" 2>/dev/null || true)"
+    if [ -n "$_bin" ] && [ -x "$_bin" ]; then
+      case "$cand" in
+        node) [ -n "$NODE" ] || NODE="$_bin" ;;
+        npm)  [ -n "$NPM" ]  || NPM="$_bin"  ;;
+      esac
+    fi
+  done
+
+  # 能力校验 — node/npm --version 必须能跑(MSYS 自带 /usr/bin/node 不带 npm 会失败)
+  if [ -n "$NODE" ] && ! "$NODE" --version >/dev/null 2>&1; then NODE=""; fi
+  if [ -n "$NPM" ]  && ! "$NPM"  --version >/dev/null 2>&1; then NPM="";  fi
+
+  # 第二轮: Windows MSYS 平台典型位置(覆盖 Git for Windows fork 子进程时 PATH 精简)
+  if [ -z "$NODE" ] && { [ -x /mnt/c/Windows/System32/cmd.exe ] || [ -x /c/Windows/System32/cmd.exe ]; }; then
+    # 官方安装包典型位置
+    for p in \
+      "/mnt/c/Program Files/nodejs/node.exe" \
+      "/c/Program Files/nodejs/node.exe" \
+      "/mnt/c/Program Files (x86)/nodejs/node.exe" \
+      "/c/Program Files (x86)/nodejs/node.exe"; do
+      if [ -x "$p" ] && "$p" --version >/dev/null 2>&1; then NODE="$p"; break; fi
+    done
+    # 兜底: 走 cmd.exe 内建 where,绕开 MSYS PATH 精简(MSYS_NO_PATHCONV 防自动转换)
+    if [ -z "$NODE" ]; then
+      local _where
+      _where="$(MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' cmd.exe //c where node 2>/dev/null | tr -d '\r' | head -1 || true)"
+      if [ -n "$_where" ]; then
+        case "$_where" in
+          [A-Za-z]:\\*) _where="$(echo "$_where" | tr 'A-Z' 'a-z' | sed 's|^\([a-z]\):\\|/mnt/\1/|; s|\\|/|g')" ;;
+        esac
+        if [ -x "$_where" ] && "$_where" --version >/dev/null 2>&1; then NODE="$_where"; fi
+      fi
+    fi
+    # Windows 下 npm 通常是 npm.cmd(PATH 不会自动加 .cmd 后缀)
+    if [ -n "$NODE" ] && [ -z "$NPM" ]; then
+      local _d
+      _d="$(dirname "$NODE")"
+      for n in npm.cmd npm; do
+        if [ -x "$_d/$n" ] && "$_d/$n" --version >/dev/null 2>&1; then NPM="$_d/$n"; break; fi
+      done
+    fi
+  fi
+
+  # 第三轮: macOS / Linux 平台典型位置
+  if [ -z "$NODE" ]; then
+    case "$(uname -s 2>/dev/null)" in
+      Darwin|Linux|*)
+        for p in /opt/homebrew/bin/node /usr/local/bin/node /usr/bin/node; do
+          if [ -x "$p" ] && "$p" --version >/dev/null 2>&1; then NODE="$p"; break; fi
+        done
+        ;;
+    esac
+  fi
+
+  export MY_TRAE_HELPER_NODE="$NODE"
+  export MY_TRAE_HELPER_NPM="$NPM"
+}
+
+_detect_node
+
+# 用 shell 函数强制 node/npm 走探测到的完整路径
+# (MSYS bash 的 alias 在非交互 shell 默认不展开,函数 + export -f 才对当前进程生效)
+node() {
+  if [ -n "${MY_TRAE_HELPER_NODE:-}" ]; then
+    "$MY_TRAE_HELPER_NODE" "$@"
+  else
+    command node "$@"
+  fi
+}
+npm() {
+  if [ -n "${MY_TRAE_HELPER_NPM:-}" ]; then
+    "$MY_TRAE_HELPER_NPM" "$@"
+  else
+    command npm "$@"
+  fi
+}
+export -f node npm
+
 set -e
 
-echo "🔍 执行 L1 Commit Gate (PY=$PY)..."
+echo "🔍 执行 L1 Commit Gate (PY=$PY, NODE=$MY_TRAE_HELPER_NODE)..."
 
 # 0. 注册表守卫（最严 — 每个 skill 必带同名 guard + gate 路由）
 # 任何 skill-markets/<x>/ 新建/删除/重命名都必须先在 registry/skills.yaml 注册,

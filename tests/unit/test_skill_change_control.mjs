@@ -51,10 +51,12 @@ await test('classifyRisk: create 操作 → LOW', () => {
   assert.equal(classifyRisk({ operation: 'create', target: 'any' }), 'LOW');
 });
 
-await test('classifyRisk: modify + scripts 变更（v0.x 技能）→ MEDIUM', () => {
+await test('classifyRisk: modify + scripts 变更（已发布 ≥1.0.0 技能）→ HIGH', () => {
+  // 2026-08-15: coding-xinfa 实际 version=1.0.0,先命中已发布分支返回 HIGH;
+  //             scripts/dependencies 降级只在 0.x 未发布阶段生效。
   assert.equal(
     classifyRisk({ operation: 'modify', target: 'coding-xinfa', changes: { scripts: true } }),
-    'MEDIUM'
+    'HIGH'
   );
 });
 

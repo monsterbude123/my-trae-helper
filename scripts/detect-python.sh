@@ -26,22 +26,87 @@ PY=""
 # - macOS:                /opt/homebrew/bin/python3 /usr/local/bin/python3 /usr/bin/python3
 # - Linux:                /usr/bin/python3 /usr/local/bin/python3
 # 用 uname 判断 OS,绝不混搭
+#
+# 2026-08-15 修复: git 子进程 PATH 被精简(Git 自身只塞 %SystemRoot%\system32 + %ProgramFiles%\Git\cmd),
+# `command -v python3` 只找到 MSYS 自带的 /usr/bin/python3(无 pip),无法自愈。
+# 修复策略:
+#   (a) Windows 加 `py -3` launcher(走注册表,不受 MSYS PATH 影响)
+#   (b) Windows 加 `where.exe python`(cmd.exe 内建,通过 cmd.exe 拿 Windows 真实 PATH,翻译回 MSYS 路径)
+#   (c) 遍历当前 PATH(即便精简)中的 python* 二进制
+#   (d) 关键修复:Git for Windows 新版 MSYS 的 `uname -s` 返回 `Linux`(而非 MINGW*),
+#       单纯信 uname 会走 Linux 分支漏掉 Windows Python。用"文件系统可达性"兜底:
+#       若 /mnt/c/Windows/System32/cmd.exe 存在 → 必是 MSYS on Windows → 走 Windows 分支。
+_is_windows_msys() {
+  # MSYS on Windows 必有 /mnt/c/Windows/System32,且 /usr/bin/python3 是 MSYS 自带无 pip
+  # macOS / Linux 上 /mnt/c 不存在 → 返回非零
+  [ -x /mnt/c/Windows/System32/cmd.exe ] || [ -x /c/Windows/System32/cmd.exe ]
+}
 _candidates() {
+  # 先用文件系统可达性判定(覆盖 Git for Windows 新版 uname 返回 Linux 的情况)
+  if _is_windows_msys; then
+    # Windows Git Bash: 常见位置 — Python Launcher / miniconda / 官方安装包
+    echo "/mnt/c/Users/$USER/AppData/Local/Programs/Python/Python3*/python.exe"
+    echo "/mnt/c/ProgramData/miniconda3/python.exe"
+    echo "/mnt/c/Python3*/python.exe"
+    echo "/c/Users/$USER/AppData/Local/Programs/Python/Python3*/python.exe"
+    echo "/c/ProgramData/miniconda3/python.exe"
+    echo "/c/Python3*/python.exe"
+    # (c) 当前 PATH 中所有 python 候选(精简 PATH 内若意外存在优先)
+    local IFS=':'
+    for p in $PATH; do
+      case "$p" in
+        *python*|*Python*|*conda*|*anaconda*)
+          echo "$p/python.exe"
+          echo "$p/python3.exe"
+          # Windows PATH 可能用 C:\foo 或 /c/foo 两种,加 /mnt 镜像
+          case "$p" in
+            /c/*) echo "/mnt$p/python.exe" ;;
+            [A-Za-z]:\\*) echo "$(echo "$p" | sed 's|^\([A-Za-z]\):\\|/mnt/\L\1/|; s|\\|/|g')/python.exe" ;;
+          esac
+          ;;
+      esac
+    done
+    # (b) cmd.exe 内建 where → MSYS 路径翻译(走 $MSYS_NO_PATHCONV=1 避免自动转换)
+    local _where
+    _where="$(MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' cmd.exe //c where python 2>/dev/null | tr -d '\r' | head -1)"
+    if [ -n "$_where" ]; then
+      # Windows 风格 C:\foo\python.exe → MSYS /mnt/c/foo/python.exe(Git for Windows)
+      case "$_where" in
+        [A-Za-z]:\\*) echo "$(echo "$_where" | sed 's|^\([A-Za-z]\):\\|/mnt/\L\1/|; s|\\|/|g')" ;;
+        *) echo "$_where" ;;
+      esac
+    fi
+    # (a) py launcher(走注册表,无 PATH 依赖)
+    echo "py:-3"
+    return 0
+  fi
+
+  # 真·Linux / macOS / BSD 用 uname 分流
   case "$(uname -s 2>/dev/null)" in
-    MINGW*|MSYS*|CYGWIN*)
-      # Windows Git Bash: 常见位置 — Python Launcher / miniconda / 官方安装包
-      echo "/c/Users/$USER/AppData/Local/Programs/Python/Python3*/python.exe"
-      echo "/c/ProgramData/miniconda3/python.exe"
-      echo "/c/Python3*/python.exe"
-      ;;
     Darwin)
       echo "/opt/homebrew/bin/python3"
       echo "/usr/local/bin/python3"
       echo "/usr/bin/python3"
+      local IFS=':'
+      for p in $PATH; do
+        case "$p" in
+          *python*|*conda*|*anaconda*)
+            echo "$p/python3"
+            ;;
+        esac
+      done
       ;;
     Linux|*)
       echo "/usr/bin/python3"
       echo "/usr/local/bin/python3"
+      local IFS=':'
+      for p in $PATH; do
+        case "$p" in
+          *python*|*conda*|*anaconda*)
+            echo "$p/python3"
+            ;;
+        esac
+      done
       ;;
   esac
 }
@@ -76,21 +141,61 @@ _try_bootstrap() {
   return 1
 }
 
-# 第一轮: PATH 上的命令
+# 第一轮: PATH 上的命令 + Windows `py` launcher(走注册表,无 PATH 依赖)
 for cand in python3 py python; do
   PY2="$(command -v "$cand" 2>/dev/null || true)"
   if [ -n "$PY2" ] && [ -x "$PY2" ]; then
     if _can_import "$PY2"; then
       PY="$PY2"; break
-    elif _try_bootstrap "$PY2"; then
+    fi
+    # 探测过但不能 import:清空 PY,继续第二轮(MSYS 自带 /usr/bin/python3
+    # 不能 import 也不带 pip,不该被视为命中)
+    PY=""
+    if _try_bootstrap "$PY2"; then
       PY="$PY2"; break
     fi
+    PY=""
   fi
 done
 
-# 第二轮: 平台典型安装位置(glob 展开)
+# 第一轮扩展: Windows py launcher(Python Install Manager,Windows 7+ 自带)
+#   `py -3` 会从注册表读 PythonCore,不受 MSYS PATH 精简影响
+if [ -z "$PY" ] && [ "$(uname -s 2>/dev/null)" = "MINGW"* ] || [ "$(uname -s 2>/dev/null)" = "MSYS"* ] || [ "$(uname -s 2>/dev/null)" = "CYGWIN"* ]; then
+  if command -v py.exe >/dev/null 2>&1 || command -v py >/dev/null 2>&1; then
+    # 让 py launcher 告诉我们真实 Python 路径
+    PY2="$(py -3 -c 'import sys; print(sys.executable)' 2>/dev/null | tr -d '\r' || true)"
+    if [ -n "$PY2" ] && [ -x "$PY2" ]; then
+      if _can_import "$PY2"; then
+        PY="$PY2"
+      elif _try_bootstrap "$PY2"; then
+        PY="$PY2"
+      fi
+    fi
+  fi
+fi
+
+# 第二轮: 平台典型安装位置(glob 展开 + `py:-3` launcher 标记)
 if [ -z "$PY" ]; then
   for pat in $(_candidates); do
+    # launcher 标记: `py:-3` → 调 py -3 拿 sys.executable
+    case "$pat" in
+      py:*)
+        # 注意:set -u 下未赋值变量会炸,先给默认
+        _arg="${pat#py:}"
+        _exe=""
+        if command -v py >/dev/null 2>&1; then
+          _exe="$(py "$_arg" -c 'import sys; print(sys.executable)' 2>/dev/null | tr -d '\r' || true)"
+        fi
+        if [ -n "${_exe:-}" ] && [ -x "$_exe" ]; then
+          if _can_import "$_exe"; then
+            PY="$_exe"; break
+          elif _try_bootstrap "$_exe"; then
+            PY="$_exe"; break
+          fi
+        fi
+        continue
+        ;;
+    esac
     # shellcheck disable=SC2086
     for PY2 in $pat; do
       [ -x "$PY2" ] || continue
