@@ -123,6 +123,7 @@
 | **V11 文档入口同步工具**（V11.7.0+ NEW）| `skill-markets/fullstack4TraeV11/scripts/v11-doc-sync.py` | V11 升级时 + CI `v11-doc-check.yml` | Python | `--sync` 批量给文档加 V11.x 入口标记(L1 完整 8 行 / L4 极简 1 行) / `--check` 校验全 V11 文档含标记 / `--mark` 自定义入口文本 |
 | **V11 PR 文档入口标记 CI**（V11.8.0+ NEW）| `.github/workflows/v11-doc-check.yml` | V11 改动 PR 自动跑 | yml | paths filter `skill-markets/fullstack4TraeV11/**` → `python v11-doc-sync.py --check` → missing=0 PASS / missing>0 BLOCK |
 | **V11 PR 安全扫描 CI**（V11.8.0+ NEW）| `.github/workflows/v11-security-check.yml` | V11 改动 PR 自动跑 | yml | paths filter `skill-markets/fullstack4TraeV11/**` → `python trae-security-review scan_skills_dir.py` → PASS fail = exit 0 / BLOCKED/WARNING = 评论 + exit 1 |
+| **技能文档同步门禁**（2026-08-15 NEW 横切守卫）| `scripts/doc-sync-guard.py` | pre-commit Step 7 | Python stdlib + subprocess 调 git diff/show | 横切守卫(2026-08-15 NEW)— 每次 commit 检查:若改了某个 skill 的 "实质性内容"(SKILL.md / references/*.md / scripts/* / agents/*.md 语义行 > 7 或 SKILL.md frontmatter 关键字段变更),要保证项目侧 6 项说明文档(README/AGENTS/CHANGELOG/CAPABILITY-MAP/SECURITY-MAP/registry/skills.yaml)+ skill 一级"给人类看的说明性文档"(README/AGENTS/CHANGELOG/INDEX/GUIDE)同步更新,否则硬阻断(exit 1)。脚本支持 `--self-test` 自检模式跑 6 个反例(实质变更/注释/空行/frontmatter/全部同步/子目录 README)。registry/skills.yaml 注册 meta skill `doc-sync`(白名单跳过 skill-markets 目录校验) |
 
 ---
 

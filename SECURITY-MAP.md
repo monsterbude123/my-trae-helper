@@ -125,6 +125,7 @@
 | `scripts/skill-structure-guard.py` | CLI | 🟢 LOW | 纯文件读取 + 正则匹配；无 subprocess / 无网络 |
 | `src/guards/skill-dependency-guard.mjs` | CLI | 🟢 LOW | 纯文件 IO + YAML 解析；无 subprocess / 无网络 |
 | `scripts/skill-capability-guard.py` | CLI | 🟢 LOW | 纯文件读取 + 正则匹配；无 subprocess / 无网络 |
+| `scripts/doc-sync-guard.py` (NEW 2026-08-15 横切守卫) | CLI | 🟢 LOW | 纯 stdlib + subprocess 调 git diff/show(参数化路径无 Shell 注入);无 HTTP/无 eval-exec;读 staged 变更判定触发,缺同步即 exit 1;--self-test 自检模式(造临时 git 仓库跑 6 反例) |
 
 ### 安全脚本（纯本地/无外联）
 

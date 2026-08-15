@@ -28,8 +28,8 @@
 
 version: 1.0.0
 description: My Trae Helper 技能注册表 — 每个 skill 必带同名 guard + gate 路由
-updated: 2026-08-14
-total_skills: 46
+updated: 2026-08-15
+total_skills: 47
 
 skills:
 
@@ -431,3 +431,23 @@ skills:
     notes: |
       GuardSmith 自注册条目 — 本 skill 即"唯一可改 guard/gate"的 agent 技能包。
       此条目的 maintainer 字段 = guard-smith,形成自指闭环。
+
+  # ── 新增：横切守卫(2026-08-15 NEW) — 技能文档同步门禁 ──────────────────
+  # 注:doc-sync 不是某个 skill 包,是"针对所有 skill 的统一文档同步检查"。
+  # 放在注册表末尾 + meta 段,作为独立条目。
+  - skill: doc-sync
+    status: active
+    guards:
+      - { id: doc-sync-check, category: doc-sync, script: scripts/doc-sync-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: doc-sync-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [doc-sync-check] }
+    maintainer: guard-smith
+    notes: |
+      横切守卫(2026-08-15 NEW) — 每次 commit 检查:若改了某个 skill 的
+      "实质性内容"(SKILL.md / references/*.md / scripts/* / agents/*.md 语义行 > 7
+      或 SKILL.md frontmatter 关键字段变更),要保证:
+        (a) 项目侧 6 项说明文档同步更新(README/AGENTS/CHANGELOG/CAPABILITY-MAP/SECURITY-MAP/registry/skills.yaml)
+        (b) skill 一级"给人类看的说明性文档"同步更新(README/AGENTS/CHANGELOG/INDEX/GUIDE)
+      否则硬阻断(exit 1)。脚本自身支持 --self-test 跑 6 个反例。
+      本条目是"meta skill"概念的代表:不在 skill-markets/ 下,而是横切守卫。
+      守卫脚本: scripts/doc-sync-guard.py (Python stdlib,无 subprocess/无网络)。

@@ -37,6 +37,12 @@ const VALID_STATUS = new Set(['active', 'deprecated', 'archived']);
 const VALID_LEVEL = new Set(['L1', 'L2', 'L3', 'L4']);
 const MAINTAINER_ALLOWLIST = new Set(['guard-smith']);
 
+// 横切守卫白名单(2026-08-15 NEW):这些条目在 skill-markets/ 下无目录,
+// 是项目级"meta 守卫"(针对所有 skill 的统一规则,如 doc-sync 文档同步),
+// 注册表允许但反向目录校验跳过。
+// 设计原则:与 AGENTS.md §1.11 一致 — 白名单路径由 guard-smith 自治。
+const META_GUARD_SKILLS = new Set(['doc-sync']);
+
 /**
  * 列出 skill-markets 下所有根 skill 目录
  *
@@ -78,9 +84,10 @@ function checkSkill(entry, rootSkillsSet) {
     return { errors, warnings };
   }
 
-  // 1. 目录存在
+  // 1. 目录存在(横切守卫可跳过 — 在 skill-markets/ 下无目录)
+  const isMetaGuard = META_GUARD_SKILLS.has(entry.skill);
   const skillDir = join(SKILL_MARKETS_DIR, entry.skill);
-  if (!existsSync(skillDir)) {
+  if (!isMetaGuard && !existsSync(skillDir)) {
     errors.push(`skill 目录不存在: skill-markets/${entry.skill}/`);
   }
 
@@ -171,7 +178,7 @@ function checkUnregisteredSkills(registrySkills, rootSkills) {
 function checkPhantomSkills(registrySkills, rootSkillsSet) {
   const errors = [];
   for (const entry of registrySkills) {
-    if (entry && entry.skill && !rootSkillsSet.has(entry.skill)) {
+    if (entry && entry.skill && !rootSkillsSet.has(entry.skill) && !META_GUARD_SKILLS.has(entry.skill)) {
       errors.push(`注册表条目指向不存在的 skill: ${entry.skill}`);
     }
   }

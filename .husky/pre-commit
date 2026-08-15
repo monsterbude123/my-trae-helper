@@ -181,4 +181,15 @@ if ! grep -q '"test:manifest"' package.json; then
 fi
 npm run test:manifest
 
+# 7. 技能文档同步门禁(2026-08-15 NEW — 横切守卫)
+# 检查:若改了某个 skill 的 "实质性内容",要保证项目侧 6 项说明文档
+# + skill 一级"给人类看的说明性文档"同步更新,否则硬阻断。
+# 脚本: scripts/doc-sync-guard.py (Python stdlib,无网络)
+echo "7️⃣ 技能文档同步门禁 (doc-sync-guard)..."
+if [ -f "scripts/doc-sync-guard.py" ]; then
+  "$PY" scripts/doc-sync-guard.py
+else
+  echo "⚠️  跳过: scripts/doc-sync-guard.py 不存在"
+fi
+
 echo "✅ L1 Commit Gate 通过"
