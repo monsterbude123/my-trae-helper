@@ -24,21 +24,31 @@ cd /path/to/project
 npm run dev > /tmp/dev.log 2>&1 &
 sleep 10
 
-# Step 2: curl 探测
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:5173/
-# 必须 200
+# Step 2: curl 探测（端口与 references/startup-verification.md L17 一致 = 5173）
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5173/) || { echo "❌ Web Step 2 FAIL: curl 命令失败"; exit 1; }
+[ "$STATUS" = "200" ] || { echo "❌ Web Step 2 FAIL: curl 返回 $STATUS（非 200）"; exit 1; }
+echo "✅ Web Step 2 PASS: curl 200"
 
-# Step 3: Playwright 截图（主上下文亲自执行）
-playwright_navigate url="http://127.0.0.1:5173/"
-playwright_screenshot name="verify-default" fullPage=false
+# Step 3: Playwright 截图（主上下文亲自执行，V10-battle-tested.md 蒸馏 2 改进路径：直接指定归档路径）
+playwright_navigate url="http://127.0.0.1:5173/" || { echo "❌ Web Step 3 FAIL: playwright_navigate 失败"; exit 1; }
+playwright_screenshot name="verify-default" fullPage=false path="docs/verifications/2026-08-11-add-feature/verify-default.png" || { echo "❌ Web Step 3 FAIL: playwright_screenshot 失败"; exit 1; }
+echo "✅ Web Step 3 PASS: screenshot 已归档"
 
-# Step 4: 归档截图到 docs/verifications/{change-id}/
-mkdir -p docs/verifications/2026-08-11-add-feature
-cp /tmp/playwright-screenshot.png docs/verifications/2026-08-11-add-feature/
+# Step 4: 归档截图（跨平台兼容：MCP 直接写入归档目录，避 Downloads/ 陷阱）
+mkdir -p docs/verifications/2026-08-11-add-feature || { echo "❌ Web Step 4 FAIL: mkdir 失败"; exit 1; }
+# MCP 截图已存到指定路径；若 MCP 不支持 path 参数，回退用跨平台 SCREENSHOT_PATH：
+# Windows: %USERPROFILE%\Downloads\  |  macOS/Linux: $HOME/Downloads/
+if [ -n "$SCREENSHOT_PATH" ]; then
+  cp "$SCREENSHOT_PATH/verify-default.png" docs/verifications/2026-08-11-add-feature/ || { echo "❌ Web Step 4 FAIL: cp 失败"; exit 1; }
+fi
+echo "✅ Web Step 4 PASS: 归档完成"
 
-# Step 5: LS 验证 size
-ls -la docs/verifications/2026-08-11-add-feature/
-# 必须 ≥ 5KB
+# Step 5: LS 验证 size（必须 ≥ 5KB）
+SCREENSHOT_SIZE=$(stat -c%s "docs/verifications/2026-08-11-add-feature/verify-default.png" 2>/dev/null || stat -f%z "docs/verifications/2026-08-11-add-feature/verify-default.png" 2>/dev/null || echo 0)
+[ "$SCREENSHOT_SIZE" -ge 5000 ] || { echo "❌ Web Step 5 FAIL: 截图 ${SCREENSHOT_SIZE}B < 5KB"; exit 1; }
+echo "✅ Web Step 5 PASS: 截图 ${SCREENSHOT_SIZE}B ≥ 5KB"
+
+# 反例: anti-patterns/01-startup-equals-done.md（看到进程即通过）+ 03-skip-screenshot.md（跳过截图）
 ```
 
 ---
@@ -51,17 +61,26 @@ cd /path/to/project
 pnpm exec tauri dev > /tmp/tauri.log 2>&1 &
 sleep 30
 
-# Step 2: 进程存活检查
-ps aux | grep tauri | grep -v grep
-# 必须有进程
+# Step 2: 进程存活检查（必须有进程）
+ps aux | grep tauri | grep -v grep > /tmp/tauri-procs.txt
+[ -s /tmp/tauri-procs.txt ] || { echo "❌ Tauri Step 2 FAIL: tauri 进程未存活"; exit 1; }
+echo "✅ Tauri Step 2 PASS: tauri 进程存活"
 
 # Step 3: Playwright 连接 WebView
-playwright_navigate url="tauri://localhost/"
+playwright_navigate url="tauri://localhost/" || { echo "❌ Tauri Step 3 FAIL: playwright_navigate 失败"; exit 1; }
+echo "✅ Tauri Step 3 PASS: WebView 连接"
 
-# Step 4: 主窗口截图
-playwright_screenshot name="tauri-main-window"
+# Step 4: 主窗口截图（V10-battle-tested.md 蒸馏 2 改进路径：直接归档）
+mkdir -p docs/verifications/2026-08-11-add-feature || { echo "❌ Tauri Step 4 FAIL: mkdir 失败"; exit 1; }
+playwright_screenshot name="tauri-main-window" fullPage=false path="docs/verifications/2026-08-11-add-feature/tauri-main-window.png" || { echo "❌ Tauri Step 4 FAIL: playwright_screenshot 失败"; exit 1; }
+echo "✅ Tauri Step 4 PASS: 主窗口截图已归档"
 
-# Step 5: 归档
+# Step 5: 归档验证 size ≥ 5KB
+SCREENSHOT_SIZE=$(stat -c%s "docs/verifications/2026-08-11-add-feature/tauri-main-window.png" 2>/dev/null || stat -f%z "docs/verifications/2026-08-11-add-feature/tauri-main-window.png" 2>/dev/null || echo 0)
+[ "$SCREENSHOT_SIZE" -ge 5000 ] || { echo "❌ Tauri Step 5 FAIL: 截图 ${SCREENSHOT_SIZE}B < 5KB"; exit 1; }
+echo "✅ Tauri Step 5 PASS: 截图 ${SCREENSHOT_SIZE}B ≥ 5KB"
+
+# 反例: anti-patterns/01-startup-equals-done.md（看到进程即通过）
 ```
 
 ---
@@ -70,18 +89,28 @@ playwright_screenshot name="tauri-main-window"
 
 ```bash
 # Step 1: 真实跑一次 end-to-end
-./bin/cli --config config.toml --command full-flow
-
-# Step 2: 收集输出
-./bin/cli --command full-flow > /tmp/cli-output.txt 2>&1
-# 输出片段 ≥ 10 行
-
-# Step 3: 检查退出码
+./bin/cli --config config.toml --command full-flow > /tmp/cli-output.txt 2>&1
 EXIT_CODE=$?
-if [ $EXIT_CODE -eq 0 ]; then echo "✅"; else echo "❌"; fi
+[ $EXIT_CODE -eq 0 ] || { echo "❌ CLI Step 1 FAIL: 退出码 $EXIT_CODE（非 0）"; exit 1; }
+echo "✅ CLI Step 1 PASS: 退出码 0"
 
-# Step 4: 关键产物存在
-ls output/
+# Step 2: 收集输出 + 校验 ≥ 10 行
+./bin/cli --command full-flow > /tmp/cli-output.txt 2>&1 || { echo "❌ CLI Step 2 FAIL: 命令执行失败"; exit 1; }
+OUTPUT_LINES=$(wc -l < /tmp/cli-output.txt)
+[ "$OUTPUT_LINES" -ge 10 ] || { echo "❌ CLI Step 2 FAIL: 输出 $OUTPUT_LINES 行（< 10）"; exit 1; }
+echo "✅ CLI Step 2 PASS: 输出 $OUTPUT_LINES 行 ≥ 10"
+
+# Step 3: 检查退出码（冗余防御，双重确认）
+EXIT_CODE=$?
+if [ $EXIT_CODE -eq 0 ]; then echo "✅ 退出码 0"; else echo "❌ 退出码 $EXIT_CODE"; fi
+
+# Step 4: 关键产物存在（必须非空）
+ls output/ > /dev/null 2>&1 || { echo "❌ CLI Step 4 FAIL: output/ 不存在"; exit 1; }
+OUTPUT_COUNT=$(ls output/ | wc -l)
+[ "$OUTPUT_COUNT" -gt 0 ] || { echo "❌ CLI Step 4 FAIL: output/ 为空"; exit 1; }
+echo "✅ CLI Step 4 PASS: output/ 含 $OUTPUT_COUNT 个产物"
+
+# 反例: anti-patterns/02-container-not-started.md（容器未启声称迁移成功）
 ```
 
 ---
@@ -89,15 +118,23 @@ ls output/
 ## Library 项目工作流
 
 ```python
-# Step 1: 集成测试
-pytest tests/integration/test_real_call.py -v
+# Step 1: 集成测试（必须真调用 + ≥90% 覆盖率）
+pytest tests/integration/test_real_call.py -v > /tmp/lib-test.log 2>&1 || { echo "❌ Library Step 1 FAIL: pytest 失败"; exit 1; }
+TEST_EXIT=$?
+[ $TEST_EXIT -eq 0 ] || { echo "❌ Library Step 1 FAIL: 退出码 $TEST_EXIT"; exit 1; }
+echo "✅ Library Step 1 PASS: pytest 全 PASS"
 
-# Step 2: 测试中调用真实 API（非 mock）
+# Step 2: 测试中调用真实 API（非 mock，状态断言）
 def test_real_api():
     result = my_lib.call_real_api(endpoint="...")
-    assert result.status == 200
+    assert result.status == 200, f"API 返回 {result.status}（非 200）"
 
-# Step 3: 输出 API 调用证据 + 返回字段
+# Step 3: 收集 API 调用证据（test_real_api 必含 file:line 调用点 + 返回字段）
+grep -A2 "call_real_api" /tmp/lib-test.log > /tmp/lib-evidence.txt || { echo "❌ Library Step 3 FAIL: 找不到 API 调用证据"; exit 1; }
+[ -s /tmp/lib-evidence.txt ] || { echo "❌ Library Step 3 FAIL: API 调用证据为空"; exit 1; }
+echo "✅ Library Step 3 PASS: API 调用证据已归档 /tmp/lib-evidence.txt"
+
+# 反例: anti-patterns/01-startup-equals-done.md（PASS 自评无证据）
 ```
 
 ---
@@ -109,16 +146,25 @@ def test_real_api():
 python -m my_server > /tmp/server.log 2>&1 &
 sleep 5
 
-# Step 2: 健康检查
-curl -s http://127.0.0.1:8080/health
-# 必须返回 {"status": "ok"} + 200
+# Step 2: 健康检查（必须返回 {"status": "ok"} + 200）
+HEALTH=$(curl -s -w "\n%{http_code}" http://127.0.0.1:8080/health) || { echo "❌ Backend Step 2 FAIL: curl 失败"; exit 1; }
+HEALTH_STATUS=$(echo "$HEALTH" | tail -1)
+HEALTH_BODY=$(echo "$HEALTH" | head -n -1)
+[ "$HEALTH_STATUS" = "200" ] || { echo "❌ Backend Step 2 FAIL: /health 返回 $HEALTH_STATUS（非 200）"; exit 1; }
+echo "$HEALTH_BODY" | grep -q '"status": "ok"' || { echo "❌ Backend Step 2 FAIL: /health body 不含 status:ok"; exit 1; }
+echo "✅ Backend Step 2 PASS: /health 200 + status:ok"
 
-# Step 3: 日志无 ERROR
-grep ERROR /tmp/server.log
-# 必须 0 行
+# Step 3: 日志无 ERROR（必须 0 行）
+ERROR_COUNT=$(grep -c "ERROR" /tmp/server.log 2>/dev/null || echo 0)
+[ "$ERROR_COUNT" -eq 0 ] || { echo "❌ Backend Step 3 FAIL: 日志含 $ERROR_COUNT 行 ERROR"; exit 1; }
+echo "✅ Backend Step 3 PASS: 日志 0 行 ERROR"
 
-# Step 4: 关键 API 真实调用
-curl -s http://127.0.0.1:8080/api/v1/users/1
+# Step 4: 关键 API 真实调用（必须 200）
+API_STATUS=$(curl -s -o /tmp/api-response.txt -w "%{http_code}" http://127.0.0.1:8080/api/v1/users/1) || { echo "❌ Backend Step 4 FAIL: curl 失败"; exit 1; }
+[ "$API_STATUS" = "200" ] || { echo "❌ Backend Step 4 FAIL: API 返回 $API_STATUS（非 200）"; exit 1; }
+echo "✅ Backend Step 4 PASS: API 200 + 响应归档 /tmp/api-response.txt"
+
+# 反例: anti-patterns/02-container-not-started.md（容器未启声称迁移成功）
 ```
 
 ---
@@ -152,19 +198,25 @@ blocker:
 
 ## Step → 状态卡字段映射表（V11.2 NEW — 蒸馏自 08-real-verify 自检报告）
 
-主上下文执行 5 步时,按下列映射**自动填写** `docs/specs/changes/{id}/.state-card.md`：
+> **§5.8 主上下文唯一改声明（V11.2.1 NEW — state-card-protocol.md §5.8 同步升级）**：
+> 状态卡 5 字段（`stage_status` / `current_stage` / `gate_result.status` / `health` / `next_stage.id`）**只能由主上下文亲自 Edit**，子代理禁止直接写入。
+> 子代理只能在 Completion Report 中"建议"状态变更，主上下文亲自 Edit。
+> 本表是主上下文 Edit 的参考模板，**不是子代理直接写的清单**。
+> 详见 [references/state-card-protocol.md §5.8](../../references/state-card-protocol.md)。
+
+主上下文执行 5 步时,按下列映射**亲自 Edit** `docs/specs/changes/{id}/.state-card.md`：
 
 | Step | 状态卡字段 | 取值规则 |
 |------|-----------|---------|
-| Step 1 项目启动验证 | `gate_result.gate` = "real-verify/startup" | step_status: PASS/FAIL |
-| | `artifacts[].path` = "screenshots/{name}.png" | exists: true/false(由 visual-content-check.py 实跑决定) |
+| Step 1 项目启动验证 | `gate_result.gate` = "real-verify/startup" | status: PASS/FAIL（state-card-protocol §2.1 用 `status`，非 `step_status`） |
+| | `artifacts[].path` = "docs/verifications/{change-id}/{name}.png"（与归档路径对齐） | exists: true/false(由 visual-content-check.py 实跑决定) |
 | Step 2 类型/Lint/测试 | `gate_result.gate` = "real-verify/quality" | PASS 需 ≥90% 覆盖率 + 0 lint + 0 type error |
 | Step 3 视觉证据(PIL 3 层校验) | `artifacts[].evidence` = "visual-content-check.py PASS" | 见 [references/visual-evidence.md](../references/visual-evidence.md) |
 | Step 4 契约/产物对照 | `gate_result.gate` = "real-verify/contract-drift" | FAIL 时 `health = 🔴 blocked` + `next_stage = blocked` |
 | Step 5 全 PASS | `stage_status` = "completed", `stage_ended_at` = ISO 8601 | `next_stage = "4/review"` |
 | 任何 FAIL | `health = 🔴 blocked` | 立即按阻塞升级路径走 |
 
-完整字段定义见 [references/state-card-protocol.md §二](../../../references/state-card-protocol.md)。
+完整字段定义见 [references/state-card-protocol.md §二](../../references/state-card-protocol.md)。
 
 ## 5 工作流 × 4 维度总览表（V11.2 NEW — 蒸馏自 08-real-verify 自检报告）
 

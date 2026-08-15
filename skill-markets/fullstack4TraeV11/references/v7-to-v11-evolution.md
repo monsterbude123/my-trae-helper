@@ -347,7 +347,7 @@ maintenance_trigger:
 | 3 Implement | TDD + DRIFT + code-hygiene | code-hygiene.py / auto-test | stage-gate | 🟢 | ⚠️ 部分 |
 | 3.5 Real Verify | 5 项必跑 + 可见产物 | visual-content-check.py | **husky pre-push** | 🟢 | ✅ 已对齐 |
 | 4 Review | 4 维 + 证据链 3 层 | acceptance-audit.py | stage-gate | 🟢 | ⚠️ 部分 |
-| 4.5 Rot Scan | proactive-scan 8 项 | proactive-scan.py | stage-gate | 🟢 | ⚠️ 部分 |
+| 4.5 Rot Scan | proactive-scan 10 项 | proactive-scan.py | stage-gate | 🟢 | ⚠️ 部分 |
 | 5 Accept | 归档 + 知识沉淀 | spec-purge.py / pre-accept.sh | pre-accept（shell） | 🟢 | ⚠️ 部分 |
 | 6 Bug Fix | e2e 先行 + 6 层排查 | — | stage-gate | 🟡 | ⚠️ 部分 |
 | 7 Health | 4 维 + 优先级 | — | 异步（无 gate） | 🔴 | ❌ 未约束 |

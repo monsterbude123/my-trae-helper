@@ -20,7 +20,7 @@
 Step 1: 收集待去重需求（当前 change + 历史 change）
   ├─ 当前: docs/specs/changes/{current-id}/intent.md 或用户原话
   ├─ 历史: docs/specs/changes/{prev-id}/plan.md（活跃）
-  └─ 归档: docs/specs/archive/done/{prev-id}/plan.md
+  └─ 归档: docs/archive/done/{prev-id}/plan.md
 
 Step 2: 拆解为原子能力
   ├─ 读取每个需求的 Capabilities 列表
@@ -101,7 +101,7 @@ def scan_active_changes():
             and d != "archive"]
 
 def scan_done_changes():
-    done_dir = "docs/specs/archive/done"
+    done_dir = "docs/archive/done"
     if not os.path.exists(done_dir):
         return []
     return [d for d in os.listdir(done_dir) if os.path.isdir(f"{done_dir}/{d}")]
@@ -142,7 +142,7 @@ def dedup_by_atom(new_capabilities, history_changes):
 
 ```
 扫描: docs/specs/changes/ 活跃子目录  # ❌ 漏了 archive/done/
-正确: 同时扫描 docs/specs/archive/done/
+正确: 同时扫描 docs/archive/done/
 ```
 
 ### 反例 C：合并时未保留历史 plan

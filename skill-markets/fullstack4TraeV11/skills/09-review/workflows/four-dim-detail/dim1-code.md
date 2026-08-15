@@ -47,7 +47,7 @@ review_scorecard:
       extension_points: true
       docs_synced: true
 
-total: "{Σ(score × weight) / Σ(weight)}"  # 加权平均
+total: "{Σ(score × weight) / Σ(weight)}"  # 加权平均(与 references/four-dimension-scoring.md §评分公式 一致)
 ```
 
 ---

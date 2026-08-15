@@ -18,6 +18,8 @@
 - 设计 token（颜色 / 间距 / 字号）
 - 边缘情况（loading / error / empty）
 
+> **Article 锚定**: Article V Verifiable Claims(设计稿+交互+token+边缘情况 = 可验证的设计契约)+ Article IX Cross-Session Verify(设计师 ↔ 工程师双向交叉)。
+
 ## 关联引用
 
 - [SKILL.md §铁律 3](../SKILL.md) — designer-handoff

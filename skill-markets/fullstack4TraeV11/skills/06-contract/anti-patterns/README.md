@@ -8,6 +8,7 @@
 | 2 | 跳过孤儿契约测试清理 | [02-skip-orphan-sweep.md](02-skip-orphan-sweep.md) |
 | 3 | BREAKING 变更不用户确认 | [03-breaking-without-confirm.md](03-breaking-without-confirm.md) |
 | 4 | 契约漂移（代码与契约不一致）| [04-contract-drift.md](04-contract-drift.md) |
+| 5 | V10 实战蒸馏 | [V10-battle-tested.md](V10-battle-tested.md) |
 
 ## 自检清单
 

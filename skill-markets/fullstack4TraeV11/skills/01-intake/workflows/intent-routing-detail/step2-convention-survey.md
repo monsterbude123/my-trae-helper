@@ -22,7 +22,7 @@ Glob patterns:
 ```yaml
 project_conventions:
   naming:
-    change_id_format: "{YYYYMMDD}-{slug}"  # 例: 2026-08-11-add-user-auth
+    change_id_format: "{YYYY-MM-DD}-{slug}"  # 例: 2026-08-11-add-user-auth（V11 全局规范,见 project-iron-laws.md §D）
     bug_id_format: "{module}-{number}-{slug}"  # 例: settings-009-config-key
   custom_rules:
     - .trae/rules/coding-standards.md

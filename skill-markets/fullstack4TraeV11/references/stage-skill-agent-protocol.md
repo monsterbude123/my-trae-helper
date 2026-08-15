@@ -112,14 +112,14 @@ agent_completion:
 | 0 Plan | explore-agent（3 路径并行）| ✅ impact | stage-gate.py + spec-purge.py |
 | 0.5 Test Plan | explore-agent | ✅ | state-card-validator.py |
 | 1 Spec | spec-writer-agent | ❌ | code-hygiene.py + state-card-validator.py |
-| 1.5 Prototype | prototype-builder-agent | ❌ | visual-content-check.py |
+| 1.5 Prototype | prototype-builder-agent | ❌ | visual-content-check.py + prototype-backfill-check.py |
 | 2 Contract | contract-writer-agent | ❌ | orphan-detector.py + state-card-validator.py |
 | 3 Implement | code-implementer-agent（**TDD**）| ✅ 必跑 | code-hygiene.py + state-card-validator.py |
 | 3.5 Real Verify | e2e-verifier-agent | ✅ | visual-content-check.py + dist-hash-check.py |
 | 4 Review | review-agent（**不修代码**）| ✅ | acceptance-audit.py + state-card-validator.py |
 | 4.5 Rot Scan | rot-detector-agent | ❌ | proactive-scan.py + self-diagnose.py |
 | 5 Accept | archive-agent | ❌ | spec-knowledge-extract.py + spec-purge.py |
-| 6 Bug Fix | debugger-agent（**e2e 先行 FAIL**）| ✅ impact + context + query | code-hygiene.py + state-card-validator.py |
+| 6 Bug Fix | debugger-agent(**e2e 先行 FAIL**)| ✅ impact / context / query / detect_changes | code-hygiene.py + state-card-validator.py + reason-classifier.py(SKEPTICAL VALIDATION 触发时) |
 | 7 Project Health | health-auditor-agent | ✅ impact | proactive-scan.py + self-diagnose.py |
 
 **注**：TRAE IDE 默认 task-notification-agent / explore-agent 可用于大部分场景；复杂场景（如 spec-writer / contract-writer / debugger）可自定义 agent 类型。

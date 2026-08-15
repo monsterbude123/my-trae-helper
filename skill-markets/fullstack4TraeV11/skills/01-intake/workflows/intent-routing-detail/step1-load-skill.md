@@ -13,9 +13,9 @@
 2. 解析 depends_on:
    - skills: []（自身是入口，无外部依赖）
    - stages: []（无前置 stage）
-   - references: [9 个公共 references]
+   - references: [4 个 stage 强依赖 references,见 SKILL.md frontmatter]
    - scripts: [stage-gate.py, state-card-validator.py]
-3. 加载 9 个公共 references（来自编排器 §0.5）
+3. 按需加载公共 references（来自编排器 §0.5,stage 强依赖已在 frontmatter 声明）
 ```
 
 **校验**:

@@ -120,7 +120,7 @@ fi
 echo ""
 echo "    [4/5] fix-list.json existence check:"
 
-FIX_LIST="$PROJECT_ROOT/docs/specs/changes/${CHANGE_ID}/fix-list.json"
+FIX_LIST="$PROJECT_ROOT/docs/reports/fix-list.json"
 
 if [ ! -f "$FIX_LIST" ]; then
     echo "          ✗ fix-list.json NOT FOUND: $FIX_LIST"

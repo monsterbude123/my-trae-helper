@@ -25,6 +25,18 @@ passed = 0
 failed = 0
 
 
+def _safe_decode(b: bytes | None) -> str:
+    """跨平台解码子进程 stdout/stderr (Windows cp1252 兜底)。
+
+    AGENTS.md §4.1.3 + reference trap-instructions.yaml AP-9:
+    子进程 stdout 含 Unicode 字符 (━ / ✅ / ❌) 时,Windows 默认 cp1252
+    reader thread 解码失败 → proc.stdout = None → 字符串拼接崩溃。
+    """
+    if not b:
+        return ""
+    return b.decode("utf-8", errors="replace")
+
+
 def run_guard(skill_name):
     """运行结构守卫"""
     skill_path = REPO_ROOT / "skill-markets" / skill_name
@@ -34,9 +46,8 @@ def run_guard(skill_name):
     proc = subprocess.run(
         [sys.executable, str(GUARD), str(skill_path)],
         capture_output=True,
-        text=True
     )
-    return proc.returncode, proc.stdout + proc.stderr
+    return proc.returncode, _safe_decode(proc.stdout) + _safe_decode(proc.stderr)
 
 
 def test(name, fn):
@@ -79,7 +90,6 @@ def test_root_md_only_blocks():
     proc = subprocess.run(
         [sys.executable, str(GUARD), str(skill_path)],
         capture_output=True,
-        text=True
     )
     assert proc.returncode != 0, "根 .md 不应通过"
 

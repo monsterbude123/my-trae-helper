@@ -68,6 +68,7 @@ Step 6: 状态卡更新 + validator PASS + **updated_at 必刷新**(腐烂点 16
 | ac_list.md | `docs/specs/changes/{id}/ac_list.md` | 从 spec.md §Capabilities §Acceptance Criteria 提取(纯 AC 列表,结构化移交下游) |
 | edge_cases.md | `docs/specs/changes/{id}/edge_cases.md` | 从 spec.md §INV 边界提取(供 Stage 1.5 Prototype + Stage 2 Contract 引用) |
 | 状态卡 | `docs/specs/changes/{id}/.state-card.md` | [references/state-card-stage1-fields.md](references/state-card-stage1-fields.md) |
+| 状态卡必含字段 | (嵌入 .state-card.md frontmatter)| 强约束 8 字段见 [references/state-card-stage1-fields.md §2](references/state-card-stage1-fields.md):`e2e_count ≥ 2` / `inv_count ≥ 1` / `gate_result.gate = "spec-validate-hook"` / `gate_result.verified_at = updated_at` / `stage_ended_at` / `updated_by` / `next_stage.id = "1.5/prototype"` / `next_stage.expected_inputs = [spec.md, ac_list.md, edge_cases.md]` |
 
 ## Enhanced Acceptance 规则
 
@@ -95,13 +96,14 @@ Round 2: 基于 Round 1 回答追问更深层 → 用户答
 
 **反模式**: 单轮猜意图 = 违反 V10.16 禁止编造抽象理由。
 
-## 反模式（3 条索引到 anti-patterns/）
+## 反模式（3 条 + V10 实战蒸馏 索引到 anti-patterns/）
 
 | 反例 | 简述 |
 |------|------|
 | INV 凭空臆造 | 不基于业务规则 |
 | Clarify 跳过 | 单轮就写 spec |
 | Spec 写实施 | 写代码细节而非规格 |
+| [V10-battle-tested](anti-patterns/V10-battle-tested.md) | 状态卡字段漂移(updated_at / e2e_count / gate_result.gate / expected_inputs / stage_ended_at 5 类实战反例,V11.2 NEW)|
 
 ## 参考索引
 

@@ -1,13 +1,13 @@
-# 8 项扫描协议（Scan Protocol）
+# 10 项扫描协议（Scan Protocol）
 
-> Stage 4.5 Rot Scan Step 1 必走。V10.4 5 维度 + V10.8 扩展到 8 项。
+> Stage 4.5 Rot Scan Step 1 必走。V10.5 8 项 + V10.10 +2 项（obstacle-honesty + reason-fabrication）。
 
 ---
 
 ## 扫描流程
 
 ```bash
-# 跑全部 8 项扫描
+# 跑全部 10 项扫描
 python ../../scripts/proactive-scan.py --output docs/reports/rot-scan-{date}.md
 
 # 输出示例
@@ -21,15 +21,17 @@ python ../../scripts/proactive-scan.py --output docs/reports/rot-scan-{date}.md
     {"id": 5, "name": "bundle-staleness", "status": "PASS", "items": 0},
     {"id": 6, "name": "self-aggrandizing", "status": "PASS", "items": 0},
     {"id": 7, "name": "state-card-staleness", "status": "FAIL", "items": 1},
-    {"id": 8, "name": "stub-pileup", "status": "PASS", "items": 0}
+    {"id": 8, "name": "stub-pileup", "status": "PASS", "items": 0},
+    {"id": 9, "name": "obstacle-honesty", "status": "PASS", "items": 0},
+    {"id": 10, "name": "reason-fabrication", "status": "PASS", "items": 0}
   ],
-  "stats": {"total_checks": 8, "passed": 6, "failed": 2}
+  "stats": {"total_checks": 10, "passed": 8, "failed": 2}
 }
 ```
 
 ---
 
-## 8 项详细
+## 10 项详细
 
 ### Check 1: 视觉腐烂
 

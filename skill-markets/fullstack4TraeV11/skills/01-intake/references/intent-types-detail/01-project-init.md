@@ -36,7 +36,7 @@ Stage -1 Intake → Stage 0 Plan（项目级 plan.md）
 
 **关键产出**:
 - `AGENTS.md` — 项目入口
-- `docs/constitution.md` — 项目宪法（可继承 V11 16 Articles）
+- `docs/constitution.md` — 项目宪法（可继承 V11 17 Articles,含 Article XVII Secret Redaction）
 - `.trae/rules/*.md` — 项目级规则
 - `.trae/fullstack4traev11.config.yaml` — stage_config 覆盖
 

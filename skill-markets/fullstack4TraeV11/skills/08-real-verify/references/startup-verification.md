@@ -8,15 +8,15 @@
 
 ```bash
 # 1. 启动 dev server
-pnpm exec vite --port 1420 --host 127.0.0.1 &
+pnpm exec vite --port 5173 --host 127.0.0.1 &
 sleep 5
 
-# 2. curl 探测
-curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:1420/
-# 必须 200
+# 2. curl 探测（端口与 workflows/five-project-verify.md L29 一致 = 5173）
+curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5173/
+# 必须 200（端口以本项目 package.json 实际 dev server 端口为准，演示用 Vite 默认 5173）
 
 # 3. Playwright 截图（主上下文亲自执行）
-playwright_navigate(url="http://127.0.0.1:1420/")
+playwright_navigate(url="http://127.0.0.1:5173/")
 playwright_resize(width=1440, height=900)
 playwright_screenshot(name="evidence-default", fullPage=false)
 

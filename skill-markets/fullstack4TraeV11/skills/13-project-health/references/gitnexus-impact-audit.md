@@ -1,11 +1,12 @@
 # GitNexus 项目健康度审计 — Stage 7 Project Health
 
-> Stage 7 Project Health Step 4 必走（V10 project-health-auditor.md Step 4 蒸馏）。
+> Stage 7 Project Health 输出前必走 (V10 project-health-auditor.md Step 4 蒸馏)。
+> 注: V11 Stage 13 SKILL.md 4 步骨架中 Step 4 = "输出 report",本文档的 GitNexus 5 调用作为 Step 4 的子步 (Step 4.1 启动前影响面评估) 嵌入输出流程。
 > 用 GitNexus MCP 工具评估项目健康度的影响面。
 
 ---
 
-## Step 4: GitNexus 影响面评估
+## Step 4.1: GitNexus 影响面评估 (输出前)
 
 ```
 对不符合项运行 gitnexus impact() 评估影响面

@@ -11,13 +11,13 @@ depends_on:
     - ../../references/stage-interaction-protocol.md
     - ../../references/common-iron-rules.md
     - ../../references/common-anti-patterns.md
-    - ../../references/gitnexus-tools.md
     - ./references/gitnexus-impact.md
   scripts:
     - ../../scripts/stage-gate.py
     - ../../scripts/code-hygiene.py
     - ../../scripts/orphan-detector.py
     - ../../scripts/dist-hash-check.py
+    - ../../scripts/state-card-validator.py
 ---
 
 # Stage 3 Implement — TDD RED→GREEN
@@ -78,7 +78,7 @@ Step 4: 模块接入文档（条件触发）+ 量化汇报
 
 **V10 铁律 7**: 缺一不验收。
 
-## 反模式（4 条索引到 anti-patterns/）
+## 反模式（5 条索引到 anti-patterns/）
 
 | # | 反例 | V10 来源 |
 |:---:|------|---------|
@@ -86,6 +86,7 @@ Step 4: 模块接入文档（条件触发）+ 量化汇报
 | 2 | 编造测试证据 | V10.12 ANTI-反模式 1+2 |
 | 3 | 改实现不改测试（V10 rot #12）| implementer 铁律 2 合并 |
 | 4 | 漂移静默（不报告回流）| implementer 铁律 3 |
+| 5 | V10 实战蒸馏（rot #13 Bundle Staleness 独有）| implementer 铁律 5 |
 
 ## 参考索引
 
@@ -94,3 +95,4 @@ Step 4: 模块接入文档（条件触发）+ 量化汇报
 - [code-hygiene.md](references/code-hygiene.md) — 代码卫生
 - [drift-detect.md](references/drift-detect.md) — 漂移检测
 - 公共铁律 Article I/VI/IX: [../../references/common-iron-rules.md](../../references/common-iron-rules.md)
+- V10 实战蒸馏: [anti-patterns/V10-battle-tested.md](anti-patterns/V10-battle-tested.md)

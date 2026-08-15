@@ -87,3 +87,4 @@ Step 4: 阻塞处理（任一 FAIL → 5 字段报告 + 状态卡 blocked）
 - [visual-evidence.md](references/visual-evidence.md) — 视觉证据 3 层校验
 - [blockage-report.md](references/blockage-report.md) — 5 字段阻塞报告
 - V10 §0.10: `V10 来源` (已蒸馏到本文档)
+- V10 实战蒸馏: [anti-patterns/V10-battle-tested.md](anti-patterns/V10-battle-tested.md)

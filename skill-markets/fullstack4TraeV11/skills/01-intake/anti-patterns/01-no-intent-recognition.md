@@ -57,7 +57,7 @@ Step 4: 交接下一 stage
 **NEVER**:
 - ❌ 不识别意图直接进 spec / plan / implement
 - ❌ 跳过状态卡初始化
-- ❌ AskUserQuestion 用经验主义臆断（违反 V10.16 禁止编造抽象理由）
+- ❌ AskUserQuestion 用经验主义臆断（违反 Article XVI §1.4 质疑性校验）
 
 ---
 

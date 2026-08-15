@@ -8,10 +8,10 @@
 
 ```yaml
 checks:
-  - docs/INDEX.md 路径 vs 实际文件
-  - docs/api-endpoints/ 路径 vs 代码
-  - docs/modules/ 路径 vs 模块
-  - ARCHITECTURE.md 引用 vs 实际
+  - docs/specs/INDEX.md 路径 vs 实际文件        # V11 §1 project-structure.md L29 (单源 INDEX)
+  - docs/specs/changes/{id}/contracts/api-contracts.md 路径 vs 代码   # V11 §1 L41
+  - docs/modules/{module}.md 路径 vs 模块        # V11 §1 L49-50
+  - docs/specs/INDEX.md 引用 vs 实际             # V11 §1 (无 ARCHITECTURE.md 强制,V11 路径基准)
 ```
 
 **工具**: `ls + grep` 路径正则。
@@ -20,12 +20,12 @@ checks:
 
 ```yaml
 checks:
-  - 与 ARCHITECTURE.md 目录树一致
-  - 与 INDEX.md 目录树一致
+  - 与 docs/specs/INDEX.md 目录树一致           # V11 §1 project-structure.md L29 (无 ARCHITECTURE.md)
+  - 与 docs/specs/INDEX.md 目录树一致            # 同上,V11 单源
   - 模块边界无循环依赖
 ```
 
-**工具**: `tree + diff` ARCHITECTURE.md。
+**工具**: `tree + diff docs/specs/INDEX.md`(V11 §1 单源 INDEX)。
 
 ## 维度 3：版本残留
 
@@ -43,8 +43,8 @@ checks:
 
 ```yaml
 checks:
-  - INDEX.md ↔ ARCHITECTURE.md ↔ 模块文档
-  - API-REFERENCE ↔ contracts/
+  - docs/specs/INDEX.md ↔ docs/modules/{module}.md ↔ 模块文档  # V11 §1
+  - docs/specs/changes/{id}/contracts/api-contracts.md ↔ tests/contracts/   # V11 §1
   - CHANGELOG.md 最新条目
 ```
 

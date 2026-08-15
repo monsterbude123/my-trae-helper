@@ -5,6 +5,9 @@ stage: 7
 parent: fullstack4traev11
 depends_on:
   skills: []
+  # 横向支线(stage 7/health 无 OUTBOUND 上游 stage),可从任意 stage 转入
+  # 参见 registry/state-machine.yaml:9/14/19/24/29/34/39/44/49/54 (11 inbound transitions)
+  # 与 orchestrator SKILL.md §0.3 L283 "支线(独立): 7 Project Health (异步自检,可与任一 stage 并行)" 一致
   stages: []
   references:
     - ../../references/state-card-protocol.md
@@ -21,7 +24,7 @@ depends_on:
 
 > 第一性原则：**主动自检是反失真机制**。异步支线，可与任一 stage 并行，不阻塞主流程。
 
-## 铁律（6 条 — V10 project-health-auditor 蒸馏）
+## 铁律（7 条 — V10 project-health-auditor 6 条 + V11.4 self-diagnose 蒸馏 1 条）
 
 ```
 1. 异步非阻塞   — 不阻塞主流程；可在任一 stage 并行
@@ -46,10 +49,10 @@ Step 4: 输出 project-health-{date}.md + .json
 
 | 维度 | 检测项 |
 |------|------|
-| **路径一致性** | 文档路径 vs 代码路径是否对齐 |
-| **目录树** | 与 ARCHITECTURE.md / INDEX.md 一致 |
+| **路径一致性** | 文档路径 vs 代码路径是否对齐 (V11 §1: docs/specs/INDEX.md / docs/specs/changes/{id}/contracts/ 路径基准) |
+| **目录树** | 与 docs/specs/INDEX.md 目录树一致 (V11 §1 project-structure.md L29 单源) |
 | **版本残留** | .bak / .old / 备份文件 / 调试代码 |
-| **文档同步** | INDEX.md / API-REFERENCE / 模块文档 |
+| **文档同步** | docs/specs/INDEX.md / docs/specs/changes/{id}/contracts/api-contracts.md / docs/modules/ |
 
 ## 关键产物
 

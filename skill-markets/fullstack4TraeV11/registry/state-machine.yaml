@@ -52,11 +52,11 @@ states:
   - id: "4.5/rot-scan"
     name: 腐烂扫描
     allowed_transitions: ["5/accept", "6/bug-fix", "7/health"]
-    required_artifacts: ["rot-scan-report.md"]
+    required_artifacts: ["rot-scan-{date}.md"]
     gate: stage-4.5-rot-scan
   - id: "5/accept"
     name: 验收
-    allowed_transitions: ["7/health"]
+    allowed_transitions: []
     required_artifacts: ["ACCEPT_REPORT.md"]
     gate: stage-5-accept
   - id: "6/bug-fix"

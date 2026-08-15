@@ -61,6 +61,17 @@ Step 5 — 追加变更记录: | {日期} | v{版本} | {修订内容摘要} |
 
 ---
 
+## §2.5 Round 术语定义（Stage 9 特有）
+
+- **Round 1**: Reviewer 退回 implementer 重做（失败标签必填）
+- **Round 2**: Reviewer 升级上报用户（5 字段阻塞报告，Article XV）
+- **Round 3+**: rescue hatch — 自动触发回退 Phase 0（Intake）重新审视需求
+- **作用域**: 仅 Stage 9 Review 使用，Stage 6 Bug Fix 的 B.1/B.2/B.3 是不同术语（详见 glossary.md §V10.8 bug-workflow）
+
+> ⚠️ Round ≠ Stage 6 bug-workflow 的 B.x — agent 跨 stage 时勿混淆
+
+---
+
 ## §3 Round 1: 退回 implementer
 
 ```

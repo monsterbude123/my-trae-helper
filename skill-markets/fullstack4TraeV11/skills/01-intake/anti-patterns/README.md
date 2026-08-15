@@ -76,4 +76,4 @@ intake_checklist:
 - [SKILL.md](../SKILL.md) — Stage -1 入口
 - [README.md](../README.md) — 阶段元信息
 - [公共反例](../../../references/common-anti-patterns.md) — 18 条跨阶段公共反例
-- [公共铁律](../../../references/common-iron-rules.md) — 16 跨阶段铁律
+- [公共铁律](../../../references/common-iron-rules.md) — 17 跨阶段铁律（Article XVII Secret Redaction,见 common-iron-rules.md）

@@ -2,7 +2,7 @@
 
 > **来源**: fullstack4TraeV10/references/prototype.md（V10.9 蒸馏保留，V11.2 NEW 强化）
 > **部署时不依赖 V10**：内容已完整内化到 V11
-> **关联**: [prototype-linkage.md](prototype-linkage.md)（HANDOFF 联动）+ [designer-handoff.md](../../../../fullstack4TraeV10/references/designer-handoff.md)（外部 Designer 协议）
+> **关联**: [prototype-linkage.md](prototype-linkage.md)（HANDOFF 联动）+ ⚠️ V10 来源溯源,部署前可删:[designer-handoff.md](../../../../fullstack4TraeV10/references/designer-handoff.md)（外部 Designer 协议）
 
 ---
 
@@ -18,6 +18,8 @@
 **核心理念**：需求确认后 AI 设计提示词 + 交互逻辑，后续阶段以此为稳定真相源，不变更。
 
 **触发条件**：spec.md 含 UI 声明（页面/组件/视觉/交互任一）。
+
+> **Article 锚定**: Article II Spec First(spec 是契约来源)+ Article V Verifiable Claims(双产物必含可视化证据)+ Article IX Cross-Session Verify(实施者 vs 设计者双向交叉)。
 
 ---
 
@@ -231,5 +233,5 @@ Step 3: 用户确认两份文档 → prototypes/ 就位 → 后续验收正常�
 - [prototype-linkage.md](prototype-linkage.md) — HANDOFF 联动协议（章节契约 + 归属决策树 + 三态处理）
 - [../templates/design-prompt.md](../templates/design-prompt.md) — design-prompt 模板
 - [../templates/ui-ux-logic.md](../templates/ui-ux-logic.md) — ui-ux-logic 模板
-- [../../../../fullstack4TraeV10/references/designer-handoff.md](../../../../fullstack4TraeV10/references/designer-handoff.md) — Designer ↔ 主上下文 ↔ spec-writer 交接协议
+- ⚠️ V10 来源溯源,部署前可删:[../../../../fullstack4TraeV10/references/designer-handoff.md](../../../../fullstack4TraeV10/references/designer-handoff.md) — Designer ↔ 主上下文 ↔ spec-writer 交接协议
 - 门禁脚本：`scripts/prototype-backfill-check.py`

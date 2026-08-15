@@ -467,7 +467,7 @@ Step 3: 确认保留产物
    - test-plan.md / spec.md / prototype.md
    - contracts/ / prototypes/ / verifications/ 目录
    - IMPLEMENT_*_REPORT.md / REAL_VERIFY_*_REPORT.md
-   - review-report*.md / rot-scan-report*.md / ACCEPT_REPORT.md
+   - review-report*.md / rot-scan-*.md / ACCEPT_REPORT.md
    - tasks.md
 
 4. 同步清理(仅 docs/ 下的副本,不动代码/归档):

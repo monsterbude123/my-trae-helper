@@ -193,7 +193,7 @@ MUST: 写完任何 Gate 脚本后必须用真反例跑自验收
 | 3 | contracts/ → 代码 + 测试 | TDD GREEN + DRIFT CHECK | 🛑 |
 | 3.5 | Implement → verify-report | 5 项必跑 + 启动可见产物 | 🛑 |
 | 4 | Real Verify → review-report | 质疑式 4 维验收 + DOC SYNC | ⚙ |
-| 4.5 | Review → rot-scan | proactive-scan 8 项 | 🛑 |
+| 4.5 | Review → rot-scan | proactive-scan 10 项 | 🛑 |
 | 5 | Rot Scan PASS → archive/done | 归档不可变 + 知识沉淀 | 🛑 |
 | 6 | bug 单 → 修复 + CLOSED | e2e 先行 + 6 层排查 | 🛑 |
 | 7 | 任一阶段 → project-health | 4 维度 + 优先级分级 | ⚙ |
@@ -246,7 +246,7 @@ Guard 层负责自动化检查，**不阻断工作流，但记录异常**（除�
 | 3 | TDD GREEN + DRIFT CHECK + code-hygiene.py + auto-test.py + drift-detect.py | 🛑 |
 | 3.5 | 5 项必跑 + 启动可见产物 + visual-content-check.py | 🛑 |
 | 4 | 4 维评分 + 证据链 3 层 + DOC SYNC | 🛑 |
-| 4.5 | proactive-scan.py 8 项 + self-diagnose.py | 🛑 |
+| 4.5 | proactive-scan.py 10 项 + self-diagnose.py | 🛑 |
 | 5 | 归档前检查 + spec-purge.py + spec-knowledge-extract.py + pre-accept.sh | 🛑 |
 | 6 | e2e 先行 FAIL + 6 层排查 + 全量回归 + bug 单 CLOSED | 🛑 |
 | 7 | 4 维度检查 + 优先级分级（**非阻塞**，异步）| ⚙ |

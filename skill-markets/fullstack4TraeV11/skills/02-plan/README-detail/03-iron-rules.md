@@ -14,7 +14,7 @@
 4. DEDUP BY ATOM       — 需求去重，> 50% 重叠 → 合并，< 50% → 新建
 5. PURGE ON REFACTOR   — 重构场景先调 spec-purge.py 清除旧产物
 6. DUAL SEARCH         — 主上下文不直行代码 = 主上下文不直行探索
-7. SKEPTICAL VALIDATION — P0/P1 规划按 Article XVI 走质疑性校验
+7. SKEPTICAL VALIDATION — P0/P1 规划按 [skeptical-validation-protocol.md](../../../references/skeptical-validation-protocol.md) 走质疑性校验（4 维度 + 强制声明格式）
 8. PLAN ≤ 80 LINES     — plan.md ≤ 80 行，Capabilities ≤ 5 项
 9. CLOSURE ≤ 5 STEPS   — P0 闭环步骤 ≤ 5 步
 10. NEVER ACT ON PLAN  — plan.md 是规划不是实施

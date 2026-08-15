@@ -15,7 +15,7 @@
 | `code-hygiene.py` / `orphan-detector.py` | 代码卫生 / 孤儿测试 | Stage 3 / 4 / 4.5 |
 | `dist-hash-check.py` / `visual-content-check.py` | Bundle 一致性 / 视觉内容校验 | Stage 3.5 / 4 |
 | `acceptance-audit.py` | 4 维验收审计 | Stage 4 |
-| `proactive-scan.py` / `self-diagnose.py` | 5 项腐化扫描包 / Meta 自我诊断 | Stage 4.5 |
+| `proactive-scan.py` / `self-diagnose.py` | 10 项腐化扫描包 / Meta 自我诊断 | Stage 4.5 |
 | `spec-purge.py` / `spec-knowledge-extract.py` | Spec 清除归档 / 知识沉淀 | Stage 5 |
 | `reason-classifier.py` | 抽象理由分类器（6 类） | 所有 stage（被质疑时） |
 | `init-from-zero.py` | 项目完整初始化（4 步:config+hooks+rules+AGENTS.md+docs 骨架） | 项目首次接入 V11 |
@@ -25,7 +25,7 @@
 | `upgrade-from-v10.py` | V10→V11 升级兼容性检查 | V10 项目升级 |
 | `scan-templates.py` | 模板扫描 | 模板变更时 |
 | `phase-gate.py` | 阶段门禁（V10 兼容） | V10 项目兼容 |
-| `check_integration_contract.py` | 集成契约检查 | Stage 2 Contract |
+| `check_integration_contract.py` | 集成契约检查（项目级配置，按需启用） | Stage 3 Implement / Stage 4 Review |
 | `run-all-guards.py` | flow 层统一消费四表（registry/），逐 stage 跑门禁 | 所有 stage 验收 |
 | `repair-flow-gate.py` | 修复流程程序化门禁（读 registry/repair-flow.yaml） | Stage 6 Bug Fix |
 

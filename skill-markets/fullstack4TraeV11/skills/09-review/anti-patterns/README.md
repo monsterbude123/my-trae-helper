@@ -11,10 +11,17 @@
 
 ```yaml
 review_checklist:
+  # 4 维 + evidence 基线
   - [ ] 4 维必评（无 N/A 充数）？
   - [ ] 每个维度附 evidence（命令 + 输出 + file:line）？
   - [ ] 主上下文亲自 Read 截图？
   - [ ] 主动证伪（5 项高风险清单）？
   - [ ] 失败标签必填（如 REJECT）？
   - [ ] DOC SYNC 已查？
+  # 铁律反向检查（防漏）V11.3 NEW
+  - [ ] 铁律 5 VERIFY UNDERSTANDING — 机械验证 implementer「理解确认」？
+  - [ ] 铁律 6 REVIEWER DOES NOT FIX — reviewer 不动代码？
+  - [ ] 铁律 7 FUNCTIONAL CHECK — 用户视角功能可用？
+  - [ ] 铁律 10 关键门禁套件 — skeptical-validation-protocol.md 走查？
+  - [ ] 铁律 10(指针) 必读 5 件套 — prototype HTML + design-prompt + ui-ux-logic + design.md + HANDOFF-DESIGNER.md 全 Read？
 ```

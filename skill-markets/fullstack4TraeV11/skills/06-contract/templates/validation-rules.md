@@ -29,4 +29,4 @@
 
 - [api-contracts.md](api-contracts.md)
 - [domain-models.md](domain-models.md)
-- V10 配置治理 D-009: 项目级 `.trae/rules/配置治理.md §5`（已蒸馏到本文档）
+- V10 配置治理 D-009（已蒸馏到本文档与 03-breaking-without-confirm.md）

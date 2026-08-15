@@ -97,7 +97,7 @@ gates:
     script: pre-accept.sh
     host: manual
     guards: [spec-purge]
-    required_artifacts: ["docs/archives/{change_id}/"]
+    required_artifacts: ["docs/archive/done/{change_id}/"]
     fail_action: BLOCK
 
   - id: stage-bug-fix
@@ -106,7 +106,7 @@ gates:
     script: reason-classifier.py
     host: manual
     guards: [reason-classification]
-    required_artifacts: ["docs/bugs/{bug_id}.yaml"]
+    required_artifacts: ["docs/bugs/{bug_id}.md"]
     fail_action: BLOCK
 
   - id: stage-health

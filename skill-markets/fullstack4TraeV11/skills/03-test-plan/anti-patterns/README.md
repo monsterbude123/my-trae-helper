@@ -1,15 +1,17 @@
 # Anti-patterns — Stage 0.5 Test Plan 反例库
 
-> 4 条核心反例 + 主上下文自检清单。
+> 4 条核心反例 + 1 份 V10 实战蒸馏(2 条战役反例) + 主上下文自检清单。
 
 ## 反例索引
 
-| # | 反例 | 文件 |
-|:---:|------|------|
-| 1 | 无验收维度直接测试 | [01-no-acceptance-dimension.md](01-no-acceptance-dimension.md) |
-| 2 | 测试不可追溯 | [02-test-not-traceable.md](02-test-not-traceable.md) |
-| 3 | 覆盖率门槛宽松 | [03-coverage-too-low.md](03-coverage-too-low.md) |
-| 4 | 跳过 E2E / INV | [04-skip-e2e.md](04-skip-e2e.md) |
+| # | 反例 | 文件 | 来源 |
+|:---:|------|------|------|
+| 1 | 无验收维度直接测试 | [01-no-acceptance-dimension.md](01-no-acceptance-dimension.md) | 理论分类 |
+| 2 | 测试不可追溯 | [02-test-not-traceable.md](02-test-not-traceable.md) | 理论分类 |
+| 3 | 覆盖率门槛宽松 | [03-coverage-too-low.md](03-coverage-too-low.md) | 理论分类 |
+| 4 | 跳过 E2E / INV | [04-skip-e2e.md](04-skip-e2e.md) | 理论分类 |
+| 5 | 假装 100% 覆盖 | [V10-battle-tested.md](V10-battle-tested.md) §反例 5 | V10 战役蒸馏 |
+| 6 | 编造测试文件路径 | [V10-battle-tested.md](V10-battle-tested.md) §反例 6 | V10 战役蒸馏 |
 
 ## 自检清单
 

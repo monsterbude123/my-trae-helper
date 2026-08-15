@@ -89,7 +89,7 @@
 | `3/implement` | Stage 3 Implement | TDD RED→GREEN 实施(契约驱动 + 深度业务理解 + 漂移检测) |
 | `3.5/real-verify` | Stage 3.5 Real Verify | 启动可见产物(**唯一信任基础,不接受自评**) |
 | `4/review` | Stage 4 Review | 质疑式验收(FAIL IS FAIL + 4 维评分 + 主动证伪 + DOC SYNC) |
-| `4.5/rot-scan` | Stage 4.5 Rot Scan | 腐化扫描(proactive-scan.py 8 项必跑 + 元检测 + 修复,NO ROT NO ACCEPT) |
+| `4.5/rot-scan` | Stage 4.5 Rot Scan | 腐化扫描(proactive-scan.py 10 项必跑 + 元检测 + 修复,NO ROT NO ACCEPT) |
 | `5/accept` | Stage 5 Accept | 归档门禁(归档不可变 + 知识沉淀 + INDEX 更新) |
 | `6/bug-fix` | Stage 6 Bug Fix | 独立专精流程(根因不明不修复 + e2e 先行 + 6 层排查 + TDD 修复) |
 | `7/project-health` | Stage 7 Project Health | 项目健康度自检(**异步非阻塞** + 4 维度检查 + 防失真) |
@@ -102,6 +102,7 @@
 | stage_config | SKILL.md frontmatter 字段。V11 NEW。13 stage 路由 + depends_on 声明,由编排器解析 |
 | stage skill agent | 用 Task 启动子代理 + 注入 stage skill 调用约定 = 完成的代理(V11 不新增 stage agent skill,而是给现有 agent 一个调用 stage skill 的标准协议) |
 | stage-gate.py | V11 阶段门禁(13 stage 统一)。stage 切换前必跑 |
+| 关键路径 / Critical Path | 满足以下任一条件视为关键路径(覆盖率门槛 100% E2E 覆盖):涉及安全 / 涉及资金 / 涉及数据完整性 / 涉及业务核心规则。Stage 0.5 Test Plan 必显式声明关键路径清单,Stage 3 实施者必对关键路径写 E2E 测试,Stage 4 Review 必逐项核验 100% 覆盖。来源:skills/03-test-plan/references/coverage-rules.md §关键路径定义 |
 
 ---
 

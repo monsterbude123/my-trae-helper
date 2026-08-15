@@ -35,7 +35,7 @@ required_artifacts:
   - docs/specs/changes/{id}/contracts/validation-rules.md
   - docs/specs/changes/{id}/review-report.md
   - docs/reports/rot-scan-{date}.md
-  - docs/reports/verify-report.md
+  - docs/specs/changes/{id}/verify-report.md
 ```
 
 任一缺失 → 5 字段阻塞报告 + 状态卡 blocked。
