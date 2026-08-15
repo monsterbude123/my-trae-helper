@@ -40,6 +40,7 @@ REQUIRED_TRAP_IDS = [
     "AP-CAT-SCHEMA",
     "AP-CAT-DOCS-LANG",
     "AP-CAT-META-REGISTER",
+    "AP-17",
 ]
 
 

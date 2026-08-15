@@ -35,7 +35,7 @@ python scripts/spec-knowledge-extract.py --change {change-id}
 # 输出: docs/knowledge/{change-id}-lessons.md + docs/modules/{module}.md 更新
 
 # 然后才归档
-mv docs/specs/changes/{change-id}/ docs/specs/archive/done/{change-id}/
+mv docs/specs/changes/{change-id}/ docs/archive/done/{change-id}/
 ```
 
 ## 关联引用

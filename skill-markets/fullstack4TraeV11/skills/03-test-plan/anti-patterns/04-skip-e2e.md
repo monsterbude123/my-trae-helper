@@ -165,4 +165,4 @@ test('user can complete purchase', async ({ page }) => {
 
 - [SKILL.md §铁律 3](../SKILL.md) — E2E ≥ 2 / INV ≥ 1 / UNIT ≥ 5
 - [coverage-mapping.md §最低组合](../workflows/coverage-mapping.md) — 3 层级映射
-- 公共铁律 Article II: [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)
+- 公共铁律 Article I.2(测试覆盖 ≥ 90%) + Article XIII(可见产物是唯一信任基础): [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)

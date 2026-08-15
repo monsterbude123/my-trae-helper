@@ -102,4 +102,4 @@ go test ./tests/e2e/...                                                         
 - [SKILL.md §铁律 2](../SKILL.md) — 覆盖率门槛 ≥ 90%
 - [coverage-mapping.md](../workflows/coverage-mapping.md) — 验收维度 → 测试用例
 - [test-plan.md](../templates/test-plan.md) — test-plan.md 模板
-- 公共铁律 Article II 满分硬门禁: [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)
+- 公共铁律 Article I.2 满分硬门禁(不可为赶进度降低测试覆盖 ≥ 90%): [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)

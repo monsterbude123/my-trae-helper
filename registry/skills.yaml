@@ -315,10 +315,15 @@ skills:
   - skill: fullstack4TraeV11
     status: active
     guards:
-      - { id: fullstack4TraeV11-structure, category: structure, script: scripts/fullstack4TraeV11-guard.py, triggers: [pre-commit, L3] }
+      - { id: fullstack4TraeV11-structure, category: structure, script: scripts/fullstack4TraeV11-structure-guard.py, triggers: [pre-commit, L3] }
+      - { id: fullstack4TraeV11-flow, category: flow, script: scripts/fullstack4TraeV11-flow-guard.py, triggers: [pre-commit, pre-push, L3] }
+      - { id: fullstack4TraeV11-gate-config, category: gate-config, script: scripts/fullstack4TraeV11-gate-config-guard.py, triggers: [pre-push, L3] }
+      - { id: fullstack4TraeV11-trap, category: trap, script: scripts/fullstack4TraeV11-trap-guard.py, triggers: [L4] }
     gates:
-      - { id: fullstack4TraeV11-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack4TraeV11-structure] }
-      - { id: fullstack4TraeV11-l3, level: L3, hooks: [.github/workflows/skill-market-gate.yml], runs_guards: [fullstack4TraeV11-structure] }
+      - { id: fullstack4TraeV11-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack4TraeV11-structure, fullstack4TraeV11-flow] }
+      - { id: fullstack4TraeV11-pre-push, level: L2, hooks: [.husky/fullstack4TraeV11-pre-push, .husky/pre-push], runs_guards: [fullstack4TraeV11-flow, fullstack4TraeV11-gate-config] }
+      - { id: fullstack4TraeV11-l3, level: L3, hooks: [.github/workflows/skill-market-gate.yml], runs_guards: [fullstack4TraeV11-structure, fullstack4TraeV11-flow, fullstack4TraeV11-gate-config] }
+      - { id: fullstack4TraeV11-l4, level: L4, hooks: [.husky/fullstack4TraeV11-l4, .github/workflows/skill-market-gate.yml], runs_guards: [fullstack4TraeV11-flow, fullstack4TraeV11-trap] }
     maintainer: guard-smith
 
   - skill: game-production-kit

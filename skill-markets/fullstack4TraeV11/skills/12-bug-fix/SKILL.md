@@ -10,6 +10,10 @@ depends_on:
     - ../../references/state-card-protocol.md
     - ../../references/gitnexus-tools.md
     - ./references/gitnexus-6-layer.md
+    - ./references/five-step-flow.md
+    - ./references/six-layer-diagnosis.md
+    - ./references/cross-layer-fix.md
+    - ./references/bug-state-machine.md
     - ../../references/stage-interaction-protocol.md
     - ../../references/common-iron-rules.md
   scripts:

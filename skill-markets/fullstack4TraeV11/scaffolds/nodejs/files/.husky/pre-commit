@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# Pre-commit gate for Node.js V11 preset (L1 -> Stage 1 Spec)
+# Runs lint + typecheck + unit tests + validates Stage 1 Spec completeness.
+# HARD REQUIREMENT: required scripts MUST exist in package.json — no echo-skipping allowed.
+
+set -euo pipefail
+
+REQUIRED_SCRIPTS=("lint" "typecheck" "test:unit")
+REQUIRED_FILES=("package.json" "docs/specs/.state-card.md")
+FAILURES=0
+
+cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+echo "==> [L1 -> Stage 1 Spec] Running pre-commit gate (nodejs V11 preset)..."
+
+# ---- Step 1: existence check (fail-fast) ----
+echo "    [1/?] Required file existence check:"
+MISSING_FILES=()
+for f in "${REQUIRED_FILES[@]}"; do
+  if [ -f "$f" ]; then
+    echo "          [$f] ✓ exists"
+  else
+    echo "          [$f] ✗ MISSING — gate fails"
+    MISSING_FILES+=("$f")
+    FAILURES=$((FAILURES + 1))
+  fi
+done
+
+if [ ! -f package.json ]; then
+  echo ""
+  echo "    🛑 Cannot continue without package.json"
+  exit 1
+fi
+
+# ---- Step 2: required script existence check ----
+has_script() {
+  local name="$1"
+  python3 - "$name" <<'PYEOF' 2>/dev/null
+import json, sys
+try:
+    with open('package.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    scripts = (data.get('scripts') or {})
+    name = sys.argv[1]
+    sys.exit(0 if name in scripts else 1)
+except Exception:
+    sys.exit(1)
+PYEOF
+}
+
+echo ""
+echo "    [2/?] Required script existence check:"
+MISSING=()
+for script in "${REQUIRED_SCRIPTS[@]}"; do
+  if has_script "$script"; then
+    body=$(python3 -c "import json; print(json.load(open('package.json')).get('scripts',{}).get('$script',''))" 2>/dev/null)
+    if echo "$body" | grep -qiE '^[[:space:]]*echo[[:space:]]+["'"'"']?(skip|not|skipp)'; then
+      echo "          [$script] ✗ ECHO-SKIP DETECTED — gate rejects placeholder"
+      MISSING+=("$script")
+      FAILURES=$((FAILURES + 1))
+    else
+      echo "          [$script] ✓ script exists"
+    fi
+  else
+    echo "          [$script] ✗ MISSING — gate fails"
+    MISSING+=("$script")
+    FAILURES=$((FAILURES + 1))
+  fi
+done
+
+# ---- Step 3: state-card validation (Stage 1 Spec) ----
+STATE_CARD=$(find docs/specs -name '.state-card.md' 2>/dev/null | head -1)
+if [ -n "$STATE_CARD" ]; then
+  echo ""
+  echo "    [3/?] State card validation:"
+  if grep -q 'current_stage.*1-spec' "$STATE_CARD" 2>/dev/null; then
+    echo "          ✓ current_stage = 1-spec"
+  else
+    current=$(grep 'current_stage' "$STATE_CARD" 2>/dev/null | head -1 || echo "unknown")
+    echo "          ⚠ current_stage not at 1-spec: $current"
+    echo "          (This is a warning, not a blocker)"
+  fi
+fi
+
+if [ $FAILURES -gt 0 ]; then
+  echo ""
+  echo "    🛑 Gate FAIL: ${FAILURES} required item(s) missing or invalid"
+  if [ ${#MISSING_FILES[@]} -gt 0 ]; then
+    echo "        Missing files:"
+    for s in "${MISSING_FILES[@]}"; do echo "          - $s"; done
+  fi
+  if [ ${#MISSING[@]} -gt 0 ]; then
+    echo "        Missing/invalid scripts:"
+    for s in "${MISSING[@]}"; do echo "          - $s"; done
+    echo ""
+    echo "    Fix: add real implementation to package.json 'scripts'."
+    echo "    Forbidden: 'echo \"skipping ...\"' placeholders."
+  fi
+  exit "$FAILURES"
+fi
+
+# ---- Step 4: real execution ----
+run_step() {
+  local label="$1"
+  local script="$2"
+  echo ""
+  echo "    [$label] npm run $script"
+  if npm run "$script"; then
+    echo "    [$label] ✓ PASS"
+  else
+    echo "    [$label] ✗ FAIL"
+    FAILURES=$((FAILURES + 1))
+  fi
+}
+
+run_step "4/6" "lint"
+run_step "5/6" "typecheck"
+run_step "6/6" "test:unit"
+
+if [ $FAILURES -gt 0 ]; then
+  echo ""
+  echo "==> [L1] FAILED ($FAILURES check(s) failed)"
+  exit "$FAILURES"
+fi
+
+# ---- Step 5: update state-card gate_result ----
+if [ -f docs/specs/.state-card.md ]; then
+  sed -i 's/gate_result:.*/gate_result: PASS/' docs/specs/.state-card.md 2>/dev/null || true
+fi
+
+echo ""
+echo "==> [L1 -> Stage 1 Spec] PASSED"

@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "preset": "nodejs",
+  "description": "V11 四档 Git/CI 门禁配置（L1-L4）。由 scripts/run-gate-level.py 程序化消费，是项目的单一权威门禁源。",
+  "levels": {
+    "L1": {
+      "description": "Pre-commit — Stage 1 Spec 完整性 + 快速反馈",
+      "stage": "1/spec",
+      "host": "husky-pre-commit",
+      "checks": ["lint", "typecheck", "test:unit"],
+      "timeout_seconds": 120,
+      "blocking": true
+    },
+    "L2": {
+      "description": "Pre-push — Stage 3.5 Real Verify 集成信心",
+      "stage": "3.5/real-verify",
+      "host": "husky-pre-push",
+      "checks": ["test:integration", "test:coverage", "build"],
+      "timeout_seconds": 600,
+      "blocking": true
+    },
+    "L3": {
+      "description": "PR merge — Stage 2/4/4.5 归并（契约+评审+腐化扫描）+ 全量 E2E",
+      "stage": "2/contract,4/review,4.5/rot-scan",
+      "host": "github-actions",
+      "checks": ["test:e2e"],
+      "gates": ["stage-contract", "stage-review", "stage-rot-scan"],
+      "timeout_seconds": 1800,
+      "blocking": true
+    },
+    "L4": {
+      "description": "Release — Stage 5 Accept 验收归档 + 安全审计",
+      "stage": "5/accept",
+      "host": "github-actions",
+      "checks": ["test:all", "security-scan"],
+      "gates": ["stage-accept"],
+      "timeout_seconds": 3600,
+      "blocking": true
+    }
+  }
+}

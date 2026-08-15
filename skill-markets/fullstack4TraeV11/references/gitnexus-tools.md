@@ -62,16 +62,19 @@ mcp__gitnexus__detect_changes(scope="compare", base_ref="main")
 
 ---
 
-## V11 GitNexus 双端 Hook（V10.10 NEW）
+## V11 GitNexus 双端 Hook（V11.4 NEW）
+
+> 触发时机：**会话开始必跑一次 + 会话结束若 agent 改过代码再跑一次**（非编辑时实时触发）。
 
 ### 读端：SessionStart（gitnexus-session-check.py）
 
 ```
-会话启动时:
+会话启动时（必跑）:
   ├─ meta.json 缺失 → 后台触发 analyze
   ├─ meta.lastCommit != HEAD → 后台触发 analyze（staleness）
   ├─ meta 解析失败 → 后台触发 analyze
   └─ 索引同步 → 跳过
+  每次执行必写痕迹 → .gitnexus/last-run-check.json
 
 后台执行：subprocess.Popen + DETACHED_PROCESS
 退出码：始终 0（失败只打警告）
@@ -83,11 +86,33 @@ mcp__gitnexus__detect_changes(scope="compare", base_ref="main")
 
 ```
 会话结束时:
-  ├─ HEAD == meta.lastCommit → 跳过（已同步）
-  └─ 否则 → 后台触发 analyze（写端）
+  ├─ workspace_dirty（git status --porcelain 非空，排除 .gitnexus/）→ 后台触发 analyze
+  ├─ HEAD != meta.lastCommit（索引过期）→ 后台触发 analyze
+  └─ 不脏 且 索引同步 → 跳过（留痕 no_change_skipped）
+  每次执行必写痕迹 → .gitnexus/last-run.json
 
-设计与 SessionStart 配对: 读端 staleness + 写端 refresh
+关键：用工作区脏状态判断 agent 是否改过代码（不只比对 HEAD，
+      因 agent 会话内改代码未 commit 时 HEAD 不变）。
+      .gitnexus/ 自身产物的未跟踪文件被排除，避免死循环触发。
 ```
+
+### 统一日志格式（V11.4 NEW，可 grep）
+
+两个 hook 的 stdout 统一为 `[gitnexus]` 前缀 + key=value 结构，便于直接 grep/过滤：
+
+```
+[gitnexus] event=SessionStart reason=index_stale action=analyze head=<sha>
+[gitnexus] event=Stop reason=workspace_dirty action=analyze head=<sha> dirty=true
+[gitnexus] event=Stop reason=no_change_skipped action=skip head=<sha> dirty=false
+```
+
+字段：`event`(SessionStart/Stop) / `reason`(index_stale|workspace_dirty|no_change_skipped|...) / `action`(analyze|skip|error) / `head` / `dirty` / `detail`。
+
+### 可验证性（V11.4 NEW）
+
+- 痕迹文件：`last-run.json`（Stop）+ `last-run-check.json`（SessionStart）
+- `hooks-fidelity.py` 的 `check_gitnexus_freshness` 校验痕迹存在 + 24h 内新鲜，过期/缺失计入 FAIL
+- 新项目 `init-from-zero.py` 自动装 gitnexus 双端（5 个 hook：3 shell + 2 gitnexus）
 
 ### 安装
 

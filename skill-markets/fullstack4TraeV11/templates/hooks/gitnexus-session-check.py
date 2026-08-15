@@ -30,6 +30,7 @@ import json
 import os
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -91,10 +92,30 @@ def read_meta_last_commit():
         return None, None
 
 
+def write_trace(run_reason: str, head_sha: str) -> None:
+    """写运行痕迹到 .gitnexus/last-run-check.json，便于验证会话开始时确实跑过。
+
+    文件名与 finalize 端的 last-run.json 区分，避免并发写冲突。
+    """
+    trace = {
+        "hook": "gitnexus-session-check",
+        "at": datetime.now(timezone.utc).isoformat(),
+        "head": head_sha,
+        "run_reason": run_reason,
+        "exit": 0,
+    }
+    trace_path = project_root / ".gitnexus" / "last-run-check.json"
+    try:
+        trace_path.parent.mkdir(parents=True, exist_ok=True)
+        trace_path.write_text(json.dumps(trace, ensure_ascii=False, indent=2), encoding="utf-8")
+    except OSError as exc:
+        print(f"[gitnexus] event=SessionStart reason=trace_write_error action=error detail={exc}")
+
+
 def trigger_analyze_background() -> None:
     """Spawn `node run.cjs analyze` detached; return immediately."""
     if not runner.exists():
-        print("[GitNexus Check] ⚠️  runner missing: .gitnexus/run.cjs")
+        print("[gitnexus] event=SessionStart reason=runner_missing action=error detail=.gitnexus/run.cjs")
         return
     try:
         log_path = project_root / ".gitnexus" / "analyze.log"
@@ -110,40 +131,42 @@ def trigger_analyze_background() -> None:
             | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
             close_fds=True,
         )
-        print("[GitNexus Check] 🔄 analyze scheduled (background) — see .gitnexus/analyze.log")
+        print("[gitnexus] event=SessionStart reason=analyze_scheduled action=analyze detail=.gitnexus/analyze.log")
     except (OSError, ValueError) as exc:
-        print(f"[GitNexus Check] ⚠️  failed to spawn analyze: {exc}")
+        print(f"[gitnexus] event=SessionStart reason=analyze_spawn_error action=error detail={exc}")
 
 
 def main() -> int:
-    print("[GitNexus Check] V11 SessionStart — verifying index freshness")
+    print("[gitnexus] event=SessionStart reason=start action=check")
 
     if os.environ.get("GITNEXUS_AUTO_ANALYZE") == "0":
-        print("[GitNexus Check] ⏸  disabled via GITNEXUS_AUTO_ANALYZE=0")
+        print("[gitnexus] event=SessionStart reason=disabled action=skip")
+        write_trace(run_reason="disabled", head_sha="")
         return 0
 
     head_sha = run_git("rev-parse", "HEAD")
     if head_sha is None:
-        print("[GitNexus Check] ⚠️  not a git repo or git unavailable — skipping")
+        print("[gitnexus] event=SessionStart reason=no_head action=skip detail=not a git repo")
+        write_trace(run_reason="no_head", head_sha="")
         return 0
 
     last_commit, indexed_at = read_meta_last_commit()
 
     if last_commit is None:
-        print(f"[GitNexus Check] ⚠️  no .gitnexus/meta.json — index missing")
-        print(f"   HEAD: {head_sha[:12]}")
+        write_trace(run_reason="index_missing", head_sha=head_sha)
+        print(f"[gitnexus] event=SessionStart reason=index_missing action=analyze head={head_sha}")
         trigger_analyze_background()
         return 0
 
     if last_commit != head_sha:
         behind = run_git("rev-list", "--count", f"{last_commit}..HEAD") or "?"
-        print(f"[GitNexus Check] ⚠️  index stale: {behind} commit(s) since last analyze")
-        print(f"   indexed: {last_commit[:12]} @ {indexed_at or '?'}")
-        print(f"   HEAD:    {head_sha[:12]}")
+        write_trace(run_reason="index_stale", head_sha=head_sha)
+        print(f"[gitnexus] event=SessionStart reason=index_stale action=analyze head={head_sha} detail={behind} commits behind")
         trigger_analyze_background()
         return 0
 
-    print(f"[GitNexus Check] ✅ index up-to-date @ {head_sha[:12]}")
+    write_trace(run_reason="index_up_to_date", head_sha=head_sha)
+    print(f"[gitnexus] event=SessionStart reason=index_up_to_date action=skip head={head_sha}")
     return 0
 
 

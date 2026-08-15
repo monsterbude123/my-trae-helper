@@ -9,7 +9,8 @@
 
 ```
 Step 1: 加载本 skill + 解析 depends_on
-        ├─ 加载 9 个公共 references（constitution / iron-rules / anti-patterns / state-card / stage-interaction / dependency-config / document-layer / report-growth / ask-question-anti-patterns）
+        ├─ 加载 4 个 stage 强依赖 references（state-card-protocol / stage-interaction-protocol / dependency-config / document-layer,见 SKILL.md frontmatter）
+        ├─ 按需加载公共 references（constitution / iron-rules / anti-patterns / report-growth / ask-question-anti-patterns 等,来自编排器 §0.5）
         └─ 校验编排器 stage_config.intake 字段（空依赖符合预期）
 
 Step 2: 项目惯例勘察（Glob 1 次）
@@ -37,7 +38,7 @@ Step 5: 路由决策
 Step 6: 初始化状态卡（3 类选其一）
         ├─ project 级 → {project}/docs/specs/.state-card.md
         ├─ change 级 → docs/specs/changes/{id}/.state-card.md
-        └─ bug 级 → docs/bugs/{id}.md + .state-card.md
+        └─ bug 级 → docs/bugs/{id}.md（Bug 单）+ docs/bugs/{id}/.state-card.md（Bug 状态卡）
 
 Step 7: 交接下一 stage
         ├─ 状态卡 next_stage 字段填写

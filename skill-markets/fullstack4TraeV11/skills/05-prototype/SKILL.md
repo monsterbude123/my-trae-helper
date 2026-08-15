@@ -11,6 +11,7 @@ depends_on:
     - ../../references/stage-interaction-protocol.md
   scripts:
     - ../../scripts/stage-gate.py
+    - ../../scripts/prototype-backfill-check.py
 ---
 
 # Stage 1.5 Prototype — 双源兼容原型
@@ -22,7 +23,7 @@ depends_on:
 ```
 1. 双源一致        — 设计稿 ↔ 代码原型必须互相校验
 2. prototype-reverse-spec — 代码可反向追溯 spec
-3. designer-handoff — 设计师移交时必含交互说明
+3. designer-handoff — 设计师移交时必含交互说明(designer-handoff P0/P1 边缘状态 hover/loading/error/empty 按 [../../references/skeptical-validation-protocol.md](../../references/skeptical-validation-protocol.md) §7 L283 永久激活清单走质疑性校验)
 4. NEVER 跳过双源 — UI 改动必走双源校验
 5. GAP 标注        — 原型与 spec 不一致必标 GAP
 6. prototype 必含 E2E 截图证据

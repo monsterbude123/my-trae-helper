@@ -92,7 +92,7 @@ project/
 |------|-----|-----|
 | Spec 路径 | `docs/specs/{feature}/` | `docs/specs/changes/{change-id}/` |
 | 状态卡路径 | `docs/specs/.state-card.md` | `docs/specs/.state-card.md`(项目级)+ `docs/specs/changes/{id}/.state-card.md`(change 级)|
-| 归档路径 | `docs/specs/archive/done/{feature}/` | `docs/specs/archive/done/{change-id}/` |
+| 归档路径 | `docs/archive/done/{feature}/` | `docs/archive/done/{change-id}/` |
 | prototype 文档 | design-prompt.md + ui-ux-logic.md（V10 双源）| 同 V10（已蒸馏）|
 | 契约目录 | `docs/specs/{feature}/contracts/` | `docs/specs/changes/{change-id}/contracts/` + `tests/contracts/` |
 

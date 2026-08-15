@@ -57,7 +57,7 @@ Stage -1 Intake → Stage 7 Project Health
 
 **MUST**: AskUserQuestion（5 种意图选项）→ 用户必选
 
-**NEVER**: 经验主义臆断（违反 Article V GitNexus First 精神 / V10.16 禁止编造抽象理由）
+**NEVER**: 经验主义臆断（违反 Article V GitNexus First 精神 / Article XVI §1.4 质疑性校验）
 
 ---
 

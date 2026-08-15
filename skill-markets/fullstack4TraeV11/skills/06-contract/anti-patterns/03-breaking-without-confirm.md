@@ -108,7 +108,7 @@ CHANGELOG.md: 必含 BREAKING CHANGES 章节
 3. 测试: tests/contracts/ 新增 v2 测试 + 保留 v1 测试（迁移期）
 
 # drift-detect 验证三方一致
-python scripts/drift-detect.py
+python ../../../templates/hooks/drift-detect.py
 # 输出: code ↔ contract ↔ test 一致性 100%
 ```
 

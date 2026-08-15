@@ -29,7 +29,7 @@ agent: 已 archive/done/{change-id}/ → 修改 spec.md 加一行  # ❌ 违反 
 
 ```bash
 # ❌ 反例
-edit docs/specs/archive/done/{change-id}/spec.md  # 改归档
+edit docs/archive/done/{change-id}/spec.md  # 改归档
 
 # ✅ 正确
 # 如确需修改，必新建 change 走流程

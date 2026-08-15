@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# Pre-push gate for Python V11 preset (L2 -> Stage 3.5 Real Verify)
+# Runs pytest + coverage + build + validates Stage 3.5 consistency.
+# HARD REQUIREMENT: required tools/scripts MUST exist or be declared — no silent skipping allowed.
+
+set -euo pipefail
+
+REQUIRED_TOOLS=("pytest")
+REQUIRED_FILES=("pyproject.toml" "docs/specs/.state-card.md")
+FAILURES=0
+
+cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+echo "==> [L2 -> Stage 3.5 Real Verify] Running pre-push gate (python V11 preset)..."
+
+# ---- Step 1: project file existence check ----
+echo "    [1/?] Project manifest existence check:"
+MISSING_FILES=()
+for f in "${REQUIRED_FILES[@]}"; do
+  if [ -f "$f" ]; then
+    echo "          [$f] ✓ exists"
+  else
+    echo "          [$f] ✗ MISSING — gate fails"
+    MISSING_FILES+=("$f")
+    FAILURES=$((FAILURES + 1))
+  fi
+done
+
+# ---- Step 2: tool existence check ----
+echo ""
+echo "    [2/?] Required tool existence check:"
+MISSING_TOOLS=()
+for tool in "${REQUIRED_TOOLS[@]}"; do
+  if command -v "$tool" >/dev/null 2>&1; then
+    echo "          [$tool] ✓ installed ($(command -v "$tool"))"
+  else
+    echo "          [$tool] ✗ NOT INSTALLED — gate fails"
+    MISSING_TOOLS+=("$tool")
+    FAILURES=$((FAILURES + 1))
+  fi
+done
+
+# ---- Step 3: state-card validation (Stage 3.5 Verify) ----
+if [ -f docs/specs/.state-card.md ]; then
+  echo ""
+  echo "    [3/?] State card validation:"
+  current=$(grep 'current_stage' docs/specs/.state-card.md 2>/dev/null | head -1 || echo "unknown")
+  echo "          Current stage: $current"
+  if echo "$current" | grep -qE '3\.5-verify|3-implement|4-review'; then
+    echo "          ✓ Stage is at or beyond 3.5-verify"
+  else
+    echo "          ⚠ Stage is before 3.5-verify — ensure implementation is complete"
+    echo "          (This is a warning, not a blocker)"
+  fi
+fi
+
+# ---- Step 4: spec-impl consistency check ----
+echo ""
+echo "    [4/?] Spec-Impl consistency check:"
+spec_count=$(find docs/specs -name "*.md" -not -name ".state-card.md" 2>/dev/null | wc -l || echo 0)
+if [ "$spec_count" -gt 0 ]; then
+  echo "          ✓ Found $spec_count spec file(s)"
+else
+  echo "          ⚠ No spec files found in docs/specs/"
+fi
+
+if [ $FAILURES -gt 0 ]; then
+  echo ""
+  echo "    🛑 Gate FAIL: ${FAILURES} required item(s) missing"
+  if [ ${#MISSING_FILES[@]} -gt 0 ]; then
+    echo "        Missing files:"
+    for s in "${MISSING_FILES[@]}"; do echo "          - $s"; done
+  fi
+  if [ ${#MISSING_TOOLS[@]} -gt 0 ]; then
+    echo "        Missing tools:"
+    for s in "${MISSING_TOOLS[@]}"; do echo "          - $s"; done
+    echo ""
+    echo "    Install all required tools:"
+    echo "        pip install pytest pytest-cov"
+  fi
+  exit "$FAILURES"
+fi
+
+# ---- Step 5: real execution ----
+run_step() {
+  local label="$1"
+  shift
+  echo ""
+  echo "    [$label] $*"
+  if "$@"; then
+    echo "    [$label] ✓ PASS"
+  else
+    echo "    [$label] ✗ FAIL"
+    FAILURES=$((FAILURES + 1))
+  fi
+}
+
+run_step "5/7" pytest tests/ -v
+run_step "6/7" pytest tests/ --cov=src --cov-report=term-missing
+run_step "7/7" python -m build
+
+if [ $FAILURES -gt 0 ]; then
+  echo ""
+  echo "==> [L2] FAILED ($FAILURES check(s) failed)"
+  exit "$FAILURES"
+fi
+
+# ---- Step 6: update state-card gate_result ----
+if [ -n "$STATE_CARD" ]; then
+  sed -i 's/gate_result:.*/gate_result: PASS/' "$STATE_CARD" 2>/dev/null || true
+fi
+
+echo ""
+echo "==> [L2 -> Stage 3.5 Real Verify] PASSED"

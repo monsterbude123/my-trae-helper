@@ -134,4 +134,4 @@ def test_login_sql_injection():
 - [SKILL.md §铁律 4](../SKILL.md) — 测试可追溯
 - [coverage-matrix-build.md](../workflows/coverage-matrix-build.md) — §Step 3 矩阵构建
 - [coverage-mapping.md §Step 3](../workflows/coverage-mapping.md) — 矩阵合并
-- 公共铁律 Article V: [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)
+- 公共铁律 Article XII.1(workflow discipline — 流程纪律不可跳过): [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)

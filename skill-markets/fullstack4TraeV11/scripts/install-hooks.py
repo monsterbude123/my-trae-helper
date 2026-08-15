@@ -59,8 +59,81 @@ HOOK_SCRIPTS = [
 ]
 
 
-V11_SKILL_ROOT = pathlib.Path("~/.trae-cn/skills/fullstack4TraeV11").expanduser()
+SCRIPT_ROOT = pathlib.Path(__file__).resolve().parent.parent  # skill-markets/fullstack4TraeV11/
+V11_SKILL_ROOT = SCRIPT_ROOT if SCRIPT_ROOT.exists() else pathlib.Path("~/.trae-cn/skills/fullstack4TraeV11").expanduser()
 TEMPLATES_HOOKS = V11_SKILL_ROOT / "templates" / "hooks"
+
+
+def install_husky_hooks(project_root: pathlib.Path, force: bool = False) -> dict:
+    """安装 husky hooks（硬化版）到目标项目
+    
+    Args:
+        project_root: 项目根路径
+        force: 是否覆盖已有文件
+        
+    Returns:
+        dict: 安装结果
+    """
+    result = {
+        "husky_installed": False,
+        "hooks_installed": [],
+        "errors": [],
+    }
+    
+    husky_dir = project_root / ".husky"
+    
+    # 1. 检查 husky 是否已安装
+    if not husky_dir.exists():
+        result["errors"].append(
+            "husky 未安装。请先执行：\n"
+            "  npm install husky --save-dev\n"
+            "  npx husky init\n"
+            "然后重新运行本脚本"
+        )
+        return result
+    
+    # 2. 检查源文件是否存在
+    src_pre_commit = TEMPLATES_HOOKS / "pre-commit-hardened.sh"
+    src_pre_push = TEMPLATES_HOOKS / "pre-push-hardened.sh"
+    
+    if not src_pre_commit.exists():
+        result["errors"].append(f"缺失源文件: {src_pre_commit}")
+        return result
+    
+    if not src_pre_push.exists():
+        result["errors"].append(f"缺失源文件: {src_pre_push}")
+        return result
+    
+    # 3. 复制 hooks
+    dst_pre_commit = husky_dir / "pre-commit"
+    dst_pre_push = husky_dir / "pre-push"
+    
+    # 3.1 pre-commit
+    if dst_pre_commit.exists() and not force:
+        result["errors"].append(f"已存在: {dst_pre_commit}（使用 --force 覆盖）")
+    else:
+        shutil.copy2(src_pre_commit, dst_pre_commit)
+        dst_pre_commit.chmod(0o755)
+        result["hooks_installed"].append({
+            "name": "pre-commit",
+            "file": "pre-commit-hardened.sh",
+            "description": "Husky pre-commit hook（硬化版）",
+        })
+    
+    # 3.2 pre-push
+    if dst_pre_push.exists() and not force:
+        result["errors"].append(f"已存在: {dst_pre_push}（使用 --force 覆盖）")
+    else:
+        shutil.copy2(src_pre_push, dst_pre_push)
+        dst_pre_push.chmod(0o755)
+        result["hooks_installed"].append({
+            "name": "pre-push",
+            "file": "pre-push-hardened.sh",
+            "description": "Husky pre-push hook（硬化版）",
+        })
+    
+    result["husky_installed"] = len(result["hooks_installed"]) > 0
+    return result
 
 
 def install(project_root: pathlib.Path, force: bool = False) -> dict:
@@ -121,6 +194,10 @@ def install(project_root: pathlib.Path, force: bool = False) -> dict:
         encoding="utf-8",
     )
 
+    # 4. 安装 husky hooks（可选硬化）
+    husky_result = install_husky_hooks(project_root, force)
+    result["husky"] = husky_result
+
     return result
 
 
@@ -136,6 +213,8 @@ def main():
     if not project_root.exists():
         print(f"❌ 项目目录不存在: {project_root}")
         return 1
+
+    print(f"ℹ️ 源路径: {TEMPLATES_HOOKS}")
 
     result = install(project_root, args.force)
 
@@ -153,6 +232,20 @@ def main():
             print(f"\n❌ 错误:")
             for e in result["errors"]:
                 print(f"   - {e}")
+        
+        # 输出 husky 安装结果
+        husky = result.get("husky", {})
+        if husky.get("husky_installed"):
+            print(f"\n✅ Husky hooks 已安装 ({len(husky['hooks_installed'])} 个):")
+            for h in husky["hooks_installed"]:
+                print(f"   - {h['name']}: {h['description']}")
+        if husky.get("errors"):
+            print(f"\n⚠️  Husky 提示:")
+            for e in husky["errors"]:
+                for line in e.split("\n"):
+                    print(f"   {line}")
+        
+        if result["errors"] or husky.get("errors"):
             return 1
         print(f"\n📋 安装报告: {project_root}/.trae/logs/hooks-install.json")
 

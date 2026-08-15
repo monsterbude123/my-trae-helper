@@ -98,6 +98,17 @@ jobs:
             exit 1
           }
 
+          # 5.6 fullstack4TraeV11 V11.5 L3 step（变更 V11 时跑）
+          #     含 structure + flow + gate-config aspects（与 .husky/fullstack4TraeV11-pre-push 不同的 layer）
+          V11_CHANGED=$(git diff --name-only HEAD~1 HEAD | grep -E '^(skill-markets/fullstack4TraeV11/|scripts/fullstack4TraeV11-|registry/skills.yaml)' || true)
+          if [ -n "$V11_CHANGED" ]; then
+            echo "5.6️⃣ fullstack4TraeV11 V11.5 L3 step (structure+flow+gate-config)..."
+            python scripts/fullstack4TraeV11-guard.py fullstack4TraeV11 || {
+              echo "❌ fullstack4TraeV11 L3 BLOCK"
+              exit 1
+            }
+          fi
+
       - name: Check CAPABILITY-MAP.md sync
         run: |
           git diff --exit-code skill-markets/CAPABILITY-MAP.md || {
@@ -183,6 +194,20 @@ jobs:
             echo "🛡 agent-dev-control-kit catalog-guard (release) ..."
             python scripts/run-agent-dev-control-kit-tests.py || {
               echo "❌ agent-dev-control-kit catalog-guard 失败"
+              exit 1
+            }
+          fi
+
+          # fullstack4TraeV11 V11.5 L4 step（publish 前最后一次全量校验）
+          #     含 flow + trap aspects（断言 trap 反例测试全 PASS）
+          if [ -d "skill-markets/fullstack4TraeV11" ]; then
+            echo "🛡 fullstack4TraeV11 V11.5 L4 step (flow + trap)..."
+            python scripts/fullstack4TraeV11-flow-guard.py fullstack4TraeV11 || {
+              echo "❌ fullstack4TraeV11 flow L4 BLOCK"
+              exit 1
+            }
+            python scripts/fullstack4TraeV11-trap-guard.py fullstack4TraeV11 || {
+              echo "❌ fullstack4TraeV11 trap L4 BLOCK"
               exit 1
             }
           fi

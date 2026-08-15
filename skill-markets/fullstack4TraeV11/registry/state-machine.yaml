@@ -1,0 +1,125 @@
+version: 1.0.0
+description: V11 状态卡状态机定义
+initial_state: "-1/intake"
+terminal_states: ["5/accept"]
+pilot: main-context          # 驾驶舱角色：唯一允许改状态字段的 actor
+states:
+  - id: "-1/intake"
+    name: 需求摄取
+    allowed_transitions: ["0/plan", "6/bug-fix", "7/health"]
+    required_artifacts: []
+    gate: stage-intake
+  - id: "0/plan"
+    name: 规划
+    allowed_transitions: ["0.5/test-plan", "6/bug-fix", "7/health"]
+    required_artifacts: ["plan.md"]
+    gate: stage-plan
+  - id: "0.5/test-plan"
+    name: 测试计划
+    allowed_transitions: ["1/spec", "6/bug-fix", "7/health"]
+    required_artifacts: ["test-plan.md"]
+    gate: stage-test-plan
+  - id: "1/spec"
+    name: 规格
+    allowed_transitions: ["1.5/prototype", "6/bug-fix", "7/health"]
+    required_artifacts: ["spec.md"]
+    gate: stage-1-spec
+  - id: "1.5/prototype"
+    name: 原型
+    allowed_transitions: ["2/contract", "6/bug-fix", "7/health"]
+    required_artifacts: ["prototype.md"]
+    gate: stage-prototype
+  - id: "2/contract"
+    name: 契约
+    allowed_transitions: ["3/implement", "6/bug-fix", "7/health"]
+    required_artifacts: ["contracts/api-contracts.md"]
+    gate: stage-2-contract
+  - id: "3/implement"
+    name: 实现
+    allowed_transitions: ["3.5/real-verify", "6/bug-fix", "7/health"]
+    required_artifacts: ["代码 + tests/ + docs/modules/"]
+    gate: stage-3-implement
+  - id: "3.5/real-verify"
+    name: 真实验证
+    allowed_transitions: ["4/review", "6/bug-fix", "7/health"]
+    required_artifacts: ["verifications/ + visual_evidence"]
+    gate: stage-3.5-real-verify
+  - id: "4/review"
+    name: 评审
+    allowed_transitions: ["4.5/rot-scan", "6/bug-fix", "7/health"]
+    required_artifacts: ["review-report.md"]
+    gate: stage-4-review
+  - id: "4.5/rot-scan"
+    name: 腐烂扫描
+    allowed_transitions: ["5/accept", "6/bug-fix", "7/health"]
+    required_artifacts: ["rot-scan-{date}.md"]
+    gate: stage-4.5-rot-scan
+  - id: "5/accept"
+    name: 验收
+    allowed_transitions: []
+    required_artifacts: ["ACCEPT_REPORT.md"]
+    gate: stage-5-accept
+  - id: "6/bug-fix"
+    name: Bug 修复
+    allowed_transitions: ["7/health", "3/implement", "5/accept"]
+    required_artifacts: ["bug 单 + 回归测试"]
+    gate: stage-6-bug-fix
+  - id: "7/health"
+    name: 项目健康
+    allowed_transitions: ["5/accept", "-1/intake"]
+    required_artifacts: []
+    gate: stage-7-health
+transitions:
+  - from: "-1/intake"
+    to: "0/plan"
+    condition: "stage_gate PASS"
+    gate: stage-gate.py
+  - from: "0/plan"
+    to: "0.5/test-plan"
+    condition: "stage_gate PASS"
+    gate: stage-gate.py
+  - from: "0.5/test-plan"
+    to: "1/spec"
+    condition: "stage_gate PASS"
+    gate: stage-gate.py
+  - from: "1/spec"
+    to: "1.5/prototype"
+    condition: "stage_gate PASS"
+    gate: stage-gate.py
+  - from: "1.5/prototype"
+    to: "2/contract"
+    condition: "stage_gate PASS"
+    gate: stage-gate.py
+  - from: "2/contract"
+    to: "3/implement"
+    condition: "stage_gate PASS"
+    gate: stage-gate.py
+  - from: "3/implement"
+    to: "3.5/real-verify"
+    condition: "stage_gate PASS"
+    gate: stage-gate.py
+  - from: "3.5/real-verify"
+    to: "4/review"
+    condition: "stage_gate PASS"
+    gate: stage-gate.py
+  - from: "4/review"
+    to: "4.5/rot-scan"
+    condition: "stage_gate PASS"
+    gate: stage-gate.py
+  - from: "4.5/rot-scan"
+    to: "5/accept"
+    condition: "stage_gate PASS"
+    gate: stage-gate.py
+  # 支线：Bug 修复 / 项目健康
+  - from: "3/implement"
+    to: "6/bug-fix"
+    condition: "bug reported → e2e 初始 FAIL"
+    gate: reason-classifier.py
+  - from: "6/bug-fix"
+    to: "7/health"
+    condition: "fix verified + regression PASS"
+    gate: stage-gate.py
+  - from: "7/health"
+    to: "5/accept"
+    condition: "project health green + user confirmed"
+    gate: stage-gate.py

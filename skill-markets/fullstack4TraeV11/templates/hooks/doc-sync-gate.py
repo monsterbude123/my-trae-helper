@@ -17,8 +17,17 @@ def resolve_project_root() -> Path:
     return Path(__file__).resolve().parent.parent.parent
 
 
+def resolve_state_card(project_root: Path) -> Path | None:
+    # 优先新路径 docs/specs/changes/*/.state-card.md
+    for p in (project_root / "docs" / "specs" / "changes").glob("*/**/.state-card.md"):
+        return p
+    # 再试顶层旧路径
+    top = project_root / "docs" / "specs" / ".state-card.md"
+    return top if top.exists() else None
+
+
 project_root = resolve_project_root()
-state_card = project_root / "docs" / "specs" / ".state-card.md"
+state_card = resolve_state_card(project_root)
 
 # ── spec-purge 历史检测 ──
 spec_purge_dir = project_root / "docs" / "archive" / "out" / "spec-purge"
@@ -28,14 +37,19 @@ if spec_purge_dir.exists():
     print("    → 实现前确保新 contracts/ + define.md 已就绪")
 
 # ── DOC SYNC 检查 ──
-if not state_card.exists():
-    print("[V11 Doc-Sync Gate] ⚠️ docs/specs/.state-card.md missing — run intake first")
-    sys.exit(0)
+if state_card is None or not state_card.exists():
+    print("[V11 Doc-Sync Gate] 🛑 BLOCKED: state card missing (docs/specs/changes/*/ or docs/specs/)")
+    print("    → DOC SYNC 未完成，禁止写代码")
+    print("    → 修复: 运行 intake 或 stage-1-intake 生成 .state-card.md")
+    sys.exit(1)
 
 # 检查 modules/ 是否存在（DOC SYNC 产出）
 modules_dir = project_root / "docs" / "modules"
-if not modules_dir.exists() or not list(modules_dir.iterdir()):
-    print("[V11 Doc-Sync Gate] ℹ️ docs/modules/ empty — DOC SYNC not yet executed")
+if not modules_dir.exists() or not any(modules_dir.iterdir()):
+    print("[V11 Doc-Sync Gate] 🛑 BLOCKED: docs/modules/ empty or missing")
+    print("    → DOC SYNC 未完成，禁止写代码")
+    print("    → 修复: 运行 stage-2-doc-sync 生成 docs/modules/")
+    sys.exit(1)
 
 print("[V11 Doc-Sync Gate] ✅ DOC SYNC 状态 OK")
 sys.exit(0)

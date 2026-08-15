@@ -1,0 +1,79 @@
+version: 1.0.0
+description: V11 守卫注册表（公共守卫脚本声明）
+guards:
+  - id: spec-frontmatter
+    name: Spec frontmatter 校验
+    script: spec-validate-hook.py
+    category: quality
+    config_schema: null
+    default_threshold: null
+
+  - id: state-card-valid
+    name: 状态卡字段校验
+    script: state-card-validator.py
+    category: quality
+    config_schema: null
+    default_threshold: null
+
+  - id: code-hygiene
+    name: 代码卫生校验
+    script: code-hygiene.py
+    category: quality
+    config_schema: null
+    default_threshold: null
+
+  - id: orphan-test
+    name: 孤儿测试检测
+    script: orphan-detector.py
+    category: quality
+    config_schema: null
+    default_threshold: null
+
+  - id: bundle-consistency
+    name: Bundle 一致性校验
+    script: dist-hash-check.py
+    category: quality
+    config_schema: null
+    default_threshold: null
+
+  - id: visual-content
+    name: 视觉内容校验
+    script: visual-content-check.py
+    category: quality
+    config_schema: null
+    default_threshold: null
+
+  - id: acceptance-audit
+    name: 4 维验收审计
+    script: acceptance-audit.py
+    category: quality
+    config_schema: null
+    default_threshold: null
+
+  - id: rot-scan
+    name: 5 项腐化扫描
+    script: proactive-scan.py
+    category: quality
+    config_schema: null
+    default_threshold: null
+
+  - id: spec-purge
+    name: Spec 清除归档
+    script: spec-purge.py
+    category: lifecycle
+    config_schema: null
+    default_threshold: null
+
+  - id: reason-classification
+    name: 抽象理由分类
+    script: reason-classifier.py
+    category: quality
+    config_schema: null
+    default_threshold: null
+
+  - id: contract-integrity
+    name: 集成契约校验
+    script: check_integration_contract.py
+    category: quality
+    config_schema: null
+    default_threshold: null

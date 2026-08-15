@@ -5,6 +5,8 @@
 > **触发条件**: 项目有外部 Designer（人或 Trae Work）交付 HTML 原型页面。
 > **无外部 Designer → 跳过本章**，走标准 [prototype-dual-source.md](prototype-dual-source.md) 正向流程。
 
+> **Article 锚定**: Article XII Workflow Discipline(章节契约强制)+ Article V Verifiable Claims(<title> 与 HTML 实际 <title> 逐字匹配)。
+
 ---
 
 ## §1 章节契约 — `## 引用的 HTML 文件`
@@ -175,8 +177,8 @@ spec-writer 在 Step 5（UI 原型触发）之前，必须执行以下检查：
 
 ## §7 关联引用
 
-- [prototype-dual-source.md](prototype-dual-source.md) — 双产物机制主文档
-- [../../../../fullstack4TraeV10/references/designer-handoff.md](../../../../fullstack4TraeV10/references/designer-handoff.md) — Designer ↔ 主上下文 ↔ spec-writer 交接协议（职责矩阵）
+- **关联**: [prototype-dual-source.md](prototype-dual-source.md) — 双产物机制主文档
+- ⚠️ V10 来源溯源,部署前可删:[../../../../fullstack4TraeV10/references/designer-handoff.md](../../../../fullstack4TraeV10/references/designer-handoff.md) — Designer ↔ 主上下文 ↔ spec-writer 交接协议（职责矩阵）
 - Stage 4 Review: `skills/09-review/SKILL.md §铁律 11` 必读 5 件套（HANDOFF 索引为第 5 件）
 - Stage 0 Plan: `skills/02-plan/SKILL.md` 子代理 A prototypes_status 检查段
 - 蒸馏来源：example/test-fullstack-init 会话蒸馏，V10.8 通用化回流

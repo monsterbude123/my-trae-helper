@@ -101,7 +101,7 @@
 
 ```
 14.1 Phase 4.5 rot-detector 不可跳过
-14.2 腐化扫描必跑（8 项：视觉/归档/自验/孤儿/构建/吹嘘/状态卡/骨架）
+14.2 腐化扫描必跑（10 项：V10.5 8 项 + V10.10 +2 项；视觉/归档/自验/孤儿/构建/吹嘘/状态卡/骨架/obstacle-honesty/reason-fabrication）
 14.3 fix-list.json 必产出且不可空
 14.4 NO ROT NO ACCEPT — 任一 FAIL = 🛑 REJECT Accept
 ```

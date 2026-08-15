@@ -12,7 +12,7 @@ depends_on:
     - ../../references/common-iron-rules.md
     - ../../references/common-anti-patterns.md
   scripts:
-    - ../../scripts/stage-gate.py
+    - ../../scripts/stage-gate.py  # 主上下文跑(状态卡字段校验);agent 调用跑 state-card-validator.py(见 stage-skill-agent-protocol.md L113)
 ---
 
 # Stage 0.5 Test Plan — 测试覆盖映射

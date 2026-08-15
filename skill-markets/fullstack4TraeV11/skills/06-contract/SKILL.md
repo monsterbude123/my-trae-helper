@@ -13,6 +13,7 @@ depends_on:
   scripts:
     - ../../scripts/stage-gate.py
     - ../../scripts/orphan-detector.py
+    - ../../templates/hooks/contract-gate.py
 ---
 
 # Stage 2 Contract — 契约四件套
@@ -71,7 +72,7 @@ Step 5: contract-gate.py 验证 → 状态卡更新 + 标记 approved
 
 **V10 实战（D-009）**: 前后端 config key 大小写不一致（前端 camelCase / 后端 regex 严格小写）。修复走 BREAKING 流程，必用户确认 + 3 处同步（代码 + 契约文档 + 测试）。
 
-## 反模式（4 条索引到 anti-patterns/）
+## 反模式（5 条索引到 anti-patterns/）
 
 | # | 反例 | 文件 |
 |:---:|------|------|
@@ -79,6 +80,7 @@ Step 5: contract-gate.py 验证 → 状态卡更新 + 标记 approved
 | 2 | 跳过孤儿契约测试清理 | anti-patterns/02-skip-orphan-sweep.md |
 | 3 | BREAKING 变更不用户确认 | anti-patterns/03-breaking-without-confirm.md |
 | 4 | 契约漂移（代码与契约不一致）| anti-patterns/04-contract-drift.md |
+| 5 | V10 实战蒸馏 | anti-patterns/V10-battle-tested.md |
 
 ## 参考索引
 
@@ -87,3 +89,4 @@ Step 5: contract-gate.py 验证 → 状态卡更新 + 标记 approved
 - [orphan-test-sweep.md](references/orphan-test-sweep.md) — 孤儿测试扫描
 - 4 个契约模板: [templates/](templates/)
 - 公共铁律 Article VIII: [../../references/common-iron-rules.md](../../references/common-iron-rules.md)
+- V10 实战参考: [anti-patterns/V10-battle-tested.md](anti-patterns/V10-battle-tested.md)

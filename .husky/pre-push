@@ -89,4 +89,14 @@ node scripts/change-guard-approver.mjs gate || {
   exit 1
 }
 
+# 6. fullstack4TraeV11 V11.5 L2 step（变更了 V11 skill 或其 guard 时执行）
+#    直接 source,不写死 .husky 私有 hook 的全路径(便于以后改名)
+if [ -f ".husky/fullstack4TraeV11-pre-push" ]; then
+  echo "6️⃣ fullstack4TraeV11 L2 step（V11.5 flow + gate-config aspects）..."
+  . .husky/fullstack4TraeV11-pre-push || {
+    echo "❌ fullstack4TraeV11 L2 step BLOCK"
+    exit 1
+  }
+fi
+
 echo "✅ L2 Push Gate 通过"

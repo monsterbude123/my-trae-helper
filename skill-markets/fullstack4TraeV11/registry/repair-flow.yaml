@@ -1,0 +1,37 @@
+version: 1.0.0
+description: V11 Bug 修复流程声明
+triggers:
+  - id: bug-reported
+    name: Bug 上报
+    gate: reason-classifier
+steps:
+  - id: step-1-e2e-fail
+    name: e2e 先行确认 FAIL
+    gate: e2e-first
+  - id: step-2-6layer
+    name: 6 层排查
+    gate: six-layer
+  - id: step-3-fix-and-regression
+    name: 修复 + 回归测试
+    gate: regression-green
+  - id: step-4-user-confirm
+    name: 用户确认关闭
+    gate: user-confirmed
+terminal_condition: "tests pass + user confirmed CLOSED"
+gates:
+  - id: e2e-first
+    name: e2e 先行门禁
+    script: acceptance-audit.py
+    fail_action: BLOCK
+  - id: six-layer
+    name: 6 层排查门禁
+    script: reason-classifier.py
+    fail_action: BLOCK
+  - id: regression-green
+    name: 回归门禁
+    script: acceptance-audit.py
+    fail_action: BLOCK
+  - id: user-confirmed
+    name: 用户确认门禁
+    script: null
+    fail_action: BLOCK

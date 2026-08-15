@@ -27,6 +27,7 @@ import json
 import os
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -85,9 +86,57 @@ def read_meta_last_commit():
         return None
 
 
+def detect_workspace_dirty() -> bool:
+    """检测工作区是否脏（agent 是否改过代码但未提交）。
+
+    用 `git status --porcelain` 判断，只要输出非空即视为脏。
+    **排除 `.gitnexus/` 自身** —— 工具把索引/痕迹文件写进该目录，
+    若不排除，analyze 每次写入都会让工作区变"脏"，导致 Stop 永远触发 analyze（死循环）。
+    git 不可用 / 非 repo 时保守返回 True（宁可多跑一次 analyze）。
+    """
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=str(project_root),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            return True
+        # 仅保留真实代码/配置改动，忽略 .gitnexus/ 工具自身产物
+        significant = [
+            line
+            for line in result.stdout.splitlines()
+            if line and not line.startswith("?? .gitnexus/")
+                 and "/.gitnexus/" not in line
+        ]
+        return bool(significant)
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        return True
+
+
+def write_trace(run_reason: str, head_sha: str, dirty: bool) -> None:
+    """写运行痕迹到 .gitnexus/last-run.json，便于验证 hook 是否跑过。"""
+    trace = {
+        "hook": "gitnexus-session-finalize",
+        "at": datetime.now(timezone.utc).isoformat(),
+        "head": head_sha,
+        "workspace_dirty": dirty,
+        "run_reason": run_reason,
+        "exit": 0,
+    }
+    trace_path = project_root / ".gitnexus" / "last-run.json"
+    try:
+        trace_path.parent.mkdir(parents=True, exist_ok=True)
+        trace_path.write_text(json.dumps(trace, ensure_ascii=False, indent=2), encoding="utf-8")
+    except OSError as exc:
+        print(f"[gitnexus] event=Stop reason=trace_write_error action=error detail={exc}")
+
+
 def trigger_analyze_background() -> None:
     if not runner.exists():
-        print("[GitNexus Finalize] ⚠️  runner missing: .gitnexus/run.cjs")
+        print("[gitnexus] event=Stop reason=runner_missing action=error detail=.gitnexus/run.cjs")
         return
     try:
         log_path = project_root / ".gitnexus" / "analyze.log"
@@ -103,33 +152,37 @@ def trigger_analyze_background() -> None:
             | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
             close_fds=True,
         )
-        print("[GitNexus Finalize] 🔄 analyze scheduled (background) — see .gitnexus/analyze.log")
+        print("[gitnexus] event=Stop reason=analyze_scheduled action=analyze detail=.gitnexus/analyze.log")
     except (OSError, ValueError) as exc:
-        print(f"[GitNexus Finalize] ⚠️  failed to spawn analyze: {exc}")
+        print(f"[gitnexus] event=Stop reason=analyze_spawn_error action=error detail={exc}")
 
 
 def main() -> int:
-    print("[GitNexus Finalize] V11 Stop — refreshing index for next session")
+    print("[gitnexus] event=Stop reason=start action=check")
 
     if os.environ.get("GITNEXUS_AUTO_ANALYZE") == "0":
-        print("[GitNexus Finalize] ⏸  disabled via GITNEXUS_AUTO_ANALYZE=0")
+        print("[gitnexus] event=Stop reason=disabled action=skip")
+        write_trace(run_reason="disabled", head_sha="", dirty=False)
         return 0
 
     head_sha = run_git("rev-parse", "HEAD")
     if head_sha is None:
-        print("[GitNexus Finalize] ⚠️  not a git repo or git unavailable — skipping")
+        print("[gitnexus] event=Stop reason=no_head action=skip detail=not a git repo")
+        write_trace(run_reason="no_head", head_sha="", dirty=detect_workspace_dirty())
         return 0
 
+    dirty = detect_workspace_dirty()
     last_commit = read_meta_last_commit()
-    if last_commit == head_sha and last_commit is not None:
-        print("[GitNexus Finalize] ✅ index already fresh — skipped")
+
+    if not dirty and last_commit == head_sha:
+        write_trace(run_reason="no_change_skipped", head_sha=head_sha, dirty=dirty)
+        print(f"[gitnexus] event=Stop reason=no_change_skipped action=skip head={head_sha} dirty=false")
         return 0
 
-    if last_commit is None:
-        print(f"[GitNexus Finalize] ⚠️  no index yet — scheduling analyze for HEAD {head_sha[:12]}")
-    else:
-        print(f"[GitNexus Finalize] ⚠️  index stale ({last_commit[:12]} vs {head_sha[:12]}) — scheduling analyze")
-
+    # 触发 analyze（工作区脏 或 索引过期）
+    reason = "workspace_dirty" if dirty else "index_stale"
+    write_trace(run_reason=reason, head_sha=head_sha, dirty=dirty)
+    print(f"[gitnexus] event=Stop reason={reason} action=analyze head={head_sha} dirty={'true' if dirty else 'false'}")
     trigger_analyze_background()
     return 0
 

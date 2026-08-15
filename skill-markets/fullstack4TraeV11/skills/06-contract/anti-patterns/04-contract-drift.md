@@ -104,7 +104,7 @@ def test_create_user_with_role():
 ```yaml
 ## Step 3: drift-detect.py 自动验证
 
-python scripts/drift-detect.py
+python ../../../templates/hooks/drift-detect.py
 # 检查 code ↔ contract ↔ test 三方一致性
 # 输出:
 #   ✓ code::create_user(name, email, role)

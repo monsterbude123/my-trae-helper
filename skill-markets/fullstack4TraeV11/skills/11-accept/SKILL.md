@@ -48,6 +48,9 @@ Step 5: 状态卡 stage_status=archived + health=🟢
 | 产物 | 路径 |
 |------|------|
 | 归档目录 | `docs/archive/done/{change-id}/` |
+| 上游交付物 | `docs/reports/rot-scan-{date}.md` + `docs/reports/fix-list.json` |
+| 上游归档物 | `docs/specs/changes/{id}/verify-report.md`(随 spec-purge 一同归档)|
+| 归档产物 | `ACCEPT_REPORT.md` |
 | 知识提取 | `docs/api-endpoints/` + `docs/domain-models/` + `docs/events/` |
 | INDEX 更新 | `docs/INDEX.md` |
 | CHANGELOG | `docs/CHANGELOG.md` |

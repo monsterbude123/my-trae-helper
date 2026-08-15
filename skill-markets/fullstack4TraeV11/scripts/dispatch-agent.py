@@ -59,7 +59,7 @@ SCENARIOS: Dict[int, Dict] = {
         {"step": 1, "name": "intake-agent", "skill": "skills/01-intake",
          "must_read": ["references/intent-types.md"]},
         {"step": 2, "name": "debugger", "skill": "skills/12-bug-fix",
-         "must_read": ["references/six-layer-diagnosis.md", "references/five-step-flow.md", "references/gitnexus-6-layer.md"]},
+         "must_read": ["references/six-layer-diagnosis.md", "references/five-step-flow.md", "references/gitnexus-6-layer.md", "references/cross-layer-fix.md", "anti-patterns/01-skip-e2e-first.md"]},
         {"step": 3, "name": "implementer", "skill": "skills/07-implement"},
         {"step": 4, "name": "reviewer", "skill": "skills/09-review", "phase": "review-light"},
      ],
@@ -86,13 +86,14 @@ SCENARIOS: Dict[int, Dict] = {
      ]},
     7: {"name": "5 步精简 Bug 链（小 bug 流线化）", "type": "agent",
      "agents": [
-        {"step": 1, "name": "debugger", "skill": "skills/12-bug-fix", "phase": "5-step-flow"},
+        {"step": 1, "name": "debugger", "skill": "skills/12-bug-fix", "phase": "5-step-flow",
+         "must_read": ["references/five-step-flow.md", "references/six-layer-diagnosis.md", "references/bug-state-machine.md"]},
         {"step": 2, "name": "reviewer", "skill": "skills/09-review", "phase": "review-light"},
      ]},
     8: {"name": "项目健康度自检（异步支线）", "type": "agent",
      "agents": [
         {"step": 1, "name": "project-health-auditor", "skill": "skills/13-project-health",
-         "must_read": ["references/four-dimension-check.md", "references/anti-distortion.md"]},
+         "must_read": ["references/four-dimension-check.md", "references/anti-distortion.md", "references/gitnexus-impact-audit.md"]},
      ],
      "scripts": [
         {"step": 2, "name": "proactive-scan.py"},

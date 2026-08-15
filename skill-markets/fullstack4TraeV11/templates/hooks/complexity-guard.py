@@ -6,12 +6,23 @@
 V11 简化:
   - 增加 gitnexus / GitNexus First 检测
   - 增加 Article XVII secret 误用警告
+
+V11.2 硬化（2026-08-14）:
+  - score >= 8: 强制用户确认（写阻塞标记 + exit 1）
+  - score >= 5: 仅提示，不阻断
+  - 阻塞标记文件: .trae/complexity-blocked
 """
 
 import os
 import re
 import sys
+import json
 from pathlib import Path
+from datetime import datetime, timezone
+
+
+PROJECT_ROOT = Path.cwd()
+BLOCK_MARKER = PROJECT_ROOT / ".trae" / "complexity-blocked"
 
 
 user_prompt = os.environ.get("TRAE_USER_PROMPT", "")
@@ -79,18 +90,48 @@ if code_hygiene_results.exists():
     except Exception:
         pass
 
-if score >= 4:
-    print(f"[V11 Complexity Guard] 严重度: CRITICAL ({score})")
+# V11.2 硬化阈值
+if score >= 8:
+    # BLOCK: 写阻塞标记 + exit 1
+    print(f"[V11.2 Complexity Guard] 🛑 BLOCKED ({score})")
     print(f"  信号: {', '.join(signals)}")
-    print("  建议: 走完整 fullstack 流程 + 干净重置（Article XI）")
+    print("  建议: 需要用户显式确认")
+    print("  阻塞标记: .trae/complexity-blocked")
+    
+    # 写阻塞标记文件
+    BLOCK_MARKER.parent.mkdir(parents=True, exist_ok=True)
+    block_data = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "score": score,
+        "signals": signals,
+        "user_prompt": user_prompt[:500],  # 截断避免文件过大
+    }
+    BLOCK_MARKER.write_text(
+        json.dumps(block_data, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    
+    # 阻塞退出
+    sys.exit(1)
+
+elif score >= 5:
+    # WARNING: 仅提示，不阻断
+    print(f"[V11.2 Complexity Guard] ⚠️ WARNING ({score})")
+    print(f"  信号: {', '.join(signals)}")
+    print("  建议: 高复杂度任务，建议走 fullstack 流程 + 仔细规划")
+    sys.exit(0)
+
 elif score >= 3:
     print(f"[V11 Complexity Guard] 严重度: HIGH ({score})")
     print(f"  信号: {', '.join(signals)}")
     print("  建议: 走 fullstack 流程")
+    sys.exit(0)
+
 elif score >= 1:
     print(f"[V11 Complexity Guard] 严重度: LOW ({score})")
     print(f"  信号: {', '.join(signals)}")
+    sys.exit(0)
+
 else:
     print(f"[V11 Complexity Guard] 严重度: MINIMAL ({score})")
-
-sys.exit(0)
+    sys.exit(0)

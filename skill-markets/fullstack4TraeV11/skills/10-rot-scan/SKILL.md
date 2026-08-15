@@ -11,10 +11,8 @@ depends_on:
     - ../../references/stage-interaction-protocol.md
     - ../../references/common-iron-rules.md
   scripts:
-    - ../../scripts/stage-gate.py
     - ../../scripts/proactive-scan.py
     - ../../scripts/self-diagnose.py
-    - ../../scripts/orphan-detector.py
 ---
 
 # Stage 4.5 Rot Scan — 腐化扫描
@@ -62,6 +60,7 @@ Step 4: 全部 PASS → 进入 Stage 5 Accept；任一 FAIL → 🛑 REJECT
 |------|------|
 | 扫描报告 | `docs/reports/rot-scan-{date}.md` |
 | 修复清单 | `docs/reports/fix-list.json` |
+| Meta 元检测 | `docs/reports/self-diagnose-report.json` |
 
 ## 反模式（3 条）
 

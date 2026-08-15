@@ -68,7 +68,7 @@ if specs_changes_dir.exists():
                     for code_file in src_path.rglob(ext):
                         try:
                             code = code_file.read_text(encoding="utf-8")
-                            if re.search(route_pattern, code) and f'"{method}"' in code.upper() or f"'{method}'" in code.upper():
+                            if re.search(route_pattern, code) and (f'"{method}"' in code.upper() or f"'{method}'" in code.upper()):
                                 code_match = True
                                 break
                         except Exception:

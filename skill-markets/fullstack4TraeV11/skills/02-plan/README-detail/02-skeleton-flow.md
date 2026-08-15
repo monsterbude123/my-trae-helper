@@ -24,7 +24,7 @@ Step 1: 意图识别 + 选链
 
 Step 2: 去重检查（原子级）
         ├─ 扫描 docs/specs/changes/ 下活跃子目录
-        ├─ 扫描 docs/specs/archive/done/ 同名功能
+        ├─ 扫描 docs/archive/done/ 同名功能
         ├─ 原子级比较（> 50% 重叠 → 合并 / < 50% → 新建）
         └─ 输出: 去重决策表
 

@@ -28,8 +28,8 @@ agent: archive/done/{change-id}/ 占用空间 → 直接 rmtree  # ❌ 违反 Ar
 
 ```bash
 # ❌ 反例
-rmtree docs/specs/archive/done/{change-id}/
-git rm -r docs/specs/archive/done/{change-id}/
+rmtree docs/archive/done/{change-id}/
+git rm -r docs/archive/done/{change-id}/
 
 # ✅ 正确：归档目录永不删
 # 如需清理 → 走 spec-purge（移到 archive/out/spec-purge/）而非删

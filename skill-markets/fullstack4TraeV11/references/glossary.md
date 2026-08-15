@@ -89,7 +89,7 @@
 | `3/implement` | Stage 3 Implement | TDD RED→GREEN 实施(契约驱动 + 深度业务理解 + 漂移检测) |
 | `3.5/real-verify` | Stage 3.5 Real Verify | 启动可见产物(**唯一信任基础,不接受自评**) |
 | `4/review` | Stage 4 Review | 质疑式验收(FAIL IS FAIL + 4 维评分 + 主动证伪 + DOC SYNC) |
-| `4.5/rot-scan` | Stage 4.5 Rot Scan | 腐化扫描(proactive-scan.py 8 项必跑 + 元检测 + 修复,NO ROT NO ACCEPT) |
+| `4.5/rot-scan` | Stage 4.5 Rot Scan | 腐化扫描(proactive-scan.py 10 项必跑 + 元检测 + 修复,NO ROT NO ACCEPT) |
 | `5/accept` | Stage 5 Accept | 归档门禁(归档不可变 + 知识沉淀 + INDEX 更新) |
 | `6/bug-fix` | Stage 6 Bug Fix | 独立专精流程(根因不明不修复 + e2e 先行 + 6 层排查 + TDD 修复) |
 | `7/project-health` | Stage 7 Project Health | 项目健康度自检(**异步非阻塞** + 4 维度检查 + 防失真) |
@@ -102,6 +102,7 @@
 | stage_config | SKILL.md frontmatter 字段。V11 NEW。13 stage 路由 + depends_on 声明,由编排器解析 |
 | stage skill agent | 用 Task 启动子代理 + 注入 stage skill 调用约定 = 完成的代理(V11 不新增 stage agent skill,而是给现有 agent 一个调用 stage skill 的标准协议) |
 | stage-gate.py | V11 阶段门禁(13 stage 统一)。stage 切换前必跑 |
+| 关键路径 / Critical Path | 满足以下任一条件视为关键路径(覆盖率门槛 100% E2E 覆盖):涉及安全 / 涉及资金 / 涉及数据完整性 / 涉及业务核心规则。Stage 0.5 Test Plan 必显式声明关键路径清单,Stage 3 实施者必对关键路径写 E2E 测试,Stage 4 Review 必逐项核验 100% 覆盖。来源:skills/03-test-plan/references/coverage-rules.md §关键路径定义 |
 
 ---
 
@@ -183,7 +184,7 @@
 | scan-templates.py | 模板扫描 |
 | reason-classifier.py | 抽象理由分类器(6 类) |
 | change-status.py | 读取 change 真实状态 |
-| GitNexus 双端 Hook | 读端:`gitnexus-session-check.py`(SessionStart,staleness 检测 + 后台刷新)+写端:`gitnexus-session-finalize.py`(Stop,写新 HEAD → 后台刷新) |
+| GitNexus 双端 Hook | 读端:`gitnexus-session-check.py`(SessionStart,会话开始必跑,staleness 检测→后台刷新)+写端:`gitnexus-session-finalize.py`(Stop,会话结束若工作区脏才跑→后台刷新)。每次执行写痕迹`last-run-check.json`/`last-run.json`,stdout 统一`[gitnexus]` 格式可 grep |
 | GitNexus 3 次重试协议 | 第 1 次修参数 → 第 2 次换工具(impact ↔ context ↔ query)→ 第 3 次 list_repos(看索引状态)→ 仍失败 → 5 字段阻塞报告。NEVER: 直接降级为 grep/glob(违反 Article V.5 不可降级) |
 | V11 Hook 清单(13 个) | 覆盖 5 种 TRAE IDE event + 3 个 V11 shell hook。V11 独有:pre-stage.sh / post-stage.sh / pre-accept.sh(shell)+ gitnexus 双端(SessionStart + Stop) |
 

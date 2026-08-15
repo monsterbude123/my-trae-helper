@@ -44,7 +44,7 @@ duration_minutes: 0
 ```yaml
 ---
 card_type: change
-card_id: {YYYYMMDD}-{slug}
+card_id: {YYYY-MM-DD}-{slug}  # V11 全局规范,见 project-iron-laws.md §D
 current_stage: 0/plan | 1/spec
 stage_status: pending
 stage_started_at: {ISO 8601}

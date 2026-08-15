@@ -108,4 +108,4 @@ Step 4: 覆盖率断言
 - [SKILL.md §铁律 1](../SKILL.md) — 验收维度先于测试用例
 - [coverage-mapping.md §Step 2](../workflows/coverage-mapping.md) — 维度拆解 Step
 - [coverage-rules.md](../references/coverage-rules.md) — 维度覆盖率硬门槛
-- 公共铁律 Article V: [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)
+- 公共铁律 Article I(质量优先 — 1.2 不可为赶进度降低测试覆盖 ≥ 90%): [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)

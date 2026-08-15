@@ -133,4 +133,4 @@ critical_paths:
 - [SKILL.md §铁律 2](../SKILL.md) — 覆盖率门槛 ≥ 90%
 - [SKILL.md §铁律 8](../SKILL.md) — 不跳门槛
 - [coverage-rules.md](../references/coverage-rules.md) — 4 维度门槛详表
-- 公共铁律 Article II: [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)
+- 公共铁律 Article I.2(不可为赶进度降低测试覆盖 ≥ 90%): [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md)
