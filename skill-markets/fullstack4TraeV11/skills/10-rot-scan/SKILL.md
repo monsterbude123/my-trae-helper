@@ -4,7 +4,7 @@ description: "Stage 4.5 腐化扫描 — proactive-scan.py 10 项必跑 + 元检
 stage: 4.5
 parent: fullstack4traev11
 depends_on:
-  skills: [goal-mode]
+  skills: [gitnexus4Trae, goal-mode]
   stages: [4/review]
   references:
     - ../../references/state-card-protocol.md
@@ -33,6 +33,7 @@ depends_on:
 4. NO ROT NO ACCEPT — 任一 FAIL = 🛑 REJECT Accept
 5. fix-list.json 必产出 — 不可"扫完不改"
 6. 归档前必跑 — Accept 前置门禁
+7. **GITNEXUS FIRST（V11.8.5 NEW — 蒸馏自 bug-fix 不使用 gitnexus）** — rot 扫描必跑 GitNexus query()/impact() 查知识图谱完整性，禁止仅用 proactive-scan.py 不查符号关系（Article V 不可降级）
 ```
 
 ## 10 项腐化扫描（V10.10 同步 -- 蒸馏自 workflows/rot-detect-and-fix.md）
@@ -53,6 +54,10 @@ depends_on:
 ## 骨架流程（4 步）
 
 ```
+Step 0: GitNexus 知识图谱评估（V11.8.5 NEW）— 必跑
+   → mcp__gitnexus__query(query=相关concept) 查概念相关符号
+   → mcp__gitnexus__impact(target=可疑symbol, direction=upstream) 查上游依赖
+   → 禁止 grep/Glob 替代（Article V 不可降级）
 Step 1: 跑 proactive-scan.py 10 项 → 生成 rot-scan-{date}.md
 Step 2: 跑 self-diagnose.py → Meta 自身腐烂检测
 Step 3: 输出 fix-list.json（每项含 type/severity/fix_action）

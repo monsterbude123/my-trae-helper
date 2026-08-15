@@ -4,7 +4,7 @@ description: "Stage 4 质疑式验收 — AC 核销门禁(Gate) + 主动证伪 +
 stage: 4
 parent: fullstack4traev11
 depends_on:
-  skills: [acceptance-discipline]
+  skills: [gitnexus4Trae, acceptance-discipline]
   stages: [3.5/real-verify]
   references:
     - ../../references/state-card-protocol.md
@@ -48,11 +48,16 @@ depends_on:
 9. 质疑式验收 SUITE        — ZERO TRUST + EVIDENCE MANDATORY + ACTIVE FALSIFICATION + REQUIREMENT TRACING(V10.12 SUITE)
 10. 关键门禁套件           — SKEPTICAL VALIDATION([protocol](../../references/skeptical-validation-protocol.md))+ 产品视角 + 自动循环 + Test Plan Gate + 必读 5 件套([SKILL.md §3.7.3.5](../../SKILL.md) 指针引用 — prototype ↔ implementation 对照表 + fidelity 等级 + 偏离理由 + 评审疏漏二次再犯升级用户)
 11. MACHINE GATE           — 判定必跑 ac-gate.py(G1-G5 机械断言),人工只填矩阵不判结论;脚本 exit ≠ 0 = BLOCK,禁止"脚本拦了我放行"
+12. **GITNEXUS FIRST（V11.8.5 NEW — 蒸馏自 bug-fix 不使用 gitnexus）** — 验收前必跑 GitNexus detect_changes()/impact() 查本次变更代码范围，禁止只看 git diff 不知道改了什么（Article V 不可降级）
 ```
 
 ## 骨架流程（V10 reviewer 8 步 + V11 编排器门禁）
 
 ```
+Step -3: GitNexus 变更范围评估（V11.8.5 NEW）— 必跑
+   → mcp__gitnexus__detect_changes(scope=compare, base_ref=main) 查本次变更所有符号
+   → mcp__gitnexus__impact(target=改动的symbol, direction=upstream) 查上游依赖
+   → 禁止"只看 git diff 不知道改了什么"（Article V 不可降级）
 Step -2: 拆解验收基准（高风险清单）→ [acceptance-baseline-extract.md](workflows/acceptance-baseline-extract.md)（V11.6.0 落地:spec AC + ui-ux-logic 交互流 + TC 映射 → 基准清单;缺失 = BLOCK）
 Step -1: 跨 4 工件一致性分析（spec/contracts/prototypes/plan）
 

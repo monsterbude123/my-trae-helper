@@ -4,7 +4,7 @@ description: "Stage 1 规格增强 + 验收维度 — Spec 是真相源，验收
 stage: 1
 parent: fullstack4traev11
 depends_on:
-  skills: []
+  skills: [gitnexus4Trae]
   stages: [0.5/test-plan]
   references:
     - ../../references/state-card-protocol.md
@@ -46,6 +46,7 @@ depends_on:
 8. DRIFT → SPEC FIRST — 代码与 spec 漂移时先改 spec
 9. DOC HONEST         — spec.md INV 必在 Stage 4 落地
 10. SKEPTICAL          — P0/P1 spec 按 [skeptical-validation-protocol.md](../../references/skeptical-validation-protocol.md) 质疑性校验
+11. **GITNEXUS FIRST（V11.8.5 NEW — 蒸馏自 bug-fix 不使用 gitnexus）** — 写 spec 前必跑 GitNexus impact() / context() 查代码影响面，禁止 grep/Glob 替代（Article V 不可降级）
 ```
 
 ## 委派触发词
@@ -58,6 +59,10 @@ depends_on:
 ## 骨架流程（6 步）
 
 ```
+Step 0: GitNexus 影响面评估（V11.8.5 NEW）— 必跑
+   → mcp__gitnexus__impact(target=受影响的symbol, direction=upstream/downstream) 找代码影响面
+   → mcp__gitnexus__context(name=受影响的symbol) 查调用链
+   → 禁止 grep/Glob 替代（Article V 不可降级）
 Step 1: 加载 plan.md + test-plan.md → 识别 Capabilities + 测试覆盖
 Step 2: Enhanced Acceptance — 每个 Capability 拆 ≥ 3 验收维度（E2E ≥ 2）
 Step 3: INV 定义 — ≥ 1 不变量（数据 / 安全 / 业务）

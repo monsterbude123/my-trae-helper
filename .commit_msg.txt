@@ -1,47 +1,53 @@
-V11.8.4 — commit 准入最小集与全量验收分层（蒸馏自 2026-08-15 merged-commits）
+V11.8.5 — 5 个 P0 stage GitNexus First 强制（蒸馏自 bug-fix 不使用 gitnexus）
 
 背景：
-2026-08-15 uiux-redesign + api-timing 合并 commit 卡死，
-根因是 V11 §0.3 Stage 3.5 没明示"可异步、不阻塞 commit"，
-agent 把全量视觉验证塞入阻塞路径，反复"修一点跑一次"循环 5+ 仍不收敛。
+用户质疑 bug 修复流程 agent 几乎不用 gitnexus（仅查 V11 SKILL.md 表面）。
+经核实：5 个 P0 stage（04-spec / 06-contract / 09-review / 10-rot-scan / 12-bug-fix）
+depends_on.skills 缺 gitnexus4Trae，铁律未含 GitNexus First，骨架流程未含
+必跑调用点。agent 因此改用 grep/Glob（违反 Article V 不可降级）。
 
 改动：
 
-1. V11 主 SKILL.md §0.3 Stage 3.5/4.5 行：
-   - 补充"默认异步、不阻塞 Stage 5 commit"声明
-   - 定义 commit 准入最小集（tsc 0 错 + 5 路由 spot-check + admin 探针 200）
-   - 全量验收（60+ 路由视觉证据 / 完整 vitest / rot-scan）移到 commit 后异步
-   - 放行依据交叉引用 §3.7.3 §8.4 工具-人类分层判定
+1. skills/04-spec/SKILL.md
+   - depends_on.skills 加 gitnexus4Trae
+   - 铁律从 10 → 11（第 11 条 GITNEXUS FIRST）
+   - 骨架流程 Step 0 加 GitNexus 影响面评估（必跑 impact + context）
 
-2. V11 主 SKILL.md §1.6：
-   - 视觉验证豁免：默认异步，不入流线化判定
-   - 即使 60+ 路由也允许主代理亲自跑（按 wave 拆分异步）
+2. skills/06-contract/SKILL.md
+   - depends_on.skills 加 gitnexus4Trae
+   - 铁律从 10 → 11（第 11 条 GITNEXUS FIRST）
+   - 骨架流程 Step 0 加 GitNexus 上下游评估（必跑 impact + context）
 
-3. V11 主 SKILL.md §3.7 #10（新增）：
-   - 范围盲目扩大（反向 #5 陷阱）
-   - 为避免"假完成"反模式而把范围扩大到不可能完成
+3. skills/09-review/SKILL.md
+   - depends_on.skills 加 gitnexus4Trae
+   - 铁律从 11 → 12（第 12 条 GITNEXUS FIRST）
+   - 骨架流程 Step -3 加 GitNexus 变更范围评估（必跑 detect_changes + impact）
 
-4. V11 references/common-anti-patterns.md §7（新增 5 个子段）：
-   - §7.1 视觉证据"至少 1 张"（V11.5+ 原条款）
-   - §7.2 视觉证据"几张是过度"（NEW）
-   - §7.3 commit 准入最小集 vs 全量验收（NEW — 必读）
-   - §7.4 "修一点跑一次"循环反模式（NEW — 必读）
-   - §7.5 fixture timeout ≠ 登录失败（NEW — 必读）
-   - §7.6 自检清单
+4. skills/10-rot-scan/SKILL.md
+   - depends_on.skills 加 gitnexus4Trae
+   - 铁律从 6 → 7（第 7 条 GITNEXUS FIRST）
+   - 骨架流程 Step 0 加 GitNexus 知识图谱评估（必跑 query + impact）
 
-5. trap-instructions.yaml（继承 V11.8.3）已含 V11-BH7 范围自扩反例
-   cross-link 已加
+5. skills/12-bug-fix/SKILL.md（V11.8.3 重写后强化）
+   - 铁律 L3.1 强化：必跑 6 层排查 + GitNexus impact()/context()
+   - 新增 L3.6 GITNEXUS FIRST（必跑 impact + context + query 至少 2 个）
+   - Step L3.1 明确 3 个具体 GitNexus 调用
+
+6. tests/unit/test_gitnexus_first_coverage.py（NEW）
+   - 25 个测试覆盖 5 个 P0 stage 的 GitNexus First 强制
+   - 5 类断言：depends_on / 铁律 / 骨架调用点 / 具体工具名 / 反 grep 声明
 
 验证：
-- pytest 69 passed (skill-markets/fullstack4TraeV11/tests/unit/)
-- node src/guards/skill-registration-guard.mjs PASS
-- 安全扫描 HIGH = 0（继承 V11.8.3 修复）
+- pytest 94 passed (skill-markets/fullstack4TraeV11/tests/unit/)
+- 安全扫描：仅文档改动（不涉及脚本）
+- L1 Gate 必走（待 commit）
 
-未做（明确越权）：
-- ❌ 项目侧 fixture SignInPage.waitForURL 改写（ai-short-studio-monster 仓库）
-- ❌ 项目级 rules anti-patterns §7（项目级仓库）
-- ❌ 修整个 lint 80 problems（项目预存债务）
+未做（明确 P1，可后续）：
+- 03-test-plan / 05-prototype / 08-real-verify / 11-accept / 13-project-health
+  这些 stage 也应该用 gitnexus，但优先级次于 P0 5 个
 
 关联：
-- 报告：d:\workspace\ai-collaborate\ai-short-studio-monster\docs\reports\2026-08-15-merged-commits-retrospective.md
-- V11.8.3 bug-hunt 4 层框架（已 commit 52ab395）
+- 用户反馈：bug-fix agent 几乎不用 gitnexus
+- Article V GitNexus First 不可降级
+- V11.8.3 Stage 6 bug-hunt 4 层框架（基线）
+- V11.8.4 commit 准入最小集（基线）

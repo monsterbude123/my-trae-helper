@@ -4,7 +4,7 @@ description: "Stage 2 契约四件套 — 契约是不可变的接口真相，�
 stage: 2
 parent: fullstack4traev11
 depends_on:
-  skills: [frontend-backend-contract-alignment]
+  skills: [gitnexus4Trae, frontend-backend-contract-alignment]
   stages: [1.5/prototype]
   references:
     - ../../references/state-card-protocol.md
@@ -34,7 +34,7 @@ depends_on:
 | 孤儿契约测试清理 | 实施编码 → Stage 3 Implement |
 | ADDITIVE / BREAKING 变更流程 | 验收 → Stage 4 Review |
 
-## 铁律（10 条）
+## 铁律（11 条 — V11.8.5 NEW +1 条 GitNexus First）
 
 ```
 1. CONTRACT IS IMMUTABLE  — 契约 approved 后不可单方面改
@@ -47,11 +47,16 @@ depends_on:
 8. CONTRACT-GATE          — contract-gate.py 必 PASS（4 件套齐全 + 测试骨架）
 9. THREE-WAY SYNC         — 契约修改必同步改 docs/ 文档 + 测试代码（V10 配置治理 D-009）
 10. SKEPTICAL VALIDATION   — P0/P1 修复按 [skeptical-validation-protocol.md](../../references/skeptical-validation-protocol.md) 质疑性校验
+11. **GITNEXUS FIRST（V11.8.5 NEW — 蒸馏自 bug-fix 不使用 gitnexus）** — 写契约前必跑 GitNexus impact()/context() 查上下游调用，禁止 grep 替代（Article V 不可降级）
 ```
 
 ## 骨架流程（5 步）
 
 ```
+Step 0: GitNexus 上下游评估（V11.8.5 NEW）— 必跑
+   → mcp__gitnexus__impact(target=受影响的symbol, direction=upstream/downstream) 查上下游
+   → mcp__gitnexus__context(name=受影响的symbol) 查调用链
+   → 禁止 grep 替代（Article V 不可降级）
 Step 1: 读上游（spec.md + plan.md + ARCHITECTURE.md + 已批准 contracts/）
 Step 2: domain-models.md（先于接口，含 INV）
 Step 3: api-contracts.md + events.md + validation-rules.md

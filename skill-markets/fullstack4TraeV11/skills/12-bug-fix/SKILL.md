@@ -92,11 +92,12 @@ depends_on:
  L2.3 预算耗尽即停止      — ROI 驱动，不硬撑
 
 ═══════ Layer 3 修复铁律 ═══════
- L3.1 根因不明不修复      — 必 6 层排查 + GitNexus impact
+ L3.1 根因不明不修复      — 必 6 层排查 + GitNexus impact()/context()
  L3.2 e2e 先行            — 必初始 FAIL（证明 bug 真实存在）
  L3.3 INITIAL PASS = 不是 bug — e2e 初始 PASS → 回退 OPEN
  L3.4 跨层修复最小化      — Ponytail 决策阶梯
  L3.5 修复回写 bug 单     — bug 单 .md + index.md + .state-card.md
+ L3.6 **GITNEXUS FIRST（V11.8.5 NEW — 蒸馏自 agent 不使用 gitnexus）** — Step L3.1 必跑 GitNexus impact()/context()/query() 至少 2 个调用，禁止仅靠 6 层排查不查代码图谱（Article V 不可降级）
 
 ═══════ Layer 4 收敛铁律 ═══════
  L4.1 L1 未清零不结束      — 核心阻断优先
@@ -160,7 +161,11 @@ Step L2.3: 时间预算分配
 ```
 Step L3.1: 根因定位
     → 6 层排查：网络 → 接入 → 应用 → 数据 → 集成 → 客户端
-    → GitNexus impact 分析影响范围
+    → GitNexus 影响面评估（V11.8.5 NEW — 必跑 3 调用）：
+       L3.1.1 mcp__gitnexus__impact(target=故障symbol, direction=upstream) → 受影响符号列表
+       L3.1.2 mcp__gitnexus__context(name=故障symbol) → 调用链
+       L3.1.3 mcp__gitnexus__query(query=相关concept) → 概念相关其他符号
+    → 禁止 grep/Glob 替代（Article V 不可降级）
     → 详见 [bug-layer-3-repair.md](references/bug-layer-3-repair.md) §L3.1
 
 Step L3.2: 修复范围决策
