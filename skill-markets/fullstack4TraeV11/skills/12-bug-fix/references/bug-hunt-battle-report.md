@@ -1,19 +1,19 @@
 ---
-description: V11 Stage 3.5/4/6 bug-hunt / E2E 跨阶段实战报告 — 蒸馏自 2026-08-15 单次 90 min / 14 模块 / 16 bug 全流程。提供 5 段方法论 + 4 工具脚本 + 6 反例库 + 5 项 V11 缺漏 + 6 字段委派头部模板，专门补 fullstack4TraeV11 跨 stage 的"bug hunt / E2E 测试治理"实战段。
+description: V11.8.2 Stage 6 Phase A bug-hunt 实战报告 — 蒸馏自 2026-08-15 单次 90 min / 14 模块 / 16 bug 全流程。V11.8.2 起本报告迁入 Stage 6 子段（references/bug-hunt-battle-report.md），与 bug-hunt 工具脚本折叠进 Stage 6 scripts/bug-hunt/ 子包。下次项目用 V11 自动带出 bug-hunt 能力，无需独立 install 任何 sub-skill。
 alwaysApply: false
 enabled: true
 updatedAt: 2026-08-15
-version: 1.0.0
+version: 1.1.0
 provider:
 ---
 
-# Stage 3.5/4/6 Bug-Hunt / E2E 实战报告（V11 实战范本 V1）
+# Bug-Hunt 实战报告（V11.8.2 Stage 6 Phase A 子段）
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../../../../skills/09-review/SKILL.md) · [贾维斯门禁守护](../../../../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.8.2](../../../../CHANGELOG.md)
 
-> **本文件定位**：V11 总编排器内"跨 stage 实战段"。Stage 3.5（real-verify） + Stage 4（review-ac-gate） + Stage 6（bug-fix）3 个 stage 在 bug-hunt / E2E 场景下的真实失败案例 + 工具脚本集合 + 子代理头部模板 + 6 反例库 + 5 V11.5 缺漏吸收。
+> **本文件定位**（V11.8.2 NEW）：Stage 6 Bug Fix & Hunt 统一工序的 **Phase A 实战段**（批量 bug 发现）。本报告与 [bug-hunt-phase-a.md](bug-hunt-phase-a.md) / [bug-hunt-4d-observation.md](bug-hunt-4d-observation.md) / [bug-hunt-5-check.md](bug-hunt-5-check.md) 三段协同 — Phase A 是 3 步流程骨架，本报告是 90 min / 14 模块实战数据蒸馏。
 >
-> **本文件不定位**：独立 skill（不与 [bug-hunt-tooling](../../bug-hunt-tooling/SKILL.md) 平级）— 实战报告是 **V11 references 层** 的方法论；bug-hunt-tooling 是 **用户级 skill 层** 的工具脚本入口。
+> **V11.8.2 升级（关键）**：本报告从 `references/stage-08-real-verify-battle-report.md`（V11 公共层）迁入 `skills/12-bug-fix/references/bug-hunt-battle-report.md`（Stage 6 子段），bug-hunt-tooling 工具脚本折叠进 Stage 6 `scripts/bug-hunt/` 子包。下次项目用 V11 自动带出 bug-hunt 能力，无需独立 install bug-hunt-tooling skill。
 
 ---
 
@@ -41,19 +41,6 @@ V11 13 stage 流水线虽然完整，但**真实 bug-hunt / E2E 场景**往往**
 | `loop-pass-pattern.md` | 循环通过模式 | 本报告聚焦 **bug-hunt 单次循环的 5 步流程**，不重复循环反例 |
 
 **结论**：本报告**不重复**任何现有 references，**只补充** bug-hunt / E2E 跨 stage 实战的工具脚本集合 + 委派头部模板 + 反例库。
-
-### 0.3 与 bug-hunt-tooling skill 的关系
-
-| 维度 | bug-hunt-tooling skill（用户级） | 本报告（V11 references 层） |
-|------|--------------------------------|---------------------------|
-| 作用对象 | 全局 Trae IDE skill 体系 | V11 13 stage 流水线内部 |
-| 触发词 | bug-hunt / E2E / HMR / 受 auth 保护路由 | bug-hunt 跨 Stage 3.5/4/6 |
-| 工具脚本 | `scripts/bug-hunt/{new-bug,dev-hmr-recovery,archive-screenshot,close-bug}.sh/ps1` | 引用 bug-hunt-tooling 的工具脚本（不重复造轮子） |
-| 受众 | 任何 Trae IDE 用户 | 使用 V11 13 stage 流水线的主代理 / sub-agent |
-
-**MUST**：V11 主代理在 bug-hunt 场景委派 sub-agent 时，**必同时**：
-1. 加载 bug-hunt-tooling skill（拿工具脚本）
-2. Read 本文件（拿 V11 实战头部模板 + 反例库）
 
 ---
 
@@ -588,25 +575,26 @@ bash scripts/bug-hunt/close-bug.sh BUG-003 <agent-id>
 
 ## 关联引用
 
-- **本报告上游（V11 references 公共层）**：
-  - [constitution.md](constitution.md) — 17 Articles 宪法（Article V/IX/XI/XVI 是本报告引用源）
-  - [common-iron-rules.md](common-iron-rules.md) — 公共铁律（Article XVII Secret Redaction）
-  - [common-anti-patterns.md](common-anti-patterns.md) — 22 反例库（本报告 §8 与之不重叠）
-  - [sub-agent-rules.md](sub-agent-rules.md) — 子代理通用铁律（本报告 §5 是 bug-hunt 头部扩展）
-  - [stage-card-protocol.md](state-card-protocol.md) — 状态卡协议（本报告 §6 是 bug 单状态机扩展）
-  - [stage-physical-isolation.md](stage-physical-isolation.md) — 阶段物理隔离（V12 提案）
-  - [agent-error-diagnosis.md](agent-error-diagnosis.md) — 5 模式失败根因
-  - [unread-rule-pass.md](unread-rule-pass.md) — 跳读反例库
-  - [loop-pass-pattern.md](loop-pass-pattern.md) — 循环通过模式
-- **本报告下游（V11 stage skill）**：
-  - [skills/08-real-verify/SKILL.md](../skills/08-real-verify/SKILL.md) — Stage 3.5（启动可见产物）
-  - [skills/09-review/SKILL.md](../skills/09-review/SKILL.md) — Stage 4（AC 核销门禁）
-  - [skills/12-bug-fix/SKILL.md](../skills/12-bug-fix/SKILL.md) — Stage 6（独立 bug fix 流程）
-- **本报告横向（工具脚本层）**：
-  - [skill-markets/bug-hunt-tooling/SKILL.md](../../bug-hunt-tooling/SKILL.md) — bug-hunt 工具脚本入口
-  - [skill-markets/e2e-module-audit/SKILL.md](../../e2e-module-audit/SKILL.md) — DEPRECATED 兼容壳（acceptance-discipline 子 skill）
-- **本报告横向（V11 缺漏 PR 来源）**：
-  - 用户工作区 `D:\workspace\ai-collaborate\ai-short-studio-monster\docs\specs\sessions\2026-08-15-v11.5-fullstack-upgrade-distillation-report.md` §4
+### V11.8.2 Stage 6 同包 references（直接引用）
+- [bug-hunt-phase-a.md](bug-hunt-phase-a.md) — Phase A 3 步流程骨架（启动 / 14 模块 / 落单）
+- [bug-hunt-4d-observation.md](bug-hunt-4d-observation.md) — 4 维度观察法（visual/behavior/data/console）
+- [bug-hunt-5-check.md](bug-hunt-5-check.md) — 5 项证据独立抽检（M6.1-M6.5）
+- [five-step-flow.md](five-step-flow.md) — Phase B 5 步精简流程（理解期望 / e2e 先行 / 数据分析 / TDD / 验收）
+- [six-layer-diagnosis.md](six-layer-diagnosis.md) — Phase B 6 层排查
+- [bug-state-machine.md](bug-state-machine.md) — OPEN/IN-FIX/FIXED/VERIFIED/CLOSED
+- [../SKILL.md](../SKILL.md) — Stage 6 总入口（13 铁律 + 7 步统一工序）
+- [../scripts/bug-hunt/](../scripts/bug-hunt/) — 6 工具脚本（new-bug.sh / close-bug.sh / dev-hmr-recovery.{sh,ps1} / archive-screenshot.{sh,ps1}）
+
+### V11 公共 references（同包外）
+- [../../../references/constitution.md](../../../references/constitution.md) — 17 Articles 宪法
+- [../../../references/common-iron-rules.md](../../../references/common-iron-rules.md) — 公共铁律（Article XVII Secret Redaction）
+- [../../../references/common-anti-patterns.md](../../../references/common-anti-patterns.md) — 22 反例库
+- [../../../references/sub-agent-rules.md](../../../references/sub-agent-rules.md) — 子代理通用铁律
+- [../../../references/state-card-protocol.md](../../../references/state-card-protocol.md) — 状态卡协议
+- [../../../references/agent-error-diagnosis.md](../../../references/agent-error-diagnosis.md) — 5 模式失败根因
+
+### V11.5 缺漏 PR 来源（跨工作区）
+- 用户工作区 `D:\workspace\ai-collaborate\ai-short-studio-monster\docs\specs\sessions\2026-08-15-v11.5-fullstack-upgrade-distillation-report.md` §4
 
 ---
 
@@ -615,3 +603,4 @@ bash scripts/bug-hunt/close-bug.sh BUG-003 <agent-id>
 | 日期 | 版本 | 变更 | 来源 |
 |------|------|------|------|
 | 2026-08-15 | 1.0.0 | 首版（10 段齐全 + 6 反例 + V11.5 5 缺漏吸收） | 2026-08-15 V11.5 跨项目适配蒸馏 + bug-hunt 90 min 实战 |
+| 2026-08-15 | 1.1.0 | V11.8.2：报告迁入 Stage 6 子段（`references/stage-08-real-verify-battle-report.md` → `skills/12-bug-fix/references/bug-hunt-battle-report.md`）；删 §0.3 「与 bug-hunt-tooling 关系」段（V11.8.2 不外挂 skill）；关联引用全改同包路径；frontmatter description + version 升级 | V11.8.2 Stage 6 升级 |

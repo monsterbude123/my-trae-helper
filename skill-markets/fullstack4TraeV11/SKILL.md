@@ -91,7 +91,7 @@ ls docs/specs/.state-card.md
 | 2 | **视觉验证** | `.trae/skills/visual-evidence-discipline/` 或 `.trae-cn/skills/visual-evidence-discipline/` | UI 验收 / 像素验证 / 通过依据 |
 | 3 | **浏览器自动化** | `.trae/skills/browser-use-cloud/` 或 `.trae-cn/skills/browser-use-cloud/` | browser-use / 网页抓取 / 表单填写 |
 | 4 | **UI 测试** | `.trae/skills/playwright-best-practices/` 或 `.trae-cn/skills/playwright-best-practices/` | Playwright / E2E / page object |
-| 5 | **E2E 框架** | `.trae/skills/e2e-module-audit/` 或 `.trae-cn/skills/e2e-module-audit/` + **[references/stage-08-real-verify-battle-report.md](references/stage-08-real-verify-battle-report.md)**(V11.8.1 NEW 跨 stage 实战段) | e2e / 端到端回归 / 视觉审计 / bug-hunt / 受 auth 保护路由 / 真登录 7 步 |
+| 5 | **E2E 框架** | `.trae/skills/e2e-module-audit/` 或 `.trae-cn/skills/e2e-module-audit/` + **[skills/12-bug-fix/references/bug-hunt-battle-report.md](skills/12-bug-fix/references/bug-hunt-battle-report.md)**(V11.8.2 NEW Stage 6 Phase A 实战段) | e2e / 端到端回归 / 视觉审计 / bug-hunt / 受 auth 保护路由 / 真登录 7 步 |
 | 6 | **录屏** | `.trae/skills/screenshot/` §录屏模式 + `.trae-cn/skills/screenshot/` | 录屏 / 操作回放 / 失败重演 |
 | 7 | **a11y** | `.trae/skills/ui-ux-pro-max/` + 项目 `docs/a11y/` | 可访问性 / WCAG / a11y |
 | 8 | **性能** | `.trae/skills/ui-ux-pro-max/` + 项目 `docs/perf-budget.md` | 性能 / 帧率 / FCP / Web Vitals |
@@ -628,7 +628,7 @@ skills/{NN}-{name}/
 
 ## §13 参考索引
 
-- **references/**: constitution / common-iron-rules / common-anti-patterns / **skeptical-validation-protocol**（7 stage 永久激活）/ stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns / agent-error-diagnosis / sub-agent-rules / project-structure / gitnexus-tools / gitnexus-retry-protocol / stage-physical-isolation / **stage-08-real-verify-battle-report**（V11.8.1 NEW — 跨 Stage 3.5/4/6 bug-hunt / E2E 实战段，详见各节指针）
+- **references/**: constitution / common-iron-rules / common-anti-patterns / **skeptical-validation-protocol**（7 stage 永久激活）/ stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns / agent-error-diagnosis / sub-agent-rules / project-structure / gitnexus-tools / gitnexus-retry-protocol / stage-physical-isolation（V11.8.2 起 bug-hunt 实战段迁入 [skills/12-bug-fix/references/bug-hunt-battle-report.md](skills/12-bug-fix/references/bug-hunt-battle-report.md) 同包内，详见 [skills/12-bug-fix/SKILL.md](skills/12-bug-fix/SKILL.md)）
 - **glossary.md** — 术语表(V10 完整继承 + V11 新增 5 大类 100+ 术语)
 - **templates/**: project-agents-example / project-rules-example / state-card / hooks/ / constitution-template
 

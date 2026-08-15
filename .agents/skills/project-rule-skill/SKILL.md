@@ -78,7 +78,7 @@ reason: "<本任务场景关键词>"
 | 场景关键词 | 自动加载的 skill |
 |------------|----------------|
 | `测试` / `test` / `E2E` / `验收` / `verify` | `acceptance-discipline` / `test-experience` |
-| **`bug-hunt` / `HMR` / `受 auth 保护路由` / `真登录取证` / `bug 单 status` / `可见证据抽检`**(V11.8.0 NEW) | `bug-hunt-tooling`(工具脚本) + **[`stage-08-real-verify-battle-report.md`](../../skill-markets/fullstack4TraeV11/references/stage-08-real-verify-battle-report.md)**(V11 跨 stage 实战段) |
+| **`bug-hunt` / `HMR` / `受 auth 保护路由` / `真登录取证` / `bug 单 status` / `可见证据抽检`**(V11.8.0 NEW，V11.8.2 升级为 Stage 6 子段) | [`Stage 6 Bug Fix & Hunt`](../../skill-markets/fullstack4TraeV11/skills/12-bug-fix/SKILL.md)(Stage 6 同包内 Phase A 工具脚本 + 实战段) |
 | `安全` / `secret` / `扫描` / `audit` | `trae-security-review` |
 | `新建技能` / `skill` / `create` / `verify` | `skill-acceptance` + **V11.8.0.1** [`references/skill-creation-workflow.md`](references/skill-creation-workflow.md)(协议先行 + 多维度一致) + [`references/skills-development-rules.md`](references/skills-development-rules.md)(短细则) |
 | `protocol` / `协议先行` / `*-protocol.md` | **V11.8.0.1** [`references/protocol-coverage-protocol.md`](references/protocol-coverage-protocol.md)+ `python scripts/_check_protocol_coverage.py --protocol <path> --check` |
