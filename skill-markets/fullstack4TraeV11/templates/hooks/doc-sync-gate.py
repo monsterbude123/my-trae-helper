@@ -5,6 +5,7 @@
 """
 
 import sys
+import json
 from pathlib import Path
 
 
@@ -41,7 +42,15 @@ if state_card is None or not state_card.exists():
     print("[V11 Doc-Sync Gate] 🛑 BLOCKED: state card missing (docs/specs/changes/*/ or docs/specs/)")
     print("    → DOC SYNC 未完成，禁止写代码")
     print("    → 修复: 运行 intake 或 stage-1-intake 生成 .state-card.md")
-    sys.exit(1)
+    # Trae 官方 schema: PreToolUse 阻断必须 exit=2 + permissionDecision: "deny" JSON
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": "DOC SYNC 未完成，state card 缺失"
+        }
+    }))
+    sys.exit(2)
 
 # 检查 modules/ 是否存在（DOC SYNC 产出）
 modules_dir = project_root / "docs" / "modules"
@@ -49,7 +58,15 @@ if not modules_dir.exists() or not any(modules_dir.iterdir()):
     print("[V11 Doc-Sync Gate] 🛑 BLOCKED: docs/modules/ empty or missing")
     print("    → DOC SYNC 未完成，禁止写代码")
     print("    → 修复: 运行 stage-2-doc-sync 生成 docs/modules/")
-    sys.exit(1)
+    # Trae 官方 schema: PreToolUse 阻断必须 exit=2 + permissionDecision: "deny" JSON
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": "DOC SYNC 未完成，docs/modules/ 缺失或为空"
+        }
+    }))
+    sys.exit(2)
 
 print("[V11 Doc-Sync Gate] ✅ DOC SYNC 状态 OK")
 sys.exit(0)

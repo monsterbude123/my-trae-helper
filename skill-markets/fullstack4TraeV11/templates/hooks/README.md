@@ -25,6 +25,21 @@
 
 ---
 
+## V11.8.x 硬化（pre-stage hook 同源依赖 V11_GATE_ENFORCED）
+
+> **背景**：2026-08-16 P2-3 批修期间，`pre-stage.sh` 被硬化为"必设 `V11_GATE_ENFORCED=true` + `V11_GATE_STAGE=<id>` + `V11_GATE_CALLER=<name>` 三个 env 才能通过"，缺失任一即 `exit 1`（不能 bypass）。
+>
+> **同步要求**：任何调用 `pre-stage.sh` 的 orchestrator（包括 fullstack-hooks.json 中的 `SessionStart` 链路上层）必须：
+> 1. 由 V11 orchestrator / 主上下文在 stage 切换前显式 export 上述 3 个 env
+> 2. 不允许直接在 `fullstack-hooks.json` 的 `command` 字段里硬编码 `V11_GATE_ENFORCED=true`（绕过 = 假通过）
+> 3. CI / hook 校验路径：先 `bash pre-stage.sh` 跑通 → 再走后续 stage
+
+> **贾维斯门禁守护同源**（[README.md §1.5](../../README.md)）：V11.7.0 的贾维斯 hash 锁 + V11.8.x 的 pre-stage env 校验**共用同一道防线**——任何 sub-agent 想绕开必须同时绕过 hash 锁 + env 校验 + 审计日志,三者协同是协议主张,落地在 hooks + scripts + state-card 三处。
+
+详见 [fullstack-hooks.json §SessionStart](./fullstack-hooks.json) + [pre-stage.sh](./pre-stage.sh) — env 校验实现。
+
+---
+
 ## V11 vs V10 差异
 
 | 维度 | V10 | V11 |

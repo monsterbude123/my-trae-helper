@@ -5,6 +5,7 @@
 """
 
 import sys
+import json
 from pathlib import Path
 
 
@@ -46,7 +47,15 @@ if not has_contracts and not has_spec_contracts:
     print("[V11 Contract Gate] 🛑 BLOCKED: No contracts/ found in project or specs/changes/")
     print("    → contracts/ 缺失，禁止写代码")
     print("    → 修复: 纯后端项目先定义 contracts/，前后端项目运行 stage-1-intake 生成 specs/changes/{id}/contracts/")
-    sys.exit(1)
+    # Trae 官方 schema: PreToolUse 阻断必须 exit=2 + permissionDecision: "deny" JSON
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": "contracts/ 缺失或为空，禁止写代码"
+        }
+    }))
+    sys.exit(2)
 
 print("[V11 Contract Gate] ✅ 检查完成")
 sys.exit(0)

@@ -82,6 +82,54 @@ def validate_table_structure(name: str, data) -> list:
     return errors
 
 
+def validate_stack(stack, gates_ids, guards_ids) -> list:
+    """校验单个 stack。
+
+    返回错误列表（空 = PASS）。
+
+    校验维度:
+      - name/gates/guards 三必填字段(P3-2 scaffold 模式)
+      - stacks[].gates ⊆ gates.yaml 登记(gate id)(P3-1 交叉校验)
+      - stacks[].guards ⊆ guards.yaml 登记(guard id)(P3-1 交叉校验)
+    """
+    errors = []
+    if not isinstance(stack, dict):
+        return ["stack 条目不是 dict"]
+
+    # P3-2: 三必填字段(name / gates / guards)
+    for field in ("name", "gates", "guards"):
+        if field not in stack or stack[field] in (None, ""):
+            errors.append(f"stack 缺必填字段 `{field}`")
+    if errors:
+        return errors  # 必填缺失 → 跳过后续交叉校验
+
+    stack_id = stack.get("id", "?")
+
+    # P3-1: stacks[].gates 必须登记在 gates.yaml
+    gates = stack.get("gates", [])
+    if not isinstance(gates, list):
+        errors.append("stack.gates 不是 list")
+    else:
+        for g in gates:
+            if g not in gates_ids:
+                errors.append(
+                    f"stacks[{stack_id}].gates 含未登记 gate: {g}"
+                )
+
+    # P3-1: stacks[].guards 必须登记在 guards.yaml
+    sg = stack.get("guards", [])
+    if not isinstance(sg, list):
+        errors.append("stack.guards 不是 list")
+    else:
+        for gd in sg:
+            if gd not in guards_ids:
+                errors.append(
+                    f"stacks[{stack_id}].guards 含未登记 guard: {gd}"
+                )
+
+    return errors
+
+
 def validate_gate(gate, guards_ids, scripts_dir, hooks_dir, project_root, validate_only):
     """校验单个 gate。返回错误列表（空 = PASS）。"""
     errors = []
@@ -132,6 +180,28 @@ def validate_gate(gate, guards_ids, scripts_dir, hooks_dir, project_root, valida
     return errors
 
 
+def resolve_registry_dir(explicit: str | None, project_root: str | None, skill_root: pathlib.Path) -> tuple:
+    """决定 registry_dir,优先级:显式 > 项目级自动探测 > V11 通用。
+
+    返回 (registry_dir, auto_detected: bool)。
+    """
+    if explicit:
+        return pathlib.Path(explicit), False
+
+    project_registry = None
+    if project_root:
+        pr = pathlib.Path(project_root)
+        candidate = pr / ".trae" / "registry"
+        required = ["gates.yaml", "guards.yaml", "state-machine.yaml", "repair-flow.yaml"]
+        if candidate.is_dir() and all((candidate / r).is_file() for r in required):
+            project_registry = candidate
+
+    if project_registry is not None:
+        return project_registry, True
+
+    return skill_root / "registry", False
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="V11 flow 层统一消费脚本（registry 四表 → 13 stage 门禁矩阵）"
@@ -147,9 +217,21 @@ def main():
 
     # skill 根 = 本脚本所在目录的上一级
     skill_root = pathlib.Path(__file__).resolve().parent.parent
-    registry_dir = pathlib.Path(args.registry_dir) if args.registry_dir else skill_root / "registry"
     scripts_dir = skill_root / "scripts"
     hooks_dir = skill_root / "templates" / "hooks"
+
+    # registry 目录解析优先级:
+    #   1. 显式 --registry-dir(用户主动指定)
+    #   2. <project_root>/.trae/registry/(自动探测,项目级覆盖 V11 通用)
+    #   3. skill_root/registry/(V11 通用层)
+    registry_dir, auto_detected = resolve_registry_dir(
+        args.registry_dir, args.project_root, skill_root
+    )
+    if auto_detected:
+        print(
+            f"[v11-gate] auto-detected project registry: {registry_dir}",
+            file=sys.stderr,
+        )
 
     # ---- 1. 加载四表 ----
     tables = {}
@@ -180,8 +262,11 @@ def main():
     # ---- 2. 收集 guards 登记 id ----
     guards_ids = {g.get("id") for g in tables["guards"].get("guards", [])
                   if isinstance(g, dict) and g.get("id")}
+    gates_ids = {g.get("id") for g in tables["gates"].get("gates", [])
+                 if isinstance(g, dict) and g.get("id")}
 
     gates_data = tables["gates"].get("gates", [])
+    stacks_data = tables["stacks"].get("stacks", [])
 
     # ---- 3. 逐个 gate 检查 ----
     rows = []
@@ -199,6 +284,14 @@ def main():
         rows.append({"id": gid, "stage": stage, "script": script,
                      "status": status, "errors": errors})
 
+    # ---- 3.5 P3-1 + P3-2: 逐个 stack 交叉校验 + scaffold 必填字段 ----
+    stack_rows = []
+    for stack in stacks_data:
+        errors = validate_stack(stack, gates_ids, guards_ids)
+        sid = stack.get("id", "?") if isinstance(stack, dict) else "?"
+        status = "FAIL" if errors else "PASS"
+        stack_rows.append({"id": sid, "status": status, "errors": errors})
+
     # ---- 4. gate 数量校验（应为 13）----
     count_note = None
     if len(gates_data) != len(EXPECTED_STAGES):
@@ -214,16 +307,24 @@ def main():
     if total == 0:
         overall_fail = True
 
+    # stack 校验:任一 FAIL → 整体 FAIL
+    stack_failed = sum(1 for s in stack_rows if s["status"] == "FAIL")
+    if stack_failed > 0:
+        overall_fail = True
+
     # ---- 6. 输出 ----
     if args.json:
         print(json.dumps({
             "gates": rows,
+            "stacks": stack_rows,
             "count_note": count_note,
             "summary": {
                 "total": total,
                 "pass": passed,
                 "fail": failed,
                 "expected": len(EXPECTED_STAGES),
+                "stack_total": len(stack_rows),
+                "stack_fail": stack_failed,
             },
             "exit_code": 1 if overall_fail else 0,
         }, ensure_ascii=False, indent=2))
@@ -233,9 +334,13 @@ def main():
             print(f"[v11-gate] gate={r['id']} stage={r['stage']}{script_part} status={r['status']}")
             for e in r["errors"]:
                 print(f"[v11-gate]   - {e}")
+        for s in stack_rows:
+            print(f"[v11-gate] stack={s['id']} status={s['status']}")
+            for e in s["errors"]:
+                print(f"[v11-gate]   - {e}")
         if count_note:
             print(f"[v11-gate] count-fail {count_note}")
-        print(f"[v11-gate] summary total={total} pass={passed} fail={failed}")
+        print(f"[v11-gate] summary total={total} pass={passed} fail={failed} stack_total={len(stack_rows)} stack_fail={stack_failed}")
 
     return 1 if overall_fail else 0
 

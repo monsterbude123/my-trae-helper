@@ -378,6 +378,30 @@ NEVER: sub-agent 自动推 stage_status = completed。
 - 状态卡 git diff 检测：状态卡字段变更必须仅来自主上下文 Edit
 - 缺审计 → 标 FAIL（V11.2.1 + 反例 §7 §8 项目级补全）
 
+### V11.8.x 强化（P1-2 + P3-5 落地）
+
+> **位置说明**: 本子节按任务编号作为 §5.8 的实装状态补充,与上方协议说明一一对应。
+
+- **新 5 类字段校验**（`state-card-validator.py` L138-220）：
+  - `stage_ended_at` — 必填且为 ISO8601,缺则 FAIL（防止 stage 关闭后无法审计时长）
+  - `bug_severity` — 仅 bug 类状态卡必填 P0/P1/P2/P3,缺则 FAIL
+  - `parent_change` — 子 change 必填指向父 change id,缺则 FAIL
+  - `visual_evidence.read_by_main_context` — Stage 4 Review 后必为 true,缺则 FAIL
+  - `reset_history` 子字段（reset_count / last_reset_at / last_reset_reason）— Stage 6 bug 状态机记录,缺则 FAIL
+- **`_lib_state_card.py` 导入补全**: `hashlib` / `json` / `os` / `datetime` 补齐后,`compute_state_card_hash()` 与 `audit_state_card_change()` 才真正可用（先前因 import 缺失一直 throw NameError）
+- **强制审计钩子**: `setup-feature.py` 创建骨架 + `change-status.py` 任意字段写入后必调 `audit_state_card_change()`,写入审计日志 `logs/audit-state-card.jsonl`
+- **CI 一致性校验**: `python scripts/state-card-validator.py --strict-audit` 校验审计日志与状态卡字段强一致（断链 → FAIL）
+
+```bash
+# Stage 6 bug 状态机严格校验（含 reset_history 子字段）
+python scripts/state-card-validator.py --stage 6/bug-fix --strict-audit
+
+# 单字段校验（CI 集成）
+python scripts/state-card-validator.py --check-field stage_ended_at --project-root .
+```
+
+详见 [tests/unit/test_state_card_validator_extended.py](../tests/unit/test_state_card_validator_extended.py) — 232 passed 中的 7 条新增覆盖。
+
 **失败处理**：
 1. 立即 revert 状态卡字段
 2. 委派 implementer 重做（仅输出代码 + 截图 + Completion Report,不触碰状态卡）

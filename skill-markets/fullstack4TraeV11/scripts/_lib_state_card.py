@@ -3,7 +3,10 @@
 3 个脚本(state-card-validator / stage-gate / change-status)共用。
 优先用 PyYAML(精确解析嵌套),未安装时回退手写解析(仅顶层字段)。
 """
-
+import datetime
+import hashlib
+import json
+import os
 import pathlib
 
 
@@ -117,7 +120,7 @@ def audit_state_card_change(
         project_root = path.parent.parent.parent
     
     log_entry = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "operation": operation,
         "actor": actor,
         "hash_before": hash_before,

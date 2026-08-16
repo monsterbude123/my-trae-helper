@@ -28,11 +28,11 @@ import os
 import json
 from datetime import datetime, timezone
 
-# 13 stage 名单（必须严格匹配编排器 stage_config）
+# 13 stage 名单（必须严格匹配 registry/state-machine.yaml）
 VALID_STAGES = [
     "-1/intake", "0/plan", "0.5/test-plan", "1/spec", "1.5/prototype",
     "2/contract", "3/implement", "3.5/real-verify", "4/review",
-    "4.5/rot-scan", "5/accept", "6/bug-fix", "7/project-health"
+    "4.5/rot-scan", "5/accept", "6/bug-fix", "7/health"
 ]
 
 # 不可跳过的 stage（V11 §0 必走）
@@ -214,10 +214,27 @@ def main():
     parser = argparse.ArgumentParser(description="V11 阶段门禁（硬化版）")
     parser.add_argument("--state-card", required=True, help="状态卡文件路径")
     parser.add_argument("--stage", help="期望 stage（与状态卡 current_stage 一致）")
+    parser.add_argument("--next-stage", nargs="?", default=None,
+                        help="下一 stage（P0-2 NEW：校验 current_stage → next_stage 转换合法性）")
+    parser.add_argument("--registry-dir", default=None,
+                        help="registry 目录（默认 skill_root/registry，可被 --project-root/.trae/registry 自动探测覆盖）")
+    parser.add_argument("--project-root", default=None,
+                        help="项目根（自动探测 <project_root>/.trae/registry/）")
     parser.add_argument("--json", action="store_true", help="JSON 输出")
     parser.add_argument("--verify-signature", help="验证 Gate 签名（hex）")
     parser.add_argument("--skip-env-check", action="store_true", help="跳过环境变量验证")
-    args = parser.parse_args()
+    # P0-2:stage-id 可能以 - 开头（如 -1/intake），会被 argparse 当作 flag 报错。
+    # 用 nargs="?" 让 argparse 接受"无值"情形，把 - 开头的值留在 remaining 中。
+    pre_parsed, remaining = parser.parse_known_args()
+    args = pre_parsed
+    if pre_parsed.next_stage is None and remaining:
+        # 匹配 V11 stage-id 格式:可选负号 + 数字 + / + 文本（如 -1/intake, 0/plan, 4.5/rot-scan）
+        import re as _re
+        stage_id_re = _re.compile(r"^-?\d+(?:\.\d+)?/[A-Za-z][\w-]*$")
+        for tok in remaining:
+            if stage_id_re.match(tok):
+                args.next_stage = tok
+                break
 
     path = pathlib.Path(args.state_card)
     fields = parse_state_card(path)
@@ -237,7 +254,38 @@ def main():
 
     is_valid, errors = validate_state_card(fields, args.stage)
 
-    if is_valid:
+    # P0-2 NEW：--next-stage 提供时校验状态转换合法性
+    # registry_dir 解析优先级:显式 --registry-dir > 自动探测项目级 > skill_root/registry
+    transition_check = None
+    if args.next_stage:
+        # 解析 registry_dir
+        skill_root = pathlib.Path(__file__).resolve().parent.parent
+        if args.registry_dir:
+            reg_dir = pathlib.Path(args.registry_dir)
+        else:
+            reg_dir = None
+            if args.project_root:
+                proj_reg = pathlib.Path(args.project_root) / ".trae" / "registry"
+                if proj_reg.is_dir() and (proj_reg / "state-machine.yaml").is_file():
+                    reg_dir = proj_reg
+            if reg_dir is None:
+                reg_dir = skill_root / "registry"
+
+        from _lib_state_card import load_state_machine, validate_transition
+        state_machine = load_state_machine(reg_dir)
+        from_stage = fields.get("current_stage", "")
+        ok, reason = validate_transition(state_machine, from_stage, args.next_stage)
+        transition_check = {
+            "from_stage": from_stage,
+            "to_stage": args.next_stage,
+            "valid": ok,
+            "reason": reason,
+            "registry_dir": str(reg_dir),
+        }
+        if not ok:
+            errors.append(f"transition FAIL: {reason}")
+
+    if is_valid and not errors:
         result = {
             "status": "PASS",
             "current_stage": fields.get("current_stage"),
@@ -248,25 +296,28 @@ def main():
             "gate_id": f"stage-gate-{datetime.now().strftime('%Y%m%d%H%M%S')}",
             "artifacts": fields.get("artifacts", [])
         }
-        
+
         if not args.skip_env_check:
             env_info = validate_environment()
             result["environment"] = env_info
-            
+
             exec_validation = validate_gate_execution(result, env_info)
             result["execution_valid"] = exec_validation["valid"]
             if exec_validation["errors"]:
                 result["execution_errors"] = exec_validation["errors"]
             if exec_validation["warnings"]:
                 result["execution_warnings"] = exec_validation["warnings"]
-        
+
+        if transition_check is not None:
+            result["transition_check"] = transition_check
+
         signature = sign_gate_result(result)
         result["signature"] = signature
-        
+
         if args.verify_signature:
             sig_valid = verify_gate_signature(result, args.verify_signature)
             result["signature_valid"] = sig_valid
-        
+
         print_json_or_text(result, args.json)
         return 0
     else:
@@ -277,9 +328,14 @@ def main():
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "gate_id": f"stage-gate-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         }
+        if transition_check is not None:
+            result["transition_check"] = transition_check
         signature = sign_gate_result(result)
         result["signature"] = signature
         print_json_or_text(result, args.json)
+        # P0-2 NEW:transition FAIL → exit 2;field FAIL → exit 1
+        if transition_check is not None and not transition_check.get("valid"):
+            return 2
         return 1
 
 

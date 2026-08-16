@@ -41,6 +41,32 @@ def read_state_card(state_card_path: pathlib.Path) -> dict:
     return _parse(state_card_path)
 
 
+def audit_read_operation(
+    state_card_path: pathlib.Path,
+    project_root: pathlib.Path,
+    actor: str = "change-status.py",
+) -> dict:
+    """P3-6 NEW: 读取状态卡时记录审计(防止 ghost read → ghost write)。
+
+    失败不阻断主流程(best-effort)。
+    """
+    try:
+        sys.path.insert(0, str(pathlib.Path(__file__).parent))
+        from _lib_state_card import audit_state_card_change
+
+        content_after = state_card_path.read_text(encoding="utf-8") if state_card_path.exists() else ""
+        return audit_state_card_change(
+            path=state_card_path,
+            operation="read-via-change-status",
+            actor=actor,
+            content_after=content_after,
+            project_root=project_root,
+        )
+    except Exception as e:
+        sys.stderr.write(f"[change-status] WARN: audit_state_card_change 失败(不阻断): {e}\n")
+        return {"error": str(e)}
+
+
 def check_artifacts(change_dir: pathlib.Path) -> dict:
     """检查必走工件状态"""
     today = datetime.now().strftime("%Y-%m-%d")
@@ -78,6 +104,13 @@ def main():
         return 1
 
     state_card = read_state_card(change_dir / ".state-card.md")
+
+    # P3-6 NEW: 记录 read-via-change-status 审计,防止 ghost read 绕过审计链
+    audit_read_operation(
+        state_card_path=change_dir / ".state-card.md",
+        project_root=project_root,
+    )
+
     artifacts = check_artifacts(change_dir)
 
     missing = [art for art, status in artifacts.items() if not status["exists"]]

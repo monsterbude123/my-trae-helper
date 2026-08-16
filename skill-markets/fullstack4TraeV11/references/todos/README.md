@@ -30,15 +30,18 @@ references/todos/
 
 ---
 
-## §2 当前活跃待办(2026-08-16 第二轮蒸馏后)
+## §2 当前活跃待办(2026-08-16 第三轮蒸馏后)
 
 | ID | 文件 | 优先级 | 状态 | 主题 |
 |----|------|--------|------|------|
-| P3-6 | [P3-6-commit-minimum.md](P3-6-commit-minimum.md) | P3 | pending | scripts/commit-minimum-check.py — commit 准入最小集程序化校验 |
+| P3-6 | [P3-6-commit-minimum.md](P3-6-commit-minimum.md) | P3 | done(已 commit `eed9381`)| scripts/commit-minimum-check.py — 已 done **等下次会话物理归档至 archive** |
+| audit-fix | audit 仅留目录位置 | audit 留置 | pending | guard-smith audit B 方案落地:AGENTS.md §1.11 + guard-gate-smith §1.1 + skill-registration-guard.mjs 注释豁免条款增补 |
 | V12-ROOT | [v12-physical-isolation/](v12-physical-isolation/) | 等待 ADR | pending | V12 物理隔离迁移,前置 5 项见 [migration-checklist.md §0](v12-physical-isolation/migration-checklist.md) |
 
-> **数量**:当前 `2 pending`(P3-6 + V12)。
-> 历史总数:14 项协议层无解析脚本差距,V11.8.x 批修 13 项 → done,**全部物理归档** → [archive/done/2026-08-16-batch-repair/](archive/done/2026-08-16-batch-repair/)。
+> **数量**:当前 `3 pending`(audit-fix + P3-6 文件归档 + V12)。但请注意:
+> - P3-6 commit 实质 done,仅剩"文件物理归档" chore
+> - audit-fix 来自 guard-smith audit 2026-08-16,详见 [audit-history/2026-08-16-guard-smith-registry-annotation-audit.md](audit-history/2026-08-16-guard-smith-registry-annotation-audit.md)
+> 历史总数:14 项协议层无解析脚本差距,V11.8.x + P3-6(5 文件批 + audit 报告)→ **15/15 done**,0 个协议层承诺留置。
 
 ### §2.1 为什么不再按"P0/P1/P2/P3"分文件
 

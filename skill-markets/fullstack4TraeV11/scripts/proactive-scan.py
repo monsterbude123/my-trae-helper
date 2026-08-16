@@ -227,7 +227,25 @@ def scan_reason_fabrication(project_root: pathlib.Path) -> Tuple[bool, str]:
          "report-growth.md",
          "ask-question-anti-patterns.md",
          "anti-distortion.md",  # references/ 下反例文档
+         "bug-hunt-battle-report.md",  # V11 缺漏报告自身引用禁词
+         "state-card-protocol.md",  # 状态卡协议引用禁词
+         "trap-instructions.yaml",  # 反例声明文档
+         "agent-error-diagnosis.md",  # 失败归因诊断
+         "common-iron-rules.md",  # 铁律文档
+         "skill-optimization-method.md",  # 技能瘦身方法
+         "unread-rule-pass.md",
+         "audit-history",  # 审计历史
      }
+    # P3-3 NEW: 上下文窗口关键词 — 出现"反例 / 误报说明 / V11 缺漏 / 蒸馏"时跳过
+    # 这是 V11 自承认的已知误报(references/ bug-hunt-battle-report.md §9.3):
+    # 报告内"reason-fabrication 误报说明段"引用禁词本身 → 不应被误判
+    CONTEXT_SKIP_KEYWORDS = (
+        "反例", "误报说明", "V11 缺漏", "蒸馏", "反例索引",
+        "V11 实战", "V11 自承认", "V11.2.2 NEW",
+    )
+    # 上下文窗口大小: 前后各 200 字符
+    CONTEXT_WINDOW = 200
+
     for md_file in project_root.rglob("*.md"):
         if any(p in md_file.parts for p in [
             "node_modules", "__pycache__", ".git",
@@ -241,6 +259,7 @@ def scan_reason_fabrication(project_root: pathlib.Path) -> Tuple[bool, str]:
             "auto-audit",  # 自检报告(本身就是元数据)
             "templates",  # 模板(含示例占位符)
             "_invalidated",  # V11.2.2 NEW: 失效归档(已被作废的产物,Article VIII 不可变,不应 rot 扫描)
+            "docs/specs/_invalidated",  # P3-3 NEW: spec-purge 历史区
         ]):
             continue
         if any(wd in str(md_file) for wd in [
@@ -249,6 +268,7 @@ def scan_reason_fabrication(project_root: pathlib.Path) -> Tuple[bool, str]:
             "/docs/reports/",  # 周期报告(数据来源不同)
             "/docs/history/",  # 历史快照
             "/_invalidated/",  # V11.2.2 NEW: 失效归档路径(防漏:即使 rglob parts 不完全匹配也跳过)
+            "/docs/specs/_invalidated/",  # P3-3 NEW: spec-purge 历史区(路径防漏)
         ]):
             continue
         if md_file.name in filename_whitelist:
@@ -259,9 +279,20 @@ def scan_reason_fabrication(project_root: pathlib.Path) -> Tuple[bool, str]:
             continue
 
         for pattern in REASON_FABRICATION_PATTERNS:
-            if re.search(pattern, content):
-                found.append(f"{md_file.name}: 含 '{pattern}'")
-                break
+            m = re.search(pattern, content)
+            if not m:
+                continue
+
+            # P3-3 NEW: 上下文窗口检查 — 禁词前后 200 字符内出现"反例/误报说明"等关键词时跳过
+            start = max(0, m.start() - CONTEXT_WINDOW)
+            end = min(len(content), m.end() + CONTEXT_WINDOW)
+            context_window = content[start:end]
+            if any(kw in context_window for kw in CONTEXT_SKIP_KEYWORDS):
+                # 已知误报:跳过,不加 found
+                continue
+
+            found.append(f"{md_file.name}: 含 '{pattern}'")
+            break
 
     if found:
         return False, "; ".join(found[:5])

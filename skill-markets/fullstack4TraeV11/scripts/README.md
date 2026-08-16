@@ -37,6 +37,9 @@
 | `check_integration_contract.py` | 集成契约检查（项目级配置，按需启用） | Stage 3 Implement / Stage 4 Review |
 | `run-all-guards.py` | flow 层统一消费四表（registry/），逐 stage 跑门禁 | 所有 stage 验收 |
 | `repair-flow-gate.py` | 修复流程程序化门禁（读 registry/repair-flow.yaml） | Stage 6 Bug Fix |
+| **`project-priority-resolver.py`** (**V11.8.x NEW — 批修落地**) | 项目优先级解析器（实现 dependency-config.md §Layer 3 伪代码:resolve_skills + 自动探测项目级 config） | Stage -1/0 |
+| **`secrets-detector.py`** (**V11.8.x NEW — 批修落地**) | 真密钥检测器（`--stdin` / `--path` / `--json` 三模式，替代简易 keyword 匹配，识别 base64 / hex / OpenAI/Anthropic 真实格式） | Stage 0~4 + pre-commit |
+| **`bug-state-machine-validator.py`** (**V11.8.x NEW — 批修落地**) | bug 状态机字段校验（读 registry/state-machine.yaml + bug-template.md，校验 severity/parent_change/visual_evidence.reset_history 等新字段） | Stage 6 Bug Fix |
 
 ---
 

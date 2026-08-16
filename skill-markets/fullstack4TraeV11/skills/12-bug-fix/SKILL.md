@@ -109,6 +109,37 @@ depends_on:
 
 ## 分层决策流程
 
+### Step 0 — 4 步流程门禁串接（V11.8.x P2-2 NEW）
+
+Stage 6 Bug Fix 流程必须通过 `repair-flow-gate.py --strict` 机械串联 4 步流程（见 [registry/repair-flow.yaml](../../registry/repair-flow.yaml) L97-110）：
+`step-1-e2e-fail` → `step-2-6layer` → `step-3-fix-and-regression` → `step-4-user-confirm`
+
+**Step 1 / Step 2 / Step 3 入口硬约束**（每个 step 启动前必跑）：
+
+```bash
+# Step 1 入口
+python scripts/repair-flow-gate.py --step step-1-e2e-fail --strict \
+    --evidence-paths <step-1.md>,<step-2.md>,<step-3.md>,<step-4.md>
+# 期望: step-1 首次跑可不带 step-2/3/4 实际文件,先建占位;但数量 + 顺序必须按 P2_2_STEP_ORDER
+```
+
+**Step 4 跑前必前 3 步证据齐**（stage 流转强制阻断）：
+
+```bash
+# Step 4 入口:前 3 步证据文件必须存在,顺序正确
+python scripts/repair-flow-gate.py --step step-4-user-confirm --strict \
+    --evidence-paths docs/bugs/<bug-id>/step-1-e2e-fail.md,docs/bugs/<bug-id>/step-2-6layer.md,docs/bugs/<bug-id>/step-3-fix-and-regression.md,docs/bugs/<bug-id>/step-4-user-confirm.md
+# 退出码: 0 = PASS(step 流转允许); 1 = FAIL(stage 流转阻断)
+```
+
+**失败处理**（V11.8.x P2-2 强制）：
+
+- strict 模式失败 → **禁止** 推进到下一 stage / 关闭 bug
+- 错误消息含「预期 4 项 / 顺序映射 / 缺失文件」三类,必须先修复再重跑
+- 失败证据写入 `docs/bugs/<bug-id>/strict-fail-<timestamp>.log` 供 review 阶段追溯
+
+---
+
 ### Layer 1 发现分层
 
 ```

@@ -124,6 +124,27 @@ def resolve_skills(stage_id, project_config):
     return list(dict.fromkeys(skills))
 ```
 
+### V11.8.x 实现状态
+
+`scripts/project-priority-resolver.py` 把上述伪代码落地为真实 CLI 接口（取代了原先仅停留在协议层的人肉判断）：
+
+- **接口**: `--stage <id>` 单 stage 解析 / `--check-forbidden` 校验路径禁读 / `--merge-anti-patterns` 输出项目级禁用项
+- **自动探测**: 优先读 `project_root/.trae/fullstack4traev11.config.yaml`，缺失则回退到 V11 内置 `SKILL.md depends_on`，再回退到全局 skills 目录（3 层优先级与算法伪代码严格一致）
+- **真反例**: 2026-08-16 批修期间，用临时 JSON 输入验证 `resolve_skills` 返回顺序 = `[project, v11, global]`，项目级覆盖生效
+
+```bash
+# 单 stage 解析
+python scripts/project-priority-resolver.py --stage 3/implement --project-root .
+
+# 校验禁读路径（pre-stage hook 调用）
+python scripts/project-priority-resolver.py --check-forbidden --project-root .
+
+# 输出项目级反例合并（CI 集成）
+python scripts/project-priority-resolver.py --merge-anti-patterns --json
+```
+
+详见 [tests/unit/test_project_priority_resolver.py](../../tests/unit/test_project_priority_resolver.py) — 232 passed 中的 14 条新增覆盖。
+
 ---
 
 ## 反例（依赖配置陷阱）
