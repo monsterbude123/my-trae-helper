@@ -19,9 +19,11 @@ MUST NOT:
 
 ```
 .agents/rules/
-└── README.md       (本文件 — 加载协议)
-└── learning.md     (经验沉淀路由表)
-└── 项目核心.md      (项目级操作注意)
+└── README.md          (本文件 — 加载协议)
+└── learning.md        (经验沉淀路由表)
+└── 项目核心.md         (项目级操作注意)
+└── skills开发细则.md   (skills 开发注意)
+└── trae-work-mechanics.md  (Trae 四大机制速查:agents/rules/hooks/mcp)
 ```
 
 > 后续 rules 按需新建:`.agents/rules/<topic>.md`(如 paths.md / git.md / coding-standards.md)。

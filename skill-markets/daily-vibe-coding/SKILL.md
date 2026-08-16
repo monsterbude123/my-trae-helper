@@ -1,6 +1,6 @@
 ---
 name: daily-vibe-coding
-version: 1.0.0
+version: 1.1.1
 requires:
   - guard-approver
   - trae-professional
@@ -33,9 +33,12 @@ audience: [agent]
 ### 方式 A:TRAE Work "在对话中创建"(推荐)
 
 1. 打开 TRAE Work 对话框
-2. 粘贴 `prompt-installation/installation-prompt.md` 全文
+2. 粘贴 `auto-task/daily-vibe-coding/prompt.md` 全文
 3. TRAE AI 解读后会让你确认任务名、触发时间、运行模式
 4. 创建成功 → 任务**已配置,明日 09:00 自动跑**
+
+> **v1.1.1 变更**:`prompt.md` 已迁移到 `auto-task/daily-vibe-coding/`,提示词内**全部使用相对路径 + ${WORKSPACE} 变量**,跨机器可移植。
+> 详见 [auto-task/README.md](../../../auto-task/README.md) 管理机制。
 
 ### 方式 B:手动新建
 
@@ -60,8 +63,8 @@ audience: [agent]
 ```text
 你是一个每日早晨的深度调研 + 自检代理。**不修改仓库任何文件,只生成报告和建议清单**。
 
-工作目录: d:\workspace\my-trae-helper
-输出根目录: logs/daily-vibe-coding/  (今日子目录 YYYY-MM-DD/, 缺则 mkdir -p)
+工作目录: ${WORKSPACE}
+输出根目录: ${WORKSPACE}/logs/daily-vibe-coding/  (今日子目录 YYYY-MM-DD/, 缺则 mkdir -p)
 时区: Asia/Shanghai
 
 ================================================================
@@ -216,8 +219,10 @@ PART D — 收尾 + 历史索引维护
 | 文件 | 内容 |
 |------|------|
 | `skill-markets/daily-vibe-coding/SKILL.md` (本文件) | 定时任务规范 + 完整 prompt |
-| `skill-markets/daily-vibe-coding/prompt-installation/installation-prompt.md` | 方式 A 一键安装 prompt(直接复制) |
-| `skill-markets/daily-vibe-coding/prompt-installation/trae-setup-steps.md` | 方式 A/B/C 详细步骤 + 截图位 |
+| `auto-task/daily-vibe-coding/prompt.md` | **v1.1.1 迁移**:TRAE Work 一键安装 prompt(相对路径版) |
+| `auto-task/daily-vibe-coding/config.yaml` | **v1.1.1 新增**:调度配置(cron / 时区 / 输出路径) |
+| `auto-task/daily-vibe-coding/README.md` | **v1.1.1 新增**:任务说明 |
+| `auto-task/README.md` + `REGISTRY.md` | **v1.1.1 新增**:自动任务管理机制 + 清单 |
 | `scripts/daily-vibe-coding/collect-baseline.py` | **辅助脚本**:一次性采集 12 项基线 + 历史消化 → `_baseline.json` |
 | `scripts/daily-vibe-coding/generate-templates.py` | **辅助脚本**:读 `_baseline.json` 自动填 5 份报告骨架 |
 | `scripts/daily-vibe-coding/run-precheck.sh` | **辅助脚本**:Git Bash 入口(探测 Python) |

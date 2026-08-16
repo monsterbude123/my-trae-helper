@@ -7,7 +7,7 @@ provider:
 ---
 
 # skills开发细则需要注意的事项
-
+- MUST: 新增技能先把todo写到skill的todos/task.md todos/checklist.md文件里(防止事情做一半),skill对应的功能开发完，门禁进行检查全部agent复核之后再删除todo。
 - MUST: 有需要配置环境的，把skill专属的环境变量示例写到 skills目录下的.env.example。
 - MUST: 运行测试的时候，使用脚本自动去项目的根目录加载.env。
 # 反例
