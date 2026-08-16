@@ -29,8 +29,8 @@
 
 version: 1.0.0
 description: My Trae Helper 技能注册表 — 每个 skill 必带同名 guard + gate 路由
-updated: 2026-08-15
-total_skills: 47
+updated: 2026-08-16
+total_skills: 48
 
 skills:
 
@@ -452,3 +452,17 @@ skills:
       否则硬阻断(exit 1)。脚本自身支持 --self-test 跑 6 个反例。
       本条目是"meta skill"概念的代表:不在 skill-markets/ 下,而是横切守卫。
       守卫脚本: scripts/doc-sync-guard.py (Python stdlib,无 subprocess/无网络)。
+
+  # ── 新增:github-kownledge-helper — 本地 GitHub 仓库管家(2026-08-16) ─────
+  - skill: github-kownledge-helper
+    status: active
+    guards:
+      - { id: github-kownledge-helper-structure, category: structure, script: scripts/github-kownledge-helper-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: github-kownledge-helper-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [github-kownledge-helper-structure] }
+    maintainer: guard-smith
+    notes: |
+      本地 GitHub 仓库管家技能(2026-08-16 NEW) — 沉淀 ADD / UPDATE / UPDATE-ALL / QUERY / SYNC-TO
+      五大工作流的可复用经验、命令模式与踩坑记录。本项目专属技能,纯文档型,scripts/ 客户端 CLI
+      在项目根 src-cli/,不在 skill 子目录(aspect = structure-only)。
+      注册由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。

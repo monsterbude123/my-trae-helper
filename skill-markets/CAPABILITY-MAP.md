@@ -43,7 +43,8 @@
 | [skill-optimization-method](skill-optimization-method/SKILL.md) | 纯Skill | 技能包优化升级方法论 — 体积诊断 + 外部对标 + 缺口对照 + 最小修复（项目级） | 无 |
 | [session-distiller](session-distiller/SKILL.md) | 纯Skill | 会话蒸馏器 — 从完整会话历史中提炼高质量方法论、最佳实践和可复用技能包 | 无 |
 | [trae-local-data-export](trae-local-data-export/SKILL.md) | 纯Skill | Trae IDE 本地数据导出 — 整合 ZedeX/trae-chat-decrypt + cgint/ai-data-extraction，产出 JSON/TXT/SQLite 三大产物 | 7 脚本（extract_key ×2 / decrypt_db / verify / export_sessions / extract_trae_jsonl / sanitize_export） |
-| [agent-dev-control-kit](agent-dev-control-kit/SKILL.md) | 纯Skill | Agent 开发控制体系 — 三层控制(Execution+Guard+Gate) + 快速失败 + 标准模板 | 无（模板文件在 templates/） |
+| [agent-dev-control-kit](agent-dev-control-kit/SKILL.md) | 纯Skill | Agent 开发控制体系 — 三层控制(Execution+Guard+Gate) + 快速失败 + 标准模板 | 无（模板文件在 templates/）|
+| [github-kownledge-helper](github-kownledge-helper/SKILL.md) | 纯Skill | 本地 GitHub 仓库管家 — ADD/UPDATE/UPDATE-ALL/QUERY/SYNC-TO 五大工作流 + 命令模式 + 踩坑记录；TS CLI 化（pnpm ghh add/update/sync-to/sync-docs/verify-docs）；项目专属 | 9 references(commands/workflows/workflows-aggregate/workflows-protocols/workflows-sync-to/cli-development/tdd/doc-verify/pitfalls)；**软依赖**: doc-map-manager（独立 Skill 已发布，CLI 落本项目根） |
 
 ### L1 集成层（整合 L0 能力）
 

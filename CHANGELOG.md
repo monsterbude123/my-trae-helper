@@ -5,6 +5,16 @@
 
 ## [Unreleased]
 
+### github-kownledge-helper 接入(2026-08-16)
+
+- **V1.0 NEW** — 本地 GitHub 仓库管家技能接入合规体系(skill-creation-workflow §3.1 协议先行 + 多维度一致)
+  - `skill-markets/github-kownledge-helper/SKILL.md` 加 YAML frontmatter(name/version/description/audience/requires.skills doc-map-manager),catalog V2 校验从 FAIL 转为 PASS
+  - `scripts/github-kownledge-helper-guard.py`(新增,forge-skill-guard.py 自动生成,aspects=[structure])
+  - `registry/skills.yaml` 加条目(1 structure guard + 1 L1 pre-commit gate + maintainer guard-smith),total_skills 47 → 48
+  - `skill-markets/CAPABILITY-MAP.md` + `SECURITY-MAP.md` 各加 L0 行(评分 5.0,实跑 trae-security-review scan_skills_dir.py V2.1 → HIGH 0 + MEDIUM 0 + LOW 0)
+  - **未涉及**:`.husky/<name>-gate`(其他 skill 普遍未建,与 forge-skill-guard 生成的 L1 pre-commit guard 已自动挂到 `.husky/pre-commit` 共担路径)
+  - **6 项兜底验证全 PASS**:`node src/guards/skill-registration-guard.mjs`(单 skill + 全量)/ `python tests/catalogs/_check_skill_catalog.py` / `python scripts/github-kownledge-helper-guard.py` / `python scripts/skill-security-guard.py` / `python scripts/skill-capability-guard.py`
+
 ### fullstack4TraeV11 升级(2026-08-16)
 
 - **V11.8.5** — 协议层承诺 → 脚本落地(13/14 done + 1 留置)

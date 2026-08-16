@@ -5,6 +5,8 @@ Trae IDE 技能包开发工程 + 跨 Agent 技能市场 CLI。
 > 这个仓库既是「技能包开发工程」也是「技能市场 CLI 源码」：
 > - `skill-markets/` —— 43 个技能包
 > - `bin/` + `src/` —— `@my-trae-helper/cli`(已发布到 npm)
+>
+> **2026-08-16 新增 skill**：`github-kownledge-helper`（本地 GitHub 仓库管家）— 第 48 个技能包（V1.0），纯文档 + 9 references + TS CLI（`pnpm ghh add/update/sync-to/sync-docs/verify-docs`，CLI 落本项目根）；详见 [skill-markets/github-kownledge-helper/SKILL.md](skill-markets/github-kownledge-helper/SKILL.md) 与 [CHANGELOG.md Unreleased §github-kownledge-helper 接入](CHANGELOG.md)
 
 > **2026-08-16 fullstack4TraeV11 升级**：V11.8.5 协议层承诺 → 脚本落地（13/14）— 新增 3 脚本 + 6 references + 79 单测。详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md](skill-markets/fullstack4TraeV11/CHANGELOG.md)。
 >
