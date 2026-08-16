@@ -212,6 +212,12 @@ Step L3.4: 状态同步
     → close-bug.sh BUG-NNN <agent-id>
     → bug 单 .md + index.md + .state-card.md 三文件同步
     → 详见 [bug-layer-3-repair.md](references/bug-layer-3-repair.md) §L3.4
+
+Step L3.5: 委派复测（qa-loop 闭环，V11.9 角色协议 NEW）
+    → 修复完成后**必须重启应用**再委派测试专家复测（禁止旧进程验证新代码，HMR 陷阱）
+    → 委派走 [TEST-EXPERT-DELEGATION] 头部（详见 [docs/specs/qa-loop.md](../../docs/specs/qa-loop.md) 步骤 2）
+    → 测试专家独立第二套验收 e2e（裁判不复用修复者的复现卷子）
+    → 复测结果: VERIFIED（通过）→ 收敛；REOPENED（不通过）→ 回到 Layer 3 修复
 ```
 
 ### Layer 4 收敛分层
@@ -235,6 +241,11 @@ Step L4.3: 产物落盘 + 遗留上报
     → Bug 单 + e2e 测试 + 截图证据
     → 遗留 L1/L2 必上报，L3 可延后
     → 详见 [bug-layer-4-convergence.md](references/bug-layer-4-convergence.md) §L4.3-§L4.4
+
+Step L4.4: 循环上限（qa-loop，V11.9 角色协议 NEW）
+    → 同一 bug 复测 REOPENED ≥ 2 次 → 升级主上下文仲裁（5 字段阻塞报告）
+    → 提测循环 ≥ 5 轮仍不收敛 → 升级用户决策
+    → 详见 [docs/specs/qa-loop.md](../../docs/specs/qa-loop.md) 循环铁律 ③
 ```
 
 ---

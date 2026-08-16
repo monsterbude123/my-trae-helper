@@ -337,6 +337,23 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 > - 详见 [references/common-anti-patterns.md §7.3](references/common-anti-patterns.md)（commit 准入 ≠ 全量验收）
 | 5 ~ 7 | `skills/11-accept` ~ `skills/13-project-health` | [doc-map-manager] / [gitnexus4Trae] | archive/done → bug 单 CLOSED → project-health |
 
+### §1.1 角色（Role）委派列（V11.9 角色协议 NEW）
+
+> 角色体系与 stage **正交**：角色答"谁/职责/权限"，stage 答"何时/流程/产物"（一个角色跨多 stage 履职，一个 stage 多角色协作）。8 角色定义见 [skills/00-boot/agents/README.md](skills/00-boot/agents/README.md)（注册表 + 履职矩阵）+ 各 `<role>.md`。
+
+| 角色 id | 履职 stage | 委派时注入头部 |
+|---------|-----------|--------------|
+| **jarvis** | 全域 gate（时机①~⑥） | `[JARVIS-DELEGATION]`（含 type: gate-design）|
+| **product-manager** | -1 / 1 / 4 / 5 | `[PIPELINE]`（产出 uiux 双文档供下游）|
+| **tech-planner** | 0 / 1 / 2 | `[PIPELINE]`（可发起 `[JARVIS-DELEGATION]` gate-design）|
+| **backend-implementer** | 3 | `[PIPELINE]` + GitNexus 必跑 |
+| **frontend-implementer** | 3 | `[PIPELINE]` + GitNexus 必跑 |
+| **prototype-designer** | 1.5 / 3 | `[PROTOTYPE-DELEGATION]` |
+| **qa-submitter** | 3.5 / 6 | `[QA-SUBMIT-DELEGATION]` |
+| **test-expert** | 0.5 / 3.5 / 4 / 6 | `[TEST-EXPERT-DELEGATION]` |
+
+**委派头部协议引用**: 13 stage × 角色映射见 [references/stage-skill-agent-protocol.md §4](references/stage-skill-agent-protocol.md#4)；子代理通用委派模板见 [references/sub-agent-rules.md §7](references/sub-agent-rules.md)。角色专属委派头部（[PROTOTYPE-DELEGATION] / [QA-SUBMIT-DELEGATION] / [TEST-EXPERT-DELEGATION] / [JARVIS-DELEGATION] gate-design 扩展）见 [references/role-protocol.md §4](references/role-protocol.md)。qa-loop 闭环流程见 [docs/specs/qa-loop.md](docs/specs/qa-loop.md)。
+
 ### 委派注入头部（coding-task 强制）
 
 ```

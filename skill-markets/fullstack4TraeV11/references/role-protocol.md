@@ -49,11 +49,16 @@
 职责:
   1. 维护产品文档（需求/功能点清单）
   2. 维护落地追踪表: feature → spec.md 章节 → 代码 file:line 映射
-  3. Stage 1 spec 产品侧把关（产品意图是否被 spec 忠实表达）
-  4. Stage 4 验收对照（功能点 ↔ 落地追踪表）
-权限: ✅ 产品文档 + 落地追踪表读写；✅ 向测试专家提供"功能点清单"作为测试范围输入
-禁止: ❌ 改任何代码；❌ 改 gate/registry；❌ 跳过落地追踪表直接宣称"已落地"（Article V）
+  3. 产出/维护 UI/UX 双文档（纯产品语言、零技术性代码内容）:
+     - uiux-spec.md  产品原型 UI/UX 文档（视觉意图: 布局/组件/状态清单）
+     - uiux-logic.md UI/UX 交互逻辑文档（交互规则: 用户流程/状态流转/边界行为）
+  4. Stage 1 spec 产品侧把关（产品意图是否被 spec 忠实表达）
+  5. Stage 4 验收对照（功能点 ↔ 落地追踪表）
+权限: ✅ 产品文档 + 落地追踪表 + UI/UX 双文档读写；✅ 向测试专家提供"功能点清单"作为测试范围输入
+禁止: ❌ 改任何代码（含 prototypes/** 与 src/**）；❌ uiux 双文档混入技术性代码内容；
+      ❌ 改 gate/registry；❌ 跳过落地追踪表直接宣称"已落地"（Article V）
 产物: docs/specs/ 内产品文档 + tracking/product-coverage.md（feature→spec→code 映射表）
+      + uiux-spec.md + uiux-logic.md（prototype-designer 的唯一输入，见 §2.6）
 ```
 
 ### 2.3 技术策划（tech-planner）
@@ -154,6 +159,7 @@
 职责:
   1. 业务理解 + 测试计划（Stage 0.5，复用 skills/03-test-plan）
   2. 测试脚本编写与维护: api 测试 / uiux 测试 / id 级验收（只写 tests/**）
+     **e2e 脚本义务**: 验收动作必须落 e2e 脚本（可重复执行、可追溯）；VERIFIED/REOPENED 结论必须来自 e2e 脚本运行结果
   3. 在代码提测启动的应用进程上测试（连接使用，非所有）——保证"测的就是即将交付的构建"
   4. 多处校验: 应用侧（UI 渲染/API 响应/数据落盘）+ 用户侧（体验流/文案/多入口路径），确保用户体验符合产品要求
   5. bug 单全生命周期编辑:
@@ -167,6 +173,7 @@
 禁止: ❌ 修改应用层代码 src/**（对标 review-agent 不修代码先例，违规 = 🛑 REJECT）
       ❌ 重启/停止应用进程（进程所有权归代码提测；进程异常 → 报告代码提测，附现场证据）
       ❌ 改 gate/registry；❌ "没跑就说 PASS"（Article V 可验证声明）
+      ❌ 滥用 Playwright MCP 等交互式工具点页面作为验收手段——交互式操作仅限 bug 定位/复现探索，验收结论必须来自 e2e 脚本
 产物: 测试报告（4 字段 handoff）+ bug 单 + 测试脚本 + 截图证据
 ```
 
@@ -177,6 +184,9 @@
 ```
 ┌────────────────── 代码提测主代理 ──────────────────┐
 │ 1. 重启应用（干净构建；记录 进程信息+端口+构建 hash）  │
+│ 1.5 委派前自验证: 在本进程先自跑一遍功能点验证（冒烟） │
+│    确认通过后再委派——避免把基础性崩溃留给测试专家     │
+│    （主上下文抽检前置）                              │
 │ 2. [TEST-EXPERT-DELEGATION] 委派测试专家             │
 │    注入: 进程信息 + 功能点清单(产品策划经理产出)       │
 │         + bug 单目录 + 复测单清单(如有)              │
@@ -200,7 +210,7 @@
 
 **循环铁律**:
 1. **每轮修复后必须重启应用再委派复测**——禁止测试专家在旧进程上验证新代码（HMR 陷阱，对标 [dev-hmr-recovery](../skills/12-bug-fix/scripts/bug-hunt/) 的 stale 教训）
-2. **e2e 先行沿用 Stage 6 Layer 3**——修复者（代码提测）写复现 e2e 必初始 FAIL；测试专家的验收 e2e 是独立第二套（裁判不复用运动员的卷子）
+2. **e2e 先行沿用 Stage 6 Layer 3**——修复者（代码提测）写复现 e2e 必初始 FAIL；测试专家的验收 e2e 是独立第二套（裁判不复用运动员的卷子）；**测试专家必须写 e2e 脚本执行验收**——禁止用 Playwright MCP 手工点页面出 VERIFIED/REOPENED 结论（MCP 仅限 bug 定位探索）
 3. **循环上限**: 同一 bug REOPENED ≥ 2 次 → 升级主上下文仲裁（5 字段阻塞报告）；提测循环 ≥ 5 轮仍不收敛 → 升级用户决策
 4. **时间预算**（对标 Layer 2 §L2.3）: 提测态发现 20% + 修复 60% + 收敛复测 20%，耗尽即统计上报
 
@@ -308,8 +318,8 @@ roles:
   - id: product-manager
     file: agents/product-manager.md
     stages: ["-1", "1", "4", "5"]
-    owns: [docs/specs/**(产品文档), tracking/product-coverage.md]
-    forbidden: [src/**, registry/**, gates/**]
+    owns: [docs/specs/**(产品文档), uiux-spec.md, uiux-logic.md, tracking/product-coverage.md]
+    forbidden: [src/**, prototypes/**, registry/**, gates/**]
   - id: tech-planner
     file: agents/tech-planner.md
     stages: ["0", "1", "2"]
@@ -341,7 +351,7 @@ roles:
 
 ---
 
-## §8 反模式（新增 5 条，落地时并入各角色 anti-patterns）
+## §8 反模式（新增 6 条，落地时并入各角色 anti-patterns）
 
 | # | 反例 | 角色方 | 处理 |
 |:-:|------|-------|------|
@@ -350,6 +360,7 @@ roles:
 | 3 | 测试专家自行重启应用进程 | test-expert | 违规——进程证据链断裂，本轮测试结论作废 |
 | 4 | 同一进程上验证新代码（未重启） | qa-submitter | HMR stale 陷阱，VERIFIED 无效 |
 | 5 | 功能变更后旧 bug 单悬空不处理 | test-expert | 违反 OBSOLETE 义务，rot-scan 可扫出 |
+| 6 | 测试专家用 Playwright MCP 手工点页面直接下 VERIFIED/REOPENED（无 e2e 脚本） | test-expert | 结论无效——验收必须落 e2e 脚本（可重复执行），MCP 交互仅限 bug 定位 |
 
 ---
 

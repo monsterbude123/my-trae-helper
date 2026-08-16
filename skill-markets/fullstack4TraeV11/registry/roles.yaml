@@ -1,0 +1,44 @@
+version: 1.0.0
+description: V11 角色注册表（Role × Stage 正交 + 权限断言）
+# 消费方: run-all-guards.py 二期扩展读取（对齐 V11.5 五表模式）。
+# 一期以协议约束为主;二期可加机械检测（test-expert 写 src/** → BLOCK）。
+# 权威源: references/role-protocol.md §7。file 指向 batch1 落盘的 skills/00-boot/agents/*.md。
+roles:
+  - id: jarvis
+    file: skills/00-boot/agents/jarvis.md      # 现有，不上移
+    timings: [init, verify, gate-design, doc-sync-gate, upgrade-migration]
+  - id: product-manager
+    file: skills/00-boot/agents/product-manager.md
+    stages: ["-1", "1", "4", "5"]
+    owns: ["docs/specs/**(产品文档)", "uiux-spec.md", "uiux-logic.md", "tracking/product-coverage.md"]
+    forbidden: ["src/**", "prototypes/**", "registry/**", "gates/**"]
+  - id: tech-planner
+    file: skills/00-boot/agents/tech-planner.md
+    stages: ["0", "1", "2"]
+    owns: ["docs/specs/{id}/tech-plan.md"]
+    forbidden: ["src/**", "registry/gates.yaml"]
+  - id: backend-implementer
+    file: skills/00-boot/agents/backend-implementer.md
+    stages: ["3"]
+    owns: ["src/<backend-scope>/**", "tests/<backend-scope>/**"]
+    forbidden: ["src/<frontend-scope>/**", "contracts/**"]
+  - id: frontend-implementer
+    file: skills/00-boot/agents/frontend-implementer.md
+    stages: ["3"]
+    owns: ["src/<frontend-scope>/**", "tests/<frontend-scope>/**"]
+    forbidden: ["src/<backend-scope>/**", "prototypes/**(暗改)"]
+  - id: prototype-designer
+    file: skills/00-boot/agents/prototype-designer.md
+    stages: ["1.5", "3"]
+    owns: ["prototypes/**", "组件 ID/class 清单"]
+    forbidden: ["src/**", "uiux-spec.md", "uiux-logic.md", "registry/**", "gates/**"]
+  - id: qa-submitter
+    file: skills/00-boot/agents/qa-submitter.md
+    stages: ["3.5", "6"]
+    owns: ["app-process", "src/**(修复权)", "bug 单 IN-FIX/FIXED"]
+    forbidden: ["tests/**", "registry/**", "gates/**", "自评提测通过"]
+  - id: test-expert
+    file: skills/00-boot/agents/test-expert.md
+    stages: ["0.5", "3.5", "4", "6"]
+    owns: ["tests/**", "bug 单 OPEN/VERIFIED/OBSOLETE/REOPENED"]
+    forbidden: ["src/**", "app-process-control", "registry/**"]

@@ -18,6 +18,17 @@ steps:
     name: 用户确认关闭
     gate: user-confirmed
 terminal_condition: "tests pass + user confirmed CLOSED"
+state_flow:
+  main: "OPEN → IN-FIX → FIXED → VERIFIED → CLOSED"
+  reopen: "FIXED → REOPENED → IN-FIX   (复测失败回退)"
+  obsolete: "OPEN/FIXED/VERIFIED → OBSOLETE   (功能变更致过时)"
+  note: |
+    REOPENED: 测试专家复测 FIXED 单失败时标记,回到代码提测修复队列;同一单 REOPENED ≥ 2 次 → 升级仲裁。
+    OBSOLETE: 仅测试专家可标,必附"过时理由 + 功能变更引用(tech-plan/spec diff)";CLOSED 与 OBSOLETE 均为终态,
+              过时单保留在 index.md 供追溯(对标 Stage 5 归档不可变原则)。
+closed_confirmation:
+  required: [code-score-apply, test-expert-sign, user-confirm]
+  description: "CLOSED 三方确认 —— 代码提测申请 + 测试专家会签 + 用户确认(对齐下方 step-4-user-confirm 门禁)"
 gates:
   - id: e2e-first
     name: e2e 先行门禁

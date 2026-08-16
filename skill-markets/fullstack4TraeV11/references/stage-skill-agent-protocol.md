@@ -109,23 +109,25 @@ agent_completion:
 
 ## 4. 13 stage × agent 调用清单
 
-| Stage | agent 类型 | 必跑 gitnexus | 必跑脚本 |
-|-------|-----------|:---:|------|
-| -1 Intake | task-notification-agent | ❌ | setup-feature.py + state-card-validator.py |
-| 0 Plan | explore-agent（3 路径并行）| ✅ impact | stage-gate.py + spec-purge.py |
-| 0.5 Test Plan | explore-agent | ✅ | state-card-validator.py |
-| 1 Spec | spec-writer-agent | ❌ | code-hygiene.py + state-card-validator.py |
-| 1.5 Prototype | prototype-builder-agent | ❌ | visual-content-check.py + prototype-backfill-check.py |
-| 2 Contract | contract-writer-agent | ❌ | orphan-detector.py + state-card-validator.py |
-| 3 Implement | code-implementer-agent（**TDD**）| ✅ 必跑 | code-hygiene.py + state-card-validator.py |
-| 3.5 Real Verify | e2e-verifier-agent | ✅ | visual-content-check.py + dist-hash-check.py |
-| 4 Review | review-agent（**不修代码**）| ✅ | acceptance-audit.py + state-card-validator.py |
-| 4.5 Rot Scan | rot-detector-agent | ❌ | proactive-scan.py + self-diagnose.py |
-| 5 Accept | archive-agent | ❌ | spec-knowledge-extract.py + spec-purge.py |
-| 6 Bug Fix | debugger-agent(**e2e 先行 FAIL**)| ✅ impact / context / query / detect_changes | code-hygiene.py + state-card-validator.py + reason-classifier.py(SKEPTICAL VALIDATION 触发时) |
-| 7 Project Health | health-auditor-agent | ✅ impact | proactive-scan.py + self-diagnose.py |
+> **V11.9 角色协议接线**: "agent 类型"列已映射为角色 id（见 [role-protocol.md](../role-protocol.md) §1 矩阵）。角色定义文件见 [skills/00-boot/agents/](../skills/00-boot/agents/)。一个角色可跨多 stage（如 jarvis 全域 gate），一个 stage 可多角色协作（如 explore-agent 拆为 tech-planner / test-expert）。
 
-**注**：TRAE IDE 默认 task-notification-agent / explore-agent 可用于大部分场景；复杂场景（如 spec-writer / contract-writer / debugger）可自定义 agent 类型。
+| Stage | 角色 id（agent 类型） | 必跑 gitnexus | 必跑脚本 |
+|-------|-----------|:---:|------|
+| -1 Intake | jarvis | ❌ | setup-feature.py + state-card-validator.py |
+| 0 Plan | tech-planner / test-expert（3 路径并行）| ✅ impact | stage-gate.py + spec-purge.py |
+| 0.5 Test Plan | test-expert | ✅ | state-card-validator.py |
+| 1 Spec | product-manager / tech-planner | ❌ | code-hygiene.py + state-card-validator.py |
+| 1.5 Prototype | prototype-designer | ❌ | visual-content-check.py + prototype-backfill-check.py |
+| 2 Contract | tech-planner | ❌ | orphan-detector.py + state-card-validator.py |
+| 3 Implement | backend-implementer / frontend-implementer（**TDD**）| ✅ 必跑 | code-hygiene.py + state-card-validator.py |
+| 3.5 Real Verify | test-expert | ✅ | visual-content-check.py + dist-hash-check.py |
+| 4 Review | test-expert（**不修代码**）| ✅ | acceptance-audit.py + state-card-validator.py |
+| 4.5 Rot Scan | jarvis | ❌ | proactive-scan.py + self-diagnose.py |
+| 5 Accept | product-manager | ❌ | spec-knowledge-extract.py + spec-purge.py |
+| 6 Bug Fix | qa-submitter(**e2e 先行 FAIL**)| ✅ impact / context / query / detect_changes | code-hygiene.py + state-card-validator.py + reason-classifier.py(SKEPTICAL VALIDATION 触发时) |
+| 7 Project Health | jarvis | ✅ impact | proactive-scan.py + self-diagnose.py |
+
+**注**：TRAE IDE 默认 task-notification-agent / explore-agent 可用于大部分场景；复杂场景（如 spec-writer / contract-writer / debugger）可自定义 agent 类型。角色 id 与 agent 类型映射关系以 [role-protocol.md §1](../role-protocol.md) 矩阵 + [spec.md](../../../.trae/specs/adopt-v11-role-protocol/spec.md) MODIFIED Requirements 为准。
 
 ---
 

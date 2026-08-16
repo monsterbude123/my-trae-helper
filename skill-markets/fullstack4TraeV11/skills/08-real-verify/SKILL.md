@@ -33,6 +33,8 @@ depends_on:
 | 环境依赖检查 + 真实验证 + 启动可见产物 | 实施编码 → Stage 3 Implement |
 | 阻塞报告（V10 Article XV）| 验收 → Stage 4 Review |
 
+> **📎 qa-loop 提测闭环（V11.9 角色协议 NEW）**: 本阶段产出的"启动可见产物 + 运行中的应用进程"是 **qa-loop 提测闭环**（重启应用 → 步骤 1.5 自验证 → 委派测试专家 → 收报告修复 → 循环终止交接）的入口基础。真实验证确认"能启动、有可见产物"后，若无 L1/L2 bug 遗留，即可进入 [docs/specs/qa-loop.md](../../docs/specs/qa-loop.md) 走代码提测 ↔ 测试专家闭环；qa-loop 的修复内核（6 层排查 + e2e 先行 + GitNexus）见 Stage 6 [12-bug-fix/SKILL.md](../12-bug-fix/SKILL.md)。
+
 ## 铁律（6 条 — V10 §0.10）
 
 ```

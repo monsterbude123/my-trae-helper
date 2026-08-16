@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# new-bug.sh — bug-hunt 6 字段 bug 单生成脚本（V11.8.2 NEW Stage 6 Phase A）
+# new-bug.sh — bug-hunt 7 字段 bug 单生成脚本（V11.8.2 NEW Stage 6 Phase A；V11.9 扩展 --source）
 #
-# 用法: bash scripts/bug-hunt/new-bug.sh BUG-017 M4-asset /zh/workspace/asset-hub L2 "evidence"
+# 用法: bash scripts/bug-hunt/new-bug.sh BUG-017 M4-asset /zh/workspace/asset-hub L2 "evidence" [--source qa-found|user-feedback|scan]
 # 产物: docs/bugs/<YYYY-MM-DD>/<bug_id>-<module_slug>.md
 #
 # 反 V11-BH3 反例: 16 个 bug 单每单 1 min 手填 = 16 min 浪费。本脚本替代手填。
@@ -12,12 +12,35 @@
 #   {route}     - 必填, / 开头
 #   {severity}  - 必填, L1 / L2 / L3 / L4
 #   {evidence}  - 必填, 简短描述
+#   {source}    - 可选, --source 传参, 默认 qa-found; 值 ∈ qa-found | user-feedback | scan（bug 单第 7 字段, role-protocol §6）
 
 set -euo pipefail
 
+# 解析可选 --source 标志（允许出现在任意位置；其余按位置参数收集）
+SOURCE="qa-found"
+POSITIONAL=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --source)
+            if [[ $# -lt 2 ]]; then
+                echo "[FATAL] --source 缺少取值（qa-found | user-feedback | scan）" >&2
+                exit 1
+            fi
+            SOURCE="$2"
+            shift 2
+            ;;
+        *)
+            POSITIONAL+=("$1")
+            shift
+            ;;
+    esac
+done
+set -- "${POSITIONAL[@]}"
+
 if [[ $# -lt 4 ]]; then
-    echo "[FATAL] 用法: bash $0 <bug_id> <module> <route> <severity> [\"evidence\"]" >&2
+    echo "[FATAL] 用法: bash $0 <bug_id> <module> <route> <severity> [\"evidence\"] [--source qa-found|user-feedback|scan]" >&2
     echo "  示例: bash $0 BUG-017 M4-asset /zh/workspace/asset-hub L2 \"playwright 404\"" >&2
+    echo "  示例: bash $0 BUG-018 M4-asset /api/list L1 \"用户反馈 500\" --source user-feedback" >&2
     exit 1
 fi
 
@@ -31,6 +54,11 @@ EVIDENCE="${5:-（待补 — 主代理补 Description + Fix）}"
 case "$SEVERITY" in
     L1|L2|L3|L4) ;;
     *) echo "[FATAL] severity 必为 L1/L2/L3/L4, 收到: $SEVERITY" >&2; exit 1 ;;
+esac
+
+case "$SOURCE" in
+    qa-found|user-feedback|scan) ;;
+    *) echo "[FATAL] source 必为 qa-found/user-feedback/scan, 收到: $SOURCE" >&2; exit 1 ;;
 esac
 
 if [[ ! "$ROUTE" =~ ^/ ]]; then
@@ -70,7 +98,7 @@ cat > "$OUT_FILE" <<EOF
 
 ---
 
-## 6 字段（V11 §8）
+## 7 字段（V11 §8 + role-protocol §6 source）
 
 | 字段 | 值 |
 |------|-----|
@@ -80,6 +108,7 @@ cat > "$OUT_FILE" <<EOF
 | route | ${ROUTE} |
 | evidence | ${EVIDENCE} |
 | severity | ${SEVERITY} |
+| source | ${SOURCE} |
 | status | OPEN |
 | blocked_by | （人工填 — 关联上游 bug / spec / commit hash） |
 
@@ -100,6 +129,8 @@ cat > "$OUT_FILE" <<EOF
 | **IN-FIX** | 修复中 | 子代理实施中（V11 Stage 6 Phase B Step 6）|
 | **FIXED** | 已修复，待验证 | 子代理实施完成（V11 Stage 6 Phase B Step 7 验收通过）|
 | **VERIFIED** | 已验证，再观察一轮无 regression | 主代理再跑 4 维度观察 |
+| **REOPENED** | 复测失败回退，待重修 | 测试专家复测 FIXED 失败（role-protocol §6）|
+| **OBSOLETE** | 功能变更致过时（终态） | 仅测试专家可标（role-protocol §6）|
 | **CLOSED** | 关闭，归档到 done/ | 状态机终态（V11 Article VIII 不可变）|
 
 > **必备转换约束**：
