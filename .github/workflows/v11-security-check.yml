@@ -77,14 +77,14 @@ jobs:
           import json, os, subprocess, sys
           verdict = os.environ["VERDICT"]
           summary = os.environ["SUMMARY"]
-          d = json.load(open("scan_output.json"))
+          d = json.load(open("scan_output.json", encoding="utf-8-sig"))
 
           # emoji 映射
           emoji = {"PASS": "✅", "WARNING": "⚠️", "BLOCKED": "🛑"}.get(verdict, "❓")
           marker = {"PASS": "✅", "WARNING": "⚠️", "BLOCKED": "❌"}.get(verdict, "❓")
 
           # 评分(按 SECURITY-MAP 计算公式: 5.0 - 0.5×HIGH - 0.2×MEDIUM - 0.1×LOW)
-          score = max(0.0, 5.0 - 0.5 * d["high"] - 0.2 * d["medium"] - 0.1 * d["low"])
+          score = max(0.0, 5.0 - 0.5 * d["risk_counts"]["high"] - 0.2 * d["risk_counts"]["medium"] - 0.1 * d["risk_counts"]["low"])
 
           body = f"""## {emoji} V11 安全扫描: {verdict}
 
@@ -94,9 +94,9 @@ jobs:
 
           | 维度 | 数量 | 豁免 |
           |------|------|------|
-          | HIGH | {d['high']} | {d['whitelist_stats']['by_code'].get('CMD_RM_RF', 0) + d['whitelist_stats']['by_code'].get('HARDCODED_SECRET', 0) + d['whitelist_stats']['by_code'].get('DYN_EVAL', 0)} |
-          | MEDIUM | {d['medium']} | {d['whitelist_stats']['by_code'].get('SHELL_EXEC', 0) + d['whitelist_stats']['by_code'].get('HTTP_INSECURE', 0)} |
-          | LOW | {d['low']} | {d['whitelist_stats']['by_code'].get('STACK_LEAK', 0)} |
+          | HIGH | {d['risk_counts']['high']} | {d['whitelist_stats']['by_code'].get('CMD_RM_RF', 0) + d['whitelist_stats']['by_code'].get('HARDCODED_SECRET', 0) + d['whitelist_stats']['by_code'].get('DYN_EVAL', 0)} |
+          | MEDIUM | {d['risk_counts']['medium']} | {d['whitelist_stats']['by_code'].get('SHELL_EXEC', 0) + d['whitelist_stats']['by_code'].get('HTTP_INSECURE', 0)} |
+          | LOW | {d['risk_counts']['low']} | {d['whitelist_stats']['by_code'].get('STACK_LEAK', 0)} |
           | 白名单行数 | — | {d['whitelist_stats']['lines_whitelisted']} |
 
           **整改路径**(若未 PASS):
