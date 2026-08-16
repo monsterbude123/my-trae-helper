@@ -1,0 +1,12 @@
+name: daily-vibe-coding
+schedule: "0 9 * * *"          # 每天 09:00
+timezone: Asia/Shanghai
+run_mode: work                  # work / ide / api
+run_env: cloud                  # cloud / local
+output_dir: logs/daily-vibe-coding/${DATE}
+prompt_file: prompt.md
+version: 1.1.0
+owner: my-trae-helper
+precheck_script: scripts/daily-vibe-coding/run-precheck.sh
+templates_script: scripts/daily-vibe-coding/generate-templates.py
+spec_source: skill-markets/daily-vibe-coding/SKILL.md
