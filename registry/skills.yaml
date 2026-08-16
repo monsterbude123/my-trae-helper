@@ -466,3 +466,4 @@ skills:
       五大工作流的可复用经验、命令模式与踩坑记录。本项目专属技能,纯文档型,scripts/ 客户端 CLI
       在项目根 src-cli/,不在 skill 子目录(aspect = structure-only)。
       注册由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
+      2026-08-16 references 全量沉淀:AGENT.md(341 行 10 节)+ project-rules.md(94 行 10 节)→ 13 个 references(workflows-baseline/manifest-schema/doc-map-manager-usage/env-loadenv/reply-conventions/first-run-checklist/skill-evolution/task-start-probe/project-paths/git-workflow-rules/doc-index-rules/answer-rules/safety-cleanup),通用 vs 具体项目配置二分判定,具体 env 名/路径前缀仅作"示例"段。

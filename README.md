@@ -7,6 +7,8 @@ Trae IDE 技能包开发工程 + 跨 Agent 技能市场 CLI。
 > - `bin/` + `src/` —— `@my-trae-helper/cli`(已发布到 npm)
 >
 > **2026-08-16 新增 skill**：`github-kownledge-helper`（本地 GitHub 仓库管家）— 第 48 个技能包（V1.0），纯文档 + 9 references + TS CLI（`pnpm ghh add/update/sync-to/sync-docs/verify-docs`，CLI 落本项目根）；详见 [skill-markets/github-kownledge-helper/SKILL.md](skill-markets/github-kownledge-helper/SKILL.md) 与 [CHANGELOG.md Unreleased §github-kownledge-helper 接入](CHANGELOG.md)
+>
+> **2026-08-16 references 全量沉淀**：按 skill-evolution 协议，把 `AGENT.md`(341 行 10 节)+ `project-rules.md`(94 行 10 节)全量沉淀为 22 个 references(13 新增 + 9 原有增量)，按"通用 vs 具体项目配置"二分判定 — 通用约定沉淀，具体 env/路径作为示例段。详见 [CHANGELOG.md §github-kownledge-helper 全量沉淀](CHANGELOG.md)
 
 > **2026-08-16 fullstack4TraeV11 升级**：V11.8.5 协议层承诺 → 脚本落地（13/14）— 新增 3 脚本 + 6 references + 79 单测。详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md](skill-markets/fullstack4TraeV11/CHANGELOG.md)。
 >

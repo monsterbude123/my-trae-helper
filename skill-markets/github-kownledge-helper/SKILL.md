@@ -18,15 +18,23 @@ requires:
 
 ## Triggers
 
-- 用户说「加个仓库」「收录」「追踪 facebook/react」→ ADD 工作流
-- 用户说「全部更新」「批量 pull」「同步最新」→ UPDATE-ALL 工作流
-- 用户问「react 最新发了什么」「v19 在哪个 commit」「这 PR 改了哪些文件」→ QUERY 工作流
-- 用户说「把 X 同步/镜像/复制到 D:\xxx」「同步 QwenLM/Qwen-MM-Plugins 到 ...」→ SYNC-TO 工作流（镜像到任意绝对路径，含 .git，不写 manifest）
-- 用户说「升级 skill」「记录这次经验」→ 触发技能演进协议
-- 涉及 manifest.json 读写 / repos/ 路径 / docs/ 索引 → 加载本 skill
+- 用户说「加个仓库」「收录」「追踪 facebook/react」→ ADD 工作流（基线见 [workflows-baseline.md §1](./references/workflows-baseline.md#1-add--收录新仓库)）
+- 用户说「全部更新」「批量 pull」「同步最新」→ UPDATE-ALL 工作流（基线见 [workflows-baseline.md §3](./references/workflows-baseline.md#3-update-all--一键全更新)）
+- 用户问「react 最新发了什么」「v19 在哪个 commit」「这 PR 改了哪些文件」→ QUERY 工作流（基线见 [workflows-baseline.md §4](./references/workflows-baseline.md#4-query--答疑核心场景)）
+- 用户说「把 X 同步/镜像/复制到 D:\xxx」「同步 QwenLM/Qwen-MM-Plugins 到 ...」→ SYNC-TO 工作流（镜像到任意绝对路径，含 .git，不写 manifest，详见 [workflows-sync-to.md](./references/workflows-sync-to.md)）
+- 用户说「升级 skill」「记录这次经验」→ 触发 [skill-evolution.md](./references/skill-evolution.md) 5 步协议
+- 用户说「你看看 X」「处理一下」「这些仓库你看看」（未知初始状态）→ 先走 [task-start-probe.md](./references/task-start-probe.md) 探测协议，4 步（探测 → 列决策点 ≤ 4 → 等用户 → 计划公示）
+- 新会话首次启动 / 长时间未活动后 → 走 [first-run-checklist.md](./references/first-run-checklist.md) 4 步自检
+- 涉及 manifest.json 读写 / repos/ 路径 / docs/ 索引 → 加载本 skill（路径约束见 [project-paths.md](./references/project-paths.md)，Schema 见 [manifest-schema.md](./references/manifest-schema.md)）
 - 用户说「验证 doc manager 索引」「跑下 verify-docs」→ 加载 [doc-verify.md](./references/doc-verify.md)
 - 用户说「写个脚本」「加个 CLI 命令」→ 加载 [tdd.md](./references/tdd.md) + [cli-development.md](./references/cli-development.md)
 - 用户给的任务现有 CLI 覆盖不了 → 触发 [cli-development.md §协议](./references/cli-development.md#协议5-步强制)
+- 业务代码涉及 `process.env` / `os.homedir()` → 必须走 [env-loadenv.md](./references/env-loadenv.md) 收口（禁止直读）
+- 答疑类问题（涉及数字/commit/tag/版本号）→ 走 [answer-rules.md](./references/answer-rules.md) 4 条铁律（实测 + 来源标注 + 不盲信 + 不臆造）
+- 涉及 git clone / pull / ff-only / 网络降级 → 加载 [git-workflow-rules.md](./references/git-workflow-rules.md) 5 条铁律
+- 涉及索引构建 / 新鲜度协议 → 加载 [doc-index-rules.md](./references/doc-index-rules.md) 6 条铁律 + [doc-map-manager-usage.md](./references/doc-map-manager-usage.md) 使用规范
+- agent 回复格式（简表 / 来源标注 / 失败直报错）→ 加载 [reply-conventions.md](./references/reply-conventions.md)
+- 涉及 token / 密钥 / 临时清理 / `repos/` 入 git → 加载 [safety-cleanup.md](./references/safety-cleanup.md) 4 条铁律
 
 ## 依赖的外部 Skill
 
@@ -150,6 +158,8 @@ github-kownledge-helper/
 
 | 日期 | 摘要 | 沉淀位置 |
 |------|------|---------|
+| 2026-08-16 | 接入 my-trae-helper skill 市场 6 维度合规（YAML frontmatter + registry/skills.yaml 注册 + scripts/github-kownledge-helper-guard.py + CAPABILITY-MAP / SECURITY-MAP / README / CHANGELOG / AGENTS §7 同步） | SKILL.md frontmatter + registry + scripts/<name>-guard.py + 多文档 |
+| 2026-08-16 | **AGENT.md + project-rules.md 全量沉淀**：13 个 references 文件（基线 4 大工作流 + manifest Schema + doc-map-manager 使用 + load_env 收口 + 回复规范 + 首次启动自检 + 技能演进 + 任务启动探测 + 路径硬约束 + git 工作流硬约束 + 知识索引硬约束 + 答疑红线 + 安全与清理） + workflows.md 基线引用改向 workflows-baseline.md + SKILL.md Triggers 完整扩展。判定原则：通用约定沉淀，具体项目配置仅作示例段 | references/workflows-baseline.md(新增基线) + manifest-schema.md + doc-map-manager-usage.md + env-loadenv.md + reply-conventions.md + first-run-checklist.md + skill-evolution.md + task-start-probe.md + project-paths.md + git-workflow-rules.md + doc-index-rules.md + answer-rules.md + safety-cleanup.md + workflows.md(基线引用重定向) + SKILL.md Triggers 段 |
 | 2026-08-13 | 缺失-CLI 走开发的工作流 + TDD 模板 + doc manager 验证步骤写入 skill；TDD 实现 `add` + `verify-docs` 两 CLI（5 套件 25 例全绿） | references/cli-development.md（新增）+ tdd.md（新增）+ doc-verify.md（新增）+ commands.md（CLI 清单扩展）+ SKILL.md Triggers / 结构 / CLI 段 |
 | 2026-08-13 | 首次批量收录 38 仓库 + 聚合目录支持（group 字段）+ TS/pnpm CLI 化 | references/workflows.md (聚合变体+TS CLI) + references/commands.md (TS CLI 入口) + references/pitfalls.md (pnpm v11 esbuild / 隐藏 .git / PS 字符串插值) |
 | 2026-08-13 | update / update-all 实现 + 跑通 38 仓库更新（24 changed / 13 up-to-date / 1 ff-only 失败 reset 修复） | references/workflows.md (UPDATE 实战) + references/commands.md (update CLI) + references/pitfalls.md (§004 ff-only 失败 + §005 mtime 索引不更新) |

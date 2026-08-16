@@ -5,6 +5,13 @@
 
 ## [Unreleased]
 
+### github-kownledge-helper 全量沉淀(2026-08-16)
+
+- **references 全量沉淀 V1.0** — 按 skill-evolution 协议,把 `D:\workspace\github-kownledge-helper\AGENT.md`(341 行 / 10 节)+ `.trae\rules\project-rules.md`(94 行 / 10 节)全量沉淀为 13 个 references(workflows-baseline / manifest-schema / doc-map-manager-usage / env-loadenv / reply-conventions / first-run-checklist / skill-evolution / task-start-probe / project-paths / git-workflow-rules / doc-index-rules / answer-rules / safety-cleanup)+ SKILL.md Triggers 扩展 12 行 + workflows.md 基线引用重定向。判定原则:通用约定沉淀,具体项目配置(env 名/路径前缀)仅作"示例"段
+  - **A 类 8 个**(AGENT.md §3-§10 未吸收):manifest Schema / 4 大工作流基线 / doc-map-manager 使用 / load_env 收口 / 回复规范 / 首次自检 / 技能演进 / 任务启动探测
+  - **B 类 5 个**(project-rules §1-§7 未吸收):路径约定 / git 工作流硬约束 / 知识索引硬约束 / 答疑红线 / 安全与清理
+  - **workflows.md 重写**:因 SearchReplace 工具报告成功但实际未落盘(陷阱 §010),改用 Write 整文件替换 5 处,Read 验证全部落盘
+
 ### github-kownledge-helper 接入(2026-08-16)
 
 - **V1.0 NEW** — 本地 GitHub 仓库管家技能接入合规体系(skill-creation-workflow §3.1 协议先行 + 多维度一致)

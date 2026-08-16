@@ -277,7 +277,7 @@ python skill-markets/trae-security-review/scripts/scan_skills_dir.py skill-marke
 | **`.agents/skills/project-rule-skill/references/skill-creation-workflow.md`** (V11.8.0.1 路径迁移) | **任何 skill 创建 / 升级 / 合并 / 废弃操作前必读**(协议先行 + 多维度一致) |
 | **`.agents/skills/project-rule-skill/references/protocol-coverage-protocol.md`** (V11.8.0.1 路径迁移) | **任何协议规范 (`*-protocol.md`) 创建后必跑 `python scripts/_check_protocol_coverage.py --protocol <path> --check`**;CI gate L3/L4 已自动检 |
 | **`tests/catalogs/catalog-protocol.md`** (2026-08-15 NEW) | **任何 SKILL 创建/修改必跑 `python tests/catalogs/_check_skill_catalog.py`**(V1 report-only);CI gate L3/L4 §5.8 自动检 |
-| **`skill-markets/github-kownledge-helper/SKILL.md`** (V1.0 NEW 2026-08-16) | 本项目专属:本地 GitHub 仓库管家 — ADD/UPDATE/UPDATE-ALL/QUERY/SYNC-TO 五大工作流 + 命令模式 + 踩坑记录;TS CLI 化(`pnpm ghh ...`);仅软依赖 doc-map-manager |
+| **`skill-markets/github-kownledge-helper/SKILL.md`** (V1.0 NEW 2026-08-16) | 本项目专属:本地 GitHub 仓库管家 — ADD/UPDATE/UPDATE-ALL/QUERY/SYNC-TO 五大工作流 + 命令模式 + 踩坑记录;TS CLI 化(`pnpm ghh ...`);仅软依赖 doc-map-manager;**2026-08-16 全量沉淀**:AGENT.md + project-rules.md → 13 个 references(workflows-baseline/manifest-schema/doc-map-manager-usage/env-loadenv/reply-conventions/first-run-checklist/skill-evolution/task-start-probe/project-paths/git-workflow-rules/doc-index-rules/answer-rules/safety-cleanup) |
 
 完整索引见 [skill-markets/CAPABILITY-MAP.md](skill-markets/CAPABILITY-MAP.md)。
 
