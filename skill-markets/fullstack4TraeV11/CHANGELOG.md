@@ -4,6 +4,68 @@
 
 ---
 
+## [V11.8.5] - 2026-08-16
+
+### ✨ 协议层承诺 → 脚本落地（13/14 done + 1 留置）
+
+#### ✨ 新增脚本（NEW）
+
+- **scripts/project-priority-resolver.py** — 实现 dependency-config.md §Layer 3 resolve_skills 伪代码。3 子命令：--stage / --check-forbidden / --merge-anti-patterns；替代 init-from-zero.py 不跑 scripts 的历史局限。
+- **scripts/secrets-detector.py**（V11.7.1+ Article XVII Secret Redaction 程序化扫描）— 10 类 pattern：AWS / OpenAI / GitHub / Generic credential / Bearer / PEM / JWT / 中国手机号 / 身份证号 / 邮箱 PII。
+- **scripts/bug-state-machine-validator.py**（V11.8.x NEW）— bug-state-machine.md 5 状态机制校验：OPEN / IN_PROGRESS / CLOSED / BLOCKED / SKIPPED。
+
+#### 🔧 修改脚本
+
+- **scripts/run-all-guards.py** — 新增 resolve_registry_dir() 自动探测项目 .trae/registry/（V11 自承认 §9.5 缺漏）。
+- **scripts/stage-gate.py** — 加 --next-stage 协议升级 + validate_transition()（exit 2 区分 transition FAIL）。
+- **scripts/state-card-validator.py** — 加 5 类校验（stage_ended_at / bug_severity / parent_change / visual_evidence.read_by_main_context / reset_history 5 子字段）。
+- **scripts/proactive-scan.py** — 修 reason-fabrication 误报（V11 自承认 §9.3 缺漏，docs/specs/_invalidated/ + 上下文 200）。
+- **scripts/setup-feature.py / change-status.py** — 强制调 audit_state_card_change（修复 _lib_state_card.py 原 import 缺失 bug）。
+- **scripts/repair-flow-gate.py** — 加 --strict + --evidence-paths（Stage 6 4 步流程门禁串接）。
+- **templates/hooks/pre-stage.sh** — 硬化：V11_GATE_ENFORCED=true 等 3 env 必设 + 3 级 V11_SCRIPTS 解析。
+
+#### ➕ references 新增
+
+- `references/todos/{P0,P1,P2,P3}-*.md` — 14 条协议层无解析脚本差距清单。
+- `references/todos/v12-physical-isolation/` — V12 物理隔离迁移检查清单。
+- `references/todos/audit-history/2026-08-16-mentioned-but-not-parsed.md`。
+- `references/config-files-glossary.md`（子代理 A 交付）。
+- `references/role-protocol.md`。
+
+#### 🧪 测试新增（9 文件 / 79 用例）
+
+- `tests/unit/` 9 个 test 文件。
+- `tests/integration/pre_stage_hook_test.sh`（4 用例）。
+
+#### 📊 协议层覆盖率
+
+0/14 → **13/14（93%）**：
+- ✅ P0-1 + P0-2（2/2）
+- ✅ P1-1 + P1-2 + P1-3（3/3）
+- ✅ P2-1 + P2-2 + P2-3（3/3）
+- ✅ P3-1 + P3-2 + P3-3 + P3-4 + P3-5（5/6）
+- ⏳ **P3-6 commit-minimum-check.py 留置** + ⏳ V12 物理隔离迁移留置（等 ADR）。
+
+#### 📝 引用
+
+- [references/todos/README.md §2](references/todos/README.md) 总览表
+- [references/todos/audit-history/2026-08-16-mentioned-but-not-parsed.md §5](references/todos/audit-history/2026-08-16-mentioned-but-not-parsed.md) 主上下文兜底 + commit 时间表
+- [references/dependency-config.md §V11.8.x](references/dependency-config.md) 实现状态
+- [references/state-card-protocol.md §V11.8.x](references/state-card-protocol.md) 强化
+- [templates/hooks/README.md §V11.8.x](templates/hooks/README.md) 硬化
+- [scripts/README.md L40-42](scripts/README.md)（3 个 V11.8.x NEW 脚本）
+
+#### 🔧 V11.8.5.P1 commit 准入最小集(2026-08-16)
+
+- **scripts/commit-minimum-check.py** — 实现 SKILL.md §3.7 #10 commit 准入最小集 + common-anti-patterns.md §7.3 程序化校验
+  - 4 项: typecheck(compileall) / spot-check(/docs/specs/changes/{id}/spot-check.json) / admin 探针(urllib 5s 超时) / lint 预存(pyflakes → .trae/logs/commit-readiness-warnings.jsonl)
+  - exit codes: 0=PASS / 1=FAIL 阻断 / 2=WARN
+  - 跨平台: Windows / macOS / Linux(仅标准库 + PyYAML)
+- **tests/unit/test_commit_minimum_check.py** — 16 用例全 PASS in 11.80s
+- **references/todos/P3-6-commit-minimum.md** — status: pending → done + resolved_at + evidence
+
+---
+
 ## [V11.8.4] - 2026-08-15
 
 ### ✨ commit 准入最小集与全量验收分层（V11.8.4 NEW — 蒸馏自 2026-08-15 merged-commits）

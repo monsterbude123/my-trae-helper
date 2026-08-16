@@ -312,6 +312,28 @@ python scripts/gate-integrity-guard.py --generate --root <项目根> --force --r
 
 ---
 
+## 项目状态（2026-08-16 update）
+
+V11.8.5 — 协议层承诺 → 脚本落地：
+
+| 维度 | 进度 |
+|------|------|
+| 协议层覆盖率（13/14） | 93%（P3-6 commit-minimum + V12 留置） |
+| 测试套件 | pytest 232 passed in 9.52s |
+| 新增脚本 | 3 个（project-priority-resolver / secrets-detector / bug-state-machine-validator） |
+| 新增 references | 6 个（含 references/todos/ 全套） |
+| 新增单测 | 79 用例（9 文件） |
+| 待办状态 | [references/todos/README.md §2](references/todos/README.md)（13 done / 2 pending） |
+
+**注**：本仓库是 my-trae-helper 元项目的 `skill-markets/fullstack4TraeV11/` 子目录，跨仓 commit 受 §B 7 步 SOP 治理。详见 [CHANGELOG.md](CHANGELOG.md) 与 [references/todos/](references/todos/README.md)。
+
+## V11.8.5.P1 commit 准入最小集(2026-08-16 update)
+
+[P3-6] scripts/commit-minimum-check.py 实现 — 4 项准入校验(typecheck / spot-check / admin 探针 / lint 预存),exit 0=PASS / 1=FAIL / 2=WARN,仅前 3 项 FAIL 阻断 commit。
+详见 [CHANGELOG.md](CHANGELOG.md) 与 [references/todos/](../todos/README.md)。
+
+---
+
 ## 部署
 
 ```bash

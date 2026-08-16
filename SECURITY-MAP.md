@@ -76,6 +76,26 @@
 | comfyui-api-skills | 1 md + 15 skill + 10 py + 4 ref | 0 | 12 | 0 | **2.6** | 🔴 | 12 个 MEDIUM：大量 HTTP 引用（ComfyUI API 调用本身需要 HTTP）；部分脚本含 Shell 执行。**需关注：网络调用面大** |
 | **fullstack4TraeV10** (10.12.5) | 1 md + 9 agent + 35 ref + 18 py + 10 hook | 0 | 0 | 0 | **5.0** | 🟢 | **实跑扫描（2026-08-10 13:26，最新）**：trae-security-review scan_skills_dir.py V2.1 + 13 个脚本 SHELL_EXEC 白名单 → **HIGH 0 + MEDIUM 0 + LOW 0 → PASS**（从 WARNING 升级）。**V10.12.5 升级**：(a) trae-security-review SKILL.md 更新 V2.1 描述（8 类风险表 + 三层白名单机制 + 词边界修复说明）；(b) 8 个脚本 SECURITY 标注后加 `<!-- scan-whitelist:SHELL_EXEC --><!-- /scan-whitelist -->` 区块（acceptance-audit / check_prerequisites / code-hygiene / phase-gate / proactive-scan / test_v10_5_fixtures / gitnexus-session-check / gitnexus-session-finalize）；(c) AGENTS.md 新增 "Agent 回复行为规约（V10.12.5 NEW）" 章节（防"问下一步"模式）。**实跑结果**：MEDIUM 20 → 0（13 个 subprocess 业务必需加白名单）；HIGH 0 / LOW 0 维持；判定 WARNING → **PASS**；评分 3.4 → **5.0**（🟢 满分）。**注**: MEDIUM 269 HTTP localhost 真调用（acceptance-audit.py 验收脚本需要）随文件级 SHELL_EXEC 区块一并豁免（同一 docstring 区块）。**下一轮升级前**：无 backlog（已满分）。 |
 | **fullstack4TraeV11** (11.7.1) | 1 md + 14 skill(含 agents/jarvis.md) + 13 ref + 18 py + 18 hook + 5 registry + 6 tpl + 3 scaffold | 0 | 0 | 0 | **5.0** | 🟢 | **实跑扫描（2026-08-15 13:57，最新 PASS）**：trae-security-review scan_skills_dir.py V2.1 → 扫描 328 文件 → **HIGH 0 + MEDIUM 0 + LOW 0 → PASS**(白名单豁免 1963 行)。**V11.7.1 整改闭环**(本版本):(a) 10 个 .md 文档加行级 `<!-- scan-whitelist -->` 包裹命中行(secret-in-tool-arg.md / sub-agent-rules.md / project-iron-laws.md / skill-market-control-design.md / code-hygiene.md / 06-contract anti-patterns/03-breaking-without-confirm.md / startup-verification.md / five-project-verify.md / 2.prototype-code-gap-flow.md / templates/project-rules-example/stack.md);(b) 5 个 .py 真可执行脚本加 docstring 内嵌白名单 `<!-- scan-whitelist:CODE -->` 不闭合 → in_block 永久 True → 整文件豁免(scripts/init-from-zero.py + script-threshold-audit.py + tests/conftest.py + scaffolds/{nodejs,python}/files/scripts/run-gate-level.py);(c) 借 V10.12.5 同款模式 — 白名单 marker 必须嵌在模块 docstring 内(否则破坏 Python 语法,初版踩过坑已修复)。**V11.7.0 升级要点**(本版本交付):(a) V11.6.0 AC 核销门禁(ac-gate.py G1-G5)取代 4 维评分制, 评审员无敌权, 脚本权威;(b) V11.7.0 贾维斯门禁守护(pre-stage 角色 + 三层防线 + hash 锁)+ 防篡改 P0 自检发现并修复(--generate 在 verify BLOCK 状态默认拒绝,强制重签需 --reason 审计)。**V11.8.0+ CI 升级**（2026-08-15 NEW）:新增 2 个 PR 触发 CI — `v11-doc-check.yml`（文档入口标记校验）+ `v11-security-check.yml`（trae-security-review 实扫 + PR 评论 PASS/BLOCKED/WARNING），仅作用 skill-markets/fullstack4TraeV11/** 路径。**下一轮升级前**:无 backlog(已满分)。 |
+
+#### V11.8.5 — 2026-08-16
+
+- 新增 `scripts/project-priority-resolver.py`：**LOW**（无新网络调用，无新 secret）
+- 新增 `scripts/secrets-detector.py`：**LOW**（只读取 + 模式匹配，不网络）
+- 新增 `scripts/bug-state-machine-validator.py`：**LOW**（纯 .py 解析）
+- 新增 `audit_state_card_change` 串接：隐性降低原 import-bug 风险（修复 _lib_state_card.py 原 import 缺失 bug）
+- 修 `scripts/proactive-scan.py` reason-fabrication 误报：修复 V11 自承认误报
+- 评分维持 **5.0** 🟢（无新增 MEDIUM/HIGH），V11 协议层覆盖率 0/14 → 13/14 (93%)
+
+#### V11.8.5.P1 commit-minimum-check.py(2026-08-16)
+
+- 新增 scripts/commit-minimum-check.py: LOW(仅读取 + 探测 dev server,无网络写入 / 不上传 secret)
+- 4 项校验:typecheck / spot-check / admin 探针(本地 urllib + 5s 超时) / lint 预存(写本地日志)
+- 退出码语义清晰:0=PASS / 1=FAIL / 2=WARN — 不存在"诱导绕过"风险
+- 不引入新依赖;PyYAML 已是项目既有
+
+详见 [references/todos/P3-6-commit-minimum.md](skill-markets/fullstack4TraeV11/references/todos/P3-6-commit-minimum.md)。
+
+详见 [references/todos/audit-history/2026-08-16-mentioned-but-not-parsed.md §5](skill-markets/fullstack4TraeV11/references/todos/audit-history/2026-08-16-mentioned-but-not-parsed.md)。
 | **docsify-doc-builder** (v2.0) | 1 md + 8 ps1/sh + 6 tpl | 0 | 6 | 0 | **3.5** | 🟡 | v2.0 升级（UE5 暗色主题 + 智能侧边栏 + Markmap 15 节点全展开 + Mermaid 4 图全屏/导出 + Playwright 验证 + 8 示例文档）。6 MEDIUM 全为 `http://localhost:3000` 本地提示语（SKILL.md ×1 + init-docs.ps1 ×2 + init-docs.sh ×1 + serve.ps1 ×1 + serve.sh ×1 + README.md ×1），无外网通信；CDN 链接全部 HTTPS（cdn.jsdelivr.net + esm.sh）。Shell 执行面含 8 个 ps1/sh 脚本（init-docs/serve/check-env/generate-sidebar）。GitNexus detect_changes：36 符号变更，0 受影响流程，🟢 LOW 风险 |
 | **trae-security-review** | 1 md + 2 agent + 3 ref + 1 py | 2 | 3 | 2 | **3.9** | 🟡 | 2 个 HIGH 和 3 个 MEDIUM 均为 risk-patterns.md 和 skill-scanner.md 中的风险模式文档引用（非可执行） |
 | **`.agents/`(项目级本地 agent 配置,非 skill 市场)** | 1 README + 1 learning + 1 项目核心 + 3 stub(.agents/rules/*) + 3 skill + 8 ref + 6 assets + 1 hooks.json + 3 references(NEW,V11.8.0.1 project-rule-skill 同包)+ 1 SKILL.md(v2.0.0) | 15 | 5 | 5 | **N/A** | ⚪ 不评级 | **实跑扫描(2026-08-15 14:39,24 文件,2026-08-15 V11.8.0.1 迁移后再扫描文件数变更)**:扫描结果来自 `.agents/skills/security-review/references/`(language-patterns / vuln-categories / secret-patterns + 配套),**全部 HIGH 15 + MEDIUM 5 + LOW 5 均为安全规则教学文档引用**(描述反例规则 = 文档本质,如 secret-patterns.md 含 token 示例字串,vuln-categories.md 描述 eval/exec 模式)。**V11.8.0 协议先行新增 3 文件 0 命中**:原在 `.agents/rules/` 现已迁移到 `.agents/skills/project-rule-skill/references/`(见 V11.8.0.1 路径迁移通知);`scripts/_check_protocol_coverage.py` 200+ 行 std lib 检测工具(本仓库侧)。**注**: `.agents/` 不在 skill 市场范围内,**SECURITY-MAP 不强制评级**;如需整改走与 V11.7.1 同款白名单机制(`<!-- scan-whitelist -->` 包裹文档命中行)。 |

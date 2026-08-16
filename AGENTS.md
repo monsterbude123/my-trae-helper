@@ -2,6 +2,10 @@
 
 > **元项目**：开发 Trae IDE 技能包 + 维护跨 Agent 技能市场 CLI（`@my-trae-helper/cli`）。
 >
+> **2026-08-16 蒸馏**：fullstack4TraeV11 V11.8.5 协议层承诺 → 脚本落地（13/14 done + 1 留置），参考 [skill-markets/fullstack4TraeV11/references/todos/README.md §2](skill-markets/fullstack4TraeV11/references/todos/README.md)。
+>
+> **2026-08-16 蒸馏**：fullstack4TraeV11 V11.8.5.P1 — §3.7 #10 commit 准入最小集程序化（`scripts/commit-minimum-check.py` 4 项校验），收尾 P3-6 留置（14/14 done）。参考 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.5.P1](skill-markets/fullstack4TraeV11/CHANGELOG.md)。
+>
 > **2026-08-15 蒸馏**：fullstack4TraeV11 V11.8.4 commit 准入最小集与全量验收分层（Stage 3.5/4.5 异步化），参考 [references/common-anti-patterns.md §7](skill-markets/fullstack4TraeV11/references/common-anti-patterns.md)。
 
 ---
@@ -287,21 +291,43 @@ python skill-markets/trae-security-review/scripts/scan_skills_dir.py skill-marke
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **my-trae-helper**. Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **my-trae-helper** (32516 symbols, 39969 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
-> Index stale? Run `node .gitnexus/run.cjs analyze` from the project root — it auto-selects an available runner.
+> Index stale? Run `node .gitnexus/run.cjs analyze` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? `npx gitnexus analyze` (npm 11 crash → `npm i -g gitnexus`; #1939).
 
 ## Always Do
 
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `impact({target: "symbolName", direction: "upstream"})` and report the blast radius.
-- **MUST run `detect_changes()` before committing** to verify your changes only affect expected symbols.
-- When exploring unfamiliar code, use `query({query: "concept"})` to find execution flows.
-- When you need full context on a specific symbol, use `context({name: "symbolName"})`.
+- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
+- **MUST run `detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows. For regression review, compare against the default branch: `detect_changes({scope: "compare", base_ref: "main"})`.
+- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
+- When exploring unfamiliar code, use `query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
+- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `context({name: "symbolName"})`.
 
 ## Never Do
 
-- NEVER edit a function without first running `impact` on it.
+- NEVER edit a function, class, or method without first running `impact` on it.
 - NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
 - NEVER rename symbols with find-and-replace — use `rename` which understands the call graph.
+- NEVER commit changes without running `detect_changes()` to check affected scope.
+
+## Resources
+
+| Resource | Use for |
+|----------|---------|
+| `gitnexus://repo/my-trae-helper/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/my-trae-helper/clusters` | All functional areas |
+| `gitnexus://repo/my-trae-helper/processes` | All execution flows |
+| `gitnexus://repo/my-trae-helper/process/{name}` | Step-by-step execution trace |
+
+## CLI
+
+| Task | Read this skill file |
+|------|---------------------|
+| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
+| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
+| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
+| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
+| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
+| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->

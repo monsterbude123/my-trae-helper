@@ -5,6 +5,20 @@
 
 ## [Unreleased]
 
+### fullstack4TraeV11 升级(2026-08-16)
+
+- **V11.8.5** — 协议层承诺 → 脚本落地(13/14 done + 1 留置)
+  - 新增 `scripts/project-priority-resolver.py`(resolve_skills 伪代码实现)
+  - 新增 `scripts/secrets-detector.py`(Article XVII Secret Redaction 10 类 pattern)
+  - 新增 `scripts/bug-state-machine-validator.py`(5 状态机制校验)
+  - 详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.5 条目](skill-markets/fullstack4TraeV11/CHANGELOG.md)
+- **V11.8.5.P1** — §3.7 #10 commit 准入最小集程序化落地
+  - 新增 `scripts/commit-minimum-check.py`(4 项准入校验:typecheck compileall / spot-check json / admin 探针 urllib 5s 超时 / lint 预存 pyflakes → warnings jsonl)
+  - 新增 `tests/unit/test_commit_minimum_check.py`(16 用例全 PASS in 11.80s)
+  - 收尾 P3-6 commit-minimum-check.py 留置(`references/todos/P3-6-commit-minimum.md` status pending → done)
+  - 详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.5.P1 条目](skill-markets/fullstack4TraeV11/CHANGELOG.md)
+  - **同步触发 doc-sync-guard** 6 项(README / CHANGELOG / SECURITY-MAP / CAPABILITY-MAP / AGENTS.md / registry/skills.yaml)一并落本 commit
+
 ### fullstack4TraeV11 升级(2026-08-15)
 
 - **V11.8.4** — commit 准入最小集与全量验收分层

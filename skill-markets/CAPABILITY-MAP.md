@@ -3,10 +3,15 @@
 > 单一事实来源。新增技能前先查此地图，确认不重复。脚本复用前先查共享注册表。
 
 > **2026-08-15 升级**：fullstack4TraeV11 V11.8.4 提交准入最小集与全量验收分层（Stage 3.5/4.5 异步化），Stage 6 重构为 4 层分层决策框架（V11.8.3）。详见各 skill CHANGELOG。
-> 
+>
+> **2026-08-16 升级**：fullstack4TraeV11 V11.8.5 协议层承诺 → 脚本落地（13/14）— 新增 3 个脚本 + 6 个 references + 79 单测。详见 V11.8.5 CHANGELOG。
+>
 > 维护规则：新增/删除/改依赖 → 同步更新此文件。地图与 SKILL.md 不一致时，以地图为准。
-> 
-> **Last Updated**: 2026-08-14（聚合归档 P1.1 + P1.2 + P2）
+>
+> **Last Updated**: 2026-08-16（聚合归档 V11.8.5 脚本落地）
+
+| V11.8.5 | 2026-08-16 | project-priority-resolver / secrets-detector / bug-state-machine-validator + todos 全套 | [scripts/README.md L40-42](fullstack4TraeV11/scripts/README.md) + [references/todos/README.md §2](fullstack4TraeV11/references/todos/README.md) |
+| V11.8.5.P1 | 2026-08-16 | commit-minimum-check.py + 4 项准入校验(typecheck/spot-check/admin 探针/lint 预存) | [scripts/commit-minimum-check.py](fullstack4TraeV11/scripts/commit-minimum-check.py) + [tests/unit/test_commit_minimum_check.py](fullstack4TraeV11/tests/unit/test_commit_minimum_check.py) |
 
 ---
 
