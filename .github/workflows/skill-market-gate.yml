@@ -119,6 +119,12 @@ jobs:
               echo "❌ fullstack4TraeV11 L3 BLOCK"
               exit 1
             }
+            # 5.6.1 V11 unit tests 全量（含 test_new_bug_source_field.py 等 unit marker 测试）
+            echo "5.6.1️⃣ fullstack4TraeV11 V11 unit tests (L3)..."
+            python -m pytest skill-markets/fullstack4TraeV11/tests/unit -q || {
+              echo "❌ fullstack4TraeV11 V11 unit tests L3 BLOCK"
+              exit 1
+            }
           fi
 
       - name: Check CAPABILITY-MAP.md sync
@@ -277,6 +283,12 @@ jobs:
             }
             python scripts/fullstack4TraeV11-trap-guard.py fullstack4TraeV11 || {
               echo "❌ fullstack4TraeV11 trap L4 BLOCK"
+              exit 1
+            }
+            # L4 unit tests 全量（含 test_new_bug_source_field.py 等 unit marker 测试）
+            echo "🛡 fullstack4TraeV11 V11 unit tests (L4)..."
+            python -m pytest skill-markets/fullstack4TraeV11/tests/unit -q || {
+              echo "❌ fullstack4TraeV11 V11 unit tests L4 BLOCK"
               exit 1
             }
           fi
