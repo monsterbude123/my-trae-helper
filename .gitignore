@@ -67,3 +67,9 @@ skills-lock.json
 # Node
 .publish/
 node_modules/
+
+# CI / 安全扫描临时产物
+scan_output.json
+scan_output.*.json
+*.scan-output.json
+*.scan.json
