@@ -48,6 +48,23 @@
 - **禁读 process 层**：diagnose.md、fix_result.md、分析手记、v1v2v3 — 主上下文提取事实摘要注入，子代理不主动读
 - **log 层不作依据**：changelog、commit log、review 报告 — 可看但不作验收依据
 
+### 1.0 V11 主版本可选 V12 物理布局（V11.8.6 NEW — 渐进落地）
+
+```
+MUST: V11 项目可选按 V12 物理布局写产物 —— 见 templates/change-dir-layout-v12-preview.md
+  - init-from-zero.py --layout v12-preview 创建 fact/ + stage/{11 个} 骨架
+  - 既有 V11 项目不动(Article VIII 不可变);新 change-id 主动对齐 V12
+  - fact/ + stage/{N}/ 物理隔离 = V12 §1 设计哲学在 V11 主版本的预览实现
+
+NEVER: V11 项目初始化时默认按 v11-default 布局,后补 fact/ 目录
+  - 破坏既有归档,违反 Article VIII
+  - 正确替代: --layout v12-preview 一次性创建
+
+NEVER: 把 process 层文件(notes/handoff/diagnosis)写到 fact/
+NEVER: 把 fact 层文件(spec/plan/contracts)写到 stage/{N}/
+  - 路径校验由 templates/hooks/process-layer-guard.sh 强制执行
+```
+
 ### 1.1 主动扫描 vs 任务执行读取区分（V11 — 修正冲突）
 
 ```

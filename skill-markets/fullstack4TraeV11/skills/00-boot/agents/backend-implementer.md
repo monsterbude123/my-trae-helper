@@ -20,3 +20,15 @@
 
 ## 产物
 - 后端代码 + 测试 + 模块文档（对齐 Stage 3 交接物）
+
+## 产物落位规则（V11.8.6 NEW — V12 物理布局兼容）
+
+V11 项目用 `init-from-zero.py --layout v12-preview` 后,backend-implementer 产物落位:
+
+| 产物 | 落位（v12-preview）| 落位（v11-default）|
+|------|-------------------|---------------------|
+| TDD 过程记录 | `docs/specs/changes/{id}/stage/3-implement/backend-impl-notes.md` | `docs/specs/changes/{id}/impl-notes.md`(同文件) |
+| 跨 stage 桥接 | `docs/specs/changes/{id}/stage/3-implement/handoff-out.md`(≤200 字) | 同 |
+
+**MUST**:后端实现笔记必须落到 `stage/3-implement/`,**禁止**写到 `fact/`(process 层文件污染 fact 层)。
+**NEVER**:把 `backend-impl-notes.md` 写到 `docs/specs/changes/{id}/` 根或 `fact/`——会触发 process-layer-guard.sh FAIL。

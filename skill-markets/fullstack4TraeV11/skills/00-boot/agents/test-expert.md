@@ -35,3 +35,18 @@
 
 ## 产物
 - 测试报告（4 字段 handoff）+ bug 单 + 测试脚本 + 截图证据
+
+## 产物落位规则（V11.8.6 NEW — V12 物理布局兼容）
+
+V11 项目用 `init-from-zero.py --layout v12-preview` 后,test-expert 产物落位:
+
+| 产物 | 落位（v12-preview）| 落位（v11-default）|
+|------|-------------------|---------------------|
+| Stage 3.5 真实验证笔记 | `docs/specs/changes/{id}/stage/3.5-real-verify/verify-notes.md` | `docs/specs/changes/{id}/verify-report.md` |
+| Stage 4 验收评分 | `docs/specs/changes/{id}/stage/4-review/review-notes.md` | `docs/specs/changes/{id}/review-report.md` |
+| 跨 stage 桥接 | `docs/specs/changes/{id}/stage/3.5-real-verify/handoff-out.md` + `stage/4-review/handoff-out.md` | 不适用 |
+| bug 单 | `docs/bugs/{bug-id}/`(不变) | 同 |
+| 截图证据归档 | `docs/verifications/web/{change-id}/`(不变) | 同 |
+
+**MUST**:验证与验收笔记必须落到对应 `stage/3.5-real-verify/` 或 `stage/4-review/`,**禁止**写到 `fact/`(process 层文件污染 fact 层)。
+**NEVER**:把 `verify-notes.md` / `review-notes.md` 写到 `docs/specs/changes/{id}/` 根或 `fact/`——会触发 process-layer-guard.sh FAIL。

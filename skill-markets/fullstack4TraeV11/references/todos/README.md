@@ -13,34 +13,34 @@
 ```
 references/todos/
 ├── README.md                                    本文件(当前活跃索引)
-├── P3-6-commit-minimum.md                       1 条 P3 pending(2026-08-16 抽出)
+├── P0-v12-physical-rollout.md                   V12 物理隔离 V11 范围内渐进落地(in_progress,本会话)
 ├── archive/                                     已 done 事项的物理归档
 │   └── done/
-│       └── 2026-08-16-batch-repair/              单目录批量归档 P0/P1/P2/P3
-│           ├── P0-protocol-vs-parser.md         2/2 done(整文件归档)
-│           ├── P1-config-and-state-card.md      3/3 done(整文件归档)
-│           ├── P2-bug-flow-and-stage-gate.md     3/3 done(整文件归档)
-│           └── P3-cross-skill-and-doc.md        5/6 done(1 条 P3-6 抽出到根)
+│       ├── 2026-08-16-batch-repair/             单目录批量归档 P0/P1/P2/P3
+│       │   ├── P0-protocol-vs-parser.md         2/2 done(整文件归档)
+│       │   ├── P1-config-and-state-card.md      3/3 done(整文件归档)
+│       │   ├── P2-bug-flow-and-stage-gate.md     3/3 done(整文件归档)
+│       │   └── P3-cross-skill-and-doc.md        5/6 done(1 条 P3-6 抽出到根)
+│       └── 2026-08-16-batch-repair-2/           P3-6 commit-minimum + Windows PYTHONIOENCODING 兜底归档
+│           └── P3-6-commit-minimum.md           P3-6 done(2026-08-16)
 ├── audit-history/                               审计过程留痕
 │   └── 2026-08-16-mentioned-but-not-parsed.md   子代理 B 14 条原始证据 + §5 后续
-└── v12-physical-isolation/                      V12 物理隔离迁移检查清单(等 ADR)
+└── v12-physical-isolation/                      V12 物理隔离迁移检查清单(等 ADR,主版本升级)
     ├── V11.3-fact-stage-rationale.md
     └── migration-checklist.md
 ```
 
 ---
 
-## §2 当前活跃待办(2026-08-16 第三轮蒸馏后)
+## §2 当前活跃待办(2026-08-16 第四轮蒸馏后)
 
 | ID | 文件 | 优先级 | 状态 | 主题 |
 |----|------|--------|------|------|
-| P3-6 | [P3-6-commit-minimum.md](P3-6-commit-minimum.md) | P3 | done(已 commit `eed9381`)| scripts/commit-minimum-check.py — 已 done **等下次会话物理归档至 archive** |
+| P0-v12 | [P0-v12-physical-rollout.md](P0-v12-physical-rollout.md) | P0 | in_progress | V12 物理隔离思想 V11 范围内渐进落地(6 步,不升主版本) |
 | audit-fix | audit 仅留目录位置 | audit 留置 | pending | guard-smith audit B 方案落地:AGENTS.md §1.11 + guard-gate-smith §1.1 + skill-registration-guard.mjs 注释豁免条款增补 |
-| V12-ROOT | [v12-physical-isolation/](v12-physical-isolation/) | 等待 ADR | pending | V12 物理隔离迁移,前置 5 项见 [migration-checklist.md §0](v12-physical-isolation/migration-checklist.md) |
+| V12-ROOT | [v12-physical-isolation/](v12-physical-isolation/) | 等待 ADR | pending | V12 物理隔离迁移(主版本升级),前置 5 项见 [migration-checklist.md §0](v12-physical-isolation/migration-checklist.md) |
 
-> **数量**:当前 `3 pending`(audit-fix + P3-6 文件归档 + V12)。但请注意:
-> - P3-6 commit 实质 done,仅剩"文件物理归档" chore
-> - audit-fix 来自 guard-smith audit 2026-08-16,详见 [audit-history/2026-08-16-guard-smith-registry-annotation-audit.md](audit-history/2026-08-16-guard-smith-registry-annotation-audit.md)
+> **数量**:当前 `3 pending`(P0-v12 in_progress + audit-fix + V12-ROOT)。
 > 历史总数:14 项协议层无解析脚本差距,V11.8.x + P3-6(5 文件批 + audit 报告)→ **15/15 done**,0 个协议层承诺留置。
 
 ### §2.1 为什么不再按"P0/P1/P2/P3"分文件

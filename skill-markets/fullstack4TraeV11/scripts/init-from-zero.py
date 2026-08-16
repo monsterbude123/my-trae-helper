@@ -289,6 +289,115 @@ def create_docs_skeleton(project_root: pathlib.Path) -> bool:
     return True
 
 
+def create_v12_preview_skeleton(project_root: pathlib.Path) -> bool:
+    """Step 4.5(V11.8.6 NEW): 生成 V12 物理隔离预览骨架
+
+    仅在 --layout v12-preview 时调用。创建 fact/ + stage/{11 个 stage 子目录}。
+    不创建 change-id 目录(每个 change 跑 --layout v12-preview --change {id} 时单独建)。
+    模板见 templates/change-dir-layout-v12-preview.md。
+
+    注意:V11 主版本兼容,不破坏现有 V11 归档(Article VIII)。
+    """
+    # 11 个 stage 子目录(对齐 V12 §1)
+    v12_stage_subdirs = [
+        "-1-intake",
+        "0-plan",
+        "0.5-test-plan",
+        "1-spec",
+        "1.5-prototype",
+        "2-contract",
+        "3-implement",
+        "3.5-real-verify",
+        "4-review",
+        "4.5-rot-scan",
+        "5-accept",
+    ]
+
+    # 在 docs/specs/changes/ 下创建 _v12-preview-template/ 目录(供 --change 时参照)
+    template_dir = project_root / "docs/specs/changes/_v12-preview-template"
+    if template_dir.exists():
+        print(f"   ⏭️  V12 preview 骨架已存在（{template_dir}）")
+        return True
+
+    template_dir.mkdir(parents=True, exist_ok=True)
+
+    # fact/ 目录(含 README.md 说明)
+    fact_dir = template_dir / "fact"
+    fact_dir.mkdir(exist_ok=True)
+    (fact_dir / "README.md").write_text(
+        """# fact/ — 事实唯一源(V12 §1)
+
+> 本目录为 V12 物理布局的 fact 层,跨 stage 共享,不被 stage 重置影响。
+>
+> 详见 `~/.trae-cn/skills/fullstack4TraeV11/templates/change-dir-layout-v12-preview.md` §0。
+
+## 必含文件
+
+- `spec.md`(Layer 1: AC / INV / Edge Cases)
+- `plan.md`(Layer 2: Capabilities / Non-Goals)
+- `test-plan.md`(Stage 0.5 产物)
+- `prototype.md`(Stage 1.5 产物,若有)
+- `contracts/`(Layer 3: domain-models / api-contracts / events / validation-rules)
+- `.state-card.md`(项目级状态卡副本)
+
+## 禁止文件
+
+- `*-notes.md`(process 层命名,属 stage/{N}/)
+- `*handoff*.md`(桥接文档,属 stage/{N}/)
+- `diagnosis-*.md` / `fix-*.md` / `v[0-9]*`(process 层命名约定)
+""",
+        encoding="utf-8",
+    )
+
+    # stage/ 目录 + 11 个 stage 子目录
+    stage_dir = template_dir / "stage"
+    stage_dir.mkdir(exist_ok=True)
+    for sub in v12_stage_subdirs:
+        sub_dir = stage_dir / sub
+        sub_dir.mkdir(exist_ok=True)
+        (sub_dir / "README.md").write_text(
+            f"""# stage/{sub}/ — Stage {sub} 流程产物(V12 §1)
+
+> 本目录为 V12 物理布局的 stage 层,Stage {sub} 重置时**可清空**(保留 fact/)。
+>
+> 详见 `~/.trae-cn/skills/fullstack4TraeV11/templates/change-dir-layout-v12-preview.md` §0 + §1。
+
+## 必含文件
+
+- `{sub}-notes.md`(本 stage 主代理笔记)
+- `handoff-out.md`(≤200 字交下一 stage)
+
+## 角色专属(Stage 3-implement)
+
+- `backend-impl-notes.md`(backend-implementer 产物)
+- `frontend-impl-notes.md`(frontend-implementer 产物)
+
+## 禁止文件
+
+- `spec.md` / `plan.md` / `contracts/`(属 fact 层)
+- 跨 stage 引用(只允许 `handoff-out.md`)
+""",
+            encoding="utf-8",
+        )
+
+    # archive/ 目录
+    archive_dir = template_dir / "archive"
+    archive_dir.mkdir(exist_ok=True)
+    (archive_dir / "README.md").write_text(
+        """# archive/ — Stage 5-accept 完成后写入(不可变,Article VIII)
+
+> 本目录为 V12 物理布局的 archive 层,Stage 5-accept 完成后由主代理写入。
+> 写入后**不可修改**(V11 Article VIII)。
+""",
+        encoding="utf-8",
+    )
+
+    print(f"   ✅ V12 preview 骨架已创建: {template_dir}")
+    print(f"      (11 stage 子目录 + fact/ + archive/,共 13 个目录)")
+    print(f"   📋 用法: agent 创建新 change 时,cp -r 此模板到 docs/specs/changes/{id}/")
+    return True
+
+
 def _check_v11_overlap(rule_name: str, content: str) -> bool:
     """V11.2 NEW: 检查 rule 是否与 V11 内部已含规则重叠(供 agent 整合时识别 hint)
 
@@ -560,6 +669,12 @@ def main():
     parser.add_argument("--language", help="主语言")
     parser.add_argument("--rules-as-skill", dest="rules_as_skill", action="store_true", default=True, help="Step 5 默认开:把 .trae/rules/ 收纳到 .trae/skills/project_rules_skills/(适用 rules ≥3 时)")
     parser.add_argument("--no-rules-as-skill", dest="rules_as_skill", action="store_false", help="禁用 Step 5(默认开,显式禁用才传此参数)")
+    parser.add_argument(
+        "--layout",
+        choices=["v11-default", "v12-preview"],
+        default="v11-default",
+        help="V11.8.6 NEW: change-id 物理布局。v11-default(默认,V11 现有扁平 layout) 或 v12-preview(对齐 V12 fact/ + stage/{N}/,详见 templates/change-dir-layout-v12-preview.md)",
+    )
     parser.add_argument("--quiet", action="store_true", help="不打印 agent handoff")
     parser.add_argument("--json", action="store_true", help="JSON 输出")
     args = parser.parse_args()
@@ -576,8 +691,10 @@ def main():
     language = args.language or detect_language(project_root)
 
     step_count = 5 if args.rules_as_skill else 4
-    print(f"🚀 V11 初始化（{step_count} 步全流程）— {project_root}")
+    layout_step = "+ Step 4.5(V12 preview)" if args.layout == "v12-preview" else ""
+    print(f"🚀 V11 初始化（{step_count} 步全流程{layout_step}）— {project_root}")
     print(f"   项目名: {project_name} | 类型: {project_type} | 语言: {language}")
+    print(f"   物理布局: {args.layout}" + ("(对齐 V12 fact/ + stage/{N}/)" if args.layout == "v12-preview" else "(V11 现有扁平 layout)"))
     if not args.rules_as_skill:
         print(f"   模式: --no-rules-as-skill(Step 5 已禁用,SKILL.md §0.5 Step 3 需手动调用)")
     else:
@@ -590,6 +707,10 @@ def main():
         ("Step 3: AGENTS.md", lambda: create_agents_md(project_root, project_name, project_type, language)),
         ("Step 4: docs/ 骨架", lambda: create_docs_skeleton(project_root)),
     ]
+
+    # V11.8.6 NEW: 仅 --layout v12-preview 时跑 Step 4.5(创建 V12 物理布局模板)
+    if args.layout == "v12-preview":
+        steps.append(("Step 4.5: V12 物理布局 preview 骨架", lambda: create_v12_preview_skeleton(project_root)))
 
     if args.rules_as_skill:
         steps.append(("Step 5: 收纳 rules 到 skill", lambda: create_rules_skill(project_root, project_name)))

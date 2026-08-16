@@ -4,6 +4,70 @@
 
 ---
 
+## [V11.8.6] - 2026-08-16
+
+### ✨ V12 物理隔离思想在 V11 主版本内的渐进落地（6 步 — 不升主版本）
+
+> **背景**：用户 2026-08-16 反馈"多角色关注文档管理的就应该按 V12 物理隔离标准去实现"，主上下文核查 [v12-physical-isolation/migration-checklist.md §0](references/todos/v12-physical-isolation/migration-checklist.md) 5 项前置均未达成（用户未授权 V12 ADR），但 V12 的"目录物理布局 + handoff 桥接"是**目录约定**——**V11 主版本内可渐进落地**。
+>
+> **核心**：不改 `SKILL.md frontmatter version`；既有 V11 项目不动；新项目可用 `init-from-zero.py --layout v12-preview` 主动对齐 V12。
+
+#### ✨ 新增
+
+- **templates/change-dir-layout-v12-preview.md**（V11.8.6 NEW）— V12 物理布局模板（V11 主版本可选使用）。详述 `fact/` + `stage/{11 个 stage 子目录}/` 物理布局、三层映射（fact/process/log → fact/stage/{N}/）、路径白名单、V11 → V12-preview 迁移步骤（按文件分类移动，禁一次 mv 到齐）。
+- **scripts/init-from-zero.py --layout v12-preview**（V11.8.6 NEW）— argparse 新增 `--layout {v11-default, v12-preview}` 参数；v12-preview 模式跑 Step 4.5 创建 `_v12-preview-template/` 模板（含 fact/ + stage/ + 11 个 stage 子目录 + archive/，每目录带 README 说明）。默认仍为 v11-default（向后兼容）。
+- **templates/hooks/process-layer-guard.sh**（V11.8.6 NEW）— V12 物理布局路径校验 hook。3 规则：
+  - Rule 1: `docs/specs/changes/{id}/` 根目录禁止任何 .md（必须落 `fact/` 或 `stage/{N}/`）
+  - Rule 2: `fact/` 禁止 process 层命名（`*-notes.md` / `*handoff*.md` / `diagnosis-*` / `fix-*` / `v[0-9]*`）
+  - Rule 3: `stage/{N}/` 禁止 fact 层命名（`spec.md` / `plan.md` / `contracts/`）
+  - 跨平台：macOS / Linux / Git Bash on Windows
+- **scripts/stage-gate.py --reset-to**（V11.8.6 NEW）— V12 §2.1 重置协议实现。保留 `fact/`，清 `stage/{target_stage+1}/ ~ stage/5/accept/`，不动 `archive/`（Article VIII 不可变）。自动重置 `stage/{target_stage}/.state-card.md` 为 `stage_status: pending` + `reset_at` + `reset_by` 字段。
+
+#### 🔧 修改
+
+- **references/sub-agent-rules.md §1.0** — 新增"V11 主版本可选 V12 物理布局"指针段。`MUST` + 2 个 `NEVER`（不允许后补 fact/；process 层文件禁写 fact/；fact 层文件禁写 stage/）。
+- **skills/00-boot/agents/jarvis.md §7.5** — 新增"产物落位规则"段：贾维斯状态卡落位规则（v12-preview: `fact/.state-card.md` + `stage/{N}/.state-card.md`；v11-default: 单卡）。
+- **skills/00-boot/agents/backend-implementer.md** — 新增产物落位规则段（`stage/3-implement/backend-impl-notes.md`）。
+- **skills/00-boot/agents/frontend-implementer.md** — 同上（`stage/3-implement/frontend-impl-notes.md`）。
+- **skills/00-boot/agents/test-expert.md** — 新增产物落位规则段（`stage/3.5-real-verify/verify-notes.md` + `stage/4-review/review-notes.md`）。
+
+#### ➕ references 新增
+
+- `references/todos/P0-v12-physical-rollout.md`（V11.8.6 NEW）— P0 优先级索引文件，记录 6 步落地路径 + 真空识别 + 落地原则 + 反向提示词。
+
+#### 🧪 测试新增（1 文件 / 7 用例）
+
+- `tests/unit/test_stage_gate_reset.py` — 7 用例覆盖 `--reset-to` 子命令（PASS/边界/FAIL 三态）：
+  - `#1 PASS` — `--reset-to 3/implement` 完整流程（保留 fact + stage/{-1..3}/ + archive，删 stage/3.5..5/accept，重置 stage/3/implement/.state-card.md）
+  - `#2 PASS` — 边界 `--reset-to 5/accept`（不删任何 stage/）
+  - `#3 FAIL` — target_stage 非法（`99/notexist` exit 1）
+  - `#4 FAIL` — 项目级 `docs/specs/.state-card.md` 拒绝（必须 change 级）
+  - `#5 FAIL` — change 目录不存在
+  - `#6 PASS` — 状态卡内容校验（stage_status=pending + reset_at + reset_by）
+  - `#7 PASS` — 直接调用 `cmd_reset_to` 函数（不走子进程）
+
+#### 📊 兼容性保证
+
+| 维度 | V11.8.6 行为 | V11.8.5 行为 | 影响 |
+|------|---------------|---------------|------|
+| SKILL.md frontmatter version | 11.5.0（不变） | 11.5.0 | ✅ V12 主版本未升 |
+| `--layout` 参数 | v11-default（默认）/ v12-preview | 不存在 | ✅ 向后兼容 |
+| 既有 V11 项目 | 不动 | 同 | ✅ Article VIII 不可变 |
+| `init-from-zero.py --help` | 加 `--layout` 说明 | 不含 | ✅ 不破坏 |
+| `stage-gate.py --help` | 加 `--reset-to` 说明 | 不含 | ✅ 不破坏 |
+| `stage-gate.py` 现有 `--state-card --stage --next-stage` 行为 | 不变 | 同 | ✅ 0 回归 |
+
+#### 📝 引用
+
+- [references/todos/P0-v12-physical-rollout.md](references/todos/P0-v12-physical-rollout.md) — P0 主索引
+- [references/todos/v12-physical-isolation/migration-checklist.md](references/todos/v12-physical-isolation/migration-checklist.md) — V12 ADR 通过后的一次性迁移（未触）
+- [references/todos/v12-physical-isolation/V11.3-fact-stage-rationale.md](references/todos/v12-physical-isolation/V11.3-fact-stage-rationale.md) — 思想起点
+- [references/stage-physical-isolation.md](references/stage-physical-isolation.md) — V12 提案原文
+- [templates/change-dir-layout-v12-preview.md](templates/change-dir-layout-v12-preview.md) — V12 物理布局模板
+- [templates/hooks/process-layer-guard.sh](templates/hooks/process-layer-guard.sh) — 路径校验 hook
+
+---
+
 ## [V11.8.5] - 2026-08-16
 
 ### ✨ 协议层承诺 → 脚本落地（13/14 done + 1 留置）

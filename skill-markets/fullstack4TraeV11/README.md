@@ -2,9 +2,12 @@
 
 > 全栈文档驱动开发技能包 V11。V10 思想传承 + 架构升级。
 >
-> **当前版本 V11.8.4** — commit 准入最小集与全量验收分层（蒸馏自 2026-08-15 merged-commits）
+> **当前版本 V11.8.6** — V12 物理隔离思想在 V11 主版本内渐进落地（6 步，不升主版本）
 >
 > 历次重要升级：
+> - **V11.8.6** (2026-08-16) — V12 物理隔离渐进落地：`init-from-zero.py --layout v12-preview` + `process-layer-guard.sh` + `stage-gate.py --reset-to` + 4 个 agent 产物落位规则。详见 [CHANGELOG.md V11.8.6 条目](CHANGELOG.md) + [references/todos/P0-v12-physical-rollout.md](references/todos/P0-v12-physical-rollout.md)
+> - **V11.8.5.P1** (2026-08-16) — §3.7 #10 commit 准入最小集程序化（`commit-minimum-check.py` + 4 项校验 + 16 单测）
+> - **V11.8.5** (2026-08-16) — 协议层承诺 → 脚本落地（13/14 done + 1 留置）
 > - **V11.8.4** (2026-08-15) — commit 准入最小集与全量验收分层（Stage 3.5/4.5 异步化）
 > - **V11.8.3** (2026-08-15) — Stage 6 重构为 4 层分层决策框架
 > - **V11.8.2** (2026-08-15) — Stage 6 Bug Fix & Hunt 统一工序

@@ -35,6 +35,18 @@
   - 收尾 P3-6 commit-minimum-check.py 留置(`references/todos/P3-6-commit-minimum.md` status pending → done)
   - 详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.5.P1 条目](skill-markets/fullstack4TraeV11/CHANGELOG.md)
   - **同步触发 doc-sync-guard** 6 项(README / CHANGELOG / SECURITY-MAP / CAPABILITY-MAP / AGENTS.md / registry/skills.yaml)一并落本 commit
+- **V11.8.6** — V12 物理隔离思想在 V11 主版本内渐进落地(6 步,不升主版本)
+  - 新增 `templates/change-dir-layout-v12-preview.md` — V12 物理布局模板(V11 可选,fact/ + stage/{11}/ + archive/)
+  - 新增 `templates/hooks/process-layer-guard.sh` — 路径校验 hook(3 规则,Git Bash + macOS + Linux 跨平台)
+  - 新增 `tests/unit/test_stage_gate_reset.py` — `--reset-to` 7 用例全 PASS(PASS/边界/FAIL 三态)
+  - 新增 `tests/unit/test_encoding_windows.py` — Windows PYTHONIOENCODING=utf-8 兜底 3 用例(沿用 P3-6)
+  - `scripts/init-from-zero.py` 新增 `--layout v12-preview` 参数 + Step 4.5 创建 `_v12-preview-template/` 骨架(11 stage 子目录 + 14 README)
+  - `scripts/stage-gate.py` 新增 `--reset-to` 子命令 + `cmd_reset_to` 函数(保留 fact/ + 清 stage/{N+1} ~ stage/5/accept + 不动 archive/)
+  - `references/sub-agent-rules.md §1.0` 新增"V11 主版本可选 V12 物理布局"指针(MUST + 2 NEVER)
+  - 4 个 agents 加产物落位规则(jarvis + backend-implementer + frontend-implementer + test-expert)
+  - 详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.6 条目](skill-markets/fullstack4TraeV11/CHANGELOG.md)
+  - 物理归档 P3-6 → `references/todos/archive/done/2026-08-16-batch-repair-2/`
+  - **同步触发 doc-sync-guard** 7 项(README / CHANGELOG / SECURITY-MAP / CAPABILITY-MAP / AGENTS.md / registry/skills.yaml / skill-level README)一并落本 commit
 
 ### fullstack4TraeV11 升级(2026-08-15)
 

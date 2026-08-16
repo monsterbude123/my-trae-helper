@@ -155,6 +155,105 @@ def parse_state_card(path: pathlib.Path) -> dict:
     return _parse(path)
 
 
+# V11.8.6 NEW: V12 物理布局 --reset-to 子命令的 stage 顺序
+V12_STAGE_ORDER = [
+    "-1/intake", "0/plan", "0.5/test-plan", "1/spec", "1.5/prototype",
+    "2/contract", "3/implement", "3.5/real-verify", "4/review",
+    "4.5/rot-scan", "5/accept",
+]
+
+
+def cmd_reset_to(change_dir: pathlib.Path, target_stage: str) -> int:
+    """V11.8.6 NEW: V12 §2.1 重置协议实现
+
+    行为(借鉴 V12 §2.1 + step-physical-isolation.md §2.1):
+      1. 保留 fact/ 整个目录(事实源)
+      2. 删除 stage/{target_stage+1} ~ stage/5-accept 全部内容(流程文档可重置)
+      3. 保留 stage/-1-intake ~ stage/{target_stage}(如果存在)
+      4. 不动 archive/(不可变,Article VIII)
+
+    Args:
+        change_dir: docs/specs/changes/{id} 路径
+        target_stage: 目标 stage,如 "3/implement"
+
+    Returns:
+        int: 退出码(0=PASS / 1=FAIL)
+    """
+    import shutil
+
+    if not change_dir.is_dir():
+        print(f"❌ change 目录不存在: {change_dir}", file=sys.stderr)
+        return 1
+
+    # 校验 target_stage 在 11 stage 顺序内
+    if target_stage not in V12_STAGE_ORDER:
+        print(
+            f"❌ target_stage={target_stage} 不在 V12 stage 顺序内({V12_STAGE_ORDER})",
+            file=sys.stderr,
+        )
+        return 1
+
+    target_idx = V12_STAGE_ORDER.index(target_stage)
+    deleted = []
+    kept = []
+
+    # Step 1: 检查 fact/ 是否存在(若不存在,V12 layout 未启用,不重置)
+    fact_dir = change_dir / "fact"
+    if not fact_dir.is_dir():
+        next_stage_label = V12_STAGE_ORDER[target_idx + 1] if target_idx + 1 < len(V12_STAGE_ORDER) else "(none)"
+        print(
+            f"⚠️  fact/ 不存在(项目未用 v12-preview layout),--reset-to 仅清 stage/{next_stage_label}/",
+            file=sys.stderr,
+        )
+
+    # Step 2: 删除 stage/{target_stage+1} 之后的所有 stage 子目录
+    stage_dir = change_dir / "stage"
+    if not stage_dir.is_dir():
+        print(f"❌ stage/ 不存在: {stage_dir}", file=sys.stderr)
+        return 1
+
+    for i in range(target_idx + 1, len(V12_STAGE_ORDER)):
+        sub = V12_STAGE_ORDER[i]
+        sub_dir = stage_dir / sub
+        if sub_dir.is_dir():
+            shutil.rmtree(sub_dir)
+            deleted.append(sub)
+
+    # Step 3: 保留 stage/{target_stage} 及之前(仅记录,不删除)
+    for i in range(0, target_idx + 1):
+        sub = V12_STAGE_ORDER[i]
+        sub_dir = stage_dir / sub
+        if sub_dir.is_dir():
+            kept.append(sub)
+
+    # Step 4: 不动 archive/(若存在,仅警告)
+    archive_dir = change_dir / "archive"
+    archive_note = "保留(Article VIII 不可变)" if archive_dir.is_dir() else "不存在"
+
+    # Step 5: 重置当前 stage 状态卡 = {target_stage}, stage_status=pending
+    # 仅 v12-preview 项目有每 stage 独立 .state-card.md
+    target_state_card = stage_dir / target_stage / ".state-card.md"
+    if target_state_card.is_file():
+        content = target_state_card.read_text(encoding="utf-8")
+        # 简单 reset:写 minimal yaml frontmatter
+        new_content = (
+            f"---\ncurrent_stage: {target_stage}\nstage_status: pending\n"
+            f"reset_at: {datetime.now(timezone.utc).isoformat()}\n"
+            f"reset_by: stage-gate.py --reset-to {target_stage}\n---\n\n"
+            f"# Stage {target_stage} 状态卡(已重置)\n\n"
+        )
+        target_state_card.write_text(new_content, encoding="utf-8")
+        kept.append(f"{target_stage}/.state-card.md(已 reset)")
+
+    # 输出报告
+    print(f"✅ --reset-to {target_stage} PASS")
+    print(f"   change_dir: {change_dir}")
+    print(f"   保留(不可重置): {kept if kept else '(空)'}")
+    print(f"   删除(可重置): {deleted if deleted else '(空)'}")
+    print(f"   archive/: {archive_note}")
+    return 0
+
+
 def validate_state_card(fields: dict, stage: str = None) -> tuple:
     """验证状态卡字段"""
     errors = []
@@ -213,6 +312,14 @@ def validate_state_card(fields: dict, stage: str = None) -> tuple:
 def main():
     parser = argparse.ArgumentParser(description="V11 阶段门禁（硬化版）")
     parser.add_argument("--state-card", required=True, help="状态卡文件路径")
+    # V11.8.6 NEW: --reset-to 子命令(V12 §2.1 重置协议)
+    # 在 --state-card 之后立即判定,如指定则走 cmd_reset_to,跳过其他校验
+    parser.add_argument(
+        "--reset-to",
+        dest="reset_to",
+        metavar="STAGE_ID",
+        help="V12 §2.1 重置:保留 fact/,清 stage/{next}/ ~ stage/5-accept/(STAGE_ID 如 3/implement)",
+    )
     parser.add_argument("--stage", help="期望 stage（与状态卡 current_stage 一致）")
     parser.add_argument("--next-stage", nargs="?", default=None,
                         help="下一 stage（P0-2 NEW：校验 current_stage → next_stage 转换合法性）")
@@ -238,6 +345,32 @@ def main():
 
     path = pathlib.Path(args.state_card)
     fields = parse_state_card(path)
+
+    # V11.8.6 NEW: --reset-to 子命令(V12 §2.1 重置协议)
+    # 如指定 --reset-to,跳过常规校验,直接走 cmd_reset_to
+    if args.reset_to:
+        # 推断 change_dir: 状态卡路径的父目录(项目级 docs/specs/.state-card.md 不适用,
+        # 必须 change 级 docs/specs/changes/{id}/.state-card.md)
+        # 校验:路径必须形如 .../docs/specs/changes/{id}/.state-card.md
+        # 即 path.parent.name 是 change_id(非 specs/changes)
+        path_parts = path.parts
+        if (
+            "docs" not in path_parts
+            or "specs" not in path_parts
+            or "changes" not in path_parts
+        ) or (
+            # 排除项目级 docs/specs/.state-card.md(无 changes 段)
+            "changes" not in path_parts
+            or path_parts.index("changes") == len(path_parts) - 1
+        ):
+            print(
+                "❌ --reset-to 必须用 change 级状态卡(.state-card.md 在 docs/specs/changes/{id}/ 下),"
+                f"当前 {path}",
+                file=sys.stderr,
+            )
+            return 1
+        change_dir = path.parent
+        return cmd_reset_to(change_dir, args.reset_to)
 
     if "error" in fields:
         result = {

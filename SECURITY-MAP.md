@@ -92,6 +92,16 @@
 
 - 新增 scripts/commit-minimum-check.py: LOW(仅读取 + 探测 dev server,无网络写入 / 不上传 secret)
 - 4 项校验:typecheck / spot-check / admin 探针(本地 urllib + 5s 超时) / lint 预存(写本地日志)
+
+#### V11.8.6 — V12 物理隔离渐进落地(2026-08-16)
+
+- 新增 `templates/change-dir-layout-v12-preview.md`:**LOW**(纯协议文档,无代码)
+- 新增 `templates/hooks/process-layer-guard.sh`:**LOW**(只读 fs + 字符串匹配,无网络 / 不写文件 / 不删文件)
+- 改 `scripts/init-from-zero.py` 加 `--layout v12-preview`:无新增网络/secret,Step 4.5 只 mkdir + write_text 模板文件
+- 改 `scripts/stage-gate.py` 加 `--reset-to`:**LOW**(仅项目方主动触发,递归删 stage/{N+1} 子目录,但保留 fact/ + archive/)
+- 改 `references/sub-agent-rules.md` + 4 个 agents 文件:纯协议补充,无代码风险
+- 评分维持 **5.0** 🟢(无新增 MEDIUM/HIGH)
+- **安全注意**:`stage-gate.py --reset-to` 调用方应严格限定 change 级状态卡(已 enforce,项目级 docs/specs/.state-card.md 触发即 FAIL)— 防止误删项目级目录
 - 退出码语义清晰:0=PASS / 1=FAIL / 2=WARN — 不存在"诱导绕过"风险
 - 不引入新依赖;PyYAML 已是项目既有
 

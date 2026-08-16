@@ -37,6 +37,14 @@ import os
 import subprocess
 import sys
 import time
+
+# 跨平台 Windows console cp1252 兜底（V11.8.5 P1 — 反馈 2026-08-16 #5 采纳）
+# Python 3.13 在 Windows 默认 cp1252，print(f"...中文...") 必崩 UnicodeEncodeError
+# 必须在 import 阶段前置（subprocess 启动前），否则下游 argparse 等 print 已触发
+if sys.platform == "win32" and not os.environ.get("PYTHONIOENCODING"):
+    os.environ["PYTHONIOENCODING"] = "utf-8"
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import List, Optional, Tuple

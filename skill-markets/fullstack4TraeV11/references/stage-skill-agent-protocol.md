@@ -27,6 +27,9 @@
 [PIPELINE] stage: {N}    # 必填：哪个 stage
 [DOC_WHITELIST] {paths}  # 必填：可读路径
 [FORBIDDEN] docs/archive/**, .trae/tmp/**
+  # V11.8.5 反馈补完 — 全局配置文件白名单（sub-agent 禁止改）:
+  # playwright.config.ts, vitest.config.ts, acceptance_manifest.yaml,
+  # .trae/fullstack4traev11.config.yaml, .trae/hooks.json, .trae/registry/*.yaml
 [GITNEXUS] impact()      # 必填：必跑 gitnexus
 [TASK] {一句话 ≤200 chars}
 [OUTPUT] 4 字段: status / evidence / pass_count / next_hook

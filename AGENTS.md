@@ -6,6 +6,8 @@
 >
 > **2026-08-16 蒸馏**：fullstack4TraeV11 V11.8.5.P1 — §3.7 #10 commit 准入最小集程序化（`scripts/commit-minimum-check.py` 4 项校验），收尾 P3-6 留置（14/14 done）。参考 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.5.P1](skill-markets/fullstack4TraeV11/CHANGELOG.md)。
 >
+> **2026-08-16 蒸馏**：fullstack4TraeV11 V11.8.6 — V12 物理隔离思想在 V11 主版本内渐进落地（6 步，不升主版本）：`init-from-zero.py --layout v12-preview` + `process-layer-guard.sh` + `stage-gate.py --reset-to` + 4 个 agent 产物落位规则。P0-v12-physical-rollout 落地（status: done）。参考 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.6](skill-markets/fullstack4TraeV11/CHANGELOG.md) + [skill-markets/fullstack4TraeV11/references/todos/P0-v12-physical-rollout.md](skill-markets/fullstack4TraeV11/references/todos/P0-v12-physical-rollout.md)。
+>
 > **2026-08-15 蒸馏**：fullstack4TraeV11 V11.8.4 commit 准入最小集与全量验收分层（Stage 3.5/4.5 异步化），参考 [references/common-anti-patterns.md §7](skill-markets/fullstack4TraeV11/references/common-anti-patterns.md)。
 
 ---

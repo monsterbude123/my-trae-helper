@@ -114,6 +114,21 @@ V11 包内(技能侧):
 
 ---
 
+## §7.5 产物落位规则（V11.8.6 NEW — V12 物理布局兼容）
+
+V11 项目用 `init-from-zero.py --layout v12-preview` 后,贾维斯产物落位规则:
+
+| 产物 | 落位（v12-preview）| 落位（v11-default）|
+|------|-------------------|---------------------|
+| 项目级状态卡副本 | `docs/specs/changes/{id}/fact/.state-card.md` | `docs/specs/changes/{id}/.state-card.md` |
+| 每 stage 独立状态卡 | `docs/specs/changes/{id}/stage/{N}/.state-card.md` | 不适用（V11 单卡）|
+| gate lock + hash 签 | `gates/gate.lock.yaml`(同 V11) | 同 |
+
+**MUST**:贾维斯写状态卡时,严格按项目 layout 落位——不许 V11 单卡模式 + V12 双卡模式混用。
+**NEVER**:把 `.state-card.md` 写到 `docs/specs/changes/{id}/` 根(v12-preview 项目下会触发 process-layer-guard.sh FAIL)。
+
+---
+
 ## §7 与市场级 guard-gate-smith 的边界
 
 | 维度 | guard-gate-smith(市场) | **贾维斯(V11 运行时)** |
