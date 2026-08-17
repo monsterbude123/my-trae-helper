@@ -28,6 +28,12 @@ import os
 import json
 from datetime import datetime, timezone
 
+try:
+    from _lib_paths import get_archive_dir
+except ImportError:
+    def get_archive_dir(project_root: pathlib.Path) -> pathlib.Path:
+        return project_root / "docs" / "archive" / "done"
+
 # 13 stage 名单（必须严格匹配 registry/state-machine.yaml）
 VALID_STAGES = [
     "-1/intake", "0/plan", "0.5/test-plan", "1/spec", "1.5/prototype",
@@ -179,6 +185,8 @@ def cmd_reset_to(change_dir: pathlib.Path, target_stage: str) -> int:
     Returns:
         int: 退出码(0=PASS / 1=FAIL)
     """
+    # V11.8.7 audit-fix:project_root 从 change_dir 向上推两级得(project_root/change_dir 结构)
+    project_root = change_dir.parent.parent
     import shutil
 
     if not change_dir.is_dir():
@@ -227,7 +235,7 @@ def cmd_reset_to(change_dir: pathlib.Path, target_stage: str) -> int:
             kept.append(sub)
 
     # Step 4: 不动 archive/(若存在,仅警告)
-    archive_dir = change_dir / "archive"
+    archive_dir = get_archive_dir(project_root)
     archive_note = "保留(Article VIII 不可变)" if archive_dir.is_dir() else "不存在"
 
     # Step 5: 重置当前 stage 状态卡 = {target_stage}, stage_status=pending

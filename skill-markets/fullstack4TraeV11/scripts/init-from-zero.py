@@ -28,6 +28,14 @@ import pathlib
 import json
 from datetime import datetime, timezone
 
+try:
+    from _lib_paths import get_changes_archive_dir, load_paths
+except ImportError:
+    def load_paths(project_root: pathlib.Path) -> dict:
+        return {"archive": "docs/archive/done", "changes_archive": "docs/specs/changes/archive"}
+    def get_changes_archive_dir(project_root: pathlib.Path) -> pathlib.Path:
+        return project_root / "docs" / "specs" / "changes" / "archive"
+
 V11_SKILL_ROOT = pathlib.Path("~/.trae-cn/skills/fullstack4TraeV11").expanduser()
 V11_TEMPLATES = V11_SKILL_ROOT / "templates"
 AGENTS_TEMPLATE = V11_TEMPLATES / "project-agents-example.md"
@@ -260,9 +268,10 @@ def create_agents_md(project_root: pathlib.Path, project_name: str, project_type
 
 def create_docs_skeleton(project_root: pathlib.Path) -> bool:
     """Step 4: 生成 V11 文档系统骨架"""
+    paths_cfg = load_paths(project_root)
     dirs = [
         "docs/specs/changes",       # change 级 spec
-        "docs/specs/changes/archive",  # 归档
+        paths_cfg["changes_archive"],  # 归档(由 .trae/fullstack4traev11.config.yaml 配置)
         "docs/bugs",                # bug 单
         "docs/verifications",       # 验证报告
         "docs/reports",             # 周期报告
@@ -346,7 +355,7 @@ def cmd_migrate_from_v11(args) -> int:
         print(f"   ✓ 项目不在 lock 状态")
 
     # 1.3 校验 archive/done/ 不与 change 重名(Article VIII 不可变)
-    archive_dir = project_root / "docs" / "specs" / "changes" / "archive"
+    archive_dir = get_changes_archive_dir(project_root)
     if archive_dir.is_dir():
         archive_changes = {d.name for d in archive_dir.iterdir() if d.is_dir()}
         for change_dir in changes_dir.iterdir():
@@ -1099,8 +1108,20 @@ def main():
     parser.add_argument("--project-name", help="项目名（默认：项目根目录名）")
     parser.add_argument("--project-type", choices=["web", "tauri", "cli", "library", "backend"], help="项目类型")
     parser.add_argument("--language", help="主语言")
-    parser.add_argument("--rules-as-skill", dest="rules_as_skill", action="store_true", default=True, help="Step 5 默认开:把 .trae/rules/ 收纳到 .trae/skills/project_rules_skills/(适用 rules ≥3 时)")
-    parser.add_argument("--no-rules-as-skill", dest="rules_as_skill", action="store_false", help="禁用 Step 5(默认开,显式禁用才传此参数)")
+    # V11.8.7 NEW (case 2 蒸馏):fix dual-write 双写 bug — 二选一模式
+    # 默认走 --rules-as-files(.trae/rules/*.md 留源文件,agent 直接 Read),
+    # 显式 --rules-as-skill 才移到 .trae/skills/project_rules_skills/(适用 rules ≥3)
+    parser.add_argument(
+        "--rules-layout",
+        choices=["files", "skill"],
+        default="files",
+        help=(
+            "V11.8.7 NEW(case 2 蒸馏 fix dual-write 双写 bug):rules 物理布局。\n"
+            "  files (默认) = .trae/rules/*.md 留源文件,agent 直接 Read\n"
+            "  skill = 移走到 .trae/skills/project_rules_skills/(适用 rules ≥3 减少 context)\n"
+            "禁止同时存在两份,违反任意一项 = REJECT"
+        ),
+    )
     parser.add_argument(
         "--layout",
         choices=["v11-default", "v12-preview"],
@@ -1159,16 +1180,18 @@ def main():
     project_type = args.project_type or detect_project_type(project_root)
     language = args.language or detect_language(project_root)
 
-    step_count = 5 if args.rules_as_skill else 4
+    # V11.8.7: switch to --rules-layout {files|skill}; default = files (no move)
+    rules_layout = args.rules_layout
+    step_count = 5 if rules_layout == "skill" else 4
     layout_step = "+ Step 4.5(V12 preview)" if args.layout == "v12-preview" else ""
     # V12.0.0 升主版本:V11 → V12 名称标识
     print(f"🚀 V12 初始化（{step_count} 步全流程{layout_step}）— {project_root}")
     print(f"   项目名: {project_name} | 类型: {project_type} | 语言: {language}")
     print(f"   物理布局: {args.layout}" + ("(V12 默认,fact/ + stage/{N}/)" if args.layout == "v12-preview" else "(V11 兼容,扁平 layout,显式声明)"))
-    if not args.rules_as_skill:
-        print(f"   模式: --no-rules-as-skill(Step 5 已禁用,SKILL.md §0.5 Step 3 需手动调用)")
+    if rules_layout == "files":
+        print(f"   rules 布局: --rules-layout files(.trae/rules/*.md 留源文件,agent 直接 Read)")
     else:
-        print(f"   模式: --rules-as-skill(Step 5 默认开启,自动建 .trae/skills/project_rules_skills/)")
+        print(f"   rules 布局: --rules-layout skill(自动建 .trae/skills/project_rules_skills/,适用 rules ≥3)")
     print()
 
     steps = [
@@ -1182,8 +1205,9 @@ def main():
     if args.layout == "v12-preview":
         steps.append(("Step 4.5: V12 物理布局 preview 骨架", lambda: create_v12_preview_skeleton(project_root)))
 
-    if args.rules_as_skill:
-        steps.append(("Step 5: 收纳 rules 到 skill", lambda: create_rules_skill(project_root, project_name)))
+    # V11.8.7: --rules-layout skill 才走 Step 5 move(skill 收纳);files 模式不跑
+    if rules_layout == "skill":
+        steps.append(("Step 5: 收纳 rules 到 skill(--rules-layout skill)", lambda: create_rules_skill(project_root, project_name)))
 
     results = []
     for name, func in steps:

@@ -265,7 +265,7 @@ traps:
     next_skill_action: "spec 阶段就识别'模块数 = Task 数'，必委派"
     reclaim_steps:
       - 主代理 spec 阶段按 V11 §1.6 判定模块数 vs Task 数
-      - >6 模块 → 必委派 sub-agent 并行（拆 3 agent × ~5 模块）
+      - ">=6 模块 → 必委派 sub-agent 并行（拆 3 agent × ~5 模块）"
       - 每个 sub-agent 必含 [TOOL-HINTS] 头部（参见 skills/12-bug-fix/references/bug-hunt-battle-report.md §5）
       - 主代理职责 = 监控 + 拼接 + 状态卡同步（不亲自 navigate）
     see_also:
@@ -446,3 +446,71 @@ traps:
     see_also:
       - "skills/12-bug-fix/references/bug-layer-2-severity.md §L2.2 波次分配"
       - "skills/12-bug-fix/references/bug-layer-4-convergence.md §L4.1 停止条件"
+
+  # ─────────────────────────────────────────────────────────────────
+  # V11.8.7 蒸馏(2026-08-17 feedback03)— 路径必须程序化配置,禁止文档/脚本独立硬编码
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-AP15
+    title: archive 路径必须配置化,禁止文档/脚本独立硬编码
+    severity: HIGH
+    what_is_wrong: |
+      V11 SKILL 5 个脚本(init-from-zero.py × 2 / spec-purge.py / proactive-scan.py / stage-gate.py)
+      独立硬编码 archive 路径,产生 3 个不同路径:
+
+        - docs/specs/archive/             (project-structure.md L81-83 文档示意)
+        - docs/specs/changes/archive/     (init-from-zero.py L265 创建 + L349 校验)
+        - docs/archive/done/              (spec-purge.py L70 写入 + Constitution Article VIII)
+
+      文档描述和脚本执行不一致 → agent 解读路径漂移 → 归档工件可能写到错误位置,
+      违反 V11 §3.7 #10 "禁止文档与实现漂移"。
+    detect_signal: |
+      1. grep -E 'docs/archive|docs/specs/archive|docs/specs/changes/archive' scripts/*.py
+         → 应 0 命中(所有引用必须经 _lib_paths.get_archive_dir / get_changes_archive_dir)
+      2. grep -E '"docs/archive"|"docs/specs/(changes/)?archive"' scripts/*.py
+         → 应 0 命中(脚本中禁止硬编码路径字符串,除 _lib_paths.py 默认值外)
+      3. .trae/fullstack4traev11.config.yaml 应含 paths.archive + paths.changes_archive 字段
+      4. scripts/_lib_paths.py 应存在 + 含 load_paths / get_archive_dir / get_changes_archive_dir 三函数
+      5. spec-purge.py / init-from-zero.py / proactive-scan.py / stage-gate.py 必须 try/except ImportError fallback
+    fix_template_before: |
+      # ❌ scripts/spec-purge.py L70 硬编码
+      archive_dir = project_root / f"docs/archive/done/{change_id}"
+
+      # ❌ scripts/init-from-zero.py L265 硬编码
+      dirs = [..., "docs/specs/changes/archive", ...]
+
+      # ❌ .trae/fullstack4traev11.config.yaml 无 paths 字段
+      gate:
+        base_url: http://localhost:3000
+    fix_template_after: |
+      # ✅ scripts/spec-purge.py L70 读配置
+      try:
+        from _lib_paths import get_archive_dir
+      except ImportError:
+        def get_archive_dir(project_root):
+          return project_root / "docs" / "archive" / "done"
+      archive_dir = get_archive_dir(project_root) / change_id
+
+      # ✅ scripts/init-from-zero.py L265 读配置
+      from _lib_paths import load_paths
+      paths_cfg = load_paths(project_root)
+      dirs = [..., paths_cfg["changes_archive"], ...]
+
+      # ✅ .trae/fullstack4traev11.config.yaml paths 字段
+      paths:
+        archive: docs/archive/done
+        changes_archive: docs/specs/changes/archive
+    next_skill: trae-ponytail
+    next_skill_action: "路径引用必走 _lib_paths 函数,禁止脚本中硬编码字符串"
+    reclaim_steps:
+      - 新增 scripts/_lib_paths.py(load_paths / get_archive_dir / get_changes_archive_dir)
+      - 5 个脚本加 try-except ImportError fallback(无 yaml 不阻断)
+      - 替换硬编码为函数调用
+      - 加 references/config.example.yaml 给出 paths.archive + paths.changes_archive 默认值
+      - 自验收:5 项跑通(默认/自定义/部分/损坏 yaml/helper 函数)
+      - 跑 detect_signal 5 项 grep,期望 0 命中或全部通过
+    see_also:
+      - "scripts/_lib_paths.py"
+      - "references/config.example.yaml"
+      - "references/project-structure.md §与 V10 的关键差异(归档路径行)"
+      - "references/constitution.md §Article VIII"
+      - ".trae/reports/feedback03-answer.md §2(5 处不一致表)"

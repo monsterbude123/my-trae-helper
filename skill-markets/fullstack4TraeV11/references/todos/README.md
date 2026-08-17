@@ -104,8 +104,8 @@ evidence_required: <跑什么命令证明 PASS>
 | 总条目 | 14 → 13 done + 1 pending(P3-6) |
 | 触动脚本 | 3 新增 + 9 修改 = 12 个 .py |
 | 新增单测 | 9 个 test 文件,79 用例 |
-| 主上下文兜底 | pytest 232 passed,真反例 4 件 |
-| Commit | `39d4f78` "V11.8.x 协议层承诺 → 脚本落地(13/14 done + 1 留置)" |
+| 主上下文兜底 | pytest 79 passed,真反例 4 件 |
+| Commit | `f4d9303 [v11-repair-2] V11.8.5 + V11.8.5.P1 protocol-layer 收尾 + audit-fix 留置` |
 
 ### 4.2 2026-08-17 audit 闭环批次
 

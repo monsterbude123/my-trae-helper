@@ -29,6 +29,12 @@ import re
 from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Tuple
 
+try:
+    from _lib_paths import load_paths
+except ImportError:
+    def load_paths(project_root: pathlib.Path) -> dict:
+        return {"archive": "docs/archive/done", "changes_archive": "docs/specs/changes/archive"}
+
 # 10 项扫描定义（V10.10 合并 V10.5 8 项 + V10.10 +2 项）
 SCAN_ITEMS = [
     "visual", "archive", "self-attest", "orphan-tests", "bundle-staleness",
@@ -76,7 +82,8 @@ def scan_visual(project_root: pathlib.Path) -> Tuple[bool, str]:
 
 def scan_archive(project_root: pathlib.Path) -> Tuple[bool, str]:
     """Check 2: 归档腐烂"""
-    archive = project_root / "docs/archive"
+    paths_cfg = load_paths(project_root)
+    archive = project_root / paths_cfg["archive"]
     if not archive.exists():
         return True, "无 archive/ 目录（N/A）"
     return True, f"archive/ 存在（{sum(1 for _ in archive.rglob('*'))} 项）"
