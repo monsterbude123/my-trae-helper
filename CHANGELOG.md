@@ -69,6 +69,16 @@
     - #6 run-all-guards.py resolve_registry_dir 项目级 .trae/registry/ 自动探测 → ✅ done
   - 14 条协议层差距全部 done(批修 + V11.8.5.P1 + V11.8.6 三批 commit 累积)
   - V11 协议层闭环度 100%(18/18 done);剩余 V12-ROOT(等用户授权 V12 ADR,主版本升级独立轨道)
+  - **扩展核查(用户复述后追加)** — 完整 14 条(非仅 top 5)全量验证 14/14 已落地:
+    - #3 state-card-validator.py L133-139 Stage 4/review visual_evidence + verified_at + read_by_main_context → ✅ done
+    - #7 run-all-guards.py L92-93 + L108-127 stack-gate 交叉校验(stacks[].gates/guards ⊆ gates.yaml/guards.yaml) → ✅ done
+    - #8 project-priority-resolver.py L5 §14.5 项目级 rules 优先 + L38 读 project_rules_skills → ✅ done
+    - #9 secrets-detector.py L67 regex 11 类(api_key/token/password/passwd/pwd/secret/access_key/client_secret 等)+ L20 6+ 字符 → ✅ done
+    - #10 bug-state-machine-validator.py(批修新增,5 状态机 + 7 转换矩阵) → ✅ done
+    - #11 change-status.py L55-58 + setup-feature.py L137-150 双路径强制 audit_state_card_change → ✅ done
+    - #12 proactive-scan.py L88/134/174/195/196/270/271 _invalidated 白名单 + L247 上下文窗口 200 字符 + L286 反例说明跳过 → ✅ done
+    - #13 commit-minimum-check.py V11.8.5.P1 → ✅ done
+    - #14 templates/hooks/pre-stage.sh L7-119 + launch-guard.sh L40 强制 stage-gate.py 调用 → ✅ done
 
 ### fullstack4TraeV11 升级(2026-08-15)
 
