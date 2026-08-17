@@ -102,6 +102,15 @@
 - 改 `references/sub-agent-rules.md` + 4 个 agents 文件:纯协议补充,无代码风险
 - 评分维持 **5.0** 🟢(无新增 MEDIUM/HIGH)
 - **安全注意**:`stage-gate.py --reset-to` 调用方应严格限定 change 级状态卡(已 enforce,项目级 docs/specs/.state-card.md 触发即 FAIL)— 防止误删项目级目录
+
+#### audit-fix-2026-08-16 — guard-smith audit B 方案(2026-08-16)
+
+- **白名单内委派 guard-smith sub-agent 改动**:
+  - `skill-markets/guard-gate-smith/SKILL.md §1.1.1` 增补(+35 行):**LOW**(纯协议文档,无代码)
+  - `src/guards/skill-registration-guard.mjs` 顶部 docstring 增补(+9 行):**LOW**(仅 docstring 注释,JS 代码完全不动)
+- **主代理直接 Edit**:`AGENTS.md §1.11 铁律 11 增补条款`(+16 行):**LOW**(项目侧铁律文档)
+- 评分维持 **5.0** 🟢(无新增 MEDIUM/HIGH)
+- **治理闭合**:豁免范围 + 硬约束 + 算法三方一致,补完协议语义真空
 - 退出码语义清晰:0=PASS / 1=FAIL / 2=WARN — 不存在"诱导绕过"风险
 - 不引入新依赖;PyYAML 已是项目既有
 

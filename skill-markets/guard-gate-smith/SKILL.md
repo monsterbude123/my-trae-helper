@@ -58,6 +58,41 @@ requires:
   maintainer: guard-smith   # 唯一白名单
 ```
 
+### 1.1.1 非 schema 字段(注释行)豁免（2026-08-16 蒸馏补 — guard-smith audit 落地）
+
+> **来源**:2026-08-16 guard-smith audit 报告 `skill-markets/fullstack4TraeV11/references/todos/audit-history/2026-08-16-guard-smith-registry-annotation-audit.md` §4.4(B 方案:接受 + 系统化缺口修复)。
+
+**问题缺口**:§1.1 仅列 schema 字段(`skill/status/guards/gates/maintainer`),未明示 `registry/skills.yaml` 顶部 YAML 注释行的归属,导致协议语义真空 → 主代理 3 次越界改 `last_updated` 注释行(`142d046` / `39d4f78` / `eed9381`)。
+
+**豁免规则**(明确不属于 §1.11 写权范畴):
+
+| 内容 | 是否需 guard-smith 委派 | 说明 |
+|------|------------------------|------|
+| 顶部 YAML 注释行(以 `#` 开头) | **不需要** | 不在 YAML schema 范畴,`yaml.safe_load()` 解析后丢弃 |
+| 元数据注释(`last_updated` / `total_skills` / 协议说明) | **不需要** | 同上,语义为文档说明而非注册路由 |
+| YAML schema 字段(`skill/status/guards/gates/maintainer/notes/version`) | **需要** | §1.11 铁律 11 写权范畴,必须 guard-smith 委派 |
+| 注册表条目(添加 / 删除 / 重命名 skill) | **需要** | 同上 |
+| 守卫 / 门禁路由(`guards[].script` / `gates[].hooks` 等) | **需要** | 同上 |
+
+**主代理直接改注释行的硬约束**(改后必跑,不留隐性风险):
+
+```
+1. commit msg 显式声明:"非 schema 注释行变更"
+2. node src/guards/skill-registration-guard.mjs              → 期望 PASS
+3. node scripts/guard-router.mjs --all                       → 期望 PASS(47 条目仍可执行)
+```
+
+**治理边界算法**(程序化判定):
+
+```
+schema_required_fields = { skill, status, guards, gates, maintainer }
+yaml_keys = yaml.safe_load(registry/skills.yaml).keys() ∩ schema_required_fields
+∉ yaml_keys 的内容(注释行 + 元数据段) → 主代理可改
+∈ yaml_keys 的内容 → 必须 guard-smith 委派
+```
+
+**反向对齐**:本豁免与 `src/guards/skill-registration-guard.mjs` 顶部 docstring 增补段一致,守卫本体只校验 schema 字段、不校验注释行。
+
 ### 1.2 拆分 / 新建 `scripts/<name>-guard.<ext>`
 
 按 skill 名独立自治（脱离共享脚本）。每个 guard 脚本：

@@ -47,6 +47,19 @@
   - 详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.6 条目](skill-markets/fullstack4TraeV11/CHANGELOG.md)
   - 物理归档 P3-6 → `references/todos/archive/done/2026-08-16-batch-repair-2/`
   - **同步触发 doc-sync-guard** 7 项(README / CHANGELOG / SECURITY-MAP / CAPABILITY-MAP / AGENTS.md / registry/skills.yaml / skill-level README)一并落本 commit
+- **audit-fix-2026-08-16** — guard-smith audit B 方案 3 件系统化缺口修补落地
+  - **guard-smith sub-agent 委派完成**(白名单内):
+    - `skill-markets/guard-gate-smith/SKILL.md §1.1.1` 增补(+35 行,非 schema 字段注释行豁免规则表 + 硬约束 3 条 + 治理边界算法)
+    - `src/guards/skill-registration-guard.mjs` 顶部 docstring 增补(+9 行,守卫本体只校验 schema 不校验注释)
+  - **主代理直接 Edit**:`AGENTS.md §1.11 铁律 11 增补条款`(+16 行,与 §1.1.1 + docstring 三方一致)
+  - 主上下文兜底验证(§2.4 SOP Step 6,2026-08-16):
+    * `node src/guards/skill-registration-guard.mjs` → ✅ PASS
+    * `node scripts/guard-router.mjs guard-gate-smith` → ✅ PASS
+    * `node tests/unit/test_guard_router.mjs` → ✅ 4/4
+    * `npm run lint` → ✅ 29 文件
+    * `python -m pytest` → ✅ 262/262 passed(0 回归)
+  - 新建 todo: `references/todos/audit-fix-2026-08-16.md`(status done)
+  - 协议语义真空闭合:豁免范围明文化 + 硬约束明文化 + 治理边界算法程序化
 
 ### fullstack4TraeV11 升级(2026-08-15)
 

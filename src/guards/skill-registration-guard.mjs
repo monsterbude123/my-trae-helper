@@ -15,6 +15,15 @@
  *   0 = PASS
  *   1 = BLOCK（注册缺失 / 文件缺失 / schema 错误）
  *   2 = WARN（仅警告，不阻断 — 留给 deprecated 过渡期）
+ *
+ * 非 schema 字段豁免（2026-08-16 蒸馏补 — guard-smith audit 落地）：
+ *   本守卫仅校验 YAML schema 字段（skill/status/guards/gates/maintainer/notes/version），
+ *   顶部 # 注释行（包括 last_updated / total_skills / 文档说明）不在校验范畴 — 任何 agent 可改，
+ *   包括主代理直接 Edit（无需 guard-smith 委派）。YAML parse 后注释行被丢弃，不影响 schema 完整性。
+ *   详见：
+ *     - AGENTS.md §1.11 铁律 11 增补条款
+ *     - skill-markets/guard-gate-smith/SKILL.md §1.1.1
+ *     - skill-markets/fullstack4TraeV11/references/todos/audit-history/2026-08-16-guard-smith-registry-annotation-audit.md §4.5
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';

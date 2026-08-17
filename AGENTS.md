@@ -8,6 +8,8 @@
 >
 > **2026-08-16 蒸馏**：fullstack4TraeV11 V11.8.6 — V12 物理隔离思想在 V11 主版本内渐进落地（6 步，不升主版本）：`init-from-zero.py --layout v12-preview` + `process-layer-guard.sh` + `stage-gate.py --reset-to` + 4 个 agent 产物落位规则。P0-v12-physical-rollout 落地（status: done）。参考 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.6](skill-markets/fullstack4TraeV11/CHANGELOG.md) + [skill-markets/fullstack4TraeV11/references/todos/P0-v12-physical-rollout.md](skill-markets/fullstack4TraeV11/references/todos/P0-v12-physical-rollout.md)。
 >
+> **2026-08-16 蒸馏**：fullstack4TraeV11 audit-fix-2026-08-16 — guard-smith audit B 方案 3 件系统化缺口修补：`AGENTS.md §1.11 增补条款`（主代理直接 Edit）+ `guard-gate-smith SKILL §1.1.1`（guard-smith sub-agent 委派）+ `skill-registration-guard.mjs` 顶部 docstring（guard-smith sub-agent 委派）。三方一致明文化"非 schema 字段注释行豁免 + 硬约束 3 条 + 治理边界算法"。status: done。参考 [skill-markets/fullstack4TraeV11/references/todos/audit-fix-2026-08-16.md](skill-markets/fullstack4TraeV11/references/todos/audit-fix-2026-08-16.md) + [AGENTS.md §1.11 增补条款](AGENTS.md)。
+>
 > **2026-08-15 蒸馏**：fullstack4TraeV11 V11.8.4 commit 准入最小集与全量验收分层（Stage 3.5/4.5 异步化），参考 [references/common-anti-patterns.md §7](skill-markets/fullstack4TraeV11/references/common-anti-patterns.md)。
 
 ---
@@ -67,6 +69,22 @@ my-trae-helper/
     - **仅 `guard-smith` sub-agent** 可改 `registry/skills.yaml` / `scripts/<name>-guard.*` / `scripts/guard-router.mjs` / `.husky/<name>-gate` / `src/guards/skill-registration-guard.mjs` / `.github/workflows/skill-market-gate.yml`
     - 其他 agent 试图 Edit 这些路径 → guard-approver Tier 3 拦截 + 注册表守卫自举
     - 详见 `skill-markets/guard-gate-smith/SKILL.md`
+
+    **§1.11 增补条款（2026-08-16 蒸馏补 — guard-smith audit 落地）**：
+    - **豁免范围**（明确不属于 §1.11 写权范畴，主代理可直接 Edit 无需 guard-smith 委派）：
+      - `registry/skills.yaml` 顶部 YAML 注释行（以 `#` 开头的非 schema 字段），如 `# 版本(last_updated)`、文档说明、字段说明
+      - 元数据注释（`last_updated` / `total_skills` / 协议说明等）
+      - 理由：`yaml.safe_load()` parse 后注释行被丢弃，不影响 schema 完整性
+    - **改注释行的硬约束**（不留隐性风险）：
+      1. commit msg 显式声明「非 schema 注释行变更」
+      2. 跑 `node src/guards/skill-registration-guard.mjs` → 期望 PASS
+      3. 跑 `node scripts/guard-router.mjs --all` → 期望 PASS（47 条目仍可执行）
+    - **仍属 §1.11 写权范畴**（必须 guard-smith 委派）：
+      - YAML schema 字段（`skill/status/guards/gates/maintainer/notes/version`）
+      - 注册表条目（添加/删除/重命名 skill）
+      - 守卫/门禁路由（`guards[].script` / `gates[].hooks` 等）
+    - 治理边界算法：`schema_required_fields ∩ yaml_keys` ⊆ guard-smith 域，否则 ⊆ 主代理直接改域
+    - 详见：[skill-markets/guard-gate-smith/SKILL.md §1.1.1](skill-markets/guard-gate-smith/SKILL.md) + [audit 报告 §4.3-4.5](skill-markets/fullstack4TraeV11/references/todos/audit-history/2026-08-16-guard-smith-registry-annotation-audit.md)
 
 12. **调整 guard/gate 必走 7 步 SOP（2026-08-14 §2.4 新增，调用方强制）**：
     任何 agent（含主 agent / 其他 sub-agent）要调整 guard / gate，按以下 7 步：

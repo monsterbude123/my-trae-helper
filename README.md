@@ -16,6 +16,8 @@ Trae IDE 技能包开发工程 + 跨 Agent 技能市场 CLI。
 >
 > **2026-08-16 fullstack4TraeV11 升级**：V11.8.6 — V12 物理隔离思想在 V11 主版本内的渐进落地（6 步，不升主版本）：`init-from-zero.py --layout v12-preview` 创建 fact/ + stage/ 骨架，多角色按模板落位产物，`process-layer-guard.sh` 强制路径边界，`stage-gate.py --reset-to` 保留事实源可重置流程。详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md](skill-markets/fullstack4TraeV11/CHANGELOG.md)。
 >
+> **2026-08-16 audit-fix**：guard-smith audit B 方案 3 件系统化缺口修补落地 — `AGENTS.md §1.11 增补条款`（主代理直接 Edit）+ `guard-gate-smith SKILL §1.1.1` + `skill-registration-guard.mjs` 顶部 docstring（guard-smith sub-agent 委派）。协议语义真空闭合：豁免范围明文化 + 硬约束明文化 + 治理边界算法程序化。详见 [skill-markets/fullstack4TraeV11/references/todos/audit-fix-2026-08-16.md](skill-markets/fullstack4TraeV11/references/todos/audit-fix-2026-08-16.md)。
+>
 > **2026-08-15 fullstack4TraeV11 升级**：V11.8.4 提交准入最小集与全量验收分层（Stage 3.5/4.5 异步化）+ V11.8.3 Stage 6 重构为 4 层分层决策框架。详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md](skill-markets/fullstack4TraeV11/CHANGELOG.md)。
 
 ## 📑 目录

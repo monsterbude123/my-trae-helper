@@ -13,6 +13,7 @@
 | V11.8.5 | 2026-08-16 | project-priority-resolver / secrets-detector / bug-state-machine-validator + todos 全套 | [scripts/README.md L40-42](fullstack4TraeV11/scripts/README.md) + [references/todos/README.md §2](fullstack4TraeV11/references/todos/README.md) |
 | V11.8.5.P1 | 2026-08-16 | commit-minimum-check.py + 4 项准入校验(typecheck/spot-check/admin 探针/lint 预存) | [scripts/commit-minimum-check.py](fullstack4TraeV11/scripts/commit-minimum-check.py) + [tests/unit/test_commit_minimum_check.py](fullstack4TraeV11/tests/unit/test_commit_minimum_check.py) |
 | V11.8.6 | 2026-08-16 | V12 物理隔离渐进:init-from-zero --layout v12-preview + process-layer-guard.sh + stage-gate --reset-to + 4 个 agent 落位规则 | [templates/change-dir-layout-v12-preview.md](fullstack4TraeV11/templates/change-dir-layout-v12-preview.md) + [templates/hooks/process-layer-guard.sh](fullstack4TraeV11/templates/hooks/process-layer-guard.sh) + [tests/unit/test_stage_gate_reset.py](fullstack4TraeV11/tests/unit/test_stage_gate_reset.py) |
+| audit-fix-2026-08-16 | 2026-08-16 | guard-smith audit B 方案 3 件修补:guard-gate-smith §1.1.1 + skill-registration-guard docstring + AGENTS.md §1.11 增补 | [skill-markets/guard-gate-smith/SKILL.md §1.1.1](guard-gate-smith/SKILL.md) + [src/guards/skill-registration-guard.mjs 顶部 docstring](src/guards/skill-registration-guard.mjs) + [AGENTS.md §1.11 增补条款](AGENTS.md) |
 
 ---
 

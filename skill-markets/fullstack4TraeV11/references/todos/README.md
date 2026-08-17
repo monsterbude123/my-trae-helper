@@ -32,16 +32,17 @@ references/todos/
 
 ---
 
-## §2 当前活跃待办(2026-08-16 第四轮蒸馏后)
+## §2 当前活跃待办(2026-08-16 第五轮蒸馏后)
 
 | ID | 文件 | 优先级 | 状态 | 主题 |
 |----|------|--------|------|------|
-| P0-v12 | [P0-v12-physical-rollout.md](P0-v12-physical-rollout.md) | P0 | in_progress | V12 物理隔离思想 V11 范围内渐进落地(6 步,不升主版本) |
-| audit-fix | audit 仅留目录位置 | audit 留置 | pending | guard-smith audit B 方案落地:AGENTS.md §1.11 + guard-gate-smith §1.1 + skill-registration-guard.mjs 注释豁免条款增补 |
+| audit-fix | [audit-fix-2026-08-16.md](audit-fix-2026-08-16.md) | audit | done(2026-08-16) | guard-smith audit B 方案 3 件系统化缺口修补落地(AGENTS.md §1.11 增补 + guard-gate-smith §1.1.1 + skill-registration-guard.mjs 顶部 docstring) |
 | V12-ROOT | [v12-physical-isolation/](v12-physical-isolation/) | 等待 ADR | pending | V12 物理隔离迁移(主版本升级),前置 5 项见 [migration-checklist.md §0](v12-physical-isolation/migration-checklist.md) |
+| mentioned-but-not-parsed top 5 | [audit-history/2026-08-16-mentioned-but-not-parsed.md](audit-history/2026-08-16-mentioned-but-not-parsed.md) §2 | top 5 | pending(4 条剩余,#13 已 done) | config.yaml 消费 / state-card 17 字段校验 / repair-flow.yaml Stage 6 接入 / §14.5 项目级 rules 优先解析 |
 
-> **数量**:当前 `3 pending`(P0-v12 in_progress + audit-fix + V12-ROOT)。
-> 历史总数:14 项协议层无解析脚本差距,V11.8.x + P3-6(5 文件批 + audit 报告)→ **15/15 done**,0 个协议层承诺留置。
+> **数量**:当前 `2 pending`(V12-ROOT 等 ADR + mentioned-but-not-parsed top 5 4 条剩余)。
+> 历史总数:14 项协议层无解析脚本差距,V11.8.x + P3-6 + audit-fix + P0-v12 → **17/17 done**(含本会话两批次 commit)。
+> **P0-v12 status:done(已 commit `06269ae`)** — V11.8.6 物理隔离渐进落地 6 步全部完成,本批次已归档至本表首行。
 
 ### §2.1 为什么不再按"P0/P1/P2/P3"分文件
 
