@@ -326,4 +326,30 @@ V12 ADR **不**为既有 V11 项目强制迁移 = **无回滚需求**。
 
 ---
 
+## §12 V11 harness 兼容范围声明(V11.8.7 NEW — case 3 蒸馏 fix 路径冲突)
+
+> **来源**:case 3 (ai-chat-openai-v11) V11 harness 实跑报 9/13 gates FAIL — 因 case 3 用 V12 物理布局 (`docs/specs/changes/{id}/fact/` + `stage/{N}/`),而 V11 `registry/gates.yaml` expected_artifacts 仍指 V11 扁平 (`docs/specs/changes/{id}/spec.md` 等)。
+层)。
+>
+> **结论**:V12 ADR **未升主版本前**,`run-all-guards.py` + `gates.yaml` 对 V12 layout 项目**不兼容**。这是 V12 ADR 升主版本时必解决的 8 步路径之一(原 §5 Step 6 仅提 stage-gate.py 子命令,**未提 run-all-guards.py 适配**)。
+>
+> **V11.8.7 增量补救**(本期不升 V12 主版本,仅给 V11 harness 加 V12 兼容层):
+>
+> 1. `run-all-guards.py` **新增 `--allow-v12-layout` 选项**: 走 V12 物理布局路径(`fact/` / `stage/{N}/`)
+> 2. `registry/gates.yaml` 各 stage required_artifacts **同步增加** V12 layout 路径(双路径,先 V11 后 V12)
+> 3. `gates.yaml` schema 校验加一条: V12 项目必须有 `fact/spec.md` + `stage/{1.5-prototype}/prototypes/design.html`
+> 4. spec-purge.py 已 V11.8.7 修了 V12 layout,本节明示 **归档后 in-flight 检查**:
+>    - spec-purge 后, change 目录只剩 `archive/done/{id}/` + 旧的 `fact/` + `stage/{N}/` 已 flatten
+>    - 跑 `run-all-guards.py` 时会按 archive/done/{id} 检查,提示 `[broken]`(只剩 archive,无 in-flight) — 这**是 accept 正常状态**,不应误判
+> 5. `proactive-scan.py` 应增加 `v12-post-purge-state-check` —— 识别 accept 后 change 已在 archive,无需重复 in-flight gate
+
+**反例(本期已发生)**:
+
+- ❌ case 3 自作主张 V12 物理布局,跑 `run-all-guards.py` 9/13 FAIL 不知情 → 6 个 stage 因路径不对被误判
+- ❌ spec-purge 归档后, `proactive-scan.py` 报 `[broken]` → 实为正常,但工具不识别
+
+**V12 ADR 升主版本时**:**必** 把上述 5 点纳入 §5 8 步路径(替换原 Step 6 仅 stage-gate.py 部分)。
+
+---
+
 **本 ADR DRAFT 待用户授权。请在 §9.1 签署后告知,主上下文将执行 §5 8 步 + §6 验证 + 状态转换。**

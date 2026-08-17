@@ -141,17 +141,56 @@ def detect_ui_involved(change_id: str, project_root: pathlib.Path) -> bool:
     return any(kw in content for kw in ui_keywords)
 
 
+def detect_ui_involved_v12(change_id: str, project_root: pathlib.Path) -> bool:
+    """V11.8.7 NEW (case 3 蒸馏):V12 layout 下 spec.md 在 fact/, 也兼容 fallback V11。"""
+    change_root = project_root / "docs/specs/changes" / change_id
+    # V12 layout path
+    v12_spec = change_root / "fact" / "spec.md"
+    # V11 layout fallback
+    v11_spec = change_root / "spec.md"
+    spec_md = v12_spec if v12_spec.exists() else v11_spec
+    if not spec_md.exists():
+        return True
+    content = spec_md.read_text(encoding="utf-8")
+    ui_keywords = ["UI", "UX", "页面", "组件", "视觉", "交互", "前端", "prototypes", "design-prompt", "ui-ux-logic"]
+    return any(kw in content for kw in ui_keywords)
+
+
 def check_change(change_id: str, project_root: pathlib.Path) -> Dict:
-    """检查单 change 的 prototypes/ 最低门禁(仅 UI 涉及 change)"""
-    prototypes_dir = project_root / "docs/specs/changes" / change_id / "prototypes"
+    """检查单 change 的 prototypes/ 最低门禁(仅 UI 涉及 change)
+
+    V11.8.7 NEW (case 3 蒸馏):兼容 V12 物理布局。
+    V11 路径:`docs/specs/changes/{id}/prototypes/{design-prompt,ui-ux-logic}.md`
+    V12 路径:`docs/specs/changes/{id}/stage/1.5-prototype/prototypes/{design-prompt,ui-ux-logic}.md`
+    优先 V11 路径;如 V11 不存在,fallback V12。
+    """
+    change_root = project_root / "docs/specs/changes" / change_id
+    # V11 平
+    v11_prototypes_dir = change_root / "prototypes"
+    # V12 平 (V11.8.7 NEW — case 3)
+    v12_prototypes_dir = change_root / "stage" / "1.5-prototype" / "prototypes"
+
+    # 优先 V11,V12 fallback
+    if v11_prototypes_dir.exists():
+        prototypes_dir = v11_prototypes_dir
+        layout_used = "v11-default"
+    elif v12_prototypes_dir.exists():
+        prototypes_dir = v12_prototypes_dir
+        layout_used = "v12-preview"
+    else:
+        prototypes_dir = v11_prototypes_dir  # 检查不存在的也走 V11(默认报缺)
+        layout_used = "none"
+
     design_prompt = prototypes_dir / "design-prompt.md"
     ui_ux_logic = prototypes_dir / "ui-ux-logic.md"
 
-    ui_involved = detect_ui_involved(change_id, project_root)
+    # detect_ui_involved 也跨 V11/V12
+    ui_involved = detect_ui_involved_v12(change_id, project_root)
 
     result = {
         "change_id": change_id,
         "ui_involved": ui_involved,
+        "layout_used": layout_used,  # V11.8.7 NEW
         "prototypes_dir_exists": prototypes_dir.exists(),
         "design_prompt": check_design_prompt(design_prompt),
         "ui_ux_logic": check_ui_ux_logic(ui_ux_logic),

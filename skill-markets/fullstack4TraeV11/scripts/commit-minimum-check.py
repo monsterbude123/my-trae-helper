@@ -6,11 +6,12 @@ V11 commit-minimum-check.py — commit 准入最小集程序化校验(AUDIT-#13 
 定位:SKILL.md §3.7 #10 反虚假交付反转陷阱 + references/common-anti-patterns.md §7.3
      "commit 准入最小集 ≠ 全量验收"协议落地。
 
-4 项准入最小集校验(适配 Python 后端工具集,无 TS / Next.js 依赖):
+5 项准入最小集校验(适配 Python 后端工具集,无 TS / Next.js 依赖):
     1. typecheck 0 错   → compileall 全部 .py
     2. 关键 5 路由 spot-check  → docs/specs/changes/{id}/spot-check.json 探测
     3. admin 探针 200    → .trae/fullstack4traev11.config.yaml gate.base_url + /health
     4. lint 预存问题不阻塞  → pyflakes 收集 → 写 .trae/logs/commit-readiness-warnings.jsonl
+    5. **secret 在 git tracked 文件** → git ls-files + sk-{20+} regex(Article XVII P0,V11.8.7 case 3 反馈)
 
 Usage:
     python scripts/commit-minimum-check.py
@@ -401,6 +402,95 @@ def check_admin_probe(project_root: Path, strict: bool = False) -> CheckResult:
     )
 
 
+def check_secret_in_tracked_files(project_root: Path) -> CheckResult:
+    """#5 secret 在 git tracked 文件(Article XVII P0)。
+
+    case 3 反馈(2026-08-17):V11 §17.5  触发 — 真实 API key 在 .env(已 .gitignore)不算违规,
+    但**同一 key 在 commit message + spec.md rot-scan 段落**出现过,违反 §17.4 "工具调用参数中
+    含 secret"精神 + §17.5 "secret 误写 → 立即回滚 + 用户重置"。
+
+    本 check 用 git ls-files 列出已入库文件,grep SECRETS_REGEX,FAIL = 阻断 commit。
+    """
+
+    import re
+
+    SECRETS_REGEX = re.compile(r"\bsk-[a-zA-Z0-9]{20,}\b")
+
+    # 1. 列出 git tracked 文件(过滤 .gitignore 排除)
+    try:
+        result = subprocess.run(
+            ["git", "ls-files"],
+            cwd=str(project_root),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="ignore",
+            check=False,
+            timeout=10,
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return CheckResult(
+            name="secret-in-tracked",
+            status="warn",
+            detail="git 不可用,跳过(项目可能未 init git)",
+            exit_code=0,
+        )
+
+    if result.returncode != 0:
+        return CheckResult(
+            name="secret-in-tracked",
+            status="warn",
+            detail=f"git ls-files 失败:{result.stderr[:80]}",
+            exit_code=0,
+        )
+
+    files = [f for f in result.stdout.splitlines() if f]
+
+    # 2. 扫每个文件
+    leaks = []
+    # V11.8.7 NEW(case 3 反馈):test fixture 也含 fake sk- 前缀,会触发误报
+    # 判定逻辑:真实 key 是 ≥40 字符 + 在 docs/src 等真源码区;test fixture 在 tests/ 下
+    # 区分: tests/ 目录下的命中 → 跳过(已是 V11 协议 layer 期望的反例库)
+    for rel in files:
+        # 跳过 git 历史压缩文件(Commit 信息 dump)
+        if rel.startswith(".git/") or rel.endswith((".png", ".jpg", ".ico", ".woff", ".woff2")):
+            continue
+        # 跳过测试目录的 fixture — 它们本身就是反例库
+        if "/tests/" in rel or rel.startswith("tests/"):
+            continue
+        p = project_root / rel
+        if not p.is_file():
+            continue
+        try:
+            content = p.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for m in SECRETS_REGEX.finditer(content):
+            leaks.append({
+                "file": rel,
+                "line": content[: m.start()].count("\n") + 1,
+                "match_prefix": m.group(0)[:12] + "...",
+            })
+
+    if not leaks:
+        return CheckResult(
+            name="secret-in-tracked",
+            status="pass",
+            detail="0 secret leak in git tracked files",
+            exit_code=0,
+        )
+
+    # 3. 写出 leak 报告 — 列前 10
+    leak_lines = [f"{l['file']}:{l['line']} ({l['match_prefix']})" for l in leaks[:10]]
+    return CheckResult(
+        name="secret-in-tracked",
+        status="fail",
+        detail=f"{len(leaks)} secret leak(s) — {leak_lines[0]}",
+        exit_code=1,
+        evidence={"leak_count": len(leaks), "first_10": leaks[:10]},
+    )
+
+
 def check_lint_pre_existing(project_root: Path) -> CheckResult:
     """#4 lint \u9884\u5b58\u95ee\u9898\u4e0d\u963b\u65ad \u2014 pyflakes \u6536\u96c6 + \u5199 jsonl"""
     py_files = list((project_root / "scripts").rglob("*.py"))
@@ -546,6 +636,7 @@ def main() -> int:
         check_spot_check(project_root),
         check_admin_probe(project_root, strict=args.strict),
         check_lint_pre_existing(project_root),
+        check_secret_in_tracked_files(project_root),  # V11.8.7 NEW — Article XVII P0
     ]
     summary_str, summary_exit = aggregate(results, strict=args.strict)
     report = Report(

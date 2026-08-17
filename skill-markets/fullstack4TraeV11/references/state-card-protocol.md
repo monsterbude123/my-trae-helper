@@ -594,7 +594,121 @@ reset_history:
 
 ---
 
-## 十、V12 每 stage 独立 .state-card.md（V12.0.0 NEW — 主版本升级后强制）
+## §10.5 Schema 单一真相源(V11.8.7 NEW — case 2 蒸馏 fix 文档 vs 脚本漂移)
+
+> **来源**:case 2 (desktop-pet-v11) audit-fix — `stage-card-protocol.md` 文档说 `current_stage` 是基本字段但 `stage-gate.py` 校验实际要 13 字段;`health` 文档说 🟢 green 但脚本要 `🟢 on-track` emoji。文档与脚本独立演进未同步,导致 case 1 E2E 暴露 BLOCK。
+>
+> **V11.8.7 修复**:把状态卡 schema 提到 JSON Schema 单源文件 `[state-card.schema.json](state-card.schema.json)`,文档 + 脚本 + 模板都从本文件校验/生成。
+
+**强制单源规则**:
+
+```
+MUST: 状态卡字段定义(必填/合法值/联动约束)的唯一真相源 = state-card.schema.json
+MUST: state-card-protocol.md §2 必须按本文件生成(章节号 §2.1+ 都对应 schema properties)
+MUST: state-card-validator.py 必读本文件做 jsonschema 校验(V11.8.7 自验收)
+MUST: setup-feature.py 必按本文件生成空白模板骨架
+NEVER: 改文档或脚本字段定义而不同步 schema.json(违反 V11 §3.7 #10 反虚假交付 #10 文档与实现漂移)
+```
+
+**字段名 / 合法值变更流程**:
+
+```
+1. 改 references/state-card.schema.json(主源)
+2. 同步 references/state-card-protocol.md §2(派生文档)
+3. 同步 scripts/state-card-validator.py REQUIRED_FIELDS / VALID_* 常量(派生实现)
+4. 同步 scripts/setup-feature.py / change-status.py 字段写入路径(派生工具)
+5. 重跑 python scripts/state-card-validator.py docs/specs/.state-card.md --project-root .
+   → 期望 PASS/V12 schema 一致
+6. 跑 tests/unit/test_state_card_validator_extended.py → 期望 232/232 PASS
+```
+
+**消费清单(派生源必查)**:
+
+- 文档:[state-card-protocol.md §2](state-card-protocol.md) §五/§5.x 模板段(由 schema.required 推)
+- 脚本:state-card-validator.py 必读 schema.json 用 jsonschema.validate()(V11.8.7 自验收)
+- 模板:templates/state-card.md 字段顺序与 schema.required 一致
+- hooks:`templates/hooks/spec-validate-hook.py` 加载 schema(防止 commit 时卡字段不一致)
+
+**自验收清单(V11.8.7 蒸馏 — 跑通后 commit)**:
+
+```bash
+# 1. JSON Schema 文件本身合法
+python -c "import json; s=json.load(open('references/state-card.schema.json')); print('✅ schema JSON 合法')"
+python -c "import jsonschema; jsonschema.Draft7Validator.check_schema(json.load(open('references/state-card.schema.json')))"
+echo "✅ schema JSON Schema Draft-7 合法"
+
+# 2. 派生文档字段覆盖 schema 必填
+python tests/unit/test_state_card_protocol_coverage.py
+# → 期望 schemas=14/14 必填字段全在 state-card-protocol.md §2 文档中
+
+# 3. 派生脚本字段覆盖 schema 必填
+python tests/unit/test_state_card_validator_extended.py
+# → 期望 232 passed
+
+# 4. 真状态卡跑 schema 校验
+python scripts/state-card-validator.py docs/specs/.state-card.md --project-root . --json | jq '.errors | length'
+# → 期望 0
+```
+
+---
+
+## §10.6 AC 核销矩阵硬约束(V11.8.7 NEW — case 3 蒸馏 fix 形式主义)
+
+> **来源**:case 3 (ai-chat-openai-v11) V11 harness 实跑 `ac-gate.py` 报 G1 BLOCK ——"review-report 不含 `## AC 核销矩阵` 段(6 列格式)"。我当时用 markdown 写了"4 维评分",V11 `ac-gate.py` 完全不接受。**这是真形式主义失败,文档没说清 V11 期望的硬格式**。
+>
+> **V11.8.7 修复**:本节显式声明 Stage 4 review-report 的硬格式是 `## AC 核销矩阵` 段,任何 Stage 4 产物必须满足,否则 Stage 5 spec-purge 之前必须先修复。
+
+**强制矩阵格式**(Stage 4 review-report 必含 `## AC 核销矩阵` 段,V11 §6.0 G1 硬要求):
+
+```markdown
+## AC 核销矩阵
+
+| AC-ID | 类型 | TC-ID | TC结果 | UI证据 | 状态 |
+|-------|------|-------|--------|--------|------|
+| AC-1 | 功能 | tc-1.1 | PASS | logs/screenshot-1.png | ✅ |
+| AC-2 | 边界 | tc-2.1 | PASS | curl stdout | ✅ |
+```
+
+**6 列定义**:
+- `AC-ID`:`AC-<数字或符号>` 格式,正则 `^AC-[A-Za-z0-9][A-Za-z0-9\-]*$`
+- `类型`:`功能` / `边界` / `接口` / `性能` / `兼容` / `恢复` 之一
+- `TC-ID`:`tc-<id>` 格式,必须在 `test-plan.md` 中存在(V11 G5 防编造)
+- `TC结果`:`PASS` / `FAIL` —— G3 必 PASS
+- `UI证据`:`logs/<file>.png` 或 `curl stdout` 或 `产出物路径` — V11 §13.1 启动可见产物
+- `状态`:`✅` 或 `❌` —— 终态判定
+
+**程序化校验**:`ac-gate.py --review-report <path> --spec <path>` 自动跑 G1-G5
+
+```bash
+python scripts/ac-gate.py \
+    --review-report docs/specs/changes/{id}/review-report.md \
+    --spec docs/specs/changes/{id}/spec.md
+# 期望:verdict=PASS,全部 AC 核销 ✅
+```
+
+**反例(形式主义伪装)**:
+
+- ❌ "4 维评分 4.25/5.0" markdown 表(本 case 3 实际写法) — V11 不认
+- ❌ review-report 不含 `## AC 核销矩阵` 标题
+- ❌ TC-ID 在 `test-plan.md` 中找不到(G5 报编造)
+- ❌ TC 结果为 FAIL 但状态写 ✅
+
+**自验收清单**(V11.8.7 蒸馏 — 跑通后 commit):
+
+```bash
+# 必跑 — V11 §3.7 #5 反虚假交付
+python scripts/ac-gate.py \
+    --review-report docs/specs/changes/{id}/review-report.md \
+    --spec docs/specs/changes/{id}/spec.md \
+    --test-plan docs/specs/changes/{id}/test-plan.md
+# 期望 verdict=PASS
+```
+
+---
+
+---
+
+
 
 > **来源**:[references/todos/v12-physical-isolation/V12-ADR-DRAFT.md](../todos/v12-physical-isolation/V12-ADR-DRAFT.md) §5 Step 5 + [stage-physical-isolation.md §2](stage-physical-isolation.md)
 >
