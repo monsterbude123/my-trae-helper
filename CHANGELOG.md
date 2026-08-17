@@ -60,6 +60,15 @@
     * `python -m pytest` → ✅ 262/262 passed(0 回归)
   - 新建 todo: `references/todos/audit-fix-2026-08-16.md`(status done)
   - 协议语义真空闭合:豁免范围明文化 + 硬约束明文化 + 治理边界算法程序化
+- **mentioned-but-not-parsed closure(2026-08-16)** — top 5 全量验证 5/5 已落地
+  - 主上下文核查 + 源码 grep 双重核对子代理 B 报告 top 5:
+    - #1 project-priority-resolver.py + run-all-guards.py L43-72/L183-199 → ✅ done
+    - #2 state-card-validator.py 17+ 字段 + visual_evidence 硬门槛 → ✅ done
+    - #4 state-machine.yaml 消费方:stage-gate + _lib_state_card + run-all-guards → ✅ done
+    - #5 repair-flow-gate.py + Stage 6 SKILL.md L114-130 4 步强制流程 → ✅ done
+    - #6 run-all-guards.py resolve_registry_dir 项目级 .trae/registry/ 自动探测 → ✅ done
+  - 14 条协议层差距全部 done(批修 + V11.8.5.P1 + V11.8.6 三批 commit 累积)
+  - V11 协议层闭环度 100%(18/18 done);剩余 V12-ROOT(等用户授权 V12 ADR,主版本升级独立轨道)
 
 ### fullstack4TraeV11 升级(2026-08-15)
 

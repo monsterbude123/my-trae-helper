@@ -111,6 +111,18 @@
 - **主代理直接 Edit**:`AGENTS.md §1.11 铁律 11 增补条款`(+16 行):**LOW**(项目侧铁律文档)
 - 评分维持 **5.0** 🟢(无新增 MEDIUM/HIGH)
 - **治理闭合**:豁免范围 + 硬约束 + 算法三方一致,补完协议语义真空
+
+#### mentioned-but-not-parsed closure — top 5 全量验证(2026-08-16)
+
+- 本条目 = 0 改动(纯核查报告,非代码改动)
+- 5/5 已落地证据:
+  - project-priority-resolver.py + run-all-guards.py 四表消费 → ✅ done
+  - state-card-validator.py 17+ 字段 + visual_evidence 硬门槛 → ✅ done
+  - state-machine.yaml 4 个消费函数 → ✅ done
+  - repair-flow-gate.py + Stage 6 SKILL.md L114-130 → ✅ done
+  - run-all-guards.py resolve_registry_dir 项目级自动探测 → ✅ done
+- 评分维持 **5.0** �(无新增 MEDIUM/HIGH)
+- **V11 协议层闭环度 100%**(18/18 done)
 - 退出码语义清晰:0=PASS / 1=FAIL / 2=WARN — 不存在"诱导绕过"风险
 - 不引入新依赖;PyYAML 已是项目既有
 

@@ -10,6 +10,8 @@
 >
 > **2026-08-16 蒸馏**：fullstack4TraeV11 audit-fix-2026-08-16 — guard-smith audit B 方案 3 件系统化缺口修补：`AGENTS.md §1.11 增补条款`（主代理直接 Edit）+ `guard-gate-smith SKILL §1.1.1`（guard-smith sub-agent 委派）+ `skill-registration-guard.mjs` 顶部 docstring（guard-smith sub-agent 委派）。三方一致明文化"非 schema 字段注释行豁免 + 硬约束 3 条 + 治理边界算法"。status: done。参考 [skill-markets/fullstack4TraeV11/references/todos/audit-fix-2026-08-16.md](skill-markets/fullstack4TraeV11/references/todos/audit-fix-2026-08-16.md) + [AGENTS.md §1.11 增补条款](AGENTS.md)。
 >
+> **2026-08-16 蒸馏**：fullstack4TraeV11 mentioned-but-not-parsed closure — 子代理 B 报告 top 5 全量验证 5/5 已落地（批修 + V11.8.5.P1 + V11.8.6 三批 commit 累积）。V11 协议层闭环度 **18/18 = 100%**；剩余仅 V12-ROOT（等用户授权 V12 ADR，主版本升级独立轨道）。参考 [skill-markets/fullstack4TraeV11/references/todos/mentioned-but-not-parsed-closure.md](skill-markets/fullstack4TraeV11/references/todos/mentioned-but-not-parsed-closure.md)。
+>
 > **2026-08-15 蒸馏**：fullstack4TraeV11 V11.8.4 commit 准入最小集与全量验收分层（Stage 3.5/4.5 异步化），参考 [references/common-anti-patterns.md §7](skill-markets/fullstack4TraeV11/references/common-anti-patterns.md)。
 
 ---
