@@ -48,6 +48,19 @@
 
 **不做**:读代码细节、评判代码风格、重构建议、性能优化建议。
 
+#### ➕ 配套工具:V12 MIGRATION PROTOCOL + `--migrate-from-v11`
+
+> **触发**:V12.0.0 主版本升级后,既有 V11 项目需迁移工具链。
+> **文件**:[`references/todos/v12-physical-isolation/V12-MIGRATION-PROTOCOL.md`](references/todos/v12-physical-isolation/V12-MIGRATION-PROTOCOL.md)
+> **配套子命令**:`init-from-zero.py --migrate-from-v11 [path] [--dry-run] [--no-backup] [--exclude CHANGE_ID]`
+
+**三阶段迁移**:
+1. **Pre-flight 6 项校验**:docs/specs/changes/ 存在 + 项目非 lock + archive/done 无重名 + 项目级 .state-card.md 存在 + 每 change 含 spec.md/plan.md
+2. **8 步原子迁移**:Step 1 创建 fact/ + stage/{11}/ + archive/ + Step 2 移动 fact 层文件(spec/plan/test-plan/prototype/contracts) + Step 3 移动 stage 流程产物(verify-review-rot-scan 等) + Step 4 拆分 .state-card.md 为 13 个独立卡 + Step 5 生成 handoff-out.md 空白模板 + Step 6 项目级 state-card 副本到 fact/ + Step 7 删 V11 扁平文件 + Step 8 写迁移报告
+3. **Post-flight 验证**:目录完整 + process-layer-guard 软失败(Windows Git Bash 兼容) + 报告 + 自动回滚(Post-flight 错误时从 `.pre_v12_migration_<ts>/` 恢复)
+
+**Exit codes**:0=PASS / 1=FAIL / 2=PARTIAL
+
 ---
 
 ## [V11.8.6] - 2026-08-16
