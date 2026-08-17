@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# V11 Pre-stage Gate (HARDENED) — Stage Transition Validation
+# V12 Pre-stage Gate (HARDENED) — Stage Transition Validation
 # HARDENING POINTS:
 #   1. set -euo pipefail (fail-fast + pipe error propagation)
 #   2. Mandatory environment variable validation (V11_GATE_ENFORCED)
 #   3. Missing env vars = gate FAIL (exit 1) — cannot bypass
 #   4. Real execution of stage-gate.py with --next-stage — no mock/stub PASS
 #   5. State card existence check + transition verification
+#   6. **V12.0.0 NEW**: 物理路径校验(process-layer-guard.sh) — 默认行为
+#   7. **V12.0.0 NEW**: stage-gate.py --reset-to 强制 default(若 STATE_CARD_RESET_TO 设置)
 #
 # V11.8.x 新协议(P0-2):用 --next-stage 校验 current_stage → next_stage
 # 转换合法性,而非旧 --stage(只能校验一致性)。EXPECTED_NEXT_STAGE
@@ -15,6 +17,8 @@
 #   0 = PASS
 #   1 = state-card field FAIL
 #   2 = transition FAIL
+#   3 = process-layer-guard FAIL(V12 NEW)
+#   4 = --reset-to FAIL(V12 NEW)
 
 set -euo pipefail
 
@@ -164,6 +168,36 @@ else
     echo "          x stage-gate.py field FAIL (exit $EXIT_CODE)"
     echo "    [GATE FAIL] Stage transition not allowed (state-card validation failed)"
     exit $EXIT_CODE
+fi
+
+# ---- V12.0.0 NEW Step 3.5: process-layer-guard.sh 物理路径校验 ----
+# V12 默认行为:fact/ + stage/{N}/ 物理布局强校验(V11 项目可设 V11_BYPASS_LAYOUT_GUARD=1 跳过)
+if [ "${V11_BYPASS_LAYOUT_GUARD:-}" != "1" ]; then
+    echo ""
+    echo "    [3.5/4] process-layer-guard.sh (V12 physical layout):"
+
+    # 探测 process-layer-guard.sh(V11.8.6 已落地)
+    PROCESS_LAYER_GUARD=""
+    if [ -n "$V11_SCRIPTS_DIR" ] && [ -f "$V11_SCRIPTS_DIR/templates/hooks/process-layer-guard.sh" ]; then
+        PROCESS_LAYER_GUARD="$V11_SCRIPTS_DIR/templates/hooks/process-layer-guard.sh"
+    elif [ -f "$HOME/.trae-cn/skills/fullstack4TraeV11/templates/hooks/process-layer-guard.sh" ]; then
+        PROCESS_LAYER_GUARD="$HOME/.trae-cn/skills/fullstack4TraeV11/templates/hooks/process-layer-guard.sh"
+    elif [ -f "$(dirname "$STAGE_GATE_SCRIPT")/../templates/hooks/process-layer-guard.sh" ]; then
+        PROCESS_LAYER_GUARD="$(dirname "$STAGE_GATE_SCRIPT")/../templates/hooks/process-layer-guard.sh"
+    fi
+
+    if [ -n "$PROCESS_LAYER_GUARD" ] && [ -f "$PROCESS_LAYER_GUARD" ]; then
+        PROJECT_ROOT="$PROJECT_ROOT" bash "$PROCESS_LAYER_GUARD"
+        PLG_EXIT=$?
+        if [ $PLG_EXIT -ne 0 ]; then
+            echo "          x process-layer-guard FAIL (exit $PLG_EXIT)"
+            echo "    [GATE FAIL] V12 物理布局路径违规 — 见 templates/change-dir-layout-v12-preview.md §2"
+            exit 3
+        fi
+        echo "          ok process-layer-guard PASS"
+    else
+        echo "          warn process-layer-guard.sh 未找到(非 V12 项目,跳过)"
+    fi
 fi
 
 # ---- Step 4: Gate signature (SHA-256 hash) ----

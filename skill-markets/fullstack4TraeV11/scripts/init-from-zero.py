@@ -289,6 +289,96 @@ def create_docs_skeleton(project_root: pathlib.Path) -> bool:
     return True
 
 
+def cmd_upgrade_to_v11(args) -> int:
+    """V12.0.0 NEW — V12 项目回滚到 V11 layout(ADR §7.2)。
+
+    行为:
+      1. 校验项目根存在 docs/specs/changes/{id}/ 目录(V12 layout 特征)
+      2. 遍历每个 change-id 子目录:
+         a. fact/ 整个目录内容移到 docs/specs/changes/{id}/ 根(平铺)
+         b. 删除 stage/ 整个目录
+         c. 删除 archive/ 整个目录(若有)
+      3. 不破坏 archive/done/ 内容(Article VIII)
+      4. 输出回滚报告
+
+    Args:
+        args: argparse 解析结果(含 --project-root / --dry-run / --json)
+
+    Returns:
+        int: 0=PASS / 1=FAIL
+    """
+    project_root = pathlib.Path(args.project_root).resolve()
+
+    if not project_root.exists():
+        print(f"❌ 项目目录不存在: {project_root}")
+        return 1
+
+    changes_dir = project_root / "docs" / "specs" / "changes"
+    if not changes_dir.is_dir():
+        print(f"❌ 未找到 docs/specs/changes 目录: {changes_dir} — 不是 V12 项目,无需回滚")
+        return 1
+
+    # 识别 V12 change 子目录(含 fact/ + stage/ 两个子目录的)
+    upgraded = []
+    skipped = []
+    errors = 0
+
+    for change_dir in sorted(changes_dir.iterdir()):
+        if not change_dir.is_dir():
+            continue
+        if change_dir.name == "_v12-preview-template":
+            continue  # 模板目录不动
+        if change_dir.name == "archive":
+            continue  # archive/done/ 是 V11 历史归档(Article VIII)
+
+        fact_dir = change_dir / "fact"
+        stage_dir = change_dir / "stage"
+        if not (fact_dir.is_dir() and stage_dir.is_dir()):
+            skipped.append(f"{change_dir.name}(非 V12 layout)")
+            continue
+
+        # V12 项目 — 回滚
+        try:
+            # Step a: fact/ 内容移到 change 根
+            for f in fact_dir.iterdir():
+                if f.is_file():
+                    target = change_dir / f.name
+                    if not target.exists():
+                        f.rename(target)
+                elif f.is_dir():
+                    # contracts/ 子目录整体移
+                    target = change_dir / f.name
+                    if not target.exists():
+                        f.rename(target)
+
+            # 删除 fact/ 空目录
+            if fact_dir.exists():
+                fact_dir.rmdir()
+
+            # Step b: 删除 stage/ 整个目录
+            if stage_dir.is_dir():
+                import shutil
+                shutil.rmtree(stage_dir)
+
+            # Step c: 删除 archive/ 整个目录(V12 私有,不在 V11)
+            archive_dir = change_dir / "archive"
+            if archive_dir.is_dir():
+                import shutil
+                shutil.rmtree(archive_dir)
+
+            upgraded.append(change_dir.name)
+        except Exception as e:
+            errors += 1
+            print(f"❌ FAIL {change_dir.name}: {e}")
+
+    print(f"✅ --upgrade-to-v11 PASS")
+    print(f"   project_root: {project_root}")
+    print(f"   upgraded: {upgraded if upgraded else '(空)'}")
+    print(f"   skipped: {skipped if skipped else '(空)'}")
+    print(f"   errors: {errors}")
+    return 0 if errors == 0 else 1
+
+
 def create_v12_preview_skeleton(project_root: pathlib.Path) -> bool:
     """Step 4.5(V11.8.6 NEW): 生成 V12 物理隔离预览骨架
 
@@ -672,12 +762,24 @@ def main():
     parser.add_argument(
         "--layout",
         choices=["v11-default", "v12-preview"],
-        default="v11-default",
-        help="V11.8.6 NEW: change-id 物理布局。v11-default(默认,V11 现有扁平 layout) 或 v12-preview(对齐 V12 fact/ + stage/{N}/,详见 templates/change-dir-layout-v12-preview.md)",
+        # V12.0.0 升主版本后默认改 v12-preview(V11.8.6 之前是 v11-default)
+        # V11 兼容:V11 项目显式传 --layout v11-default
+        default="v12-preview",
+        help="V12.0.0 NEW: change-id 物理布局。v12-preview(V12 默认,fact/ + stage/{N}/) 或 v11-default(V11 兼容,扁平 layout,显式声明)",
+    )
+    # V12.0.0 NEW: --upgrade-to-v11 子命令(V12 项目回滚到 V11 layout 用,见 V12-ADR-DRAFT.md §7.2)
+    parser.add_argument(
+        "--upgrade-to-v11",
+        action="store_true",
+        help="V12.0.0 NEW: V12 项目回滚到 V11 layout(自动反向迁移 fact/ → 根目录 + 清 stage/)",
     )
     parser.add_argument("--quiet", action="store_true", help="不打印 agent handoff")
     parser.add_argument("--json", action="store_true", help="JSON 输出")
     args = parser.parse_args()
+
+    # V12.0.0 NEW: --upgrade-to-v11 子命令(V12 项目回滚到 V11 layout)
+    if args.upgrade_to_v11:
+        return cmd_upgrade_to_v11(args)
 
     project_root = pathlib.Path(args.project_root).resolve()
 
@@ -692,9 +794,10 @@ def main():
 
     step_count = 5 if args.rules_as_skill else 4
     layout_step = "+ Step 4.5(V12 preview)" if args.layout == "v12-preview" else ""
-    print(f"🚀 V11 初始化（{step_count} 步全流程{layout_step}）— {project_root}")
+    # V12.0.0 升主版本:V11 → V12 名称标识
+    print(f"🚀 V12 初始化（{step_count} 步全流程{layout_step}）— {project_root}")
     print(f"   项目名: {project_name} | 类型: {project_type} | 语言: {language}")
-    print(f"   物理布局: {args.layout}" + ("(对齐 V12 fact/ + stage/{N}/)" if args.layout == "v12-preview" else "(V11 现有扁平 layout)"))
+    print(f"   物理布局: {args.layout}" + ("(V12 默认,fact/ + stage/{N}/)" if args.layout == "v12-preview" else "(V11 兼容,扁平 layout,显式声明)"))
     if not args.rules_as_skill:
         print(f"   模式: --no-rules-as-skill(Step 5 已禁用,SKILL.md §0.5 Step 3 需手动调用)")
     else:

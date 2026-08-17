@@ -32,17 +32,16 @@ references/todos/
 
 ---
 
-## §2 当前活跃待办(2026-08-16 第六轮蒸馏后)
+## §2 当前活跃待办(2026-08-16 第七轮蒸馏后 — V12.0.0 升级完成)
 
 | ID | 文件 | 优先级 | 状态 | 主题 |
 |----|------|--------|------|------|
-| audit-fix | [audit-fix-2026-08-16.md](audit-fix-2026-08-16.md) | audit | done(2026-08-16) | guard-smith audit B 方案 3 件系统化缺口修补落地(AGENTS.md §1.11 增补 + guard-gate-smith §1.1.1 + skill-registration-guard.mjs 顶部 docstring) |
-| mentioned-but-not-parsed closure | [mentioned-but-not-parsed-closure.md](mentioned-but-not-parsed-closure.md) | audit | done(2026-08-16) | mentioned-but-not-parsed top 5 全量验证 — 5/5 已落地(批修 + V11.8.5.P1 + V11.8.6 三批 commit 累积) |
-| V12-ROOT | [v12-physical-isolation/](v12-physical-isolation/) | 等待 ADR | pending | V12 物理隔离迁移(主版本升级),前置 5 项见 [migration-checklist.md §0](v12-physical-isolation/migration-checklist.md) |
+| audit-fix | [audit-fix-2026-08-16.md](audit-fix-2026-08-16.md) | audit | done(2026-08-16) | guard-smith audit B 方案 3 件系统化缺口修补落地 |
+| mentioned-but-not-parsed closure | [mentioned-but-not-parsed-closure.md](mentioned-but-not-parsed-closure.md) | audit | done(2026-08-16) | mentioned-but-not-parsed top 5 全量验证 5/5 + 完整 14/14 已落地 |
+| V12.0.0 ADR | [v12-physical-isolation/V12-ADR-DRAFT.md](v12-physical-isolation/V12-ADR-DRAFT.md) | ADR | **ACCEPTED → IMPLEMENTED → CLOSED**(2026-08-16) | 主版本 V11.5.0 → 12.0.0 升级完成,8 步 + 验证 + 真实反例全过 |
 
-> **数量**:当前 `1 pending`(V12-ROOT 等用户授权 V12 ADR,主版本升级独立轨道)。
-> 历史总数:**18/18 done**(协议层 14 + P3-6 1 + P0-v12 1 + audit-fix 1 + mentioned-but-not-parsed closure 1)。
-> **协议层闭环度 100%**;剩余仅 V12 主版本升级(独立轨道,需用户授权)。
+> **数量**:当前 `0 pending` — V11/V12 协议层闭环度 **19/19 done**(含 V12 主版本升级)。
+> 历史总数:14 项协议层差距 + P3-6 + audit-fix + P0-v12 + mentioned-but-not-parsed closure + V12.0.0 主版本升级 = **19/19 done**。
 
 ### §2.1 为什么不再按"P0/P1/P2/P3"分文件
 

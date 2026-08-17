@@ -48,21 +48,23 @@
 - **禁读 process 层**：diagnose.md、fix_result.md、分析手记、v1v2v3 — 主上下文提取事实摘要注入，子代理不主动读
 - **log 层不作依据**：changelog、commit log、review 报告 — 可看但不作验收依据
 
-### 1.0 V11 主版本可选 V12 物理布局（V11.8.6 NEW — 渐进落地）
+### 1.0 V12 物理布局默认（V12.0.0 NEW — 主版本升级后强制）
 
 ```
-MUST: V11 项目可选按 V12 物理布局写产物 —— 见 templates/change-dir-layout-v12-preview.md
-  - init-from-zero.py --layout v12-preview 创建 fact/ + stage/{11 个} 骨架
-  - 既有 V11 项目不动(Article VIII 不可变);新 change-id 主动对齐 V12
-  - fact/ + stage/{N}/ 物理隔离 = V12 §1 设计哲学在 V11 主版本的预览实现
+MUST: V12 项目**默认**按 V12 物理布局写产物 —— 见 templates/change-dir-layout-v12-preview.md
+  - init-from-zero.py --layout 默认 v12-preview(V11.8.6 之前是 v11-default)
+  - fact/ + stage/{N}/ 物理隔离 = V12 §1 设计哲学作为主版本默认
+  - 既有 V11 项目用 --layout v11-default 显式声明保持向后兼容(不改 Article VIII)
 
-NEVER: V11 项目初始化时默认按 v11-default 布局,后补 fact/ 目录
-  - 破坏既有归档,违反 Article VIII
-  - 正确替代: --layout v12-preview 一次性创建
+NEVER: V12 项目初始化时按 v11-default 布局,后补 fact/ 目录
+  - 破坏 V12 默认契约,违反主版本约定
+  - 正确替代: --layout v12-preview(默认)或 --layout v11-default(显式声明兼容)
 
 NEVER: 把 process 层文件(notes/handoff/diagnosis)写到 fact/
 NEVER: 把 fact 层文件(spec/plan/contracts)写到 stage/{N}/
-  - 路径校验由 templates/hooks/process-layer-guard.sh 强制执行
+  - 路径校验由 templates/hooks/process-layer-guard.sh 强制执行(V12 默认行为)
+
+V11.8.6 历史(参考):本节 V11.8.6 时为"V11 项目可选按 V12"措辞,V12.0.0 升主版本后改为"V12 项目**默认**按 V12"。
 ```
 
 ### 1.1 主动扫描 vs 任务执行读取区分（V11 — 修正冲突）

@@ -49,6 +49,7 @@ depends_on:
 10. 关键门禁套件           — SKEPTICAL VALIDATION([protocol](../../references/skeptical-validation-protocol.md))+ 产品视角 + 自动循环 + Test Plan Gate + 必读 5 件套([SKILL.md §3.7.3.5](../../SKILL.md) 指针引用 — prototype ↔ implementation 对照表 + fidelity 等级 + 偏离理由 + 评审疏漏二次再犯升级用户)
 11. MACHINE GATE           — 判定必跑 ac-gate.py(G1-G5 机械断言),人工只填矩阵不判结论;脚本 exit ≠ 0 = BLOCK,禁止"脚本拦了我放行"
 12. **GITNEXUS FIRST（V11.8.5 NEW — 蒸馏自 bug-fix 不使用 gitnexus）** — 验收前必跑 GitNexus detect_changes()/impact() 查本次变更代码范围，禁止只看 git diff 不知道改了什么（Article V 不可降级）
+13. **V12 STAGE-4 瘦身（V12.0.0 NEW — 主版本升级后强制）** — Stage 4 Review 只做 4 件事：(a) 读 `fact/spec.md` AC 清单；(b) 看 prototype 截图(如 prototype)；(c) 看 real-verify 截图/视频；(d) 对比 AC vs 实际功能。**不做**:读代码细节、评判代码风格、重构建议、性能优化建议（代码细节已通过 Stage 3 自身门禁）。
 ```
 
 ## 骨架流程（V10 reviewer 8 步 + V11 编排器门禁）

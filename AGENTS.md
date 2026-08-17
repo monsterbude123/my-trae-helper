@@ -12,6 +12,8 @@
 >
 > **2026-08-16 蒸馏**：fullstack4TraeV11 mentioned-but-not-parsed closure — 子代理 B 报告 top 5 全量验证 5/5 已落地（批修 + V11.8.5.P1 + V11.8.6 三批 commit 累积）。V11 协议层闭环度 **18/18 = 100%**；剩余仅 V12-ROOT（等用户授权 V12 ADR，主版本升级独立轨道）。参考 [skill-markets/fullstack4TraeV11/references/todos/mentioned-but-not-parsed-closure.md](skill-markets/fullstack4TraeV11/references/todos/mentioned-but-not-parsed-closure.md)。
 >
+> **2026-08-16 蒸馏**：fullstack4TraeV11 **V12.0.0 主版本升级** — 用户 2026-08-16 授权 V12 ADR（回 "同意 A"）后，SKILL.md frontmatter `version: 11.5.0 → 12.0.0`，V11.8.6 6 步工具从可选变强制默认（`--layout` 默认 `v12-preview`，新项目默认 V12 物理布局；既有 V11 项目用 `--layout v11-default` 显式声明兼容）。参考 [skill-markets/fullstack4TraeV11/references/todos/v12-physical-isolation/V12-ADR-DRAFT.md](skill-markets/fullstack4TraeV11/references/todos/v12-physical-isolation/V12-ADR-DRAFT.md)（ACCEPTED → IMPLEMENTED → CLOSED）。
+>
 > **2026-08-15 蒸馏**：fullstack4TraeV11 V11.8.4 commit 准入最小集与全量验收分层（Stage 3.5/4.5 异步化），参考 [references/common-anti-patterns.md §7](skill-markets/fullstack4TraeV11/references/common-anti-patterns.md)。
 
 ---

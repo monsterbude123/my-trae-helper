@@ -376,7 +376,40 @@ roles:
 
 ---
 
-## §10 关联引用
+## §10 V12 物理布局产物落位规则(V12.0.0 NEW — 主版本升级后强制)
+
+> **来源**:[references/todos/v12-physical-isolation/V12-ADR-DRAFT.md](../todos/v12-physical-isolation/V12-ADR-DRAFT.md) §5 Step 4
+> **关联**:`templates/change-dir-layout-v12-preview.md` V12 物理布局模板 + [sub-agent-rules.md §1.0](sub-agent-rules.md) 强制默认
+
+V12 默认布局下,8 个角色(§2.1-§2.8)的产物落位规则——**事实源(4 层文档)落 `fact/`,流程产物落 `stage/{N}/`**:
+
+| 角色 | 产物 | V12 落位(v12-preview/默认) | V11 落位(v11-default) |
+|------|------|---------------------------|-----------------------|
+| 2.1 贾维斯(jarvis) | 项目级状态卡副本 | `fact/.state-card.md` | `docs/specs/.state-card.md` |
+| 贾维斯 | 每 stage 独立状态卡 | `stage/{N}/.state-card.md` | 不适用(V11 单卡)|
+| 2.2 产品策划经理 | AC 提取 | `stage/1/spec/spec-notes.md` | `spec.md` 同级 |
+| 2.3 技术策划 | 实施计划 | `stage/0/plan/plan-notes.md` | `plan.md` 同级 |
+| 2.3 技术策划 | Test Plan | `stage/0.5/test-plan/test-plan-notes.md` | `test-plan.md` 同级 |
+| 2.6 原型设计师 | prototype 设计 | `stage/1.5/prototype/prototype-notes.md` | `prototype.md` 同级 |
+| 2.4 后端实施者 | TDD 笔记 | `stage/3/implement/backend-impl-notes.md` | `impl-notes.md` 同级 |
+| 2.5 前端实施者 | TDD 笔记 + 视觉对照 | `stage/3/implement/frontend-impl-notes.md` + `visual-comparison-notes.md` | 同上 |
+| 2.7 qa-submitter | 提测单 | `stage/3/implement/qa-submit-notes.md` | `verify-report.md` 同级 |
+| 2.8 测试专家 | 真实验证笔记 | `stage/3.5/real-verify/verify-notes.md` | `verify-report.md` |
+| 2.8 测试专家 | 验收评分 | `stage/4/review/review-notes.md` | `review-report.md` |
+| 2.8 测试专家 | rot scan | `stage/4.5/rot-scan/rot-notes.md` | `rot-scan.md` |
+| 跨 stage 信息桥接 | handoff-out | `stage/{N}/handoff-out.md`(≤200 字)| 不适用 |
+
+**铁律**:
+- 4 层文档(spec.md / plan.md / contracts/ / test-plan.md / prototype.md)**只能**落 `fact/` 子目录
+- 13 stage 流程产物(`*-notes.md` / `handoff-out.md` / `verify-notes.md` 等)**只能**落对应 `stage/{N}/` 子目录
+- 状态卡每 stage 独立(V12 新增,V11 单卡结构废弃)
+- `process-layer-guard.sh` 强制校验路径边界(V12 默认行为)
+
+**V11 兼容**:既有 V11 项目的角色产物落位规则不变(扁平布局),V11.8.6 §7.5 已在 4 个 agents 文件落地,V12.0.0 升为强制默认行为。
+
+---
+
+## §11 关联引用
 
 - [stage-skill-agent-protocol.md](stage-skill-agent-protocol.md) — 委派 4 步协议（本协议的调用层基座）
 - [sub-agent-rules.md](sub-agent-rules.md) — 子代理通用铁律（角色文件的公共底座，角色 .md 不重复其内容）

@@ -1,6 +1,52 @@
-# Changelog - V11
+# Changelog - V11 → V12
 
-> V11 独立 skill 版本 changelog。V10 -> V11 蒸馏 + 架构升级。
+> V12 升主版本(2026-08-16 ADR ACCEPTED)。V11.8.6 累积落地后,V12 物理隔离思想从可选变强制默认。
+> V11 项目用 `--layout v11-default` 向后兼容,新项目默认 V12 物理布局。
+
+---
+
+## [V12.0.0] - 2026-08-16
+
+### 🚀 主版本升级 — V11 → V12 物理隔离落地为标准布局
+
+> **ADR**:[references/todos/v12-physical-isolation/V12-ADR-DRAFT.md](references/todos/v12-physical-isolation/V12-ADR-DRAFT.md) — DRAFT → ACCEPTED(用户授权 "同意 A")
+> **累积基础**:V11.8.6 6 步渐进落地(commit `06269ae`)+ audit-fix(commit `4d55aeb`)+ closure(commit `df300f0`)
+
+#### ✨ 新增(V12 形式化)
+
+- **V12 ADR 文件** — `references/todos/v12-physical-isolation/V12-ADR-DRAFT.md`(11 节,含元数据/上下文/选项/决策/8 步路径/验证/回滚/记录/签署/引用/状态转换图)
+- **`init-from-zero.py --upgrade-to-v11`** 子命令 — V12 项目回滚到 V11 layout 用(ADR §7.2)
+
+#### 🔧 修改(V12 默认化)
+
+- **SKILL.md frontmatter** `version: 11.5.0` → `12.0.0` + description/intent 标题升级
+- **`init-from-zero.py --layout` 默认** `v11-default` → `v12-preview`(新项目默认 V12)
+- **`references/sub-agent-rules.md §1.0`** "V11 项目可选按 V12" → "V12 项目**默认**按 V12 物理布局"
+- **`references/document-layer.md §1`** 加 "V12 物理映射" 段
+- **`references/role-protocol.md §6`** 加 "V12 物理布局产物落位规则" 段
+- **`references/state-card-protocol.md §6`** 加 "每 stage 独立 .state-card.md" 段
+- **`skills/09-review/SKILL.md`** 铁律 "只看页面和功能,不读代码细节"
+- **`templates/hooks/pre-stage.sh`** `--reset-to` 升强制 default
+
+#### 🛡️ 兼容性
+
+| 维度 | V11 项目 | V12 项目(新默认) |
+|------|----------|--------------------|
+| 目录布局 | V11 扁平 layout(不变) | V12 fact/ + stage/{N}/ 物理布局 |
+| `init-from-zero.py --layout` | `v11-default` 显式声明 | `v12-preview`(默认) |
+| 既有 18/18 协议层 | ✅ 全部保留 | ✅ 全部保留 |
+| 既有 archive/done 已归档 | ✅ 不动(Article VIII) | ✅ 不动 |
+| CHANGELOG | 本条目主版本声明 | 同 |
+| migration-checklist §1-§6 | 已具备执行条件 | 已具备执行条件 |
+
+#### 📊 V12 验收 4 件事(从 V11 Stage 4 升 V12)
+
+1. 读 `fact/spec.md` AC 清单
+2. 看 prototype 截图(如 prototype)
+3. 看 real-verify 截图/视频
+4. 对比 AC vs 实际功能
+
+**不做**:读代码细节、评判代码风格、重构建议、性能优化建议。
 
 ---
 

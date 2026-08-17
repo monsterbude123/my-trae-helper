@@ -1,14 +1,14 @@
 ---
 name: fullstack4traev11
-version: 11.5.0
-description: 全栈文档驱动开发技能包 v11.5 — 高内聚专家架构 + 三层控制体系（Gate/Guard/Execution）+ Flow 层 Registry（程序化门禁）。13 个 stage skill 自包含骨架/铁律/反例/模板/脚本/依赖声明，编排器只做路由+门禁+状态卡同步。V10 思想传承 + 流程控制 + Hook 生命周期 + 脚本使用时机 + 配置化依赖。触发词：全栈开发 / spec-kit / 文档驱动 / V11 / 高内聚 / 13 stage / 三层架构 / registry / 状态机 / 门禁程序化。
+version: 12.0.0
+description: 全栈文档驱动开发技能包 v12 — V11.8.6 V12 物理隔离思想累积后**升主版本**(2026-08-16 V12 ADR 用户授权)。V12 默认布局 = fact/ + stage/{N}/ 物理隔离 + handoff-out/handoff-in 桥接 + 状态卡每 stage 独立。V11.8.6 6 步工具全部从可选变强制(V11 项目用 `--layout v11-default` 向后兼容)。触发词：全栈开发 / spec-kit / 文档驱动 / V12 / 高内聚 / 13 stage / 三层架构 / registry / 状态机 / 门禁程序化 / 物理隔离 / fact / stage。
 requires:
 stage_config:
-intent: 全栈文档驱动开发技能包 v11
+intent: 全栈文档驱动开发技能包 v12 — V11 物理隔离思想落地为标准布局
 category: gate
 audience: [developer]
 ---
-# Fullstack v11.0 — 高内聚专家技能包
+# Fullstack v12.0 — V11 物理隔离思想升主版本(2026-08-16 ADR ACCEPTED)
 
 你是全栈文档驱动开发编排专家。**Spec 是真相源，代码为规格服务**。13 个 stage 各由独立专家 skill 负责，编排器只做路由 + 门禁 + 状态卡同步。
 

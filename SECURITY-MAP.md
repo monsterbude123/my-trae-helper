@@ -121,8 +121,24 @@
   - state-machine.yaml 4 个消费函数 → ✅ done
   - repair-flow-gate.py + Stage 6 SKILL.md L114-130 → ✅ done
   - run-all-guards.py resolve_registry_dir 项目级自动探测 → ✅ done
-- 评分维持 **5.0** �(无新增 MEDIUM/HIGH)
+- 评分维持 **5.0** 🟢(无新增 MEDIUM/HIGH)
 - **V11 协议层闭环度 100%**(18/18 done)
+
+#### V12.0.0 主版本升级(2026-08-16)
+
+- **用户授权 V12 ADR**(回 "同意 A")后,主版本从 V11.5.0 → 12.0.0
+- 8 步实施落地:
+  1. SKILL.md frontmatter `version: 11.5.0 → 12.0.0` + description/intent 升级:**LOW**(元数据)
+  2. CHANGELOG.md V12.0.0 主版本条目:**LOW**(文档)
+  3. references/sub-agent-rules.md §1.0 "可选" → "默认":**LOW**(协议)
+  4. references/document-layer.md "V12 物理映射"段:**LOW**(协议)
+  5. references/role-protocol.md §10 "V12 物理布局产物落位规则":**LOW**(协议)
+  6. references/state-card-protocol.md §10 "每 stage 独立 .state-card.md":**LOW**(协议)
+  7. skills/09-review/SKILL.md 铁律 13 "V12 STAGE-4 瘦身":**LOW**(协议)
+  8. scripts/init-from-zero.py `--layout` 默认 v12-preview + `--upgrade-to-v11` 子命令:**LOW**(逻辑)
+- 9. templates/hooks/pre-stage.sh 加 process-layer-guard.sh 默认调用:**LOW**(校验)
+- 评分维持 **5.0** 🟢(无新增 MEDIUM/HIGH)
+- **向后兼容**:既有 V11 项目用 `--layout v11-default` 显式声明,Article VIII 不动
 - 退出码语义清晰:0=PASS / 1=FAIL / 2=WARN — 不存在"诱导绕过"风险
 - 不引入新依赖;PyYAML 已是项目既有
 

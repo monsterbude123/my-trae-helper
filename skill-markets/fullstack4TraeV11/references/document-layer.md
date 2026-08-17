@@ -7,6 +7,55 @@
 
 ---
 
+## V12 物理映射(V12.0.0 NEW — 主版本升级后强制)
+
+> **来源**:[references/todos/v12-physical-isolation/V12-ADR-DRAFT.md](../todos/v12-physical-isolation/V12-ADR-DRAFT.md) §4.3 + [templates/change-dir-layout-v12-preview.md](../../templates/change-dir-layout-v12-preview.md)
+>
+> **V12 默认行为**:4 层文档(Layer 1-4)落到 `fact/` 目录物理子目录;13 stage 流程产物落到 `stage/{N}/` 物理子目录。
+
+```
+V12 物理布局(V12.0.0 默认)
+docs/specs/changes/{change-id}/
+├── fact/                                  # 4 层文档物理映射(V12 强制)
+│   ├── spec.md                            # Layer 1: AC / INV / Edge Cases
+│   ├── plan.md                            # Layer 2: Capabilities / Non-Goals
+│   ├── prototype.md                       # Stage 1.5 产物(可选)
+│   ├── test-plan.md                        # Stage 0.5 产物
+│   └── contracts/                         # Layer 3: 契约 4 件套
+│       ├── domain-models.md
+│       ├── api-contracts.md
+│       ├── events.md
+│       └── validation-rules.md
+├── stage/                                 # 13 stage 流程产物(可重置,V12 §2)
+│   ├── -1/intake/{intake-notes, handoff-out}.md
+│   ├── 0/plan/{plan-notes, handoff-out}.md
+│   ├── 0.5/test-plan/{test-plan-notes, handoff-out}.md
+│   ├── 1/spec/{spec-notes, handoff-out}.md
+│   ├── 1.5/prototype/{prototype-notes, handoff-out}.md
+│   ├── 2/contract/{contract-notes, handoff-out}.md
+│   ├── 3/implement/{impl-notes, handoff-out}.md
+│   ├── 3.5/real-verify/{verify-notes, handoff-out}.md
+│   ├── 4/review/{review-notes, handoff-out}.md
+│   ├── 4.5/rot-scan/{rot-notes, handoff-out}.md
+│   └── 5/accept/{accept-notes, handoff-out}.md
+└── archive/                               # Stage 5 完成后写入(V12 不可变)
+```
+
+**映射规则**:
+- `fact/` = 4 层文档物理落位(Layer 1/2/3 + Stage 0.5/1.5 产物)
+- `stage/{N}/` = 13 stage 流程产物(N-1 → 0 → 0.5 → ... → 5)
+- `archive/` = Stage 5 完成后写入(Article VIII 不可变)
+- 主上下文项目级 `.state-card.md` → 副本到 `fact/.state-card.md`(只读)
+
+**V11 兼容**:既有 V11 项目保留原 4 层逻辑(只是物理位置不同,概念不变)。`init-from-zero.py --layout v11-default` 显式声明 V11 layout 继续可用。
+
+**强制校验**:[templates/hooks/process-layer-guard.sh](../../templates/hooks/process-layer-guard.sh) 3 规则:
+- Rule 1: `docs/specs/changes/{id}/` 根目录禁止任何 .md
+- Rule 2: `fact/` 禁止 process 层命名(`*-notes.md` / `*handoff*.md` / `diagnosis-*` / `fix-*` / `v[0-9]*`)
+- Rule 3: `stage/{N}/` 禁止 fact 层命名(`spec.md` / `plan.md` / `contracts/`)
+
+---
+
 ## 4 层文档
 
 ```

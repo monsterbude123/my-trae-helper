@@ -591,3 +591,80 @@ reset_history:
 - _lib_state_card.validate_transition() 校验转换合法性
 - _lib_state_card.is_terminal_state() 判断终止态
 - run-all-guards.py 统一消费（Agent-D 实现）
+
+---
+
+## 十、V12 每 stage 独立 .state-card.md（V12.0.0 NEW — 主版本升级后强制）
+
+> **来源**:[references/todos/v12-physical-isolation/V12-ADR-DRAFT.md](../todos/v12-physical-isolation/V12-ADR-DRAFT.md) §5 Step 5 + [stage-physical-isolation.md §2](stage-physical-isolation.md)
+>
+> **V12 默认行为**:13 stage 各有独立 `.state-card.md` 落 `stage/{N}/.state-card.md`,取代 V11 单卡模式。
+
+### 10.1 V11 vs V12 对比
+
+```
+V11 单卡模式(V11 项目, --layout v11-default):
+docs/specs/changes/{id}/
+└── .state-card.md    # 单卡塞 13 stage 全部数据
+
+V12 多卡模式(V12 默认, --layout v12-preview):
+docs/specs/changes/{id}/
+├── fact/.state-card.md    # 项目级状态卡副本(只读)
+└── stage/
+    ├── -1/intake/.state-card.md
+    ├── 0/plan/.state-card.md
+    ├── 0.5/test-plan/.state-card.md
+    ├── 1/spec/.state-card.md
+    ├── 1.5/prototype/.state-card.md
+    ├── 2/contract/.state-card.md
+    ├── 3/implement/.state-card.md
+    ├── 3.5/real-verify/.state-card.md
+    ├── 4/review/.state-card.md
+    ├── 4.5/rot-scan/.state-card.md
+    └── 5/accept/.state-card.md
+```
+
+### 10.2 多卡字段(V12)
+
+每 stage `.state-card.md` 含字段(精简版,只本 stage 数据):
+
+```yaml
+current_stage: 3/implement
+stage_status: working | completed | blocked
+stage_started_at: 2026-08-16T22:30:00
+stage_ended_at: null
+updated_at: 2026-08-16T23:00:00
+updated_by: 主上下文
+actor: backend-implementer
+duration_minutes: 30
+artifacts:
+  - path: stage/3/implement/backend-impl-notes.md
+    type: file
+    exists: true
+gate_result:
+  status: PENDING
+handoff_out:                       # ≤200 字,给下一 stage
+  - stage: 3.5/real-verify
+    note: "TDD 全绿,backend + frontend impl 完成,等真实验证"
+reset_history: []                  # 仅 stage-gate.py --reset-to 后非空
+```
+
+### 10.3 多卡 vs 单卡的核心好处
+
+| 维度 | V11 单卡 | V12 多卡 |
+|------|---------|---------|
+| 主上下文切换 stage 读 | 全卡(13 stage 累计) | 仅目标 stage 卡 |
+| stage-gate.py --reset-to | 全卡重置 | 仅本 stage + 后续清目录 |
+| handoff 桥接 | 字段嵌入卡片(易膨胀) | `handoff-out.md` 文件(可读性强) |
+| 子代理白名单边界 | 难执行(单卡大家都能读) | 物理目录隔离(主代理扫 stage/{N}/ 仅本 stage) |
+
+### 10.4 V11 兼容
+
+既有 V11 项目保留单卡(`--layout v11-default`)。`stage-gate.py` 默认 `--state-card docs/specs/changes/{id}/.state-card.md`(V11 模式);V12 模式加 `--state-card-per-stage` 参数指定 stage 子目录。V11 项目**不强制迁移**。
+
+### 10.5 强制实现机制(V12 默认)
+
+- `stage-gate.py --state-card` 参数支持项目级 + per-stage 两种路径
+- `process-layer-guard.sh` 校验 `stage/{N}/` 必须含 `.state-card.md`(V12 项目)
+- `init-from-zero.py --layout v12-preview` 创建 `stage/{N}/` 时自动生成空白 `.state-card.md` 模板
+- `state-card-validator.py --strict-audit` 扩到多卡校验(V12 默认)
