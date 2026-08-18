@@ -13,6 +13,8 @@
  *   trae-skills bundle <subcmd> <pkg>            Bundle install/update/uninstall/list
  *                                                 (one-click for sub-skill packages
  *                                                  like fullstack4TraeV11 / game-production-kit)
+ *   trae-skills add-all [options]                Batch install all skills to one or more agents
+ *   trae-skills install-all [options]            Alias for add-all
  *
  * Entry point — only routes commands. Logic lives in src/*.mjs.
  */
@@ -25,6 +27,7 @@ import { runInit } from '../src/init.mjs';
 import { runCreate } from '../src/create.mjs';
 import { runVerify } from '../src/verify.mjs';
 import { runBundle } from '../src/bundle.mjs';
+import { runAddAll, runInstallAll } from '../src/add-all.mjs';
 
 const commands = {
   add: { run: runAdd, desc: 'Install a skill from skill-markets' },
@@ -36,6 +39,8 @@ const commands = {
   create: { run: runCreate, desc: 'Create a new skill package (三层控制)' },
   verify: { run: runVerify, desc: 'Verify a skill (执行所有守卫)' },
   bundle: { run: runBundle, desc: 'Bundle ops for sub-skill packages (install/update/uninstall/list)' },
+  'add-all': { run: runAddAll, desc: 'Batch install all skills from skill-markets (顶层 + 子 skill)' },
+  'install-all': { run: runInstallAll, desc: 'Alias for add-all' },
 };
 
 async function main() {

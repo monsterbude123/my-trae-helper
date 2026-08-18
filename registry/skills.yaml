@@ -30,7 +30,7 @@
 version: 1.0.0
 description: My Trae Helper 技能注册表 — 每个 skill 必带同名 guard + gate 路由
 updated: 2026-08-16
-total_skills: 48
+total_skills: 49
 
 skills:
 
@@ -481,3 +481,28 @@ skills:
       含 name=find-skills + description(发现/安装 agent skill 的入口技能)。本仓库仅保留 SKILL.md
       作为知识引用,实际安装通过 `npx skills find` / `npx skills add` 命令完成(aspect = structure-only)。
       注册由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
+
+  # ── 新增:add-all — CLI 一键全量安装命令(2026-08-18) ─────────────────────
+  # 注:add-all 不是 skill 包,是 bin/cli.mjs add-all CLI 命令,
+  # 按 find-skills / github-kownledge-helper 先例注册为 meta skill。
+  # src/guards/skill-registration-guard.mjs 的 META_GUARD_SKILLS 白名单已扩 add-all。
+  - skill: add-all
+    status: active
+    guards:
+      - { id: add-all-cli, category: cli, script: scripts/add-all-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: add-all-pre-commit, level: L1, hooks: [.husky/add-all-gate, .husky/pre-commit], runs_guards: [add-all-cli] }
+    maintainer: guard-smith
+    notes: |
+      add-all CLI 一键全量安装(2026-08-18 NEW) — 替代逐个 add,把 skill-markets 全部 skill
+      装到目标 agent(40 顶层 + 63 子 skill,默认 trae-cn 全局;支持 --include / --exclude / --bundles)。
+      实现:`src/add-all.mjs`(419 行,三层控制全跑) + `bin/cli.mjs` 路由(别名 install-all)
+      + `tests/unit/test_add_all.mjs`(6 个反例端到端测试 PASS)。
+      不是 skill 包而是 CLI 命令,按 find-skills / github-kownledge-helper 先例注册为 meta skill
+      (无需 skill-markets/add-all/ 目录,通过 src/guards/skill-registration-guard.mjs 的
+      META_GUARD_SKILLS 白名单豁免目录存在性校验)。
+      守卫 scripts/add-all-guard.py 验证 3 项:
+        (1) node --check src/add-all.mjs(语法 OK)
+        (2) bin/cli.mjs add-all --help + install-all --help(已注册)
+        (3) tests/unit/test_add_all.mjs node 跑通(exit 0)
+      本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。

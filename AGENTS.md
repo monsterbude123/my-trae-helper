@@ -2,6 +2,8 @@
 
 > **元项目**：开发 Trae IDE 技能包 + 维护跨 Agent 技能市场 CLI（`@my-trae-helper/cli`）。
 >
+> **2026-08-18 蒸馏**:`add-all` 新命令 — `trae-skills add-all [options]` 一键把 skill-markets 全部 skill 装到目标 agent(40 顶层 + 63 子 skill,默认 trae-cn 全局)。配套:`src/add-all.mjs`(三层控制全跑)+ `bin/cli.mjs` 路由(别名 `install-all`)+ `tests/unit/test_add_all.mjs`(6 反例端到端)。参考 [src/add-all.mjs](src/add-all.mjs)。
+>
 > **2026-08-18 蒸馏**：`find-skills` 入仓 — 从 [vercel-labs/skills](https://github.com/vercel-labs/skills) 的 `skills/find-skills/SKILL.md` 同步入 `skill-markets/find-skills/`,纯文档 skill(V1.0)。**目的**：让本项目 CLI 可通过 junction 接管 `~/.agents/skills/` 目录(Vercel 那套 CLI 原本用 cpSync 复制,本项目统一用 symlink/junction)。**配套改动**:`src/execution/skill-install-control.mjs` 委托 `installer.mjs` 合并双份 junction/copy 实现(避免双代码漂移);`scripts/find-skills-guard.py`(guard-smith 委派生成)+ `registry/skills.yaml` 新增条目(structure guard + L1 pre-commit gate + maintainer guard-smith)。参考 [skill-markets/find-skills/SKILL.md](skill-markets/find-skills/SKILL.md)。
 >
 > **2026-08-16 蒸馏**：fullstack4TraeV11 V11.8.5 协议层承诺 → 脚本落地（13/14 done + 1 留置），参考 [skill-markets/fullstack4TraeV11/references/todos/README.md §2](skill-markets/fullstack4TraeV11/references/todos/README.md)。
@@ -32,7 +34,7 @@
 my-trae-helper/
 ├── bin/cli.mjs               # @my-trae-helper/cli 入口
 ├── src/                      # CLI 实现
-│   ├── add.mjs list.mjs remove.mjs update.mjs init.mjs
+│   ├── add.mjs list.mjs remove.mjs update.mjs init.mjs add-all.mjs
 │   ├── scanner.mjs installer.mjs agents.mjs utils.mjs
 │   ├── create.mjs verify.mjs # 带三层控制的扩展命令
 │   ├── execution/            # Execution Layer（CP1~CP6 风险/备份/回滚/审计）
@@ -201,6 +203,7 @@ MUST: 写完任何 Gate / Guard 脚本后必须用真反例跑自验收
 | 命令 | 功能 | 三层控制 |
 |------|------|---------|
 | `add <name>` | 安装技能 | Execution: install-control + Dependency Guard |
+| `add-all` / `install-all` | 一键安装 skill-markets 全部 skill 到目标 agent(默认全选,支持 `--include` / `--exclude` / `--bundles`) | Execution: install-control + Dependency Guard |
 | `list` / `ls` | 列出已装技能 | - |
 | `remove` / `rm` | 卸载技能 | Execution: install-control |
 | `update` / `up` | 更新技能 | - |

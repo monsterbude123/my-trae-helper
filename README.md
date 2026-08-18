@@ -240,6 +240,17 @@ trae-skills --help               # 帮助
 trae-skills --version            # 版本
 ```
 
+### add-all
+
+一键安装 `skill-markets` 全部 skill 到目标 agent（别名：`install-all`）：
+
+```bash
+trae-skills add-all -g -a trae-cn -y
+trae-skills add-all -g --include coding-xinfa,docsify-doc-builder --dry-run
+```
+
+> 注意：全量装会写入 `~/.trae-cn/skills/`，先 `--dry-run` 预演再 `-y` 确认。
+
 ### 全局选项
 
 | 选项 | 说明 |

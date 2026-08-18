@@ -46,11 +46,11 @@ const VALID_STATUS = new Set(['active', 'deprecated', 'archived']);
 const VALID_LEVEL = new Set(['L1', 'L2', 'L3', 'L4']);
 const MAINTAINER_ALLOWLIST = new Set(['guard-smith']);
 
-// 横切守卫白名单(2026-08-15 NEW):这些条目在 skill-markets/ 下无目录,
-// 是项目级"meta 守卫"(针对所有 skill 的统一规则,如 doc-sync 文档同步),
+// 横切守卫白名单(2026-08-15 NEW;2026-08-18 增 add-all):这些条目在 skill-markets/ 下无目录,
+// 是项目级"meta 守卫"(针对所有 skill 的统一规则,如 doc-sync 文档同步;或 CLI 命令,如 add-all),
 // 注册表允许但反向目录校验跳过。
 // 设计原则:与 AGENTS.md §1.11 一致 — 白名单路径由 guard-smith 自治。
-const META_GUARD_SKILLS = new Set(['doc-sync']);
+const META_GUARD_SKILLS = new Set(['doc-sync', 'add-all']);
 
 /**
  * 列出 skill-markets 下所有根 skill 目录
