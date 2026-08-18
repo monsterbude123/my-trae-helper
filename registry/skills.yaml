@@ -467,3 +467,17 @@ skills:
       在项目根 src-cli/,不在 skill 子目录(aspect = structure-only)。
       注册由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
       2026-08-16 references 全量沉淀:AGENT.md(341 行 10 节)+ project-rules.md(94 行 10 节)→ 13 个 references(workflows-baseline/manifest-schema/doc-map-manager-usage/env-loadenv/reply-conventions/first-run-checklist/skill-evolution/task-start-probe/project-paths/git-workflow-rules/doc-index-rules/answer-rules/safety-cleanup),通用 vs 具体项目配置二分判定,具体 env 名/路径前缀仅作"示例"段。
+
+  # ── 新增:find-skills — 技能发现 CLI(2026-08-18,源自 vercel-labs/skills) ─────
+  - skill: find-skills
+    status: active
+    guards:
+      - { id: find-skills-structure, category: structure, script: scripts/find-skills-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: find-skills-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [find-skills-structure] }
+    maintainer: guard-smith
+    notes: |
+      find-skills 技能发现 CLI(2026-08-18 NEW) — 源自 vercel-labs/skills,SKILL.md frontmatter
+      含 name=find-skills + description(发现/安装 agent skill 的入口技能)。本仓库仅保留 SKILL.md
+      作为知识引用,实际安装通过 `npx skills find` / `npx skills add` 命令完成(aspect = structure-only)。
+      注册由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。

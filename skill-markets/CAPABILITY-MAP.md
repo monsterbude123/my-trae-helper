@@ -8,6 +8,8 @@
 >
 > 维护规则：新增/删除/改依赖 → 同步更新此文件。地图与 SKILL.md 不一致时，以地图为准。
 >
+| find-skills V1.0 接入 | 2026-08-18 | vercel-labs/skills 同步 SKILL.md 入仓(单文件纯文档),src/execution/skill-install-control.mjs 委托 installer.mjs | [skill-markets/find-skills/SKILL.md](find-skills/SKILL.md) + [src/execution/skill-install-control.mjs](../../src/execution/skill-install-control.mjs) |
+
 > **Last Updated**: 2026-08-16（聚合归档 V11.8.5 脚本落地）
 
 | V11.8.5 | 2026-08-16 | project-priority-resolver / secrets-detector / bug-state-machine-validator + todos 全套 | [scripts/README.md L40-42](fullstack4TraeV11/scripts/README.md) + [references/todos/README.md §2](fullstack4TraeV11/references/todos/README.md) |
@@ -49,6 +51,7 @@
 | [trae-local-data-export](trae-local-data-export/SKILL.md) | 纯Skill | Trae IDE 本地数据导出 — 整合 ZedeX/trae-chat-decrypt + cgint/ai-data-extraction，产出 JSON/TXT/SQLite 三大产物 | 7 脚本（extract_key ×2 / decrypt_db / verify / export_sessions / extract_trae_jsonl / sanitize_export） |
 | [agent-dev-control-kit](agent-dev-control-kit/SKILL.md) | 纯Skill | Agent 开发控制体系 — 三层控制(Execution+Guard+Gate) + 快速失败 + 标准模板 | 无（模板文件在 templates/）|
 | [github-kownledge-helper](github-kownledge-helper/SKILL.md) | 纯Skill | 本地 GitHub 仓库管家 — ADD/UPDATE/UPDATE-ALL/QUERY/SYNC-TO 五大工作流 + 命令模式 + 踩坑记录；TS CLI 化（pnpm ghh add/update/sync-to/sync-docs/verify-docs）；项目专属 | 22 references(13 新增:workflows-baseline/manifest-schema/doc-map-manager-usage/env-loadenv/reply-conventions/first-run-checklist/skill-evolution/task-start-probe/project-paths/git-workflow-rules/doc-index-rules/answer-rules/safety-cleanup;+9 原有:commands/workflows/workflows-aggregate/workflows-protocols/workflows-sync-to/cli-development/tdd/doc-verify/pitfalls)；**2026-08-16 全量沉淀**:AGENT.md + project-rules.md → 13 个 references(通用约定沉淀,具体项目配置仅作示例段)；**软依赖**: doc-map-manager（独立 Skill 已发布，CLI 落本项目根） |
+| [find-skills](find-skills/SKILL.md) | 纯Skill | 帮用户发现并安装 agent skill — "how do I do X" / "is there a skill for X" / "can you do X" 等意图触发。2026-08-18 从 [vercel-labs/skills](https://github.com/vercel-labs/skills) 同步入仓 | 无(单 SKILL.md 文件,纯文档,无脚本) |
 
 ### L1 集成层（整合 L0 能力）
 

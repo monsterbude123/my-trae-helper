@@ -1,0 +1,157 @@
+audit_history:
+- check_results:
+    P0-5a-12-bug-fix-7-state: PASS
+    P0-5b-validator-7-state: PASS
+    P0-5c-01-intake-7-state: PASS
+  files_verified:
+  - skill-markets/fullstack4TraeV11/skills/12-bug-fix/references/bug-state-machine.md
+  - skill-markets/fullstack4TraeV11/skills/01-intake/references/bug-state-machine.md
+  - skill-markets/fullstack4TraeV11/scripts/bug-state-machine-validator.py
+  id: P0-5
+  inv_self_check: V11 残留 (IN_PROGRESS/BLOCKED/SKIPPED) 全 0 命中; 禁词 0; 7 态三方 100% 对齐
+  method: strong-gate (25/25) + 11 独立抽检 + 7 态三方一致性
+  notes: 权威源 12-bug-fix (7 态完整); 01-intake 从 3 态扩 7 态; validator 从 5 态扩 7 态. L5 历史命名迁移说明保留
+    (非残留)
+  verdict: PASS
+  verified_at: '2026-08-18T11:20:00'
+- check_results:
+    P0-1-init-slash-format: PASS
+    P0-1-python-syntax-ok: PASS
+    P0-1-state-machine-aligned: PASS
+  files_verified:
+  - skill-markets/fullstack4TraeV11/scripts/init-from-zero.py
+  id: P0-1
+  inv_self_check: 0 命中 (改动范围内)
+  method: strong-gate + 11 独立抽检
+  notes: 骨架 :750-764 + 迁移 :463-467 13 项斜杠对齐 state-machine.yaml
+  verdict: PASS
+  verified_at: '2026-08-18T10:55:00'
+- check_results:
+    P0-2a-prestage-syntax: PASS
+    P0-2a-prestage-v12-unique: PASS
+    P0-2b-precommit-syntax: PASS
+    P0-2b-precommit-v12-stages: PASS
+    P0-2c-prepush-syntax: PASS
+    P0-2c-prepush-v12-unique: PASS
+    P0-2d-preaccept-syntax: PASS
+    P0-2d-preaccept-v12-path: PASS
+  files_verified:
+  - skill-markets/fullstack4TraeV11/templates/hooks/pre-stage.sh
+  - skill-markets/fullstack4TraeV11/templates/hooks/pre-commit-hardened.sh
+  - skill-markets/fullstack4TraeV11/templates/hooks/pre-push-hardened.sh
+  - skill-markets/fullstack4TraeV11/templates/hooks/pre-accept.sh
+  id: P0-2
+  inv_self_check: V11 残留 0; 禁词 0; 强制 exit 非 0
+  method: strong-gate + 18 独立抽检
+  notes: 4 hook V12 唯一路径硬编码, 无 V11 fallback. Manifest substring 从错误短横线改为正确斜杠
+  verdict: PASS
+  verified_at: '2026-08-18T11:00:00'
+- check_results:
+    P0-3-nodejs-yaml-slash: PASS
+    P0-3-python-yaml-slash: PASS
+    P0-4a-proactive-syntax: PASS
+    P0-4a-proactive-v12-path: PASS
+    P0-4b-orphan-syntax: PASS
+    P0-4b-orphan-v12-path: PASS
+    P0-4c-spec-purge-syntax: PASS
+    P0-4c-spec-purge-v12-review: PASS
+    P0-4d-change-status-syntax: PASS
+    P0-4e-setup-feature-syntax: PASS
+  files_verified:
+  - skill-markets/fullstack4TraeV11/scaffolds/nodejs/scaffold.yaml
+  - skill-markets/fullstack4TraeV11/scaffolds/python/scaffold.yaml
+  - skill-markets/fullstack4TraeV11/scaffolds/nodejs/files/gates/gate-config.json
+  - skill-markets/fullstack4TraeV11/scaffolds/python/files/gates/gate-config.json
+  - skill-markets/fullstack4TraeV11/scripts/proactive-scan.py
+  - skill-markets/fullstack4TraeV11/scripts/orphan-detector.py
+  - skill-markets/fullstack4TraeV11/scripts/spec-purge.py
+  - skill-markets/fullstack4TraeV11/scripts/change-status.py
+  - skill-markets/fullstack4TraeV11/scripts/setup-feature.py
+  id: P0-3+P0-4
+  inv_self_check: V11 残留 0; 禁词 0; 13 stage 三源 100% 一致
+  method: strong-gate + 27 独立抽检 + 跨文件一致性
+  notes: scaffold + 5 扫描器 V12 化. flatten_v12_to_v11_layout 已删. Manifest substring
+    从短横线改斜杠 (3 处)
+  verdict: PASS
+  verified_at: '2026-08-18T11:10:00'
+baseline_commit: 02d0d90
+baseline_status: clean-pending-stash
+last_updated: '2026-08-18T11:10:00'
+location: logs/research-2026-08-18/
+mode: strong-gate
+note: 2026-08-17 大量 unstaged 修改未提交, 全部纳入 PR-1
+objective: '修复 fullstack4TraeV11 V12 腐败内容 (36 项: 14 P0 + 11 P1 + 11 P2)'
+operator: goal-mode (监工)
+protected_paths:
+- skill-markets/goal-mode/gate/verify-goal.py
+- skill-markets/goal-mode/gate/acceptance_manifest.yaml
+- skill-markets/goal-mode/gate/STATE_MACHINE.md
+repair_manifest:
+  p0_count: 14
+  p1_count: 11
+  p2_count: 11
+  pr_breakdown:
+    pr1:
+      item_count: 14
+      item_ids:
+      - P0-1
+      - P0-2a
+      - P0-2b
+      - P0-2c
+      - P0-2d
+      - P0-3
+      - P0-4a
+      - P0-4b
+      - P0-4c
+      - P0-4d
+      - P0-4e
+      - P0-5a
+      - P0-5b
+      - P0-5c
+      scope: P0 14 项 (解锁后续回归测试)
+    pr2:
+      item_count: 0
+      scope: P0 余 9 项 (描述层 + agents)
+    pr3:
+      item_count: 0
+      scope: P1 11 项 (references + registry 收尾)
+    pr4:
+      item_count: 0
+      scope: P2 11 项 (清理 + 漏档补全)
+  total_items: 36
+research_outputs:
+- A-upgrade-archaeology.md
+- B-dimension1-description-conflicts.md
+- C-dimension2-agents-perspective.md
+- D-dimension3-subskills-selfcheck.md
+- E-dimension4-scenario-conflicts.md
+- F-skeptical-cross-check.md
+- G-spec-kit-skeleton.md
+- H-final-delivery.md
+stages:
+  stage-0-registration:
+    completed: true
+    status: completed
+  stage-1-pr1-execution:
+    batches:
+      batch-1-p01-p02: completed
+      batch-2-p03-p04-p05: in_progress
+      batch-3-p06-p14: pending
+    completed: false
+    status: in_progress
+  stage-2-pr2-execution:
+    completed: false
+    status: pending
+  stage-3-pr3-pr4-execution:
+    completed: false
+    status: pending
+  stage-4-final-audit:
+    completed: false
+    status: pending
+started_at: '2026-08-18T10:35:00'
+status: candidate_complete
+verdict:
+  passed_checks: 25
+  status: complete
+  timestamp: '2026-08-18T11:26:19.155962'
+  total_checks: 25

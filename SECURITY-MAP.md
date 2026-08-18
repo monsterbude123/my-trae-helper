@@ -29,6 +29,7 @@
 | 技能包 | 文件数 | HIGH | MED | LOW | 评分 | 判定 | 点评 |
 |--------|--------|------|-----|-----|------|------|------|
 | coding-xinfa | 1 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档类，无脚本，无风险 |
+| **find-skills** (V1.0 NEW 2026-08-18) | 1 md | 0 | 0 | 0 | **5.0** | 🟢 | **实跑扫描（2026-08-18）**：trae-security-review scan_skills_dir.py V2.1 → **HIGH 0 + MEDIUM 0 + LOW 0 → PASS**。**来源**：从 [vercel-labs/skills](https://github.com/vercel-labs/skills) `skills/find-skills/SKILL.md` 同步入仓,标注出处。**纯文档 skill**：单 SKILL.md 文件,无 scripts/agents/references/,无 Shell/HTTP/eval-exec 执行面。**配套执行层改动**：`src/execution/skill-install-control.mjs` 委托 `installer.mjs` 合并双份 junction/copy 实现(消除 cpSync/symlinkSync 重复代码漂移风险);`scripts/find-skills-guard.py`(guard-smith 委派生成的 structure-only 占位脚本)。**与现有能力不重复**：本仓库已有 `find-skills` skill 本身无功能重叠;与 `github-kownledge-helper`(本地 GitHub 仓库管家)、`doc-map-manager`(项目文档索引)、`browser-use-cloud`(网页自动化)各占独立垂直场景 |
 | goal-mode | 1 md + 3 agent | 0 | 0 | 0 | **5.0** | 🟢 | Agent 定义文件，无执行脚本 |
 | ponytail4Trae | 7 md | 0 | 3 | 0 | **4.4** | 🟢 | 3 个 MEDIUM 均为文档中的 Shell 命令示例 |
 | gitnexus4Trae | 6 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯 Skill 指令集，无脚本 |

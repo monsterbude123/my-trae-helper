@@ -1,0 +1,16 @@
+{
+  "name": "todoapp-v11",
+  "version": "1.0.0",
+  "description": "V11 SKILL case study: minimal todo app (Node + Express + vanilla JS frontend)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node tests/contracts.test.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

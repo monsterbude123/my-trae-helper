@@ -5,6 +5,16 @@
 
 ## [Unreleased]
 
+### find-skills 接入(2026-08-18)
+
+- **V1.0 NEW** — 从 [vercel-labs/skills](https://github.com/vercel-labs/skills) 同步 `skills/find-skills/SKILL.md` 入仓(纯文档,单文件),用途:帮助用户发现并安装 agent skill("how do I do X" / "is there a skill for X")
+  - `skill-markets/find-skills/SKILL.md`(新增,标注来源)
+  - `scripts/find-skills-guard.py`(新增,guard-smith 委派生成,aspects=[structure])
+  - `registry/skills.yaml` 加条目(1 structure guard + 1 L1 pre-commit gate + maintainer guard-smith),total_skills 48 → 49
+  - `skill-markets/CAPABILITY-MAP.md` + `SECURITY-MAP.md` 各加 L0 行(评分 5.0,纯文档无风险)
+  - **未涉及**:`.husky/<name>-gate`(与其他 skill 一致,挂 `.husky/pre-commit` 共担)
+- **配套执行层重构**:`src/execution/skill-install-control.mjs` 的 `executeInstall/executeUninstall` 委托 `installer.mjs` 同一入口,删除内联 cpSync/symlinkSync 重复实现,统一 junction/copy 行为(消除双代码漂移风险)。`tests/unit/test_skill_install_control.mjs` 11/11 通过。
+
 ### github-kownledge-helper 全量沉淀(2026-08-16)
 
 - **references 全量沉淀 V1.0** — 按 skill-evolution 协议,把 `D:\workspace\github-kownledge-helper\AGENT.md`(341 行 / 10 节)+ `.trae\rules\project-rules.md`(94 行 / 10 节)全量沉淀为 13 个 references(workflows-baseline / manifest-schema / doc-map-manager-usage / env-loadenv / reply-conventions / first-run-checklist / skill-evolution / task-start-probe / project-paths / git-workflow-rules / doc-index-rules / answer-rules / safety-cleanup)+ SKILL.md Triggers 扩展 12 行 + workflows.md 基线引用重定向。判定原则:通用约定沉淀,具体项目配置(env 名/路径前缀)仅作"示例"段

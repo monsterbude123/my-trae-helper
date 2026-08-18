@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>todoApp — V11 case study</title>
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; color: #222; }
+    h1 { font-size: 22px; }
+    form { display: flex; gap: 8px; margin-bottom: 20px; }
+    input[type=text] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 8px 16px; background: #2563eb; color: white; border: 0; border-radius: 4px; cursor: pointer; }
+    ul { list-style: none; padding: 0; }
+    li { display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 1px solid #eee; }
+    li.done span { text-decoration: line-through; color: #999; }
+    li span { flex: 1; }
+    li button { background: #ef4444; }
+    .meta { color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>todoApp <span class="meta">V11 case study</span></h1>
+  <form id="form">
+    <input type="text" id="title" placeholder="输入 todo..." required>
+    <button type="submit">添加</button>
+  </form>
+  <ul id="list"></ul>
+
+  <script>
+    const $list = document.getElementById('list');
+    const $form = document.getElementById('form');
+    const $title = document.getElementById('title');
+
+    async function load() {
+      const r = await fetch('/api/todos');
+      const { todos } = await r.json();
+      $list.innerHTML = '';
+      todos.forEach((t) => {
+        const li = document.createElement('li');
+        if (t.done) li.className = 'done';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = t.done;
+        cb.onchange = () => toggle(t.id, cb.checked);
+        const span = document.createElement('span');
+        span.textContent = t.title;
+        const del = document.createElement('button');
+        del.textContent = '×';
+        del.onclick = () => remove(t.id);
+        li.append(cb, span, del);
+        $list.append(li);
+      });
+    }
+
+    $form.onsubmit = async (e) => {
+      e.preventDefault();
+      if (!$title.value.trim()) return;
+      await fetch('/api/todos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: $title.value }),
+      });
+      $title.value = '';
+      load();
+    };
+
+    async function toggle(id, done) {
+      await fetch('/api/todos/' + id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ done }),
+      });
+      load();
+    }
+
+    async function remove(id) {
+      await fetch('/api/todos/' + id, { method: 'DELETE' });
+      load();
+    }
+
+    load();
+  </script>
+</body>
+</html>

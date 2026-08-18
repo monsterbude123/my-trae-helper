@@ -2,6 +2,8 @@
 
 > **元项目**：开发 Trae IDE 技能包 + 维护跨 Agent 技能市场 CLI（`@my-trae-helper/cli`）。
 >
+> **2026-08-18 蒸馏**：`find-skills` 入仓 — 从 [vercel-labs/skills](https://github.com/vercel-labs/skills) 的 `skills/find-skills/SKILL.md` 同步入 `skill-markets/find-skills/`,纯文档 skill(V1.0)。**目的**：让本项目 CLI 可通过 junction 接管 `~/.agents/skills/` 目录(Vercel 那套 CLI 原本用 cpSync 复制,本项目统一用 symlink/junction)。**配套改动**:`src/execution/skill-install-control.mjs` 委托 `installer.mjs` 合并双份 junction/copy 实现(避免双代码漂移);`scripts/find-skills-guard.py`(guard-smith 委派生成)+ `registry/skills.yaml` 新增条目(structure guard + L1 pre-commit gate + maintainer guard-smith)。参考 [skill-markets/find-skills/SKILL.md](skill-markets/find-skills/SKILL.md)。
+>
 > **2026-08-16 蒸馏**：fullstack4TraeV11 V11.8.5 协议层承诺 → 脚本落地（13/14 done + 1 留置），参考 [skill-markets/fullstack4TraeV11/references/todos/README.md §2](skill-markets/fullstack4TraeV11/references/todos/README.md)。
 >
 > **2026-08-16 蒸馏**：fullstack4TraeV11 V11.8.5.P1 — §3.7 #10 commit 准入最小集程序化（`scripts/commit-minimum-check.py` 4 项校验），收尾 P3-6 留置（14/14 done）。参考 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.5.P1](skill-markets/fullstack4TraeV11/CHANGELOG.md)。

@@ -7,10 +7,9 @@
  */
 
 import { join, dirname, basename } from 'node:path';
-import { existsSync, mkdirSync, cpSync, rmSync, lstatSync, symlinkSync, readFileSync, appendFileSync } from 'node:fs';
-import { platform } from 'node:os';
+import { existsSync, mkdirSync, cpSync, rmSync, readFileSync, appendFileSync } from 'node:fs';
+import { installSkill, uninstallSkill } from '../installer.mjs';
 
-const isWindows = platform() === 'win32';
 const SKILL_MARKETS_DIR = join(process.cwd(), 'skill-markets');
 const BACKUP_DIR = join(process.cwd(), 'logs', 'skill-install-backups');
 const AUDIT_LOG = join(process.cwd(), 'logs', 'skill-market-audit.jsonl');
@@ -132,7 +131,7 @@ export function backupInstalled({ skillName, agentName, agentSkillsDir, timestam
 }
 
 /**
- * CP4: 执行安装
+ * CP4: 执行安装(委托 installer.mjs,统一 junction/copy 实现,避免双份维护)
  * @param {object} opts
  * @param {string} opts.skillName
  * @param {string} opts.agentName
@@ -143,37 +142,16 @@ export function backupInstalled({ skillName, agentName, agentSkillsDir, timestam
 export function executeInstall({ skillName, agentName, agentSkillsDir, method = 'symlink' }) {
   const sourcePath = join(SKILL_MARKETS_DIR, skillName);
   const targetDir = agentSkillsDir || getDefaultSkillsDir(agentName);
-  const target = join(targetDir, skillName);
 
   if (!existsSync(sourcePath)) {
     throw new Error(`技能不存在: ${skillName}`);
   }
 
-  if (!existsSync(targetDir)) {
-    mkdirSync(targetDir, { recursive: true });
-  }
-
-  if (existsSync(target) || safeLstat(target)) {
-    rmSync(target, { recursive: true, force: true });
-  }
-
-  if (method === 'symlink') {
-    if (isWindows) {
-      symlinkSync(sourcePath, target, 'junction');
-    } else {
-      symlinkSync(sourcePath, target, 'dir');
-    }
-  } else if (method === 'copy') {
-    cpSync(sourcePath, target, { recursive: true });
-  } else {
-    throw new Error(`未知安装方式: ${method}`);
-  }
-
-  return target;
+  return installSkill({ sourcePath, targetDir, skillName, method });
 }
 
 /**
- * CP4: 执行卸载
+ * CP4: 执行卸载(委托 installer.mjs)
  * @param {object} opts
  * @param {string} opts.skillName
  * @param {string} opts.agentName
@@ -181,11 +159,7 @@ export function executeInstall({ skillName, agentName, agentSkillsDir, method = 
  */
 export function executeUninstall({ skillName, agentName, agentSkillsDir }) {
   const targetDir = agentSkillsDir || getDefaultSkillsDir(agentName);
-  const target = join(targetDir, skillName);
-
-  if (existsSync(target) || safeLstat(target)) {
-    rmSync(target, { recursive: true, force: true });
-  }
+  uninstallSkill({ targetDir, skillName });
 }
 
 /**
