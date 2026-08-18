@@ -5,6 +5,70 @@
 
 ---
 
+## [V11.8.7.P2] - 2026-08-18
+
+### 🛠️ 项目级 rules skill 创建 三件套(用户提"指导 agent 初始化建立 project rules skills")
+
+> **来源**:用户连续追问 fullstack4TraeV11 指导项目 agent 初始化建立 project rules skills 的内容
+> **本轮性质**:V11.8.7 gitnexus 三件套的配套 — 项目级 rules layer 的强制协议落地
+> **修复策略**:3 件模板强化 + V11 §14.1.1 协议入口 + 自验收脚本
+
+#### 🔧 修改
+
+- **templates/project-rules-skill-template/SKILL.md** — 入口模板强化:
+  - §0 加 V11.8.7 三件套铁律(强制多选 / 漏选审查 / 用户通知)
+  - §2 路由表强制多选(单选 = 反例)
+  - §3.5 新增 7 维漏选审查 checklist(paths / code_style / build_dep / git / bug_fix / asset_hygiene / uncertainty)
+  - §4 Completion Report 必含 `checklist_summary` + 每个 skipped 项 N/A 理由
+  - §5 主代理头部 `[PROJECT-RULES-GATE]` 含 MUST: 多选 / 漏选 / 通知
+  - §5 用户通知格式固定 `📋 Rules 加载通知` markdown 块
+  - §7 反模式加 4 条 V11.8.7 反例(单选 / 选了不 Read / 不通知用户 / 跳漏选审查)
+  - §8 关联引用加 `~/.trae-cn/skills/project-rule-skill/SKILL.md`(全局协议源头)+ `V11 §14.1-§14.4`(项目级创建协议)
+- **templates/project-rules-example/README.md** — 占位示例加 V11.8.7 蒸馏补:
+  - 加"三件套"章节(强制多选 / 漏选审查 / 用户通知)
+  - 5 条具体反例(单 rule 缺 git / 缺 paths / 不通知 / 不 checklist / 单 rule 违反)
+  - 7 维 checklist 表 + 必含 rule
+  - 场景 B(CLI 工具单 rule)标"V11.8.7 不推荐",给修正建议
+  - 加场景 D 单文件脚本的 V11.8.7 例外规则(0 rules 但必告知)
+  - 加"兜底规则"全 5 rules 模板
+- **SKILL.md §14.1.1 NEW** — 项目级 rules skill 创建 三件套入口:
+  - 引 `~/.trae-cn/skills/project-rule-skill/SKILL.md §0` 三件套
+  - 列 V11.8.7 必调的两份模板
+  - 7 必含元素自检清单(用于检测 init-from-zero.py 输出完整性)
+- **SKILL.md §14.2 触发词表** — 加 `新建/初始化 project rules skills(任意 agent)` 行,显式引 §14.1.1
+- **SKILL.md §14.3 反例表** — 加 4 条 V11.8.7 NEW 反例(初始化输出缺三件套 / 单 rule / 不通知 / 不 checklist)
+
+#### 🧪 自验收
+
+| 检查项 | 期望 | 实际 |
+|--------|------|------|
+| 主模板 SKILL.md 7 元素(STRICT) | PASS=7 | ✅ 7/7 |
+| 示例 README 3 元素(LITE) | PASS=3 | ✅ 3/3 |
+| 总体自检 | PASS=10/10 | ✅ |
+| `python init-from-zero.py --help` 含 `--rules-layout {files,skill}` | PASS | ✅ 已含 |
+| V11 SKILL.md §14.1.1 引用全局 project-rule-skill | PASS | ✅ |
+
+#### 🛡️ Guard 合规
+
+- ✅ 不动 registry/skills.yaml / scripts/<name>-guard.* / .husky/<name>-gate(白名单路径)
+- ✅ 不动 V11 skill 内任何 references/*.md
+- ✅ 仅改 templates/(project-rules-example/ + project-rules-skill-template/)+ SKILL.md §14.1-§14.4 — 全在主代理可改范围
+- ✅ 自验收脚本 `_test_prs_template.py` 自检后已删
+
+#### 📋 完成报告
+
+```
+- status: COMPLETED
+- evidence:
+  - templates/project-rules-skill-template/SKILL.md:V11.8.7+ 含 §0 三件套 + §3.5 checklist
+  - templates/project-rules-example/README.md:V11.8.7+ 含三件套核心 + 7 维 checklist
+  - SKILL.md §14.1.1:V11.8.7 三件套入口协议落地
+- pass_count: 10/10(模板自检全过)
+- next_hook: 用户跑 init-from-zero.py --rules-layout skill 项目级 rules 自动按新协议生成
+```
+
+---
+
 ## [V12.0.0.P1] - 2026-08-18
 
 ### 🛠️ 腐化扫描 5 文件批修(4 维度 audit-cycle 第 1 轮)

@@ -103,6 +103,15 @@
   3. **scripts/commit-minimum-check.py #6 check_gitnexus_invocation_trace** — 24h 内有 ok=true 调用才 PASS,纯 blocked 阻断,trace 缺/stale 走 WARN(无首次 commit 即失败的硬伤)
 - 安全评分:**LOW**(仅读写本地文件 + git ls-files + 时间窗口判断;不上传任何外部;trace 路径在 .trae/ 不提交云端)
 
+#### V11.8.7.P2 项目级 rules 三件套(2026-08-18)
+
+- 来源:用户追问 fullstack4TraeV11 指导项目 agent 初始化建立 project rules skills 的内容
+- 落 3 件模板硬化 + V11 §14.1.1 协议入口,把"文字引导"变"7 必含元素自检":
+  1. **templates/project-rules-skill-template/SKILL.md** — §0 加三件套铁律 + §3.5 7 维 checklist + §5 用户通知格式 + §7 加 4 条新反例 + §8 关联引用加全局协议源头
+  2. **templates/project-rules-example/README.md** — 三件套章节 + 5 条具体反例 + 7 维 checklist 表 + 全 5 rules 兜底 + 场景 D 单文件脚本例外规则
+  3. **V11 SKILL.md §14.1.1 NEW** — 项目级 rules skill 创建 三件套入口协议,7 必含元素自检清单
+- 安全评分:**LOW**(纯文档改动,无新代码执行路径;无网络/磁盘 I/O 边界变化)
+
 #### V11.8.6 — V12 物理隔离渐进落地(2026-08-16)
 
 - 新增 `templates/change-dir-layout-v12-preview.md`:**LOW**(纯协议文档,无代码)
