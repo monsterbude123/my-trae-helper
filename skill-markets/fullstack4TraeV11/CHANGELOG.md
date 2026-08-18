@@ -5,6 +5,59 @@
 
 ---
 
+## [V12.0.0.P1] - 2026-08-18
+
+### 🛠️ 腐化扫描 5 文件批修(4 维度 audit-cycle 第 1 轮)
+
+> **来源**:2026-08-18 4 维度腐化扫描(主代理 + 4 子代理并行,reports 在 `logs/v11-corruption-scan/2026-08-18T12-40-04Z-{A,B,C,D}-*.md`)
+> **本轮性质**:V12.0.0 主版本升级后**首轮**系统性腐化扫描
+> **修复策略**:主代理 §1.11 豁免范围直修 + guard-smith 子代理批修 guard/gate 域
+
+#### 🔧 修改
+
+- **registry/state-machine.yaml — gate id 漂移归零** — 9 处 `gate: stage-N-xxx` 全部对齐 gates.yaml 短名(`stage-spec` / `stage-contract` / `stage-implement` / `stage-real-verify` / `stage-review` / `stage-rot-scan` / `stage-accept` / `stage-bug-fix` / `stage-health`)。runtime 不触发 BLOCK(已验证 `_lib_state_card.py:147-198` 不消费 `states[].gate`),纯文档语义一致性 + 未来扩展防御。
+- **registry/state-machine.yaml L40 死路径删除** — `required_artifacts: ["代码 + tests/ + docs/modules/"]` → `["代码 + tests/"]`(V11.8.7.1 已修 `doc-sync-gate` 模板不检查 docs/modules/,事实唯一,文档未同步)。
+- **registry/gates.yaml L3 同步注释** — 顶部追加 1 行 `# V12.0.0 同步:state-machine.yaml states[].gate 字段全部对齐本表短名...`,记录漂移修复意图。
+- **references/trap-instructions.yaml V11-AP15 正例模板同步 V11-AP16** — L475-477 detect_signal 第 3/4 项 + L498-505 fix_template_after 删除 `paths.changes_archive` 双路径示例,改为 `paths.archive` 单真相源。保留 `status: superseded` + `superseded_by: V11-AP16` 不动(历史档案语义)。
+- **references/role-protocol.md §10 schema 补 5 行** — 加 `2.3 tech-plan` / `2.6 fidelity-manifest` / `2.7 qa-submit 子产物` / `2.7 Stage 3.5 verify-notes` / `handoff-in` 5 行产物落位规则(补 V12 物理布局 schema 完整性)。
+- **skills/00-boot/agents/README.md 矩阵对齐 11 列** — 删除原 V12.0.0 多出的 `7/health` orphan 列,严格对齐 `role-protocol.md §1` 11 列。`7/health` 协作交 [skills/13-project-health/SKILL.md](../../13-project-health/SKILL.md) 接管。
+
+#### ➕ 不做
+
+- 13 stage SKILL.md 顶部 `V11.7.0+ 设计入口` 措辞统一 → **暂不做**:测试 `tests/unit/test_v11_doc_sync.py` 硬编码 V11.7.0+ 字符串断言,改 SKILL.md 必同步改测试 + DEFAULT_MARK = 大改动,触发 §3.7 #10 范围盲目扩大陷阱,留 V12.0.1 节奏。
+- CHANGELOG V12.0.0 主段追认 `registry/roles.yaml` 已落地 → **不做**:本任务聚焦腐化扫描修复,非协议层追认。
+
+#### 🧪 自验收
+
+| 检查项 | 期望 | 实际 |
+|--------|------|------|
+| `grep -nE "stage-[0-9]" registry/state-machine.yaml` | 0 命中带数字前缀 gate id | ✅ 0 命中 |
+| `grep -n "docs/modules" registry/state-machine.yaml` | 0 命中 | ✅ 0 命中 |
+| `grep -n "V12.0.0 同步" registry/gates.yaml` | 1 命中 | ✅ 1 命中 |
+| `grep -nE "gate: stage-[a-z-]+" registry/state-machine.yaml` | 13 命中且对齐 gates.yaml | ✅ 13 命中 |
+| `grep -n "changes_archive" references/trap-instructions.yaml` | 仅 V11-AP15 SUPERSEDED 历史背景段 | ✅ 7 处命中全部为"已废弃/已移除"上下文 |
+
+#### 🛡️ Guard 合规
+
+- 主代理直接修 2 处(`role-protocol.md §10` schema + `agents/README.md` 矩阵)→ AGENTS.md §1.11 增补条款**豁免范围**(文档内容 / 非 schema 字段注释)
+- guard-smith 子代理修 3 处(`state-machine.yaml` + `gates.yaml` 顶部注释 + `trap-instructions.yaml`)→ §1.11 写权范畴,委派 `[GUARD-SMITH-DELEGATION]`
+- 兜底验证:主代理亲自跑 5 项 grep(全部 PASS)
+
+#### 📋 报告引用
+
+- `logs/v11-corruption-scan/2026-08-18T12-40-04Z-A-upgrade-vs-antipattern.md` — 反例库冲突审计
+- `logs/v11-corruption-scan/2026-08-18T12-40-04Z-B-roles-self-audit.md` — 8 角色自检
+- `logs/v11-corruption-scan/2026-08-18T12-40-04Z-C-subskills-self-audit.md` — 13 stage sub-skills 自检
+- `logs/v11-corruption-scan/2026-08-18T12-40-04Z-D-cross-scenario-conflicts.md` — 4 场景冲突盘点
+- `logs/v11-corruption-scan/2026-08-18T12-40-04Z-SUMMARY.md` — 主代理汇总
+
+#### 📝 关联
+
+- 跨报告共性 5 条事实唯一(见 SUMMARY §2)
+- 13 项待 V12 升主版本跟进中(见 CHANGELOG V11.8.7 audit-cycle §3):本轮修复 6/13(其中 4 项本轮新增,2 项来自 audit-cycle 13 项列表)
+
+---
+
 ## [V11.8.7.1] - 2026-08-18
 
 ### 🛠️ 用户 5 项硬要求 3 连修(feedback06 + 对话蒸馏)

@@ -472,8 +472,8 @@ traps:
          → 应 0 命中(所有引用必须经 _lib_paths.get_archive_dir / get_changes_archive_dir)
       2. grep -E '"docs/archive"|"docs/specs/(changes/)?archive"' scripts/*.py
          → 应 0 命中(脚本中禁止硬编码路径字符串,除 _lib_paths.py 默认值外)
-      3. .trae/fullstack4traev11.config.yaml 应含 paths.archive + paths.changes_archive 字段
-      4. scripts/_lib_paths.py 应存在 + 含 load_paths / get_archive_dir / get_changes_archive_dir 三函数
+      3. .trae/fullstack4traev11.config.yaml 应含 paths.archive 字段(V11.8.7.1 后单 archive 真相源,不再含 paths.changes_archive)
+      4. scripts/_lib_paths.py 应存在 + 含 load_paths / get_archive_dir 函数(V11.8.7.1 后已移除 get_changes_archive_dir)
       5. spec-purge.py / init-from-zero.py / proactive-scan.py / stage-gate.py 必须 try/except ImportError fallback
     fix_template_before: |
       # ❌ scripts/spec-purge.py L70 硬编码
@@ -497,12 +497,11 @@ traps:
       # ✅ scripts/init-from-zero.py L265 读配置
       from _lib_paths import load_paths
       paths_cfg = load_paths(project_root)
-      dirs = [..., paths_cfg["changes_archive"], ...]
+      dirs = [..., paths_cfg["archive"], ...]
 
-      # ✅ .trae/fullstack4traev11.config.yaml paths 字段
+      # ✅ .trae/fullstack4traev11.config.yaml paths 字段(V11.8.7.1 单 archive 真相源)
       paths:
         archive: docs/archive/done
-        changes_archive: docs/specs/changes/archive
     next_skill: trae-ponytail
     next_skill_action: "路径引用必走 _lib_paths 函数,禁止脚本中硬编码字符串"
     reclaim_steps:

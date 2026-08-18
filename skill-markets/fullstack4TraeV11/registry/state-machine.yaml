@@ -23,7 +23,7 @@ states:
     name: 规格
     allowed_transitions: ["1.5/prototype", "6/bug-fix", "7/health"]
     required_artifacts: ["spec.md"]
-    gate: stage-1-spec
+    gate: stage-spec
   - id: "1.5/prototype"
     name: 原型
     allowed_transitions: ["2/contract", "6/bug-fix", "7/health"]
@@ -33,42 +33,42 @@ states:
     name: 契约
     allowed_transitions: ["3/implement", "6/bug-fix", "7/health"]
     required_artifacts: ["contracts/api-contracts.md"]
-    gate: stage-2-contract
+    gate: stage-contract
   - id: "3/implement"
     name: 实现
     allowed_transitions: ["3.5/real-verify", "6/bug-fix", "7/health"]
-    required_artifacts: ["代码 + tests/ + docs/modules/"]
-    gate: stage-3-implement
+    required_artifacts: ["代码 + tests/"]
+    gate: stage-implement
   - id: "3.5/real-verify"
     name: 真实验证
     allowed_transitions: ["4/review", "6/bug-fix", "7/health"]
     required_artifacts: ["verifications/ + visual_evidence"]
-    gate: stage-3.5-real-verify
+    gate: stage-real-verify
   - id: "4/review"
     name: 评审
     allowed_transitions: ["4.5/rot-scan", "6/bug-fix", "7/health"]
     required_artifacts: ["review-report.md"]
-    gate: stage-4-review
+    gate: stage-review
   - id: "4.5/rot-scan"
     name: 腐烂扫描
     allowed_transitions: ["5/accept", "6/bug-fix", "7/health"]
     required_artifacts: ["rot-scan-{date}.md"]
-    gate: stage-4.5-rot-scan
+    gate: stage-rot-scan
   - id: "5/accept"
     name: 验收
     allowed_transitions: []
     required_artifacts: ["ACCEPT_REPORT.md"]
-    gate: stage-5-accept
+    gate: stage-accept
   - id: "6/bug-fix"
     name: Bug 修复
     allowed_transitions: ["7/health", "3/implement", "5/accept"]
     required_artifacts: ["bug 单 + 回归测试"]
-    gate: stage-6-bug-fix
+    gate: stage-bug-fix
   - id: "7/health"
     name: 项目健康
     allowed_transitions: ["5/accept", "-1/intake"]
     required_artifacts: []
-    gate: stage-7-health
+    gate: stage-health
 transitions:
   - from: "-1/intake"
     to: "0/plan"

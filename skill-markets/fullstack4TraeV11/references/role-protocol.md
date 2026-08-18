@@ -390,14 +390,18 @@ V12 默认布局下,8 个角色(§2.1-§2.8)的产物落位规则——**事实�
 | 2.2 产品策划经理 | AC 提取 | `stage/1/spec/spec-notes.md` | `spec.md` 同级 |
 | 2.3 技术策划 | 实施计划 | `stage/0/plan/plan-notes.md` | `plan.md` 同级 |
 | 2.3 技术策划 | Test Plan | `stage/0.5/test-plan/test-plan-notes.md` | `test-plan.md` 同级 |
+| 2.3 技术策划 | tech-plan(三段方案) | `fact/tech-plan.md` | `docs/specs/{id}/tech-plan.md` |
 | 2.6 原型设计师 | prototype 设计 | `stage/1.5/prototype/prototype-notes.md` | `prototype.md` 同级 |
+| 2.6 原型设计师 | fidelity 标注 + 组件清单 | `stage/1.5/prototype/fidelity-manifest.md` | 不适用 |
 | 2.4 后端实施者 | TDD 笔记 | `stage/3/implement/backend-impl-notes.md` | `impl-notes.md` 同级 |
 | 2.5 前端实施者 | TDD 笔记 + 视觉对照 | `stage/3/implement/frontend-impl-notes.md` + `visual-comparison-notes.md` | 同上 |
-| 2.7 qa-submitter | 提测单 | `stage/3/implement/qa-submit-notes.md` | `verify-report.md` 同级 |
+| 2.7 qa-submitter | 提测单子产物(process 笔记) | `stage/3/implement/qa-submit-notes.md` | `verify-report.md` 同级 |
+| 2.7 qa-submitter | Stage 3.5 验证笔记 | `stage/3.5/real-verify/verify-notes.md` | `verify-report.md` 同级 |
 | 2.8 测试专家 | 真实验证笔记 | `stage/3.5/real-verify/verify-notes.md` | `verify-report.md` |
 | 2.8 测试专家 | 验收评分 | `stage/4/review/review-notes.md` | `review-report.md` |
 | 2.8 测试专家 | rot scan | `stage/4.5/rot-scan/rot-notes.md` | `rot-scan.md` |
 | 跨 stage 信息桥接 | handoff-out | `stage/{N}/handoff-out.md`(≤200 字)| 不适用 |
+| 跨 stage 信息桥接 | handoff-in | `stage/{N}/handoff-in.md`(≤200 字)| 不适用 |
 
 **铁律**:
 - 4 层文档(spec.md / plan.md / contracts/ / test-plan.md / prototype.md)**只能**落 `fact/` 子目录

@@ -1,5 +1,6 @@
 version: 1.2.0
 description: V11 门禁注册表（13 个 stage 每个必登记一门禁）— V11.6.0 stage-review 升级为 ac-gate；V11.7.0 新增 layer 分层字段（module/app/system/docs，贾维斯体系）
+# V12.0.0 同步:state-machine.yaml states[].gate 字段全部对齐本表短名(stage-spec / stage-contract / ...)。runtime 不消费该字段(已验证 _lib_state_card.py:147-198),纯文档语义一致性。
 # layer 语义（V11.7.0 贾维斯分层模型）:
 #   docs    — 流程前置层（文档完整性，按 stage 顺序跑，不属技术分层）
 #   module  — 模块基础层（CRUD 单元级）→ 挂 L1 pre-commit
