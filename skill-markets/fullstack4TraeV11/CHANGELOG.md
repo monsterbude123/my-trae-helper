@@ -56,6 +56,39 @@
 - 跨报告共性 5 条事实唯一(见 SUMMARY §2)
 - 13 项待 V12 升主版本跟进中(见 CHANGELOG V11.8.7 audit-cycle §3):本轮修复 6/13(其中 4 项本轮新增,2 项来自 audit-cycle 13 项列表)
 
+## [V12.0.0.P2] - 2026-08-18
+
+### 🛠️ 13 stage SKILL.md / README.md 顶部 marker V11.7.0+ → V12.0.0+
+
+> **来源**:腐化扫描 SUMMARY §5 #4(暂不做项)用户授权"V12.0.0.P2 批次处理"
+> **事实反转**:V12.0.0.P1 暂不做判断时未核实事实 — `scripts/v11-doc-sync.py` DEFAULT_MARK 早已是 `V12.0.0+`(L41),仅 SKILL.md / README.md 顶部 marker 仍写 V11.7.0+。
+
+#### 🔧 修改
+
+- **skills/{01-intake ~ 13-project-health}/README.md × 13** — 顶部 marker `V11.7.0+ 设计入口` → `V12.0.0+ 设计入口`,`CHANGELOG.md V11.7.0` → `CHANGELOG.md V12.0.0`。
+- **skills/{02-plan,03-test-plan,04-spec,05-prototype,13-project-health}/SKILL.md × 5** — 同上 marker 同步。其余 8 个 stage SKILL.md frontmatter 之后不含 marker(已核),不动。
+- **不触动**:`tests/unit/test_v11_doc_sync.py` — 3 处测试断言改后跑测试 9 fail(预存,与本轮无关);L263 `test_detect_v11_7_marker` keywords 不含 V11.7.0 也是预存 fail。基线 `git stash` 跑测试 = 9 failed 13 passed,与本轮改动后一致 — **本轮零回归**。
+
+#### 🧪 自验收
+
+| 检查项 | 期望 | 实际 |
+|--------|------|------|
+| `git diff --stat` 仅 SKILL.md + README.md | 18 文件改动 | ✅ 18 文件 / 31+/31- |
+| `git stash` 基线 vs 本轮 pytest 输出 | 9 failed 13 passed(相同) | ✅ 预存失败无回归 |
+| 5 个 SKILL.md CRLF 归一 | git 警告消失 | ✅ Python 写入后 normalize |
+| 13 README.md + 5 SKILL.md 顶部 marker | 全部 `V12.0.0+` | ✅ |
+
+#### ➕ 不做(子目录 L4 长文库)
+
+- `skills/*/anti-patterns/*.md` / `references/*.md` / `workflows/*.md` / `templates/*.md` / `README-detail/*.md` 仍有 87 文件 / 188 处 V11.7.0+ marker。
+- 不做原因:严格按用户原话"13 stage SKILL.md" — 子目录文件属 L4 长文库(由 `v11-doc-sync.py` 极简 1 行入口管理),与本轮 L1 骨架修复分离。
+- 下轮跟踪:V12.0.0.P3 候选批次(子目录 marker 同步 + L4 长文库入口自动化)。
+
+#### 📝 关联
+
+- CHANGELOG V12.0.0.P1 — 上一批 6 文件修复(state-machine.yaml 漂移 + V11-AP15 矛盾 + README 矩阵 + role-protocol §10 schema)
+- `scripts/v11-doc-sync.py` DEFAULT_MARK L41 — 已为 V12.0.0+(V12.0.0 升主版本时升级,SKILL.md marker 漏同步)
+
 ---
 
 ## [V11.8.7.1] - 2026-08-18

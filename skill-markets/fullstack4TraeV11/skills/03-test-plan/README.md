@@ -1,6 +1,6 @@
-# Stage 0.5 Test Plan — 元信息
+﻿# Stage 0.5 Test Plan — 元信息
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > 第一性原则：**验收维度决定测试覆盖，测试覆盖决定交付质量**。
