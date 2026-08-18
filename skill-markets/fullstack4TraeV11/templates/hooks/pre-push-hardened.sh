@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# V11 Pre-push Gate (HARDENED) — Stage 3.5 Real Verify
+# V12 Pre-push Gate (HARDENED) — Stage 3 implement + 3.5 real-verify
 # HARDENING POINTS:
 #   1. set -euo pipefail (fail-fast + pipe error propagation)
 #   2. All required files/scripts MUST exist — no assumptions
 #   3. Detect echo-skip anti-pattern (placeholder scripts)
 #   4. Real execution — no mock/stub PASS allowed
-#   5. Mandatory Stage 3.5 Real Verify (V11 §0 required stage)
+#   5. V12 物理布局: push 前 stage/3/implement + stage/3.5/real-verify 状态卡必存
 
 set -euo pipefail
 
@@ -14,19 +14,19 @@ PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 GATE_ID="L2-pre-push-$(date +%Y%m%d%H%M%S)"
 FAILURES=0
 
-echo "==> [V11 Gate L2] Pre-push hardened gate (Stage 3.5 Real Verify)"
+echo "==> [V12 Gate L2] Pre-push hardened gate (Stage 3 implement + 3.5 real-verify)"
 echo "    Gate ID: $GATE_ID"
 
 cd "$PROJECT_ROOT"
 
-# ---- Step 0: Environment validation (V11_GATE_ENFORCED) ----
-if [ -z "${V11_GATE_ENFORCED:-}" ]; then
-    export V11_GATE_ENFORCED="true"
-    export V11_GATE_STAGE="3.5/real-verify"
-    export V11_GATE_CALLER="pre-push-hardened.sh"
-    echo "    [0/6] Environment: V11_GATE_ENFORCED=true (auto-set)"
+# ---- Step 0: Environment validation (V12_GATE_ENFORCED) ----
+if [ -z "${V12_GATE_ENFORCED:-}" ]; then
+    export V12_GATE_ENFORCED="true"
+    export V12_GATE_STAGE="3.5/real-verify"
+    export V12_GATE_CALLER="pre-push-hardened.sh"
+    echo "    [0/6] Environment: V12_GATE_ENFORCED=true (auto-set)"
 else
-    echo "    [0/6] Environment: V11_GATE_ENFORCED=${V11_GATE_ENFORCED}"
+    echo "    [0/6] Environment: V12_GATE_ENFORCED=${V12_GATE_ENFORCED}"
 fi
 
 # ---- Step 1: Required files existence check ----
@@ -100,32 +100,28 @@ if [ $FAILURES -gt 0 ]; then
     exit $FAILURES
 fi
 
-# ---- Step 3: Stage 3.5 Real Verify check (V11 required stage) ----
+# ---- Step 3: V12 stage 3 + 3.5 state card 强制存在性校验 ----
 echo ""
-echo "    [3/6] Stage 3.5 Real Verify check (V11 required stage):"
+echo "    [3/6] V12 stage 3 + 3.5 state card 强制校验:"
 
-STATE_CARD="$PROJECT_ROOT/docs/specs/.state-card.md"
+# V12 唯一布局: push 前 stage/3/implement + stage/3.5/real-verify 状态卡必存
+IMPLEMENT_CARD="$PROJECT_ROOT/stage/3/implement/.state-card.md"
+REAL_VERIFY_CARD="$PROJECT_ROOT/stage/3.5/real-verify/.state-card.md"
 
-if [ -f "$STATE_CARD" ]; then
-    if python3 - "$STATE_CARD" <<'PYEOF' 2>&1; then
-import sys, pathlib, yaml
-path = pathlib.Path(sys.argv[1])
-content = path.read_text(encoding="utf-8")
-if not content.startswith("---"):
-    sys.exit(1)
-end = content.index("\n---", 3)
-fm = yaml.safe_load(content[3:end]) or {}
-stage = fm.get("current_stage", "")
-sys.exit(0 if stage == "3.5/real-verify" else 1)
-PYEOF
-        echo "          [state-card] ✓ current_stage == 3.5/real-verify"
-    else
-        echo "          [state-card] ⚠ current_stage != 3.5/real-verify"
-        echo "          Note: Stage 3.5 Real Verify must be completed before push"
-        echo "          Recommendation: run V11 orchestrator to complete Stage 3.5"
-    fi
+if [ ! -f "$IMPLEMENT_CARD" ]; then
+    echo "          ✗ V12 stage 3 implement card NOT FOUND: $IMPLEMENT_CARD"
+    echo "          Push 前 stage/3/implement/.state-card.md 必须存在"
+    FAILURES=$((FAILURES + 1))
 else
-    echo "          [state-card] ⚠ not found — skip (not mandatory for pre-push)"
+    echo "          ✓ stage/3/implement/.state-card.md exists"
+fi
+
+if [ ! -f "$REAL_VERIFY_CARD" ]; then
+    echo "          ✗ V12 stage 3.5 real-verify card NOT FOUND: $REAL_VERIFY_CARD"
+    echo "          Push 前 stage/3.5/real-verify/.state-card.md 必须存在"
+    FAILURES=$((FAILURES + 1))
+else
+    echo "          ✓ stage/3.5/real-verify/.state-card.md exists"
 fi
 
 # ---- Step 4: Test coverage check ----
@@ -174,12 +170,12 @@ echo "          Gate result: $GATE_RESULT"
 
 if [ $FAILURES -gt 0 ]; then
     echo ""
-    echo "==> [V11 Gate L2] FAILED ($FAILURES check(s) failed)"
+    echo "==> [V12 Gate L2] FAILED ($FAILURES check(s) failed)"
     echo "    Gate ID: $GATE_ID"
     exit $FAILURES
 fi
 
 echo ""
-echo "==> [V11 Gate L2] PASSED"
+echo "==> [V12 Gate L2] PASSED"
 echo "    Gate ID: $GATE_ID"
 echo "    Signature: $SIGNATURE"

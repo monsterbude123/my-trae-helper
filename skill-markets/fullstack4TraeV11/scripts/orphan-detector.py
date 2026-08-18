@@ -27,7 +27,8 @@ def scan_orphan_contract_tests(project_root: pathlib.Path) -> list:
         project_root / "src/**/__tests__/contracts",
     ]
 
-    contracts_dir = project_root / "docs/specs/changes/*/contracts"
+    # V12 物理布局:contracts 位于 change_dir/fact/contracts/ 下
+    contracts_dir = project_root / "docs" / "specs" / "changes" / "*" / "fact" / "contracts"
 
     test_files = []
     for td in test_dirs:
@@ -39,9 +40,9 @@ def scan_orphan_contract_tests(project_root: pathlib.Path) -> list:
     if not test_files:
         return orphans
 
-    # 收集所有 contract 接口
+    # 收集所有 contract 接口(V12:走 fact/contracts/ 路径)
     contract_interfaces = set()
-    for contracts_root in [project_root / "docs/specs/changes"]:
+    for contracts_root in [project_root / "docs" / "specs" / "changes"]:
         if not contracts_root.exists():
             continue
         for contracts_dir in contracts_root.rglob("api-contracts.md"):

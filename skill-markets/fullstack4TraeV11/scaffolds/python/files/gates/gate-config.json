@@ -4,7 +4,7 @@
   "description": "V11 四档 Git/CI 门禁配置（L1-L4，Python 栈）。由 scripts/run-gate-level.py 程序化消费，是项目的单一权威门禁源。",
   "levels": {
     "L1": {
-      "description": "Pre-commit — Stage 1 Spec 完整性 + ruff + mypy",
+      "description": "Pre-commit — Stage 1 Spec 完整性 + ruff + mypy。stage: '1/spec' 对应 Stage 1 Spec。",
       "stage": "1/spec",
       "host": "husky-pre-commit",
       "checks": ["lint", "typecheck", "test:unit"],
@@ -12,7 +12,7 @@
       "blocking": true
     },
     "L2": {
-      "description": "Pre-push — Stage 3.5 Real Verify 集成信心",
+      "description": "Pre-push — Stage 3.5 Real Verify 集成信心。stage: '3.5/real-verify' 对应 Stage 3.5 Real Verify。",
       "stage": "3.5/real-verify",
       "host": "husky-pre-push",
       "checks": ["test:integration", "test:coverage", "build"],
@@ -29,7 +29,7 @@
       "blocking": true
     },
     "L4": {
-      "description": "Release — Stage 5 Accept 验收归档 + 安全审计",
+      "description": "Release — Stage 5 Accept 验收归档 + 安全审计。stage: '5/accept' 对应 Stage 5 Accept。",
       "stage": "5/accept",
       "host": "github-actions",
       "checks": ["test:all", "security-scan"],

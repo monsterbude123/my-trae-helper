@@ -324,9 +324,9 @@ class TestJsonOutput:
         data = json.loads(out)
         assert "summary" in data
         assert data["summary"] in ("PASS", "WARN", "FAIL")
-        assert "checks" in data and len(data["checks"]) == 4
+        assert "checks" in data and len(data["checks"]) == 5
         names = {c["name"] for c in data["checks"]}
-        assert names == {"typecheck", "spot-check", "admin-probe", "lint-pre-existing"}
+        assert names == {"typecheck", "spot-check", "admin-probe", "lint-pre-existing", "secret-in-tracked"}
 
 
 # ============================================================================

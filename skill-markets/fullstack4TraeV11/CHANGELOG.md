@@ -1,7 +1,70 @@
 # Changelog - V11 → V12
 
 > V12 升主版本(2026-08-16 ADR ACCEPTED)。V11.8.6 累积落地后,V12 物理隔离思想从可选变强制默认。
-> V11 项目用 `--layout v11-default` 向后兼容,新项目默认 V12 物理布局。
+> V11.8.7.1 起 **V11 扁平布局已彻底废弃**(`--layout` 仅 `v12-preview`),所有项目(含 V11 既有)必须 V12 物理布局。
+
+---
+
+## [V11.8.7.1] - 2026-08-18
+
+### 🛠️ 用户 5 项硬要求 3 连修(feedback06 + 对话蒸馏)
+
+> **来源**:用户连续 3 次反馈("逗我吗" → "扯犊子" → 5 项硬要求),要求 V11 扁平默认移除 + 归档升级 + module 占位修复 + 多 archive 路径合一。
+>
+> **修复范围**:5 项必修,1 项 trap 反例固化。
+
+#### 🔧 修改
+
+- **Req 1 (HIGH) 移除 V11 扁平默认** — `scripts/init-from-zero.py` `--layout` choices 从 `["v11-default", "v12-preview"]` 缩减为 `["v12-preview"]`,V11 扁平布局**永久废弃**。`Step 4.5` 取消 `if args.layout == "v12-preview"` 条件,无条件必跑。
+- **Req 2 (HIGH) archive 保留 V12 物理布局** — `scripts/spec-purge.py` 不再调用 `flatten_v12_to_v11_layout`(该函数保留为 legacy 安全网,无调用方)。新增 `archive_keep_v12_layout()`:`copytree` 1:1 保留 `fact/ + stage/`,**不展平**。
+- **Req 3 (HIGH) 项目级 module.md 不再占位** — `scripts/init-from-zero.py` 新增 `create_project_module()`(`Step 4.6`),创建 `docs/specs/changes/_module.md` 完整模板(项目元信息 + 模块清单 + 接口边界 + 跨模块约定),不再是空占位。
+- **Req 4 (HIGH) archive 包含 module 内容** — `scripts/spec-purge.py` `archive_keep_v12_layout()` 自动从 `docs/specs/changes/_module.md` 复制到 `archive/{change-id}/_module.md`,V11 legacy 路径也补一份。`V12_FACT_ARTIFACTS` 加入 `fact/module.md`(必含)。
+- **Req 5 (HIGH) archive 路径合一** — `scripts/_lib_paths.py` 移除 `changes_archive` 键 + `get_changes_archive_dir()` 函数,单真相源 = `docs/archive/done`。`init-from-zero.py` `create_docs_skeleton` 不再创建 `docs/specs/changes/archive/`。
+
+#### ➕ 新增
+
+- `scripts/init-from-zero.py::create_project_module()` — 项目级模块真相源(Step 4.6)
+- `scripts/spec-purge.py::archive_keep_v12_layout()` — V12 保留物理布局归档
+- `references/trap-instructions.yaml::V11-AP16` — V11 扁平默认 + archive 展平 + module 占位 三连反例
+
+#### 🧪 自验收(6 项 detect_signal)
+
+```bash
+# 1. --layout 不再含 v11-default
+grep -E 'choices=\[.*v11-default' scripts/init-from-zero.py
+# 期望:0 命中
+
+# 2. flatten_v12_to_v11_layout 调用方 0 处
+grep -E 'flatten_moves\s*=\s*flatten_v12_to_v11_layout' scripts/spec-purge.py
+# 期望:0 命中
+
+# 3. dry-run 文案不再"展平"
+grep -E 'V12 → 展平' scripts/spec-purge.py
+# 期望:0 命中
+
+# 4. _module.md 存在且非占位
+cat docs/specs/changes/_module.md | grep -E "模块清单|接口边界|跨模块约定"
+# 期望:3 行均命中
+
+# 5. 多 archive 路径已合一
+ls docs/specs/changes/archive 2>/dev/null
+# 期望:No such file or directory
+
+# 6. archive 注入 _module.md
+ls docs/archive/done/*/_module.md
+# 期望:每个归档 change 都有
+```
+
+#### 🎯 落地项目
+
+- `D:\workspace\ai-collaborate\ai-short-studio-monster` — 移除 `docs/specs/changes/archive/` + 回填 `_module.md` 到 `docs/archive/done/2026-08-17-bug-1024-stale-cleanup/` + `docs/specs/_invalidated/.../`,更新 `.trae/fullstack4traev11.config.yaml` 删 `changes_archive` 字段。
+
+#### 🐛 V11-AP17(2026-08-18 user feedback)— docs/modules/ 死锁
+
+- **`templates/hooks/doc-sync-gate.py`** 移除 `docs/modules/` 非空检查(L56-69)。原 V10 蒸馏残留,V11 13 stage 流程无对应 stage 写 modules 内容 → PreToolUse 永远 BLOCK → agent 无法编码。
+- **`references/project-structure.md`** 加 "docs/modules/ 不存在" 必检项,明确 V11 模块真相源在 `docs/specs/changes/_module.md`(项目级)+ `fact/module.md`(change 级)。
+- **`references/trap-instructions.yaml`** 新增 V11-AP17。
+- **项目侧 `ai-short-studio-monster`**:`docs/modules/.gitkeep` 移到 `D:\tmp\` 备份 + `.trae/hooks/doc-sync-gate.py` 同步模板。
 
 ---
 
@@ -70,7 +133,7 @@ grep -rEn '"docs/archive"|"docs/specs/(changes/)?archive"' scripts/*.py
 | 维度 | V11 项目 | V12 项目(新默认) |
 |------|----------|--------------------|
 | 目录布局 | V11 扁平 layout(不变) | V12 fact/ + stage/{N}/ 物理布局 |
-| `init-from-zero.py --layout` | `v11-default` 显式声明 | `v12-preview`(默认) |
+| `init-from-zero.py --layout` | `v11-default` 显式声明(**V11.8.7.1 已永久废弃,不得新增**) | `v12-preview`(默认) |
 | 既有 18/18 协议层 | ✅ 全部保留 | ✅ 全部保留 |
 | 既有 archive/done 已归档 | ✅ 不动(Article VIII) | ✅ 不动 |
 | CHANGELOG | 本条目主版本声明 | 同 |
@@ -138,11 +201,11 @@ grep -rEn '"docs/archive"|"docs/specs/(changes/)?archive"' scripts/*.py
 #### 🧪 自验收
 
 ```bash
-# 修真工作 — 第 5 项 secret check 真工作
+# 修正工作 — 第 5 项 secret check 真工作
 python scripts/commit-minimum-check.py --project-root .
 # 期望:5/5 PASS or 4/5 WARN + 1 FAIL (skill repo 无 leak → 5 PASS)
 
-# 修真验证 — 在 case 3 project(已 .gitignore .env + 仍有 archive/done/ 内残留)
+# 修正验证 — 在 case 3 project(已 .gitignore .env + 仍有 archive/done/ 内残留)
 cd ../case-studies/ai-chat-openai-v11
 python ../skill-markets/fullstack4TraeV11/scripts/commit-minimum-check.py --project-root .
 # 期望:第 5 项 FAIL,捕到 archive/done/2026-08-17-ai-chat-openai-v11/intent.md 的真实 key

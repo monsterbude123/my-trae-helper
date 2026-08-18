@@ -1,7 +1,7 @@
 ---
 name: fullstack4traev11
 version: 12.0.0
-description: 全栈文档驱动开发技能包 v12 — V11.8.6 V12 物理隔离思想累积后**升主版本**(2026-08-16 V12 ADR 用户授权)。V12 默认布局 = fact/ + stage/{N}/ 物理隔离 + handoff-out/handoff-in 桥接 + 状态卡每 stage 独立。V11.8.6 6 步工具全部从可选变强制(V11 项目用 `--layout v11-default` 向后兼容)。触发词：全栈开发 / spec-kit / 文档驱动 / V12 / 高内聚 / 13 stage / 三层架构 / registry / 状态机 / 门禁程序化 / 物理隔离 / fact / stage。
+description: 全栈文档驱动开发技能包 v12 — V11.8.6 V12 物理隔离思想累积后**升主版本**(2026-08-16 V12 ADR 用户授权)。V12 默认布局 = fact/ + stage/{N}/ 物理隔离 + handoff-out/handoff-in 桥接 + 状态卡每 stage 独立。V11.8.7.1 起 **V11 扁平布局已彻底废弃**(`--layout` 仅 `v12-preview`,V11 既有项目必须 `--migrate-from-v11` 升级)。触发词：全栈开发 / spec-kit / 文档驱动 / V12 / 高内聚 / 13 stage / 三层架构 / registry / 状态机 / 门禁程序化 / 物理隔离 / fact / stage。
 requires:
 stage_config:
 intent: 全栈文档驱动开发技能包 v12 — V11 物理隔离思想落地为标准布局
@@ -38,31 +38,31 @@ audience: [developer]
 
 ---
 
-## §0.5 Skill 加载协议（V11 升级 — 防首次产物偏离）
+## §0.5 Skill 加载协议（V12 升级 — 防首次产物偏离）
 
 主上下文收到 "Use Skill: fullstack4traev11" 后，**必须**按顺序执行：
 
 1. 加载本 SKILL.md（含 frontmatter `stage_config`）
 2. **必读** 7 个公共 references：constitution / common-iron-rules（含 Article XVII Secret Redaction）/ common-anti-patterns（含 §19-22 反例）/ stage-interaction-protocol / state-card-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns / **agent-error-diagnosis** / **sub-agent-rules** / **project-structure**
-3. **强制调 Skill(name="project-rules")** — 拿项目级 rules 路由表，按需加载项目惯例（V11 NEW — 防违反项目级 rules 协议）。
+3. **强制调 Skill(name="project-rules")** — 拿项目级 rules 路由表，按需加载项目惯例（V12 NEW — 防违反项目级 rules 协议）。
    - **若 `.trae/skills/project_rules_skills/SKILL.md` 已存在** → 直接调用
    - **若不存在** → 必先跑 `python ~/.trae-cn/skills/fullstack4TraeV11/scripts/init-from-zero.py --project-root . --rules-as-skill`（默认开）创建入口，再调用 Skill(name="project-rules"）
 4. **Glob 1 次** 项目自身约定：`AGENTS.md` / `docs/` / `.trae/rules/` / `.trae/fullstack4traev11.config.yaml` + **项目目录结构**（见 §0.5.1）
 5. **核对 V11 标准路径** — 状态卡应在 `docs/specs/.state-card.md`（项目级）/ `docs/specs/changes/{id}/.state-card.md`（change 级）/ `docs/bugs/{id}/.state-card.md`（bug 级）。**禁止用 `.trae/state-card.md`**（V10 残留，已迁移出 `.trae/`）
 6. **如有项目级覆盖** → 按 3 层优先级合并（项目级 > 编排器 stage_config > stage skill depends_on）
-7. **列出"我能踩的雷"清单**（反例 §19-22 + 现有 Article V/IX/XI 必逐项）— 必走（V11.1 NEW）
+7. **列出"我不能踩的雷"清单**（反例 §19-22 + 现有 Article V/IX/XI 必逐项）— 必走（V12 沿用）
 8. **Bug 录入触发词识别**（见 §10）→ 询问用户是否录入 bug 单
 9. 然后才进入 Stage -1 Intake 工作模式
 
 **反例**：只加载 SKILL.md 主文件就立即进入 stage → 不知项目惯例 → 命名/编号/结构偏离 → 用户 4+ 轮返工。
 
-**反例（V11.1 NEW）**：未列"我能踩的雷"清单就直接做工作 → 反复踩同一雷 → 见 [references/unread-rule-pass.md](references/unread-rule-pass.md) §21
+**反例（V12 沿用 V11.1）**：未列"我不能踩的雷"清单就直接做工作 → 反复踩同一雷 → 见 [references/unread-rule-pass.md](references/unread-rule-pass.md) §21
 
-**反例（V11.2 NEW — 蒸馏自 canvas-asset-folders 实战）**：
+**反例（V12 沿用 V11.2 — 蒸馏自 canvas-asset-folders 实战）**：
 - ❌ 跳过 Skill(name="project-rules") 而用 grep/Glob 搜项目 rules → 违反项目级 rules 协议
 - ❌ 把状态卡写到 `.trae/state-card.md`（V10 残留路径）→ 未核对 [state-card-protocol.md §1.1](references/state-card-protocol.md) 必走协议
 
-### §0.5.2 加载后验证（V11.2 NEW — 蒸馏自 canvas-asset-folders 实战）
+### §0.5.2 加载后验证（V12 沿用 V11.2 — 蒸馏自 canvas-asset-folders 实战）
 
 加载协议 9 步走完后，**主上下文必跑 3 项验证**（不进入主流程前）：
 
@@ -81,7 +81,7 @@ ls docs/specs/.state-card.md
 
 **反例**: 跳过 §0.5.2 验证 = "看似加载成功但 hooks/rules/state-card 三件套某项缺失 → 主流程跑挂"。这是 V11.2 蒸馏的 canvas-asset-folders 实战教训。
 
-### §0.5.1 同类约定强制清单（V11.1 NEW — 蒸馏自 V10.12）
+### §0.5.1 同类约定强制清单（V12 沿用 V11.1 — 蒸馏自 V10.12）
 
 **第 3 步"Glob 1 次"具体 Glob 哪些目录**——按任务类型激活强制清单（不分类型 = 漏 Glob = 🛑 FAIL）：
 
@@ -108,15 +108,15 @@ ls docs/specs/.state-card.md
   - ... (10 项全列)
 ```
 
-**反模式（V11.1 禁止）**: "我只 Glob 1-2 项就够了" / "同类理解见仁见智" / "清单太长记不住"。
+**反模式（V12 沿用 V11.1 禁止）**: "我只 Glob 1-2 项就够了" / "同类理解见仁见智" / "清单太长记不住"。
 
 ---
 
 ## §0 三层架构（Gate / Guard / Execution）
 
-> **V11.7.0 贾维斯体系**:为防 agent 改标准通过自己,新增 pre-stage 角色贾维斯(jarvis)+ hash 锁机制(详见 [skills/00-boot/SKILL.md](skills/00-boot/SKILL.md))。会话启动必先委派贾维斯铺三层 gate + 签锁;任何 gate 文件改动必经 [JARVIS-DELEGATION] 委派 + gate-integrity-guard.py 机械校验。
+> **V12 沿用 V11.7.0 贾维斯体系**:为防 agent 改标准通过自己,新增 pre-stage 角色贾维斯(jarvis)+ hash 锁机制(详见 [skills/00-boot/SKILL.md](skills/00-boot/SKILL.md))。会话启动必先委派贾维斯铺三层 gate + 签锁;任何 gate 文件改动必经 [JARVIS-DELEGATION] 委派 + gate-integrity-guard.py 机械校验。
 
-> **V11.4 新增**：从 V11.0 的"门禁链 + Hook 生命周期"两层，升级为三层控制体系（Gate / Guard / Execution），实现"硬化门禁 + 自动化守卫 + 标准化执行"的完整控制闭环。
+> **V12 沿用 V11.4**：从 V11.0 的"门禁链 + Hook 生命周期"两层，升级为三层控制体系（Gate / Guard / Execution），实现"硬化门禁 + 自动化守卫 + 标准化执行"的完整控制闭环。
 
 ### §0.0 架构总览
 
@@ -139,12 +139,12 @@ ls docs/specs/.state-card.md
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**联动规则（V11.4 铁律）**：
+**联动规则（V12 沿用 V11.4 铁律）**：
 - Gate PASS → Guard 层启动
 - Guard PASS → Execution 层启动
 - 任一层 FAIL → 阻断 + 5 字段阻塞报告（见 Article XV）
 
-### §0.0.5 贾维斯分层模型（V11.7.0 NEW — 防 agent 改标准）
+### §0.0.5 贾维斯分层模型（V12 沿用 V11.7.0 — 防 agent 改标准）
 
 > 详见 [skills/00-boot/agents/jarvis.md](skills/00-boot/agents/jarvis.md)。三层防线 + 三层 guard/gate,详见 [references/gate-configuration-protocol.md](references/gate-configuration-protocol.md)。
 
@@ -162,14 +162,14 @@ ls docs/specs/.state-card.md
 唯一写权: 贾维斯 sub-agent(白名单机制 + 委派协议 + hash 锁兜底)
 ```
 
-**硬化状态（V11.5 更新）**：
+**硬化状态（V12 沿用 V11.5 更新）**：
 - **Gate 层**：部分硬化（husky pre-commit/pre-push 绑定 L1→Stage 1 + L2→Stage 3.5）；**13 个 stage 门禁已全部声明式登记**到 [registry/gates.yaml](registry/gates.yaml)（flow 层），`run-all-guards.py` 可程序化断言每 stage 门禁存在性
 - **Guard 层**：部分硬化（hooks-fidelity.py 验证 TRAE IDE event hooks 完整性）
 - **Execution 层**：未硬化（依赖 Agent 自律 + Article IV 委派纪律）
 
-> **Flow 层 Registry（V11.5）**：fact 层（人类+agent 读 .md）与 flow 层（纯程序化解析 .yaml）分离。四表 = `gates.yaml`（13 stage 门禁）+ `guards.yaml`（守卫）+ `state-machine.yaml`（状态机）+ `repair-flow.yaml`（修复流程）。**状态卡本质是状态机**，驾驶舱角色（主上下文）唯一可改状态字段（见 `state-card-protocol.md` 九章）。统一消费脚本 `run-all-guards.py` 读四表输出 PASS/FAIL 矩阵。详见 [registry/README.md](registry/README.md)。
+> **Flow 层 Registry（V12 沿用 V11.5）**：fact 层（人类+agent 读 .md）与 flow 层（纯程序化解析 .yaml）分离。四表 = `gates.yaml`（13 stage 门禁）+ `guards.yaml`（守卫）+ `state-machine.yaml`（状态机）+ `repair-flow.yaml`（修复流程）。**状态卡本质是状态机**，驾驶舱角色（主上下文）唯一可改状态字段（见 `state-card-protocol.md` 九章）。统一消费脚本 `run-all-guards.py` 读四表输出 PASS/FAIL 矩阵，任一 FAIL → exit 1。详见 [registry/README.md](registry/README.md)。
 
-> **⚠️ 对齐诊断（V11.4.1）**：虽有 13 stage 门禁声明，但**仅 Stage 1（L1）+ Stage 3.5（L2）绑定 Git 钩子层**，其余 11 个 stage 依赖 `stage-gate.py`（shell 手动触发）无强制宿主，Agent 仍可能跳过执行。registry 解决了"门禁可被程序化断言"，但"执行强制"仍需后续把 L3/L4 绑定到 CI。完整逐 stage 矩阵见 [references/v7-to-v11-evolution.md §F](references/v7-to-v11-evolution.md)。
+> **⚠️ 对齐诊断（V12 沿用 V11.4.1）**：虽有 13 stage 门禁声明，但**仅 Stage 1（L1）+ Stage 3.5（L2）绑定 Git 钩子层**，其余 11 个 stage 依赖 `stage-gate.py`（shell 手动触发）无强制宿主，Agent 仍可能跳过执行。registry 解决了"门禁可被程序化断言"，但"执行强制"仍需后续把 L3/L4 绑定到 CI。完整逐 stage 矩阵见 [references/v7-to-v11-evolution.md §F](references/v7-to-v11-evolution.md)。
 
 ---
 
@@ -188,7 +188,7 @@ Gate 层分两个子层：
 | **L3 Merge** | PR merge | L2 + CAPABILITY-MAP 同步 + SECURITY-MAP 同步 | 🛑 阻断 |
 | **L4 Publish** | Release | L3 + 全量扫描 + 灰度发布 + 自动升级 tag | 🛑 阻断 |
 
-**Gate 自验收铁律（V11.4 强化）**：
+**Gate 自验收铁律（V12 沿用 V11.4 强化）**：
 ```
 MUST: 写完任何 Gate 脚本后必须用真反例跑自验收
 验证:
@@ -271,7 +271,7 @@ Guard 层负责自动化检查，**不阻断工作流，但记录异常**（除�
 | 6 | e2e 先行 FAIL + 6 层排查 + 全量回归 + bug 单 CLOSED | 🛑 |
 | 7 | 4 维度检查 + 优先级分级（**非阻塞**，异步）| ⚙ |
 
-#### §0.2.4 hooks-fidelity 硬化要求（V11.4 NEW）
+#### §0.2.4 hooks-fidelity 硬化要求（V12 沿用 V11.4）
 
 ```bash
 # 加载协议后必跑（见 §0.5.2）
@@ -310,7 +310,7 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 
 **回退路径**: [references/stage-interaction-protocol.md §四](references/stage-interaction-protocol.md)
 
-**用户确认分级（V10 传承）**:
+**用户确认分级（V12 沿用 V10 传承）**:
 - 完整 13 stage（Plan/Spec/Implement 必确认）
 - 小任务流线化（≤6 Task + LOW + 无新 API → 无 Contract）
 - Bug 快速链（Plan/Review lite-gate）
@@ -337,7 +337,7 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 > - 详见 [references/common-anti-patterns.md §7.3](references/common-anti-patterns.md)（commit 准入 ≠ 全量验收）
 | 5 ~ 7 | `skills/11-accept` ~ `skills/13-project-health` | [doc-map-manager] / [gitnexus4Trae] | archive/done → bug 单 CLOSED → project-health |
 
-### §1.1 角色（Role）委派列（V11.9 角色协议 NEW）
+### §1.1 角色（Role）委派列（V12.0.0 已授权 角色协议）
 
 > 角色体系与 stage **正交**：角色答"谁/职责/权限"，stage 答"何时/流程/产物"（一个角色跨多 stage 履职，一个 stage 多角色协作）。8 角色定义见 [skills/00-boot/agents/README.md](skills/00-boot/agents/README.md)（注册表 + 履职矩阵）+ 各 `<role>.md`。
 
@@ -366,7 +366,7 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 [OUTPUT] 4 字段: status / evidence / pass_count / next_hook
 ```
 
-### §1.6 主上下文自律条款（V11.1 NEW — 蒸馏自 V10.11）
+### §1.6 主上下文自律条款（V12 沿用 V11.1 — 蒸馏自 V10.11）
 
 当主上下文决定**不委派** coding-task agent 时，**必须**在 Completion Report 中显式声明：
 
@@ -507,7 +507,7 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 - 状态卡说谎 / 文档与代码漂移静默迁就
 - 跳过 Stage 4.5 Rot Scan
 
-### §3.7 反虚假交付禁止项（V11.1 NEW — 蒸馏自 V10.10）
+### §3.7 反虚假交付禁止项（V12 沿用 V11.1 — 蒸馏自 V10.10）
 
 > **核心**: 任何"PASS"必附真实证据（command + output + file:line），禁止"看到进程即通过"。
 
@@ -524,7 +524,7 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 9. **"启动 = 完成"软指标**: 启动进程即声称"完成"，无可见产物（V10 §0.10 启动验证）
 10. **范围盲目扩大（反向 #5 陷阱）**（V11.8.4 NEW — 蒸馏自 2026-08-15 merged-commits）: 为避免"假完成"反模式而把范围扩大到不可能完成（60 路由全量截图塞 commit 阻塞路径；5 个 spec 版本反复改仍不收敛）。这是反虚假交付 #5 的镜像陷阱。**commit 准入最小集 ≠ 全量验收**，详见 [references/common-anti-patterns.md §7.3](references/common-anti-patterns.md)
 
-#### V11.2.1 NEW — 蒸馏自 canvas-asset-folders Stage 4 Round 1/2 失败案例引用
+#### V12.0.0 沿用 V11.2.1 — 蒸馏自 canvas-asset-folders Stage 4 Round 1/2 失败案例引用
 
 > **失败场景**：2026-08-12 Stage 4 Round 1/2 评审员**明知只看了"5 预设可见"未对照 prototype**，仍给 PASS。用户一句话（30 字）"这个UI和 prototypes/index.html 你前面阶段设计的内容不是一个东西啊"暴露 Stage 4 评审重大疏漏。
 >
@@ -535,7 +535,7 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 >
 > **关联引用**：[skills/09-review/SKILL.md Step -1](skills/09-review/SKILL.md) | [state-card-protocol.md §5.8](references/state-card-protocol.md)（子代理擅自升级状态协议）
 
-#### §3.7.2 Article V V11.2.1 强化 — 可验证声明硬约束（V11.2.1 NEW — 蒸馏自 canvas-asset-folders）
+#### §3.7.2 Article V V12 沿用 V11.2.1 强化 — 可验证声明硬约束（蒸馏自 canvas-asset-folders）
 
 > **追加位置说明**: 原任务要求在 Article V.5 描述末尾追加，但 SKILL.md 无 Article V.5 显式编号，按 §3.7 语义就近原则追加入 §3.7 末尾（不改 9 项禁止原文）。Article V（可验证声明）的 V11.2.1 强化条款如下：
 
@@ -548,7 +548,7 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 
 **关联铁律**：Article V（可验证声明） + Article IX（质疑式验收） + Article XVI（质疑式校验）。
 
-#### §3.7.3 灵活度铁律 8 — V11.3 NEW — 人工判定覆盖（2026-08-12 canvas-asset-folders 蒸馏）
+#### §3.7.3 灵活度铁律 8 — V12 沿用 V11.3 — 人工判定覆盖（2026-08-12 canvas-asset-folders 蒸馏）
 
 > **设计哲学**: prototype 是"参考起点 + 单一真相源",但**承认合理灵活度**。
 > **核心**: 5% 视觉差异阈值（V11.2 的 20% → V11.3 的 5%）+ fidelity 等级 + 偏离理由 + 工具-人类分层判定。
@@ -567,7 +567,7 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 
 **默认值**:design-prompt.md 无 fidelity 标注 → 视为 **L2 mockup**（默认中保真）
 
-##### 8.2 prototype 演进（V11.3 NEW）
+##### 8.2 prototype 演进（V12 沿用 V11.3）
 
 - Stage 3 实施期间如发现 prototype 设计不合理,**允许**调整 prototype + design-prompt + ui-ux-logic
 - 调整必走:
@@ -599,7 +599,7 @@ python ~/.trae-cn/skills/fullstack4TraeV11/scripts/hooks-fidelity.py --project-r
 
 **反例来源**:2026-08-12 canvas-asset-folders Stage 4 Round 1/2 评审员写"5 预设可见 + API PASS"给 PASS,缺 prototype 1:1 对照 + 缺偏离理由
 
-##### 8.4 工具-人类分层判定（V11.3 NEW — 人工判定覆盖）
+##### 8.4 工具-人类分层判定（V12 沿用 V11.3 — 人工判定覆盖）
 
 > 2026-08-12 用户决策记录:工具反馈通过 → 主上下文直接标记通过；工具反馈未通过 → 由 agent 决定放行时必须附偏离理由（见 §8.3 正当理由清单）。无证据放行视为流程违规。
 
@@ -610,7 +610,7 @@ agent PASS  → 必写偏离理由（§8.3 正当理由清单之一）
 agent FAIL  → 必写 FAIL 原因（spec 违反 / prototype GAP / 实施错误）
 ```
 
-**反例**:agent 工具检测 FAIL 时,无偏离理由即声称"通过" → 按反例 §4 不可证伪理由处理（V11 通用铁律）
+**反例**:agent 工具检测 FAIL 时,无,声称"通过" → 按反例 §4 不可证伪理由处理（V12 通用铁律）
 
 **关联铁律**:Article V（可验证声明） + Article IX（质疑式验收） + Article XVI（质疑式校验）。
 
@@ -665,7 +665,7 @@ skills/{NN}-{name}/
 
 ---
 
-## §14 项目级生态管理规范(V11.2 NEW -- 蒸馏自 init-from-zero.py Step 5 改造)
+## §14 项目级生态管理规范(V12.0.0 已授权 -- 蒸馏自 init-from-zero.py Step 5 改造)
 
 > 任何 stage skill 涉及项目级配置改动(.trae/rules/ / .trae/skills/project_rules_skills/ / .trae/hooks/ / AGENTS.md 等),必走本规范。
 
@@ -716,29 +716,29 @@ skills/{NN}-{name}/
 - templates/project-rules-skill-template/ -- project-rules skill 入口模板
 - templates/project-rules-example/ -- 占位 rule 模板(4 个文件 + README)
 
-### §14.5 项目级 rules > V11 通用层优先级（V11.2 NEW — 蒸馏自 canvas-asset-folders）
+### §14.5 项目级 rules > V12 通用层优先级（V12.0.0 已授权 — 蒸馏自 canvas-asset-folders）
 
 > **本节为任务委托方所指的"§14.2 项目级 vs V11 通用层优先级"**，因 §14.2/§14.3/§14.4 已被既有项目级生态管理规范占用，按 V11 §11 单源原则以 §14.5 编号追加，避免重复定义。
 
 ```
-当 V11 通用层（~/.trae-cn/skills/fullstack4TraeV11/）与项目级 rules（.trae/skills/project_rules_skills/）冲突时：
+当 V12 通用层（~/.trae-cn/skills/fullstack4TraeV11/）与项目级 rules（.trae/skills/project_rules_skills/）冲突时：
 
-MUST: 项目级 rules 优先于 V11 通用层
-MUST: 项目级 .trae/skills/project_rules_skills/references/anti-patterns.md 可补 V11 通用层缺失的反例
-MUST: 项目级 .trae/skills/project_rules_skills/rules/governance.md 可强制 V11 通用层未硬化的门槛（如视觉证据）
-NEVER: 盲信 V11 通用层, 缺项目级叠加（违反 Article XVI §1.4 重叠校验的反向）
+MUST: 项目级 rules 优先于 V12 通用层
+MUST: 项目级 .trae/skills/project_rules_skills/references/anti-patterns.md 可补 V12 通用层缺失的反例
+MUST: 项目级 .trae/skills/project_rules_skills/rules/governance.md 可强制 V12 通用层未硬化的门槛（如视觉证据）
+NEVER: 盲信 V12 通用层, 缺项目级叠加（违反 Article XVI §1.4 重叠校验的反向）
 ```
 
-**适用场景（V11 通用层缺位时的项目级补全范式）**：
+**适用场景（V12 通用层缺位时的项目级补全范式）**：
 
-- V11 通用层缺反例 → 项目级 anti-patterns.md 补全
-- V11 通用层误判 → 项目级 rules 纠正
-- V11 通用层缺硬门槛 → 项目级 governance 强制
-- 真实失败案例（V11 实战蒸馏）→ 项目级 references/ 沉淀
+- V12 通用层缺反例 → 项目级 anti-patterns.md 补全
+- V12 通用层误判 → 项目级 rules 纠正
+- V12 通用层缺硬门槛 → 项目级 governance 强制
+- 真实失败案例（V12 实战蒸馏）→ 项目级 references/ 沉淀
 
-**反例来源**：2026-08-12-canvas-asset-folders 会话（V11 §3.5 缺真实浏览器端到端 UI 截图硬门槛，项目级 visual-evidence-gate 补全）。
+**反例来源**：2026-08-12-canvas-asset-folders 会话（V12 §3.5 缺真实浏览器端到端 UI 截图硬门槛，项目级 visual-evidence-gate 补全）。
 
-**本节即任务委托方所提"V11 §14.2 项目级 vs V11 通用层优先级"小节的源头**。
+**本节即任务委托方所提"V12 §4.2 项目级 vs V12 通用层优先级"小节的源头**。
 
 #### §14.5.1 与 §14.1-§14.4 的关系
 
@@ -756,3 +756,65 @@ NEVER: 盲信 V11 通用层, 缺项目级叠加（违反 Article XVI §1.4 重�
 | 项目级新增反例（V11 通用层未覆盖） | §14.5 "适用场景" 第 1 项 |
 | 项目级 governance 强制门槛 | §14.5 "适用场景" 第 3 项 |
 | AI 自述 "V11 没规定" | §14.5 NEVER 反向铁律 |
+
+---
+
+## §15 paths 配置化(V12.0.0 沿用 V11.8.7 — case 2 蒸馏 fix AGENTS.md paths.archive 漂移)
+
+> **来源**:case 2 (desktop-pet-v11) audit-fix — AGENTS.md §4.1 提到 `paths.archive` 但 V12 SKILL.md 文档无声明;`feedback03-answer.md` 把 `paths.archive` 作为真相但脚本路径硬编码分散 5 个文件(init-from-zero.py / spec-purge.py / proactive-scan.py / stage-gate.py),产生 3 个不同路径(详见 trap-instructions.yaml AP-15)。
+
+### §15.1 必须配置的 4 类路径(V12.0.0 沿用 V11.8.7.1 — 移除 changes_archive)
+
+```yaml
+# .trae/fullstack4traev11.config.yaml
+paths:
+  archive: docs/archive/done               # spec-purge.py 写入路径(单真相源,V11.8.7.1 起)
+  state_card_project: docs/specs/.state-card.md
+  state_card_change: docs/specs/changes/{id}/.state-card.md
+  state_card_bug: docs/bugs/{id}/.state-card.md
+```
+
+### §15.2 单一访问源(V12.0.0 沿用 V11.8.7.1 — 删除 get_changes_archive_dir)
+
+- 任何脚本/agent **必须**通过 `scripts/_lib_paths.py` 提供:
+  - `load_paths(project_root)` → dict,读 .trae/fullstack4traev11.config.yaml `paths.*`,缺则用 V11.8.7.1 默认值(`{archive: docs/archive/done}`)
+  - `get_archive_dir(project_root)` → pathlib.Path,返回 `paths.archive` 解析值
+  - `get_state_card_path(project_root, level, id)` → project/change/bug 三类统一
+- **禁止** 脚本中字符串硬编码:`"docs/archive"` / `"docs/specs/archive"` / `"docs/specs/changes/archive"`
+- 5 个脚本必须有 `try/except ImportError fallback`(老环境无 _lib_paths 时不阻断)
+- **V11.8.7.1 REMOVED**:`get_changes_archive_dir()` 函数已删除(`changes_archive` 双路径废弃),不得复活。
+
+### §15.3 自验收协议(必跑)
+
+```bash
+# 1. 路径单源一致性:5 个脚本不应硬编码路径字符串
+grep -rEn '"docs/archive"|"docs/specs/(changes/)?archive"' skill-markets/fullstack4TraeV11/scripts/*.py
+# → 期望 0 命中(除 _lib_paths.py 的默认值 fallback 外)
+
+# 2. _lib_paths.py 函数二件套存在(V11.8.7.1:删除 get_changes_archive_dir)
+grep -E "^(def load_paths|def get_archive_dir)" skill-markets/fullstack4TraeV11/scripts/_lib_paths.py
+# → 期望 2 行命中
+
+# 3. config.example.yaml paths 字段(V11.8.7.1:不含 changes_archive)
+grep -A 3 "^paths:" skill-markets/fullstack4TraeV11/references/config.example.yaml
+# → 期望不含 changes_archive
+```
+
+### §15.4 反例(违反任一 = REJECT)
+
+| 反例 | 后果 |
+|------|------|
+| 脚本中 `pathlib.Path("docs/archive/done")` | 与 _lib_paths.py 默认值漂移 |
+| 文档描述 `docs/specs/archive/` 或 `docs/specs/changes/archive/` | 与 spec-purge.py 写入路径不一致 |
+| 缺 `_lib_paths.py` fallback | 老环境跑挂 |
+| AGENTS.md 写 `paths.foo` 但 SKILL.md 无声明 | sub-agent 无法识别 |
+| **V11.8.7.1 NEW**:`get_changes_archive_dir()` 复活 | 多 archive 路径死灰复燃,见 V11-AP16 |
+
+### §15.5 关联引用
+
+- [trap-instructions.yaml AP-15](references/trap-instructions.yaml) — V11-AP15 反例
+- [scripts/_lib_paths.py](scripts/_lib_paths.py) — 路径单源库
+- [references/config.example.yaml](references/config.example.yaml) — paths 字段定义
+- [config-files-glossary.md](references/config-files-glossary.md) — .trae/fullstack4traev11.config.yaml 字段表
+- [project-structure.md](references/project-structure.md) — V11 标准目录树
+

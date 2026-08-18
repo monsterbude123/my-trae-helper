@@ -449,10 +449,14 @@ traps:
 
   # ─────────────────────────────────────────────────────────────────
   # V11.8.7 蒸馏(2026-08-17 feedback03)— 路径必须程序化配置,禁止文档/脚本独立硬编码
+  # V11.8.7.1 SUPERSEDED(2026-08-18 feedback06)— changes_archive 双路径已废弃,见 V11-AP16
+  # 本条目保留作历史档案,后续反例请引用 V11-AP16(单 archive 真相源)
   # ─────────────────────────────────────────────────────────────────
   - id: V11-AP15
-    title: archive 路径必须配置化,禁止文档/脚本独立硬编码
+    title: archive 路径必须配置化,禁止文档/脚本独立硬编码 **[SUPERSEDED by V11-AP16]**
     severity: HIGH
+    status: superseded
+    superseded_by: V11-AP16
     what_is_wrong: |
       V11 SKILL 5 个脚本(init-from-zero.py × 2 / spec-purge.py / proactive-scan.py / stage-gate.py)
       独立硬编码 archive 路径,产生 3 个不同路径:
@@ -514,3 +518,143 @@ traps:
       - "references/project-structure.md §与 V10 的关键差异(归档路径行)"
       - "references/constitution.md §Article VIII"
       - ".trae/reports/feedback03-answer.md §2(5 处不一致表)"
+
+  # ─────────────────────────────────────────────────────────────────
+  # V11.8.7.1 蒸馏(2026-08-18 feedback06 + 用户对话)— V11 扁平默认 + archive 展平 + module.md 占位 三连
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-AP16
+    title: V11 扁平布局 + archive 展平 + module.md 占位 三连反例
+    severity: HIGH
+    what_is_wrong: |
+      V11.8.7 落地 3 个反向副作用,2026-08-18 用户反馈:
+      (1) init-from-zero.py 保留 `--layout v11-default` 选项,默认虽改 v12-preview 但 CLI 仍可显式选 V11 扁平
+      (2) spec-purge.py 在 V12 模式下把 fact/ + stage/ 展平到 archive 顶层(spec-archive.md / plan.md / ...),
+          破坏 V12 物理隔离承诺(用户原话:"为啥归档之后 fact 跟着就进了归档文件")
+      (3) project-level module.md 始终占位(空文件),归档时根本不写 fact/module.md 也未复制 _module.md,
+          V12 spec 文档承诺"项目级模块真相源"沦为形式(用户原话:"项目级 module 模块一直是占位啊")
+
+      3 个反例在用户场景同时触发:ai-short-studio-monster 重跑 init 3h 仍 V11 扁平;
+      archive 后只剩 14 个 V11 平铺 .md; module.md 永远空。
+    detect_signal: |
+      1. grep -E 'choices=\[.*v11-default.*v12-preview' scripts/init-from-zero.py
+         → 应 0 命中(V11.8.7.1 起 v11-default 已从 choices 列表移除)
+      2. grep -E 'flatten_v12_to_v11_layout' scripts/spec-purge.py
+         → 应仅 1 处(函数定义本身);调用方 flatten_moves = flatten_... 应 0 命中
+      3. grep -E 'V12 → 展平' scripts/spec-purge.py
+         → 应 0 命中(dry-run 文案不再写"展平")
+      4. cat docs/specs/changes/_module.md
+         → 应非占位(包含"模块清单/接口边界/跨模块约定"小节)
+      5. ls docs/specs/changes/archive/ 2>/dev/null
+         → 应不存在(multi-archive 路径已合一,真相源 = docs/archive/done)
+      6. ls docs/specs/changes/_module.md docs/archive/done/*/_module.md 2>/dev/null
+         → 应均存在(项目级 → archive 注入链路完整)
+    fix_template_before: |
+      # ❌ init-from-zero.py --layout 仍含 v11-default
+      parser.add_argument("--layout", choices=["v11-default", "v12-preview"], default="v12-preview", ...)
+
+      # ❌ spec-purge.py V12 模式展平
+      if layout == "v12":
+          shutil.copytree(invalidated_dir, archive_dir)
+          flatten_moves = flatten_v12_to_v11_layout(archive_dir, archive_dir)
+          extra_note = f" V12→V11 展平: {len(flatten_moves)} 个文件"
+
+      # ❌ 缺项目级 _module.md + 未注入 archive
+      # (无对应代码:module.md 永远占位,archive 写不写都不影响)
+    fix_template_after: |
+      # ✅ init-from-zero.py --layout 仅 v12-preview(V11 强制废弃)
+      parser.add_argument("--layout", choices=["v12-preview"], default="v12-preview",
+                         help="V11.8.7.1 NEW: v12-preview 唯一;v11-default 已废弃")
+      # 同时:Step 4.5 + Step 4.6 无条件必跑(不再 if args.layout == "v12-preview")
+
+      # ✅ spec-purge.py V12 保留物理布局 + 注入 _module.md
+      if layout == "v12":
+          actions = archive_keep_v12_layout(invalidated_dir, archive_dir)  # 1:1 copytree
+          # archive_keep_v12_layout 内部自动复制 _module.md → archive/_module.md
+
+      # ✅ init-from-zero.py Step 4.6 创建项目级 _module.md(非占位)
+      def create_project_module(project_root, project_name, project_type) -> bool:
+          # 写含"模块清单/接口边界/跨模块约定"完整模板
+          ...
+    next_skill: trae-ponytail
+    next_skill_action: "3 处一起修(CLI choices / 归档逻辑 / 模块真相源),不要只改一处"
+    reclaim_steps:
+      - init-from-zero.py: --layout choices 去掉 v11-default,Step 4.5 + Step 4.6 取消条件
+      - spec-purge.py: 移除 flatten_v12_to_v11_layout 调用,新增 archive_keep_v12_layout(1:1 copytree + 注入 _module.md)
+      - init-from-zero.py: 新增 create_project_module(写项目级 docs/specs/changes/_module.md)
+      - V12_FACT_ARTIFACTS 加入 fact/module.md(归档前必含)
+      - _lib_paths.py: 移除 changes_archive 键 + get_changes_archive_dir 函数(单 archive 真相源)
+      - 项目侧:rm -rf docs/specs/changes/archive/;回填 _module.md 到所有 docs/archive/done/*/
+      - 跑 6 项 detect_signal 自验收
+    see_also:
+      - "scripts/_lib_paths.py(单 archive 真相源)"
+      - "scripts/init-from-zero.py(--layout 单选 + Step 4.6 create_project_module)"
+      - "scripts/spec-purge.py(archive_keep_v12_layout + V12_FACT_ARTIFACTS 含 fact/module.md)"
+      - "CHANGELOG.md V11.8.7.1 段"
+      - ".trae/reports/feedback06.md(三连反例现场)"
+
+  # ─────────────────────────────────────────────────────────────────
+  # V11.8.7.1 蒸馏(2026-08-18 user feedback)— docs/modules/ 死锁(空目录 + PreToolUse BLOCK)
+  # ─────────────────────────────────────────────────────────────────
+  - id: V11-AP17
+    title: docs/modules/ 死锁(空目录 + doc-sync-gate BLOCK)
+    severity: HIGH
+    what_is_wrong: |
+      2026-08-18 用户反馈:清空 docs/ 后跑 init-from-zero.py,docs/modules/.gitkeep 自动出现,
+      但项目侧文档没说这个目录该装什么。
+
+      根因:doc-sync-gate.py L56-69 检查 docs/modules/ 必须非空才放行 PreToolUse,
+      而 init-from-zero.py 在历史版本可能创建 docs/modules/.gitkeep 占位(V10 stage-2-doc-sync 残留),
+      但 V11 13 stage 流程无对应 stage 写入内容 → PreToolUse 永远 BLOCK → 死锁。
+
+      表现:agent 启动后任何 Edit/Write 都被 doc-sync-gate 拒绝,
+      错误信息:"DOC SYNC 未完成，docs/modules/ 缺失或为空",永远无法进入实际编码。
+    detect_signal: |
+      1. ls <project>/docs/modules/
+         → 若存在但只有 .gitkeep = 命中(死锁前置条件)
+      2. grep -E 'docs[/\\\\]+modules' skill-markets/fullstack4TraeV11/templates/hooks/doc-sync-gate.py
+         → V11.8.7.1 后应 0 命中(检查已移除)
+      3. grep -E '"docs/modules"' skill-markets/fullstack4TraeV11/scripts/init-from-zero.py
+         → 应 0 命中(init-from-zero.py 不应创建此目录)
+      4. project-structure.md 应明确写 "docs/modules/ 不存在" 是必检项
+    fix_template_before: |
+      # ❌ templates/hooks/doc-sync-gate.py L56-69
+      modules_dir = project_root / "docs" / "modules"
+      if not modules_dir.exists() or not any(modules_dir.iterdir()):
+          # BLOCK + exit 2
+
+      # ❌ init-from-zero.py create_docs_skeleton 包含 docs/modules
+      dirs = [..., "docs/modules", ...]
+
+      # ❌ 项目侧 docs/modules/.gitkeep 占位(死锁前置)
+      docs/modules/.gitkeep
+    fix_template_after: |
+      # ✅ templates/hooks/doc-sync-gate.py 移除 modules 检查(V11.8.7.1)
+      # V11.8.7.1 REMOVED: docs/modules/ 检查(死锁 bug)
+
+      # ✅ init-from-zero.py create_docs_skeleton 不创建 docs/modules
+      dirs = [
+          "docs/specs/changes",
+          paths_cfg["archive"],
+          "docs/bugs", "docs/verifications", "docs/reports", "docs/references",
+      ]
+      # 模块真相源走 Step 4.6 create_project_module() → docs/specs/changes/_module.md
+
+      # ✅ 项目侧删孤儿目录
+      rm docs/modules/.gitkeep
+      # 或 rmdir docs/modules
+
+      # ✅ references/project-structure.md 加禁条
+      □ docs/modules/ 不存在？(必 — V11.8.7.1 REMOVED)
+    next_skill: trae-ponytail
+    next_skill_action: "V10 → V11 蒸馏常留死路径,删除 + 加规范 + 加 trap 三件套"
+    reclaim_steps:
+      - templates/hooks/doc-sync-gate.py: 删 modules_dir 检查 + 加 V11.8.7.1 REMOVED 注释
+      - 项目 .trae/hooks/doc-sync-gate.py: 同步模板
+      - references/project-structure.md: 加 "docs/modules/ 不存在" 必检项 + 解释真相源在 _module.md
+      - 项目侧:rm docs/modules/.gitkeep + rmdir docs/modules
+      - 自验收:grep + ls 双确认
+    see_also:
+      - "templates/hooks/doc-sync-gate.py(V11.8.7.1 移除 docs/modules 检查)"
+      - "references/project-structure.md(模块真相源 = _module.md)"
+      - "CHANGELOG.md V11.8.7.1 段"
+      - "scripts/init-from-zero.py(Step 4.6 create_project_module)"

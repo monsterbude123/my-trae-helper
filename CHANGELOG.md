@@ -79,6 +79,44 @@
     - #12 proactive-scan.py L88/134/174/195/196/270/271 _invalidated 白名单 + L247 上下文窗口 200 字符 + L286 反例说明跳过 → ✅ done
     - #13 commit-minimum-check.py V11.8.5.P1 → ✅ done
     - #14 templates/hooks/pre-stage.sh L7-119 + launch-guard.sh L40 强制 stage-gate.py 调用 → ✅ done
+  - 详见 [skill-markets/fullstack4TraeV11/references/todos/mentioned-but-not-parsed-closure.md](skill-markets/fullstack4TraeV11/references/todos/mentioned-but-not-parsed-closure.md)
+
+### fullstack4TraeV11 V11.8.7.1(2026-08-18)— 5 项用户硬要求 3 连修 + V11-AP17 修复
+
+- **5 项用户硬要求 3 连修**(用户 2026-08-18 拍板,V11.8.7.1 闭项):
+  - `init-from-zero.py`:`--layout` 移除 `v11-default` 兼容值(只留 `v12-preview` + 隐式默认),`create_project_module()` 强保 module 存在(避免空目录)
+  - `spec-purge.py`:`archive_keep_v12_layout()` 不再展平 archive 子目录(保留 stage/ + fact/ 物理结构)
+  - `_lib_paths.py` 合并 `paths` + `project_paths` + `check_paths_config` 3 个分散模块(单文件 ≈ 180 行,引用统一)
+  - `check_paths_config.py` 提升为项目侧独立守卫脚本(从 `_lib_paths` 抽出,独立触发)
+  - `references/project-structure.md` 加 `docs/modules/` 不存在必检项
+- **V11-AP17 修复**(doc-sync-gate 死锁):
+  - `templates/hooks/doc-sync-gate.py` 移除 `docs/modules/` 死锁检查(原因为 init-from-zero.py 创建占位 .gitkeep,但 V11 规范无 stage 写 modules/ 内容,导致 PreToolUse 永远 BLOCK)
+  - 真相源迁移:`docs/specs/changes/_module.md`(项目级) + `fact/module.md`(change 级)
+  - `references/trap-instructions.yaml` 加 V11-AP17 反例
+- **新增资产**:
+  - `references/config.example.yaml` / `project-gitignore-template.md` / `state-card.schema.json`(3 份资产 schema 与模板)
+  - `templates/ci/v12-gate.yml`(替代 `v11-gate.yml`,rename 而非删除)
+  - `scripts/_lib_paths.py` / `check_paths_config.py` / `_todoapp_e2e.py` / `_todoapp_e2e_v2.py` / `_total_verify.py`(5 个新/独立脚本)
+  - `skill-markets/fullstack4TraeV11/.gitignore`(本地保护 `case-studies/` 等外部测试项目)
+- **case-driven-skill-audit 接入(.agents/skills,非 skill-markets)**
+  - **V1.0.0 NEW** — 审计方法论技能,定位"通过实跑 case 评估 skill 真假"而非读文档判定
+  - 触发关键词:`case study` / `实跑 case` / `走完整流水线` / `skill 升级调研` / `skill 真假` / `演练收集经验` / `case-driven audit`
+  - 包含 SKILL.md + 1 references( `case-2-evidence.md`,case 2 desktop-pet-v11 实跑证据)
+  - 详见 [.agents/skills/case-driven-skill-audit/SKILL.md](.agents/skills/case-driven-skill-audit/SKILL.md)
+- **auto-task/fullstackselfimproving**
+  - 新增 auto-task 协议入口,内容为 fullstack skill 自改进场景的 prompt 模板
+  - 配合 `auto-task/daily-vibe-coding` 形成 auto-task 体系
+- **audit-cycle 闭环归档(2026-08-17)**:
+  - `references/todos/archive/done/2026-08-17-audit-cycle/` 新增 5 个文件:
+    - `audit-fix-2026-08-16.md` / `audit-fix-2026-08-17.md` / `audit-fix-2026-08-17-followup.md`
+    - `case-2-desktop-pet-v11-audit.md`(case-driven 实跑证据)
+    - `mentioned-but-not-parsed-closure.md`(top 5 + 完整 14 条全量验证)
+  - `references/todos/audit-cycle-2026-08-17.md` 主文件状态更新
+- **工具链更新**:
+  - `trap-instructions.yaml` 新增 AP16 + AP17 两条反例
+  - `goal-mode/gate/acceptance_manifest.yaml` 加 acceptance_manifest 字段
+  - `github-kownledge-helper/agents/.gitkeep` + `references/doc-map-manager-usage.md` 加 agents/ 子目录规范
+- **详见**:[skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.7.1](skill-markets/fullstack4TraeV11/CHANGELOG.md) + [V11-AP17 trap 修复说明](skill-markets/fullstack4TraeV11/references/trap-instructions.yaml)
 
 ### fullstack4TraeV11 升级(2026-08-15)
 

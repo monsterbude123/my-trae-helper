@@ -1,6 +1,6 @@
 # 反例 21：未读 rule 就自评 PASS（Unread Rule PASS Pattern）
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > 蒸馏自 V11 实战反馈。rule 太长没读完 + 反复踩同一雷 + 自评 PASS。
@@ -74,7 +74,7 @@ Agent: 自评 PASS（实际 PASS 状态待核实）
 
 ```
 ❌ 反例：rule > 350 行未拆分 → Article XI 违反（vibe-coding-standards v2.5 软上限）
-❌ 反例：加载后没列"我能踩的雷"清单 → V11 §0.5 违反
+❌ 反例：加载后没列"我不能踩的雷"清单 → V11 §0.5 违反
 ❌ 反例：同规则反复踩 → Article V.2 违反（"已完成"无证据）
 ```
 
@@ -84,7 +84,7 @@ Agent: 自评 PASS（实际 PASS 状态待核实）
 
 1. **拆分 rule**：> 200 行的 governance 拆成 P0.md / P1.md / ...
 2. **加入 backstop**：主上下文在自评 PASS 前 List-String / Get-Content 实测一遍
-3. **规则目录化**：把"我能踩的雷"做成 checklist，每次 stage 必走
+3. **规则目录化**：把"我不能踩的雷"做成 checklist，每次 stage 必走
 
 ---
 
@@ -102,7 +102,7 @@ unread_rule_check:
 
 ---
 
-## §23 — init-from-zero 遗漏 Step 5（--rules-as-skill）(V11.2 NEW — 蒸馏自 canvas-asset-folders 实战)
+## §24 — init-from-zero 遗漏 Step 5（--rules-as-skill）(V12.0.0 沿用 V11.2 — 蒸馏自 canvas-asset-folders 实战)
 
 ```
 现象:

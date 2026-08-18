@@ -20,6 +20,8 @@ Trae IDE 技能包开发工程 + 跨 Agent 技能市场 CLI。
 >
 > **2026-08-16 mentioned-but-not-parsed closure**：top 5 全量验证 — 5/5 已落地（批修 + V11.8.5.P1 + V11.8.6 三批 commit 累积）。V11 协议层闭环度 **18/18 = 100%**。剩余仅 V12-ROOT（等用户授权 V12 ADR，主版本升级独立轨道）。详见 [skill-markets/fullstack4TraeV11/references/todos/mentioned-but-not-parsed-closure.md](skill-markets/fullstack4TraeV11/references/todos/mentioned-but-not-parsed-closure.md)。
 >
+> **2026-08-18 fullstack4TraeV11 V11.8.7.1**：5 项用户硬要求 3 连修（`init-from-zero` 移除 `v11-default` + `create_project_module` 强保 / `spec-purge` 不展平 archive / `_lib_paths` 合并 3 模块 / `check_paths_config` 独立守卫 / `project-structure` 加 modules 必检）+ V11-AP17 修复（`doc-sync-gate` 移除 `docs/modules/` 死锁检查，真相源迁 `docs/specs/changes/_module.md` + `fact/module.md`）+ 新增 `case-driven-skill-audit` 审计方法论技能（V1.0.0，`case 2 desktop-pet-v11` 实跑证据落地）+ auto-task `fullstackselfimproving` + `audit-cycle 2026-08-17` 闭环归档 5 件。详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md V11.8.7.1](skill-markets/fullstack4TraeV11/CHANGELOG.md) + [V11-AP17 trap 修复](skill-markets/fullstack4TraeV11/references/trap-instructions.yaml)。
+>
 > **2026-08-16 V12.0.0 主版本升级**：用户授权 V12 ADR 后，主版本从 V11.5.0 → **V12.0.0**（V11.8.6 6 步工具从可选变强制默认；新项目默认 V12 物理布局；既有 V11 项目用 `--layout v11-default` 向后兼容）。详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md V12.0.0 条目](skill-markets/fullstack4TraeV11/CHANGELOG.md) + [V12-ADR-DRAFT.md](skill-markets/fullstack4TraeV11/references/todos/v12-physical-isolation/V12-ADR-DRAFT.md)（ACCEPTED）。
 >
 > **2026-08-15 fullstack4TraeV11 升级**：V11.8.4 提交准入最小集与全量验收分层（Stage 3.5/4.5 异步化）+ V11.8.3 Stage 6 重构为 4 层分层决策框架。详见 [skill-markets/fullstack4TraeV11/CHANGELOG.md](skill-markets/fullstack4TraeV11/CHANGELOG.md)。

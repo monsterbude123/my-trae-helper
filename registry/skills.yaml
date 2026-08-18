@@ -3,7 +3,7 @@
 # 设计目的（2026-08-14 §3 三层控制体系收紧方案 A）：
 #   每个 skill 在本文件中按同名条目注册 guard + gate 引用,确保:
 #     1. 每个 skill 必须有自己专属的 guard（项目侧 scripts/<name>-guard.*,不在 skill 子目录）
-# 版本（last_updated）：2026-08-16 fullstack4TraeV11 V12.0.0 主版本升级 — 用户授权 V12 ADR（回 "同意 A"）后，8 步实施 + 验证 PASS + 主版本从 V11.5.0 → 12.0.0（详见 V12-ADR-DRAFT.md + CHANGELOG.md V12.0.0 条目）
+# 版本（last_updated）：2026-08-18 fullstack4TraeV11 V11.8.7.1(5 项用户硬要求 3 连修 + V11-AP17 修复) + github-kownledge-helper agents/ 子目录 + case-driven-skill-audit (V1.0.0) 接入
 #     2. 每个 skill 必须有自己的 gate 路由条目（项目侧 .husky/<name>-gate 或 scripts/<name>-gate）
 #     3. 只有 guard-smith agent 有写权维护此文件 + scripts/<name>-guard.* + .husky/<name>-gate
 #     4. 其他 agent 试图 Edit 这些路径 → 强拦截 BLOCK（src/guards/skill-registration-guard.mjs 兜底）

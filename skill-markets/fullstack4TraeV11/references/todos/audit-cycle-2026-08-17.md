@@ -41,7 +41,7 @@
 | 9 | case 2 子代理诊断是否每个问题归因到位 | **未审查** | 主代理反思项 |
 | 10 | verify-report `model count: 3` 来自外部 service | **未声明** | case 3 followup |
 | 11 | `.state-card.md` 没 close 而 change 已 archive | **已验证** | V11 `state-card-validator.py:158-164` 已校验 stage_status=completed 时 stage_ended_at 必填非 null — V11 skill 完备;case 3 项目级卡 current_stage=-1/intake 而 stage_status=working 是 case 3 项目状态,本会话不动 case 3 |
-| 12 | `tests/unit/test_state_card_validator_extended.py` 232 passed 假数据 | **修真** | 本会话:`tests/unit/` **262 passed** (含新增 5 项 secret check + stage-gate.py project_root 修真);`test_state_card_validator_extended.py` 单独 **12 passed** |
+| 12 | `tests/unit/test_state_card_validator_extended.py` 232 passed 假数据 | **修正** | 本会话:`tests/unit/` **262 passed** (含新增 5 项 secret check + stage-gate.py project_root 修正);`test_state_card_validator_extended.py` 单独 **12 passed** |
 | 13 | V11.8.7 patch commit 在 fullstack4TraeV11 主仓库未 commit | **未 commit** | (本期本会话) |
 
 **已修** ✅:

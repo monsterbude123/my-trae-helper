@@ -145,6 +145,31 @@
 详见 [references/todos/P3-6-commit-minimum.md](skill-markets/fullstack4TraeV11/references/todos/P3-6-commit-minimum.md)。
 
 详见 [references/todos/audit-history/2026-08-16-mentioned-but-not-parsed.md §5](skill-markets/fullstack4TraeV11/references/todos/audit-history/2026-08-16-mentioned-but-not-parsed.md)。
+
+#### V11.8.7.1 — 5 项用户硬要求 3 连修 + V11-AP17 修复(2026-08-18)
+
+- **5 项用户硬要求 3 连修**(用户 2026-08-18 拍板):
+  - `init-from-zero.py` `--layout` 移除 `v11-default` 兼容值 + `create_project_module()` 强保 module 存在:**LOW**(逻辑)
+  - `spec-purge.py` `archive_keep_v12_layout()` 不展平 archive 子目录:**LOW**(逻辑)
+  - `_lib_paths.py` 合并 3 个分散模块(`paths` + `project_paths` + `check_paths_config`):**LOW**(重构)
+  - `check_paths_config.py` 提升为项目侧独立守卫脚本:**LOW**(独立化)
+  - `references/project-structure.md` 加 `docs/modules/` 不存在必检项:**LOW**(协议)
+- **V11-AP17 修复**(`templates/hooks/doc-sync-gate.py` 死锁):
+  - 移除 `docs/modules/` 死锁检查(原因为 init-from-zero 创建占位 .gitkeep 但 V11 规范无 stage 写 modules/ 内容,导致 PreToolUse 永远 BLOCK):**LOW**(逻辑)
+  - 真相源迁移:`docs/specs/changes/_module.md`(项目级) + `fact/module.md`(change 级):**LOW**(协议)
+- **新增资产**:
+  - `references/config.example.yaml` / `project-gitignore-template.md` / `state-card.schema.json`:**LOW**(配置 schema)
+  - `templates/ci/v12-gate.yml`(rename 自 `v11-gate.yml`):**LOW**(CI 模板)
+  - `scripts/_lib_paths.py` / `check_paths_config.py` / `_todoapp_e2e.py` / `_todoapp_e2e_v2.py` / `_total_verify.py`(5 个新/独立脚本):**LOW**(stdlib 路径校验 + e2e 验证,无外联)
+  - `skill-markets/fullstack4TraeV11/.gitignore`(本地保护 `case-studies/` 等外部测试项目):**LOW**(本地保护)
+- **case-driven-skill-audit 接入**(`.agents/skills/`,非 skill-markets):
+  - 1 SKILL.md + 1 references(`case-2-evidence.md`,case 2 desktop-pet-v11 实跑证据):**N/A**(方法论,非可执行资产)
+- **auto-task/fullstackselfimproving**:
+  - 1 prompt.md 模板:**N/A**(协议入口)
+- **实跑扫描(2026-08-18)**:trae-security-review scan_skills_dir.py V2.1 → **HIGH 0 + MEDIUM 0 + LOW 0 → PASS**(决策矩阵:HIGH 0 + MEDIUM ≤ 3 = 🟢 PASS)
+- **评分维持 5.0** 🟢(5 项硬要求 + V11-AP17 修复 + 多件入仓,均为 LOW 或 N/A)
+- **退出码语义清晰**:0=PASS / 1=FAIL — 不存在"诱导绕过"风险
+- **不引入新依赖**;全部 stdlib(pyyaml 已是项目既有)
 | **docsify-doc-builder** (v2.0) | 1 md + 8 ps1/sh + 6 tpl | 0 | 6 | 0 | **3.5** | 🟡 | v2.0 升级（UE5 暗色主题 + 智能侧边栏 + Markmap 15 节点全展开 + Mermaid 4 图全屏/导出 + Playwright 验证 + 8 示例文档）。6 MEDIUM 全为 `http://localhost:3000` 本地提示语（SKILL.md ×1 + init-docs.ps1 ×2 + init-docs.sh ×1 + serve.ps1 ×1 + serve.sh ×1 + README.md ×1），无外网通信；CDN 链接全部 HTTPS（cdn.jsdelivr.net + esm.sh）。Shell 执行面含 8 个 ps1/sh 脚本（init-docs/serve/check-env/generate-sidebar）。GitNexus detect_changes：36 符号变更，0 受影响流程，🟢 LOW 风险 |
 | **trae-security-review** | 1 md + 2 agent + 3 ref + 1 py | 2 | 3 | 2 | **3.9** | 🟡 | 2 个 HIGH 和 3 个 MEDIUM 均为 risk-patterns.md 和 skill-scanner.md 中的风险模式文档引用（非可执行） |
 | **`.agents/`(项目级本地 agent 配置,非 skill 市场)** | 1 README + 1 learning + 1 项目核心 + 3 stub(.agents/rules/*) + 3 skill + 8 ref + 6 assets + 1 hooks.json + 3 references(NEW,V11.8.0.1 project-rule-skill 同包)+ 1 SKILL.md(v2.0.0) | 15 | 5 | 5 | **N/A** | ⚪ 不评级 | **实跑扫描(2026-08-15 14:39,24 文件,2026-08-15 V11.8.0.1 迁移后再扫描文件数变更)**:扫描结果来自 `.agents/skills/security-review/references/`(language-patterns / vuln-categories / secret-patterns + 配套),**全部 HIGH 15 + MEDIUM 5 + LOW 5 均为安全规则教学文档引用**(描述反例规则 = 文档本质,如 secret-patterns.md 含 token 示例字串,vuln-categories.md 描述 eval/exec 模式)。**V11.8.0 协议先行新增 3 文件 0 命中**:原在 `.agents/rules/` 现已迁移到 `.agents/skills/project-rule-skill/references/`(见 V11.8.0.1 路径迁移通知);`scripts/_check_protocol_coverage.py` 200+ 行 std lib 检测工具(本仓库侧)。**注**: `.agents/` 不在 skill 市场范围内,**SECURITY-MAP 不强制评级**;如需整改走与 V11.7.1 同款白名单机制(`<!-- scan-whitelist -->` 包裹文档命中行)。 |

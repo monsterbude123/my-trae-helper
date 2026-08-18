@@ -96,9 +96,9 @@ docs/specs/changes/{change-id}/
 
 ### Step 2: `init-from-zero.py` 加 `--layout v12-preview`
 
-**修改**: `scripts/init-from-zero.py` argparse 加 `--layout {v11-default|v12-preview}` 参数
-- v11-default(默认)= V11 现有扁平 layout(行为不变)
-- v12-preview= 创建上述 fact/ + stage/{11 个}/ 骨架(11 个 stage 子目录)
+**修改**(历史记录,V11.8.7.1 起已废弃): `scripts/init-from-zero.py` argparse 加 `--layout {v11-default|v12-preview}` 参数
+- v11-default(历史默认值,V11.8.7.1 起已从 choices 删除)= V11 现有扁平 layout
+- v12-preview(唯一选项)= 创建上述 fact/ + stage/{11 个}/ 骨架(11 个 stage 子目录)
 
 **触发位置**: Step4 文档系统骨架生成后追加 Step4.5
 
@@ -109,7 +109,7 @@ docs/specs/changes/{change-id}/
 ```
 MUST: V11 项目可选按 V12 物理布局(fact/ + stage/{N}/) 写产物 ——
      见 templates/change-dir-layout-v12-preview.md
-NEVER: V11 项目初始化时默认按 v11-default 布局,后补 fact/ 目录(破坏既有归档)
+NEVER: V11 项目初始化时默认按 V11 扁平布局(V11.8.7.1 起已强制 v12-preview)
 正确替代: init-from-zero.py --layout v12-preview 一次性创建
 ```
 
@@ -152,7 +152,7 @@ python stage-gate.py --change {id} --reset-to stage/{N}
 | 维度 | 约束 |
 |------|------|
 | **SKILL.md frontmatter version** | ❌ 不动(仍是 11.x,不升 12.0.0) |
-| **既有 V11 项目** | 不强制迁移(v11-default 布局保持) |
+| **既有 V11 项目** | V11.8.7.1 起强制迁移(`--migrate-from-v11`),v11-default 布局已废弃 |
 | **既有 archive/done/** | 不动(Article VIII 不可变) |
 | **新项目或新 change-id** | 可用 `--layout v12-preview`(主动对齐) |
 | **V12 ADR 通过后** | 已用 `--layout v12-preview` 的项目 = 已就位,无迁移成本 |

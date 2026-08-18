@@ -1,6 +1,6 @@
 # 术语表 — V11
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > 完整继承 V10 `references/glossary.md` 64 行 + V11 新增 5 大类术语。
@@ -128,7 +128,7 @@
 |------|------|
 | AOP 移交自检清单 | 每 stage 通用自检清单(必填产物 / 每个产物附 evidence / 状态卡字段完整 / 状态卡 next_stage 指向下一 stage / 任一项 ❌ → 修正后重新移交) |
 | Completion Report 4 字段 | 子代理返回必填:`artifacts` / `status`(PASS \| FAIL \| PARTIAL)/ `evidence`(command+output+file_line)/ `next_hook`(pre-stage.sh \| post-stage.sh \| pre-accept.sh) |
-| §0.5 Skill 加载协议 | 主上下文收到 "Use Skill: fullstack4traev11" 后必走 7 步:加载 SKILL.md → 必读 7 个公共 references → Glob 1 次项目自身约定 → 3 层优先级合并 → 列"我能踩的雷"清单 → Bug 录入触发词识别 → 进入 Stage -1 Intake |
+| §0.5 Skill 加载协议 | 主上下文收到 "Use Skill: fullstack4traev11" 后必走 7 步:加载 SKILL.md → 必读 7 个公共 references → Glob 1 次项目自身约定 → 3 层优先级合并 → 列"我不能踩的雷"清单 → Bug 录入触发词识别 → 进入 Stage -1 Intake |
 | §0.5.1 同类约定强制清单 | 第 3 步"Glob 1 次"具体 Glob 哪些目录。按任务类型激活强制清单(截屏 / 视觉验证 / 浏览器自动化 / UI 测试 / E2E 框架 / 录屏 / a11y / 性能 / 契约对齐 / 时间时区 10 项) |
 | 强制声明格式(§3) | 升级方案汇报前必按格式声明:根因验证 / 责任主体校验 / 重叠校验 / 修复成本 vs 价值 4 维度 |
 | §7 永久激活 stage 清单 | skeptical-validation-protocol 必走的 7 个 stage(Plan / Spec / Contract / Implement / Review / Bug Fix / Project Health) |
@@ -169,7 +169,7 @@
 | 反例 §20 — 甩锅用户模式(User Orchestration Pattern) | V11 NEW。Agent 用"请你去做 X"代替自己能做的部分。反模式短语库必禁:"你要不要..." / "你能不能..." / "请你去做..." / "你累不累..." / "明天再继续吧..." / "你想怎么处理？" / "你来定吧" |
 | 反例 §21 — 未读 rule 就自评 PASS(Unread Rule PASS Pattern) | V11 NEW。rule 太长没读完 + 反复踩同一雷 + 自评 PASS。V11 §0.5 加载协议强化 6 步 |
 | 反例 §22 — Secret 写入工具调用参数(Secret in Tool Argument) | V11 NEW + V11 Article XVII 触发。Agent 把密码/token 写到工具调用参数 → 工具调用日志 = 明文泄露 |
-| "我能踩的雷"清单(V11.1 NEW) | 主上下文加载任意 skill 后必列的清单:反例 §19-22 + 现有 Article V/IX/XI 必逐项 |
+| "我不能踩的雷"清单(V11.1 NEW) | 主上下文加载任意 skill 后必列的清单:反例 §19-22 + 现有 Article V/IX/XI 必逐项 |
 | 同类约定强制清单(V11.1 NEW) | 10 项必 Glob 目录清单:截屏 / 视觉验证 / 浏览器自动化 / UI 测试 / E2E 框架 / 录屏 / a11y / 性能 / 契约对齐 / 时间时区 |
 
 ---

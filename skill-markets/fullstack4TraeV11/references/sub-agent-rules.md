@@ -1,6 +1,6 @@
 # 子代理通用铁律（V11 — 蒸馏自 V10.8 实操）
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > V11 全 agent 通用，主上下文委派时引用本文件路径（不内联全文）。
@@ -30,7 +30,7 @@
 □ references/ 目录已 LS
 □ 必读 6 个 references（按上表）
 □ Glob 项目同类约定目录（每次必做）
-□ 列"我能踩的雷"清单（反例 §19-22 + 现有 Article V/IX/XI 必逐项）
+□ 列"我不能踩的雷"清单（反例 §19-22 + 现有 Article V/IX/XI 必逐项）
 □ 询问用户"项目惯例 vs skill 默认"差异（如有冲突）
 □ 才进入工作模式（详见 SKILL.md §0.5）
 ```
@@ -54,11 +54,11 @@
 MUST: V12 项目**默认**按 V12 物理布局写产物 —— 见 templates/change-dir-layout-v12-preview.md
   - init-from-zero.py --layout 默认 v12-preview(V11.8.6 之前是 v11-default)
   - fact/ + stage/{N}/ 物理隔离 = V12 §1 设计哲学作为主版本默认
-  - 既有 V11 项目用 --layout v11-default 显式声明保持向后兼容(不改 Article VIII)
+  - 既有 V11 项目必须 `--migrate-from-v11` 升级(不改 Article VIII)
 
-NEVER: V12 项目初始化时按 v11-default 布局,后补 fact/ 目录
+NEVER: V12 项目初始化时按 V11 扁平布局,后补 fact/ 目录
   - 破坏 V12 默认契约,违反主版本约定
-  - 正确替代: --layout v12-preview(默认)或 --layout v11-default(显式声明兼容)
+  - 正确替代: --layout v12-preview(唯一选项,V11.8.7.1 起 v11-default 已废弃)
 
 NEVER: 把 process 层文件(notes/handoff/diagnosis)写到 fact/
 NEVER: 把 fact 层文件(spec/plan/contracts)写到 stage/{N}/

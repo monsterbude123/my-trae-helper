@@ -1,6 +1,6 @@
 # 技能市场三层控制体系设计
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > **目标**: 将 `@my-trae-helper/cli` 的技能市场管理对齐到 `agent-dev-control-kit` 的 Execution + Guard + Gate 三层控制体系,实现标准化执行、自动检查和质量门禁。

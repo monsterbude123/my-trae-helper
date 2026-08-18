@@ -160,7 +160,7 @@ evidence: scripts/setup-feature.py L130-150 + change-status.py L45-70/L108-113 +
 ---
 id: AUDIT-#13
 title: scripts/commit-minimum-check.py 实现 commit 准入最小集
-status: pending
+status: done
 priority: P3
 discovered_at: 2026-08-16
 discovered_by: 子代理 B
@@ -168,6 +168,9 @@ protocol_ref: SKILL.md L508 §3.7 #10 commit 准入最小集 ≠ 全量验收
               references/common-anti-patterns.md §7.3
 parser_ref: grep `commit.*准入最小集\|MINIMUM_COMMIT_CRITERIA` 在 scripts/ 中零命中
 fix_path: scripts/commit-minimum-check.py 新建
+resolved_at: 2026-08-16T22:11
+resolved_by: V11 子代理 + 主上下文兜底验证
+evidence: archive/done/2026-08-16-batch-repair-2/P3-6-commit-minimum.md(本条目抽出独立归档,16 用例 PASS + Windows cp1252 兜底);V11.8.7 followup `02d0d90` 新增第 5 项 secret scan
 ---
 ```
 

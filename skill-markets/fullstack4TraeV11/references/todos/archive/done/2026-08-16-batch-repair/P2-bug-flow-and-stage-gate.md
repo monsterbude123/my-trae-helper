@@ -131,7 +131,7 @@ if current_stage in ("3.5/real-verify", "4/review") or (current_stage == "3/impl
 ---
 id: AUDIT-#14
 title: templates/hooks/pre-stage.sh 强制调用 stage-gate.py
-status: in_progress
+status: done
 priority: P2
 discovered_at: 2026-08-16
 discovered_by: 子代理 B
@@ -139,6 +139,12 @@ protocol_ref: SKILL.md L213-218(Stage 子层阶段门禁)
               scripts/README.md L18(stage-gate.py 所有 stage 切换前必跑)
 parser_ref: grep `stage-gate.py --state-card\|subprocess.*stage-gate` 在 scripts/ + templates/hooks/ 中零命中
 fix_path: templates/hooks/pre-stage.sh 加 stage-gate.py 强制调用
+resolved_at: 2026-08-16T23:59
+resolved_by: V11.8.6 主上下文落地
+evidence:
+  - templates/hooks/pre-stage.sh L137-171 Step 3 真调用 stage-gate.py --state-card --project-root + EXPECTED_NEXT_STAGE 时加 --next-stage
+  - V11.8.6 commit `06269ae` V12 physical rollout 6 步落地
+  - templates/hooks/pre-stage.sh V12.0.0 L173-201 Step 3.5 process-layer-guard.sh 物理路径校验
 ---
 ```
 

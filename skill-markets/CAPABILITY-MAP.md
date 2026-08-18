@@ -283,6 +283,15 @@ L0 基座（独立可用，无外部依赖）
 
 > **2026-08-14 聚合说明**：test-experience / e2e-module-audit / test-partition-runner 三个 L0 skill 已并入 acceptance-discipline（内部子体系），不再作为独立外部依赖。其原降级后果已并入 acceptance-discipline 的硬依赖降级链。skills-security-scan 同理并入 trae-security-review。
 
+### 项目级工作流(`.agents/skills/`,非云端分发)
+
+| Skill | 类型 | 用途 | 关键产物 |
+|-------|------|------|---------|
+| [project-rule-skill](file:///D:/workspace/my-trae-helper/.agents/skills/project-rule-skill/SKILL.md) | 纯Skill | 项目级规则加载网关 — 任何任务开始前必走 | 3 references(skill-creation / protocol-coverage / skills-development) |
+| [security-review](file:///D:/workspace/my-trae-helper/.agents/skills/security-review/SKILL.md) | 纯Skill | 代码安全审查 — 5 类漏洞 + 密钥检测 | 5 references |
+| [self-improving-agent](file:///D:/workspace/my-trae-helper/.agents/skills/self-improving-agent/SKILL.md) | 纯Skill | 跨会话经验沉淀 — LEARN/ERROR/FEATURE_REQUESTS | assets/{LEARNINGS,SKILL-TEMPLATE} + 3 references + openclaw hooks |
+| [case-driven-skill-audit](file:///D:/workspace/my-trae-helper/.agents/skills/case-driven-skill-audit/SKILL.md)(**V1.0 NEW 2026-08-17**) | 纯Skill | 演练驱动 skill 审计 — 7 步工作流(选题 → 子代理委派 → 硬验收 → 暴露漏洞) | 1 reference(case-2-evidence 实战证据) |
+
 ### 完整协议
 
 > 依赖检查完整流程 + 加载时机械验证 + 降级影响模板 → [vibe-coding-standards/references/skill-dependency-check.md](vibe-coding-standards/references/skill-dependency-check.md)

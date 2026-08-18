@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# V11 Pre-accept Gate (HARDENED) — Stage 5 Accept Validation
-# HARDENING POINTS:
+# V12 Pre-accept Gate (HARDENED) — Stage 5 Accept Validation
+# HARDENING POINTS (V12 ONLY):
 #   1. set -euo pipefail (fail-fast + pipe error propagation)
-#   2. Mandatory environment variable validation (V11_GATE_ENFORCED)
+#   2. Mandatory environment variable validation (V12_GATE_ENFORCED)
 #   3. Missing env vars = gate FAIL (exit 1) — cannot bypass
 #   4. FORCED Stage 4.5 rot-scan verification
 #   5. fix-list.json existence check
 #   6. Real execution of phase-gate.py — no mock/stub PASS
+#   7. **V12**: stage/5/accept/.state-card.md 独立校验(不与其他 hook 共用逻辑)
 
 set -euo pipefail
 
@@ -15,7 +16,7 @@ PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 GATE_ID="pre-accept-$(date +%Y%m%d%H%M%S)"
 FAILURES=0
 
-echo "==> [V11 Gate] Pre-accept hardened gate (Stage 5 Accept)"
+echo "==> [V12 Gate] Pre-accept hardened gate (Stage 5 Accept)"
 echo "    Gate ID: $GATE_ID"
 
 cd "$PROJECT_ROOT"
@@ -26,72 +27,61 @@ echo "    [0/5] Environment variable validation (HARDENED):"
 
 VALIDATION_FAILED=0
 
-if [ -z "${V11_GATE_ENFORCED:-}" ]; then
-    echo "          ✗ V11_GATE_ENFORCED is NOT SET — gate FAILS"
-    echo "          Required: V11_GATE_ENFORCED=true (set by V11 orchestrator)"
+if [ -z "${V12_GATE_ENFORCED:-}" ]; then
+    echo "          ✗ V12_GATE_ENFORCED is NOT SET — gate FAILS"
+    echo "          Required: V12_GATE_ENFORCED=true (set by V12 orchestrator)"
     VALIDATION_FAILED=1
 else
-    echo "          ✓ V11_GATE_ENFORCED=${V11_GATE_ENFORCED}"
+    echo "          ✓ V12_GATE_ENFORCED=${V12_GATE_ENFORCED}"
 fi
 
-if [ -z "${V11_GATE_STAGE:-}" ]; then
-    echo "          ✗ V11_GATE_STAGE is NOT SET — gate FAILS"
-    echo "          Required: V11_GATE_STAGE=5/accept (for Stage 5 accept)"
+if [ -z "${V12_GATE_STAGE:-}" ]; then
+    echo "          ✗ V12_GATE_STAGE is NOT SET — gate FAILS"
+    echo "          Required: V12_GATE_STAGE=5/accept (for Stage 5 accept)"
     VALIDATION_FAILED=1
 else
-    echo "          ✓ V11_GATE_STAGE=${V11_GATE_STAGE}"
+    echo "          ✓ V12_GATE_STAGE=${V12_GATE_STAGE}"
 fi
 
-if [ -z "${V11_GATE_CALLER:-}" ]; then
-    echo "          ✗ V11_GATE_CALLER is NOT SET — gate FAILS"
-    echo "          Required: V11_GATE_CALLER=<caller-name> (e.g., stage-5-agent)"
+if [ -z "${V12_GATE_CALLER:-}" ]; then
+    echo "          ✗ V12_GATE_CALLER is NOT SET — gate FAILS"
+    echo "          Required: V12_GATE_CALLER=<caller-name> (e.g., stage-5-agent)"
     VALIDATION_FAILED=1
 else
-    echo "          ✓ V11_GATE_CALLER=${V11_GATE_CALLER}"
+    echo "          ✓ V12_GATE_CALLER=${V12_GATE_CALLER}"
 fi
 
 if [ $VALIDATION_FAILED -ne 0 ]; then
     echo ""
     echo "    🛑 Gate FAIL: Missing mandatory environment variables"
-    echo "    Agent cannot bypass this gate without proper V11 orchestrator context."
-    echo "    To fix: Ensure V11 orchestrator sets V11_GATE_ENFORCED/STAGE/CALLER."
+    echo "    Agent cannot bypass this gate without proper V12 orchestrator context."
+    echo "    To fix: Ensure V12 orchestrator sets V12_GATE_ENFORCED/STAGE/CALLER."
     exit 1
 fi
 
-# ---- Step 1: Change ID validation ----
+# ---- Step 1: V12 stage/5/accept/.state-card.md 独立校验 ----
+# (INV 5: pre-accept.sh 必须独立校验 stage/5/accept/.state-card.md 存在,
+#  不与其他 hook 共用逻辑 — V12 物理布局唯一)
 echo ""
-echo "    [1/5] Change ID validation:"
+echo "    [1/5] V12 stage/5/accept/.state-card.md 独立校验:"
 
-CHANGE_ID="${CHANGE_ID:-}"
+ACCEPT_CARD="$PROJECT_ROOT/stage/5/accept/.state-card.md"
 
-if [ -z "$CHANGE_ID" ]; then
-    echo "          ✗ CHANGE_ID is NOT SET — gate FAILS"
-    echo "          Required: CHANGE_ID=<change-id> (for state card path)"
-    exit 1
-else
-    echo "          ✓ CHANGE_ID: $CHANGE_ID"
-fi
-
-# ---- Step 2: State card existence check ----
-echo ""
-echo "    [2/5] State card existence check:"
-
-STATE_CARD="$PROJECT_ROOT/docs/specs/changes/${CHANGE_ID}/.state-card.md"
-
-if [ ! -f "$STATE_CARD" ]; then
-    echo "          ✗ State card NOT FOUND: $STATE_CARD"
-    echo "          Required for Stage 5 accept validation."
+if [ ! -f "$ACCEPT_CARD" ]; then
+    echo "          ✗ V12 accept state card NOT FOUND: $ACCEPT_CARD"
+    echo "          V12 物理布局: stage/5/accept/.state-card.md 必须存在"
+    echo "    🛑 Gate FAIL: V12 Stage 5 accept card 不可缺失"
     exit 1
 else
-    echo "          ✓ State card exists: $STATE_CARD"
+    echo "          ✓ V12 accept state card exists: $ACCEPT_CARD"
 fi
 
-# ---- Step 3: FORCED Stage 4.5 rot-scan verification ----
+# ---- Step 2: FORCED Stage 4.5 rot-scan verification ----
 echo ""
-echo "    [3/5] FORCED Stage 4.5 rot-scan verification:"
+echo "    [2/5] FORCED Stage 4.5 rot-scan verification:"
 
-V11_SCRIPTS="${V11_SCRIPTS:-$HOME/.trae-cn/skills/fullstack4TraeV11/scripts}"
-PHASE_GATE_SCRIPT="$V11_SCRIPTS/phase-gate.py"
+V12_SCRIPTS="${V12_SCRIPTS:-$HOME/.trae-cn/skills/fullstack4TraeV11/scripts}"
+PHASE_GATE_SCRIPT="$V12_SCRIPTS/phase-gate.py"
 
 if [ ! -f "$PHASE_GATE_SCRIPT" ]; then
     echo "          ✗ phase-gate.py NOT FOUND: $PHASE_GATE_SCRIPT"
@@ -101,12 +91,11 @@ else
     echo "          ✓ phase-gate.py exists: $PHASE_GATE_SCRIPT"
 fi
 
-echo "          Running: python $PHASE_GATE_SCRIPT --verify-rot-scan --change-id $CHANGE_ID"
+echo "          Running: python $PHASE_GATE_SCRIPT --verify-rot-scan --state-card $ACCEPT_CARD"
 
 if python "$PHASE_GATE_SCRIPT" \
-    --state-card "$STATE_CARD" \
-    --verify-rot-scan \
-    --change-id "$CHANGE_ID" 2>&1; then
+    --state-card "$ACCEPT_CARD" \
+    --verify-rot-scan 2>&1; then
     echo "          ✓ Stage 4.5 rot-scan PASSED"
 else
     EXIT_CODE=$?
@@ -116,9 +105,9 @@ else
     exit $EXIT_CODE
 fi
 
-# ---- Step 4: fix-list.json existence check ----
+# ---- Step 3: fix-list.json existence check ----
 echo ""
-echo "    [4/5] fix-list.json existence check:"
+echo "    [3/5] fix-list.json existence check:"
 
 FIX_LIST="$PROJECT_ROOT/docs/reports/fix-list.json"
 
@@ -131,17 +120,37 @@ else
     echo "          ✓ fix-list.json exists: $FIX_LIST"
 fi
 
+# ---- Step 4: stage/4.5/rot-scan/.state-card.md 存在性校验 ----
+echo ""
+echo "    [4/5] V12 stage/4.5/rot-scan/.state-card.md 校验:"
+
+ROTSCAN_CARD="$PROJECT_ROOT/stage/4.5/rot-scan/.state-card.md"
+
+if [ ! -f "$ROTSCAN_CARD" ]; then
+    echo "          ✗ V12 rot-scan card NOT FOUND: $ROTSCAN_CARD"
+    echo "          Accept 前 stage/4.5/rot-scan/.state-card.md 必须存在"
+    FAILURES=$((FAILURES + 1))
+else
+    echo "          ✓ V12 rot-scan card exists: $ROTSCAN_CARD"
+fi
+
 # ---- Step 5: Gate signature (SHA-256 hash) ----
 echo ""
 echo "    [5/5] Gate signature generation:"
 
-GATE_RESULT="status=PASS,gate_id=$GATE_ID,stage=5/accept,caller=${V11_GATE_CALLER},change_id=${CHANGE_ID}"
+GATE_RESULT="status=PASS,gate_id=$GATE_ID,stage=5/accept,caller=${V12_GATE_CALLER}"
 SIGNATURE=$(echo -n "$GATE_RESULT" | sha256sum | cut -d' ' -f1)
 echo "          Signature: $SIGNATURE"
 echo "          Gate result: $GATE_RESULT"
 
+if [ $FAILURES -gt 0 ]; then
+    echo ""
+    echo "==> [V12 Gate] Pre-accept FAILED ($FAILURES check(s) failed)"
+    echo "    Gate ID: $GATE_ID"
+    exit $FAILURES
+fi
+
 echo ""
-echo "==> [V11 Gate] Pre-accept PASSED"
+echo "==> [V12 Gate] Pre-accept PASSED"
 echo "    Gate ID: $GATE_ID"
-echo "    Change ID: $CHANGE_ID"
 echo "    Signature: $SIGNATURE"

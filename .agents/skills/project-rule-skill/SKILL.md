@@ -86,6 +86,7 @@ reason: "<本任务场景关键词>"
 | `Gate` / `pre-commit` / `pre-push` / `CI` | `skill-acceptance §7` + `agent-dev-control-kit §11` |
 | `GH Actions` / `workflow` / `push` / `force-push` / `workflow_dispatch` | `skill-acceptance §7` + `.github/workflows/*.yml` 必读 + 必走 guard-smith 委派(白名单) |
 | `重构` / `升级` / `V{N}` | `fullstack-skill-architect` |
+| **`case study` / `实跑 case` / `走完整流水线` / `skill 真假` / `演练收集经验` / `case-driven audit` / `skill 升级调研` / `skill 引入` / `跨版本验证`**(2026-08-17 NEW) | **[`.agents/skills/case-driven-skill-audit/SKILL.md`](../case-driven-skill-audit/SKILL.md)(首选,演练驱动 7 步工作流:选题 → 子代理委派 → 硬验收 → 暴露漏洞)** + `fullstack-skill-architect`(配套 V 版本审计方法论) |
 | `AGENTS.md` / `README` / `文档` | 不自动加载,改 docs/ 即可 |
 
 ---

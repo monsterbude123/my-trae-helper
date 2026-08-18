@@ -50,22 +50,30 @@ fi
 
 
 def load_gates_registry(v11_root: pathlib.Path) -> dict:
-    """解析 registry/gates.yaml(无 PyYAML 依赖的最小解析:仅取 id/layer/host)。"""
+    """解析 registry/gates.yaml(无 PyYAML 依赖的最小解析:V12 扩展消费 layer / host / stage / required_artifacts / script 字段)。"""
     gates_path = v11_root / "registry" / "gates.yaml"
     if not gates_path.exists():
         print(f"❌ registry 不存在: {gates_path}", file=sys.stderr)
         sys.exit(1)
     gates = []
     current = {}
+    # V12 扩展:消费 layer / host / stage / required_artifacts / script 字段
+    v12_field_keys = ("layer:", "host:", "stage:", "required_artifacts:", "script:")
     for line in gates_path.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
         if stripped.startswith("- id:"):
             if current:
                 gates.append(current)
             current = {"id": stripped.split(":", 1)[1].strip()}
-        elif current and stripped.startswith(("layer:", "host:", "stage:")):
+        elif current and any(stripped.startswith(k) for k in v12_field_keys):
             key, _, value = stripped.partition(":")
-            current[key.strip()] = value.strip()
+            k = key.strip()
+            v = value.strip()
+            # V12 多值字段: required_artifacts 支持列表展开
+            if k == "required_artifacts":
+                current[k] = [x.strip() for x in v.split(",")] if v else []
+            else:
+                current[k] = v
     if current:
         gates.append(current)
     return {"gates": gates}

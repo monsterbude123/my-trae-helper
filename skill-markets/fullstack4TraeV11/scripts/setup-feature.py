@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """
-V11 setup-feature.py — 创建 change 骨架（Stage -1 Intake 必走）
+V12 setup-feature.py — 创建 change 骨架(V12 物理布局唯一)
 
 Usage:
     python setup-feature.py --change-id <id> [--project-root <path>]
 
-生成:
+生成(V12 物理布局):
   docs/specs/changes/{change-id}/
-    ├── spec.md（空模板）
-    ├── plan.md（空模板）
-    ├── .state-card.md
-    └── contracts/（空目录）
+    ├── fact/
+    │   ├── spec.md（空模板）
+    │   ├── plan.md（空模板）
+    │   └── contracts/（空目录）
+    └── stage/
+        └── -1/intake/
+            └── .state-card.md
 
 Exit codes:
     0 = PASS
@@ -36,7 +39,7 @@ updated_at: {now}
 updated_by: 主上下文
 health: "🟢 on-track"
 artifacts:
-  - path: docs/specs/changes/{change_id}/.state-card.md
+  - path: docs/specs/changes/{change_id}/stage/-1/intake/.state-card.md
     type: file
     exists: true
     evidence: "Stage -1 Intake 初始化"
@@ -58,7 +61,7 @@ related_changes: []
 risk_level: LOW
 priority: P1
 notes: |
-  Change 骨架初始化
+  Change 骨架初始化(V12 物理布局)
 ---
 
 # State Card: {change_id}
@@ -108,29 +111,47 @@ PLAN_TEMPLATE = """# Plan: {change_id}
 
 
 def create_feature(change_id: str, project_root: pathlib.Path) -> dict:
-    """创建 change 骨架"""
-    change_dir = project_root / f"docs/specs/changes/{change_id}"
+    """创建 change 骨架(V12 物理布局唯一)
+
+    V12 物理布局:
+      change_dir/
+        ├── fact/
+        │   ├── spec.md
+        │   ├── plan.md
+        │   └── contracts/      (空目录,后续 Stage 2 填充 domain-models.md + api-contracts.md)
+        └── stage/
+            └── -1/intake/
+                └── .state-card.md
+    """
+    change_dir = project_root / "docs" / "specs" / "changes" / change_id
 
     if change_dir.exists():
         return {"status": "FAIL", "message": f"change 已存在: {change_dir}"}
 
+    # 创建 V12 fact/ + stage/-1/intake/ 目录
+    fact_dir = change_dir / "fact"
+    contracts_dir = fact_dir / "contracts"
+    intake_dir = change_dir / "stage" / "-1" / "intake"
+
     change_dir.mkdir(parents=True, exist_ok=True)
-    (change_dir / "contracts").mkdir(exist_ok=True)
+    fact_dir.mkdir(exist_ok=True)
+    contracts_dir.mkdir(exist_ok=True)
+    intake_dir.mkdir(parents=True, exist_ok=True)
 
     now = datetime.now(timezone.utc).isoformat()
 
-    # 写 spec.md
-    (change_dir / "spec.md").write_text(
+    # 写 spec.md → fact/spec.md
+    (fact_dir / "spec.md").write_text(
         SPEC_TEMPLATE.format(change_id=change_id), encoding="utf-8"
     )
 
-    # 写 plan.md
-    (change_dir / "plan.md").write_text(
+    # 写 plan.md → fact/plan.md
+    (fact_dir / "plan.md").write_text(
         PLAN_TEMPLATE.format(change_id=change_id), encoding="utf-8"
     )
 
-    # 写 .state-card.md
-    state_card_path = change_dir / ".state-card.md"
+    # 写 .state-card.md → stage/-1/intake/.state-card.md
+    state_card_path = intake_dir / ".state-card.md"
     state_card_content = STATE_CARD_TEMPLATE.format(change_id=change_id, now=now)
     state_card_path.write_text(state_card_content, encoding="utf-8")
 
@@ -153,17 +174,20 @@ def create_feature(change_id: str, project_root: pathlib.Path) -> dict:
         "status": "PASS",
         "change_id": change_id,
         "path": str(change_dir),
+        "layout": "v12",
         "artifacts": [
-            "spec.md",
-            "plan.md",
-            ".state-card.md",
-            "contracts/",
+            "fact/spec.md",
+            "fact/plan.md",
+            "fact/ac_list.md",
+            "fact/edge_cases.md",
+            "fact/contracts/",
+            "stage/-1/intake/.state-card.md",
         ],
     }
 
 
 def main():
-    parser = argparse.ArgumentParser(description="V11 setup-feature 创建 change 骨架")
+    parser = argparse.ArgumentParser(description="V12 setup-feature 创建 change 骨架(V12 物理布局)")
     parser.add_argument("--change-id", required=True, help="change ID（如 2026-08-11-add-feature）")
     parser.add_argument("--project-root", default=".", help="项目根路径")
     parser.add_argument("--json", action="store_true", help="JSON 输出")

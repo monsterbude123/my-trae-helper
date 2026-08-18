@@ -34,7 +34,7 @@ Step 3: 强制调 Skill(name="project-rules")（如项目已有 .trae/skills/pro
 Step 4: Glob 1 次 AGENTS.md / docs/ / .trae/rules/ / config.yaml
 Step 5: 核对 V11 标准路径 — 状态卡在 docs/specs/.state-card.md（项目级）
 Step 6: 按 3 层优先级合并项目级覆盖
-Step 7: 列"我能踩的雷"清单（反例 §19-22）
+Step 7: 列"我不能踩的雷"清单（反例 §19-22）
 Step 8: Bug 录入触发词识别
 Step 9: 进入 Stage -1 Intake 工作模式
 ```

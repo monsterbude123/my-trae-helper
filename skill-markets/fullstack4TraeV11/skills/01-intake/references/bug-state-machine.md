@@ -7,21 +7,30 @@
 
 ---
 
-## 状态机（3 个状态）
+## 状态机（7 个状态）
 
 ```
-[OPEN] ──→ [IN_PROGRESS] ──→ [CLOSED]
-   ↑              │                │
-   │              │                │
-   └──────────────┴────────────────┘
-            (用户拒绝 / 验证失败可回退)
+[OPEN] ──→ [IN-FIX] ──→ [FIXED] ──→ [VERIFIED] ──→ [CLOSED]
+   ↑           │             │             │
+   │           │             └─→ [REOPENED] ─→ [IN-FIX] (复测失败回退)
+   │           │
+   │           └──(回退)──→ [OPEN]   (e2e 初始 PASS / 修复失败)
+   │
+   └───→ [OBSOLETE]   (功能变更致过时，OPEN/FIXED/VERIFIED 任一均可)
 ```
 
 | 状态 | 含义 | 触发条件 | 维护者 |
 |------|------|---------|--------|
 | **OPEN** | Bug 已录入，等待 Stage 6 处理 | Stage -1 Intake 创建 | 主上下文 |
-| **IN_PROGRESS** | Stage 6 Bug Fix 进行中 | e2e 先行 FAIL 验证通过 | debugger |
-| **CLOSED** | Bug 修复 + 回归通过 + 用户确认 | TDD 修复 PASS + 用户签字 | debugger |
+| **IN-FIX** | Stage 6 Bug Fix 进行中（6 层排查 + TDD 修复）| e2e 先行 FAIL 验证通过 | debugger / 代码提测 |
+| **FIXED** | 已修复，待测试专家复测 | TDD GREEN + 回归 PASS + 已填 Fix | 代码提测（写权）|
+| **VERIFIED** | 测试专家复测通过，再观察无 regression | 亲自跑 + 截图 + 4 维度观察 | 测试专家（裁定权）|
+| **REOPENED** | 测试专家复测 FIXED 失败回退 | 附复现证据 | 测试专家 |
+| **OBSOLETE** | 功能变更致过时（终态）| 仅测试专家可标 + 附过时理由 | 测试专家 |
+| **CLOSED** | 关闭归档（终态）| 代码提测申请 + 测试专家会签 + 用户确认 | 三方确认 |
+
+> **权威源**: [../../12-bug-fix/references/bug-state-machine.md](../../12-bug-fix/references/bug-state-machine.md)
+> 01-intake 必须与 12-bug-fix 保持 7 态完全一致（OPEN/IN-FIX/FIXED/VERIFIED/CLOSED/REOPENED/OBSOLETE）。
 
 ---
 
@@ -29,12 +38,16 @@
 
 | From → To | 触发动作 | 必要条件 | 写入字段 |
 |-----------|---------|---------|---------|
-| (无) → OPEN | Stage -1 Intake 创建 Bug 单 | Bug 单 6 字段齐全 + 用户同意 | `stage_status=pending`, `bug_severity=P0/P1/P2` |
-| OPEN → IN_PROGRESS | Stage 6 加载 + e2e 先行 FAIL | e2e 测试初始 FAIL 验证 | `stage_status=working`, `stage_started_at=now` |
-| IN_PROGRESS → CLOSED | TDD 修复 + 回归 PASS + 用户确认 | TDD GREEN + 全量回归 PASS + 用户书面签字 | `stage_status=completed`, `stage_ended_at=now`, `health=🟢 on-track` |
-| IN_PROGRESS → OPEN | e2e 初始 PASS（说明 bug 不存在）| 6 层排查证明无 bug | `stage_status=pending`, `notes: e2e 初始 PASS → 不是 bug → 回退 OPEN` |
-| IN_PROGRESS → OPEN | TDD 修复 FAIL | 重做 TDD 循环 | `gate_result.status=FAIL`, `blocked_by=5 字段` |
-| CLOSED → OPEN | 回归发现新问题 | 用户反馈 + 重新录入 bug 单（不修改原 bug 单）| **新建** Bug 单 + 引用原 bug-id |
+| (无) → OPEN | Stage -1 Intake 创建 Bug 单 | Bug 单 7 字段齐全（含 source）+ 用户同意 | `stage_status=pending`, `bug_severity=P0/P1/P2` |
+| OPEN → IN-FIX | Stage 6 加载 + e2e 先行 FAIL | e2e 测试初始 FAIL 验证 | `stage_status=working`, `stage_started_at=now` |
+| IN-FIX → FIXED | TDD 修复 + 回归 PASS | TDD GREEN + 回归 PASS + 已填 Fix | `stage_status=working`, `qa_submitted_at=now` |
+| FIXED → VERIFIED | 测试专家复测通过 | 亲自跑 + 截图 + 4 维度观察无 regression | `stage_status=verifying`, `qa_verified_at=now` |
+| FIXED → REOPENED | 测试专家复测失败 | 附复现证据；同一单 REOPENED ≥ 2 次 → 升级仲裁 | `stage_status=pending`, `reopen_reason=...` |
+| VERIFIED → CLOSED | 代码提测申请 + 测试专家会签 + 用户确认 | 三方确认 + bug 单回写 + 用户签字 | `stage_status=completed`, `stage_ended_at=now`, `health=🟢 on-track` |
+| REOPENED → IN-FIX | 回到修复队列 | 代码提测接手 | `stage_status=working` |
+| IN-FIX → OPEN | e2e 初始 PASS（说明 bug 不存在）| 6 层排查证明无 bug | `stage_status=pending`, `notes: e2e 初始 PASS → 不是 bug → 回退 OPEN` |
+| IN-FIX → OPEN | TDD 修复 FAIL | 重做 TDD 循环 | `gate_result.status=FAIL`, `blocked_by=5 字段` |
+| OPEN/FIXED/VERIFIED → OBSOLETE | 功能变更致过时 | 仅测试专家可标 + 附过时理由 + 功能变更引用 | `stage_status=obsolete`, `obsolete_reason=tech-plan/spec diff` |
 
 ---
 
@@ -123,24 +136,24 @@ docs/bugs/{bug-id}/
 ```
 Stage 6 Bug Fix 执行中
   ├─ e2e 初始 PASS（说明无 bug）
-  │   └─→ 回退: IN_PROGRESS → OPEN + notes 标注 + 用户确认
+  │   └─→ 回退: IN-FIX → OPEN + notes 标注 + 用户确认
   │
-  ├─ 6 层排查超 5 轮（仍找不到根因）
-  │   └─→ 升级: 状态 = blocked + 5 字段阻塞报告 + 用户决策
+  ├─ 测试专家复测 FIXED 失败
+  │   └─→ FIXED → REOPENED → IN-FIX（附复现证据 + 同单 ≥ 2 次升级仲裁）
   │
-  └─ TDD 修复 PASS + 回归通过
-      └─→ 升级: 状态 = CLOSED + bug 单回写 + 用户签字
+  └─ VERIFIED 通过 + 三方确认
+      └─→ VERIFIED → CLOSED + bug 单回写 + 用户签字
 ```
 
 ---
 
 ## 状态机反例
 
-### 反例 A：跳过 OPEN 状态直接到 IN_PROGRESS
+### 反例 A：跳过 OPEN 状态直接到 IN-FIX
 
 ```
 主上下文: 创建 bug 单 → 立即进入修复  # ❌ 跳过 OPEN 状态
-正确: OPEN → e2e 先行 FAIL 验证 → IN_PROGRESS
+正确: OPEN → e2e 先行 FAIL 验证 → IN-FIX
 ```
 
 ### 反例 B：未验证 e2e 初始 FAIL
@@ -161,8 +174,17 @@ bug 单状态 = CLOSED 后又修改 symptom 字段  # ❌ 违反 Article XII
 
 ```
 Bug 单: 标记 CLOSED
-状态卡: 还是 IN_PROGRESS  # ❌ 违反铁律 9
+状态卡: 还是 IN-FIX  # ❌ 违反铁律 9
 正确: 同步更新两份
+```
+
+### 反例 E：状态机三方不一致
+
+```
+01-intake 文档: 用旧 V11 命名(无 IN-FIX)
+12-bug-fix 权威源: IN-FIX(V12 标准)
+→ 三方 7 态收敛: 12-bug-fix 是唯一状态集合  # ❌ 任意一处仍用 V11 残留名
+正确: 7 态完全一致 = OPEN/IN-FIX/FIXED/VERIFIED/CLOSED/REOPENED/OBSOLETE
 ```
 
 ---

@@ -120,16 +120,12 @@ docs/specs/changes/{change-id}/
 
 ---
 
-## §4 何时用 v12-preview vs v11-default
+## §4 何时用 v12-preview vs v11-default(V11.8.7.1 起 v11-default 已废弃)
 
-| 场景 | 推荐 layout |
-|------|-------------|
-| 新项目 / 新 change-id 优先对齐 V12 思想 | `v12-preview`(主动) |
-| 既有 V11 项目想升级到 V12 布局 | 按 §3 迁移步骤(可选,不强制) |
-| 既有 archive/done 已含 change 内容 | ❌ **不迁**(Article VIII 不可变) |
-| 临时修复 / 紧急 change | `v11-default`(无骨架约束) |
+> **V11.8.7.1 UPDATE**:`--layout` 仅 `v12-preview`,V11 既有项目用 `--migrate-from-v11` 升级。
+> 旧 v11-default 表(临时修复 / 紧急 change)不再适用 — 所有项目强制 V12 物理布局。
 
-**默认行为**:`init-from-zero.py` 不带 `--layout` 参数 = `v11-default`(行为不变,向后兼容)。
+**默认行为**:`init-from-zero.py` 不带 `--layout` 参数 = `v12-preview`(V11.8.7.1 起,旧 v11-default 已废弃)。
 
 ---
 

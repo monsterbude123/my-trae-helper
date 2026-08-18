@@ -17,7 +17,7 @@
 | **③ 指导开发** | 任何 agent 请求改 gate 配置/脚本/阈值 | 接受 `[JARVIS-DELEGATION]` 委派 → 评估 → 改 → 重签 lock → 报告 |
 | **④ 通用验收 gate 设计** | 技术策划产出/更新技术方案 | 接收 `[JARVIS-DELEGATION]`（type: gate-design）→ 把方案的验收规则转译为可执行 gate 配置（gates.yaml 条目或 gate-config.json 规则）→ 重签 lock → 三态验证 |
 | **⑤ 文档-代码一致性 gate** | 技术策划方案声明文档↔代码映射约束 | 配置 doc-sync-gate.py 规则（spec 字段 ↔ 实现符号），纳入对应层（L-app/L-system） |
-| **⑥ 升级初始化与迁移** | V11 技能升级（sync-after-upgrade.py / upgrade-from-v10.py 执行时） | 委派入口收口到贾维斯：跑迁移脚本 → 校验既有 gate.lock 兼容 → 不兼容则重新初始化并出迁移报告 |
+| **⑥ 升级初始化与迁移** | V12 技能升级 / 既有 V11 项目迁移（`--migrate-from-v11` 主路径 + sync-after-upgrade.py / upgrade-from-v10.py 执行时） | 跑 `--migrate-from-v11` 主路径 → 校验既有 gate.lock 兼容 → 不兼容则重新初始化并出迁移报告 |
 
 ---
 
@@ -55,7 +55,7 @@
 ```
 V11 包内(技能侧):
   registry/gates.yaml | registry/guards.yaml | registry/state-machine.yaml
-  registry/repair-flow.yaml | registry/stacks.yaml
+  registry/repair-flow.yaml | registry/stacks.yaml | **registry/roles.yaml** (V12 NEW 角色注册表,与 role-protocol §7 对齐)
   scripts/ac-gate.py | scripts/stage-gate.py
   scripts/gate-installer.py | scripts/gate-integrity-guard.py
 
@@ -114,7 +114,7 @@ V11 包内(技能侧):
 
 ---
 
-## §7.5 产物落位规则（V11.8.6 NEW — V12 物理布局兼容）
+## §7.5 产物落位规则（V12.0.0 强制默认 — V12 物理布局强制）
 
 V11 项目用 `init-from-zero.py --layout v12-preview` 后,贾维斯产物落位规则:
 

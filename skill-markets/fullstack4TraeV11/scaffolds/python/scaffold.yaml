@@ -1,20 +1,20 @@
 category: language
-description: Python 项目（V11 全栈流程，支持 FastAPI/Django/Flask）
+description: Python 项目（V11.8.7.1 全栈文档驱动开发流程，支持 FastAPI/Django/Flask）
 files: files/
 id: python
-name: Python (V11)
+name: Python (V12)
 gate_mapping:
   L1:
-    stage: 1-spec
+    stage: 1/spec
     description: Stage 1 Spec 验证 — Spec 完整性 + ruff + mypy
   L2:
-    stage: 3.5-verify
+    stage: 3.5/real-verify
     description: Stage 3.5 Real Verify — 代码与 Spec 一致性 + pytest + 覆盖率
   L3:
-    stage: 2-contract,4-review,4.5-rot-scan
+    stage: 2/contract,4/review,4.5/rot-scan
     description: PR merge — 契约 + 评审 + 腐化扫描归并 + E2E
   L4:
-    stage: 5-accept
+    stage: 5/accept
     description: Release — Stage 5 Accept 验收归档 + 安全审计
 post_actions:
 - description: 初始化 husky
@@ -24,9 +24,9 @@ post_actions:
   path: scripts/validate-scaffold.sh
   type: script
 ci:
-- description: V11 CI 兜底 Gate（拦截 --no-verify 绕过本地 husky）
-  template: templates/ci/v11-gate.yml
-  dest: .github/workflows/v11-gate.yml
+- description: V12 CI Gate（拦截 --no-verify 绕过本地 husky）
+  template: templates/ci/v12-gate.yml
+  dest: .github/workflows/v12-gate.yml
 required_scripts:
   pre_commit:
   - ruff
@@ -38,38 +38,68 @@ required_scripts:
   - build
 required_files:
   - pyproject.toml
-  - docs/specs/.state-card.md
+  - docs/specs/changes/<change-id>/.state-card.md
   - AGENTS.md
 state_card:
-  path: docs/specs/.state-card.md
+  path: docs/specs/changes/<change-id>/stage/-1/intake/.state-card.md
   stages:
-    "1-spec":
+    "-1/intake":
+      description: 需求摄取阶段
+      required_files:
+        - docs/specs/changes/*/fact/intent.md
+    "0/plan":
+      description: 规划阶段
+      required_files:
+        - docs/specs/changes/*/fact/plan.md
+    "0.5/test-plan":
+      description: 测试计划阶段
+      required_files:
+        - docs/specs/changes/*/fact/test-plan.md
+    "1/spec":
       description: 规格编写阶段
       required_files:
-        - docs/specs/*.md
-    "2-scaffold":
-      description: 脚手架搭建阶段
+        - docs/specs/changes/*/fact/spec.md
+    "1.5/prototype":
+      description: 原型阶段
       required_files:
-        - src/
-        - tests/
-    "3-implement":
+        - docs/specs/changes/*/fact/prototype.md
+    "2/contract":
+      description: 契约阶段
+      required_files:
+        - docs/specs/changes/*/fact/contracts/api-contracts.md
+    "3/implement":
       description: 实现阶段
       required_files:
         - src/**/*.py
-    "3.5-verify":
+    "3.5/real-verify":
       description: 验证阶段
       required_files:
         - tests/**/*.py
-    "4-review":
+    "4/review":
       description: 审查阶段
       required_files:
-        - CHANGELOG.md
+        - docs/specs/changes/*/stage/4/review/review-notes.md
+    "4.5/rot-scan":
+      description: 腐化扫描阶段
+      required_files:
+        - docs/specs/changes/*/stage/4.5/rot-scan/rot-scan-*.md
+    "5/accept":
+      description: 验收阶段
+      required_files:
+        - docs/specs/changes/*/stage/5/accept/ACCEPT_REPORT.md
+    "6/bug-fix":
+      description: Bug 修复阶段
+      required_files:
+        - tests/regression/**
+    "7/health":
+      description: 项目健康阶段
+      required_files: []
 tags:
 - python
 - fastapi
 - django
 - flask
-- v11
+- v12
 - fullstack
 variables:
 - default: my-v11-api
@@ -80,7 +110,7 @@ variables:
   description: 作者
   name: author
   required: false
-- default: '1-spec'
+- default: '-1/intake'
   description: 初始 Stage
   name: initial_stage
   required: false

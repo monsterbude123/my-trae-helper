@@ -52,21 +52,11 @@ if state_card is None or not state_card.exists():
     }))
     sys.exit(2)
 
-# 检查 modules/ 是否存在（DOC SYNC 产出）
-modules_dir = project_root / "docs" / "modules"
-if not modules_dir.exists() or not any(modules_dir.iterdir()):
-    print("[V11 Doc-Sync Gate] 🛑 BLOCKED: docs/modules/ empty or missing")
-    print("    → DOC SYNC 未完成，禁止写代码")
-    print("    → 修复: 运行 stage-2-doc-sync 生成 docs/modules/")
-    # Trae 官方 schema: PreToolUse 阻断必须 exit=2 + permissionDecision: "deny" JSON
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "deny",
-            "permissionDecisionReason": "DOC SYNC 未完成，docs/modules/ 缺失或为空"
-        }
-    }))
-    sys.exit(2)
-
+# V11.8.7.1 REMOVED: docs/modules/ 检查
+# 原因:init-from-zero.py 创建 docs/modules/ 占位(.gitkeep),但 V11 规范没有任何
+#      stage 写 modules/ 内容,导致 PreToolUse 永远 BLOCK(死锁)。
+#      references/project-structure.md 未列 docs/modules/,模块真相源在
+#      docs/specs/changes/_module.md(项目级) + fact/module.md(change 级)。
+#      见 V11.8.7.1 CHANGELOG 段 + V11-AP17 trap。
 print("[V11 Doc-Sync Gate] ✅ DOC SYNC 状态 OK")
 sys.exit(0)

@@ -1,6 +1,6 @@
 # Stage Skill Agent 协议（V11）
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > agent 如何使用 V11 stage skill 的标准协议。**不创建新的 stage agent skill**——TRAE IDE 已有 Task 子代理能力，本协议定义 agent 调用 stage skill 的标准接口。
@@ -46,7 +46,7 @@
 3. 读 references/common-anti-patterns.md（含 §19-22）
 4. 读当前 stage 的 references/（如 07-implement/gitnexus-impact.md）
 5. 读当前 stage 的 anti-patterns/
-6. 列出"我能踩的雷"清单
+6. 列出"我不能踩的雷"清单
 7. 列状态卡 + 上游 Completion Report 输入
 8. 执行 stage workflow
 9. 输出 4 字段 Completion Report
@@ -98,7 +98,7 @@ agent_completion:
 | 责任 | 主上下文 | agent |
 |------|:---:|:---:|
 | 加载 skill 入口 | ✅ | ❌ |
-| 列"我能踩的雷" | ✅ | ⚠️ 接到委派后必列 |
+| 列"我不能踩的雷" | ✅ | ⚠️ 接到委派后必列 |
 | 跑门禁脚本（stage-gate.py） | ✅ | ⚠️ 接委派后跑 |
 | 子代理委派 | ✅ | ❌ |
 | 子代理完成验证 | ✅（Article IX）| ❌ |
@@ -139,7 +139,7 @@ agent_completion:
 | 反例 | 触发 |
 |------|------|
 | ❌ agent 启动时**不读 stage skill SKILL.md** 就直接做 | Article IX 违反 |
-| ❌ agent 不列"我能踩的雷"清单 | 反例 §21 触发 |
+| ❌ agent 不列"我不能踩的雷"清单 | 反例 §21 触发 |
 | ❌ agent 把 secret 写到工具调用参数 | Article XVII 违反 |
 | ❌ agent 跨 stage（intake agent 做 implement 工作）| Article XII 违反 |
 | ❌ agent 自评 PASS 但无 evidence | Article V 违反 |
@@ -189,7 +189,7 @@ main_context_verification:
   # 主上下文亲自抽检 agent 报告（不依赖子代理自评）
  抽检清单:
     - [ ] agent 必读 5 步都执行了？
-    - [ ] agent 列的"我能踩的雷"清单完整？
+    - [ ] agent 列的"我不能踩的雷"清单完整？
     - [ ] agent evidence 中 file:line 可点击？
     - [ ] agent 未跨 stage 工作？
     - [ ] agent 无循环 PASS？

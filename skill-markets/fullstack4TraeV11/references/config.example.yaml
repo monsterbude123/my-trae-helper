@@ -1,0 +1,45 @@
+# fullstack4TraeV11 项目级配置文件示例
+# 放置路径:<project-root>/.trae/fullstack4traev11.config.yaml
+#
+# 加载顺序:
+#   1. 脚本启动时读 .trae/fullstack4traev11.config.yaml
+#   2. 字段缺/文件缺/yaml 未装 → 用默认值(向后兼容)
+#
+# 字段说明:
+#   gate.base_url: V11 commit 准入最小集探针 URL(commit-minimum-check.py 用)
+#   paths.archive: 归档写入路径(spec-purge.py / proactive-scan.py / stage-gate.py 共用)— V11.8.7.1 单真相源
+
+gate:
+  base_url: http://localhost:3000  # V11 commit-minimum-check.py 探针基址
+
+# 路径配置(V11.8.7.1 UPDATE — 单 archive 真相源)
+# 真相源 = paths.archive,无 paths.changes_archive 双键。
+# 若项目要走自定义归档路径(例如 monorepo),改这里即可:
+#
+#   paths:
+#     archive: docs/archive/done              # 真路径(spec-purge.py 写入)
+#
+# 改完后跑:
+#   python spec-purge.py --change-id <id> --dry-run --project-root .
+#   应输出 "归档至 <your-custom-path>/<id>"
+paths:
+  archive: docs/archive/done
+  state_card_project: docs/specs/.state-card.md
+  state_card_change: docs/specs/changes/{id}/.state-card.md
+  state_card_bug: docs/bugs/{id}/.state-card.md
+
+# 引擎 / GUI 默认值(V11.8.7 NEW — case 2 蒸馏 fix GUI_MODE 默认值漂移)
+# 桌面端 / GUI 项目必填,控制 fallback 顺序,避免 PIL → PIL 失败回退 Tk 的 lint 路径
+#
+# 字段含义:
+#   engine.default_gui_mode:
+#     pure_tk       — 仅 Tkinter,无 PIL 依赖(推荐,最稳定,默认)
+#     auto          — PIL 优先,失败回退 Tk(Windows + Python 3.13 环境常踩 PIL 路径 Bug)
+#     pil_only      — 必须 PIL 成功才 PASS(PIL 缺失直接 FAIL)
+#     headless      — 无 GUI,仅截图验证(适合 CI / 自动化)
+engine:
+  default_gui_mode: pure_tk  # V11.8.7 NEW — 改默认值驱动 case 2 fix
+  fallback_order:
+    - pure_tk
+    - headless
+    - auto  # 最后兜底,需 PIL 完整安装

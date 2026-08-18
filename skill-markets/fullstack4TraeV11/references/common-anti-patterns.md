@@ -1,6 +1,6 @@
 # Common Anti-Patterns — 公共反模式库
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > V11 所有 stage 必读的公共反模式索引。每个反例指向具体 stage 的 anti-patterns/ 目录。
@@ -43,6 +43,31 @@
 | 14 | **"非阻塞 FAIL" 放水** | Stage 9 review/anti-patterns/01-non-blocking-fail.md |
 | 15 | **编造测试覆盖** | Stage 9 review/anti-patterns/03-fabricate-coverage.md |
 | 23 | **GitNexus 可用却 grep / glob**（V10 process-rot-analysis.md 蒸馏） | 反例 23 本节已展开（Article V.5 + §19-22 cross-ref） |
+
+## §23 GitNexus 可用却用 grep / glob（V12.0.0 沿用 V10.12 — 反例 23 独立标题段）
+
+> **位置说明**: 本节按"反例 23"的独立标题段形式追加,便于 cross-stage 引用与 common-anti-patterns.md §23 在 unread-rule-pass.md §24 中同名编号引用时不冲突。
+
+**现象**: Agent 知道 GitNexus 可用,仍 `grep -r "X" src/` / `Glob "**/*.ts"`,而非 `query({query: "X"})` / `context({name: "X"})`。
+
+**根因**: `query()` / `context()` / `impact()` 调用需参数格式正确,部分 agent 偷懒用 grep 绕过。
+
+**识别信号**:
+- Agent 输出含 `grep -rn`、`find` 命令而非 `query()` / `impact()`
+- 主上下文重跑工具发现 `gitnexus index` 已建但未被引用
+
+**教训**: GitNexus 是项目级索引（32516 symbols / 39969 relationships,见项目 README gitnexus block）,不是装饰。grep 只能匹配字面文本,query() 走语义图谱;项目规模大时 grep 必然漏。
+
+**正确替代**: 
+```bash
+# ❌ 错
+grep -rn "create_user" src/
+
+# ✅ 对
+gitnexus query --query "create_user"
+gitnexus context --name create_user
+gitnexus impact --target create_user --direction upstream
+```
 
 ### P3 低优类
 

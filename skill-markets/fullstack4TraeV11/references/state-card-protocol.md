@@ -1,25 +1,29 @@
 # 状态卡协议
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > 13 个 stage 的状态卡统一协议。状态卡是任务真相源之一，不允许说谎（Article XII）。
 
 ---
 
-## 一、状态卡分类
+## 一、状态卡分类（V12.0.0 NEW — 主版本升级后强制）
 
-> **核心区分**: V11 有两类状态卡,**职责不同,不可混用**:
-> - `docs/specs/.state-card.md` = **项目级**(全局健康度 + 当前活跃 change 指针)
-> - `docs/specs/changes/{change-id}/.state-card.md` = **change 级**(单个 change 的 stage 进度)
+> **核心区分**: V12 多卡模式(**项目级 + change 级 + 13 stage 独立卡 + bug 级**),**职责不同,不可混用**:
+> - `fact/.state-card.md` = **项目级**(全局健康度 + 当前活跃 change 指针)
+> - `stage/{N}/.state-card.md` = **每 stage 独立状态卡**(单 stage 的产物 + 门禁,13 stage 各自一份)
+> - `fact/.state-card.md` = **change 级副本**(只读,从项目级同步)
+> - `docs/bugs/{bug-id}/.state-card.md` = **bug 级**(可选,bug 修复进度)
 >
-> **路径设计**: 项目级在 `docs/specs/` 根,change 级在 `docs/specs/changes/{id}/` 子目录。两类状态卡在不同目录,文件系统层无冲突。
+> **路径设计**: V12 默认 `fact/` + `stage/{N}/` 物理布局,状态卡每 stage 独立,跨 stage 信息桥接走 `handoff-out.md` / `handoff-in.md`。
 >
-> **类比**: 项目级 = 公司仪表盘 / change 级 = 单个项目任务卡
+> **类比**: 项目级 = 公司仪表盘 / 13 stage 独立卡 = 各部门周报 / change 级副本 = 项目周报汇总
+>
+> **V11 兼容(已废弃 V11.8.7.1)**: V11 单卡模式 `docs/specs/changes/{id}/.state-card.md` 一卡塞 13 stage 数据的做法永久废弃。所有项目必须 V12 多卡模式。
 
 ### 1.1 项目级状态卡
 
-**位置**: `{project_root}/docs/specs/.state-card.md`
+**位置**: `{project_root}/fact/.state-card.md`
 
 **作用**: 记录项目整体状态（当前活跃 change + 整体健康度 + 阻塞 + 下一步）
 
@@ -36,28 +40,43 @@ next_action: "..."                   # 下一步行动
 
 **谁维护**: Stage -1 Intake 初始化 / Stage 7 Project Health 更新 / 各 stage post-stage hook 同步指针
 
-### 1.2 Change 级状态卡
+### 1.2 Change 级状态卡(V12 多卡模式)
 
-**位置**: `{project_root}/docs/specs/changes/{change-id}/.state-card.md`
+**位置(V12 多卡)**: 每 stage 独立
+- `{project_root}/stage/-1/intake/.state-card.md`
+- `{project_root}/stage/0/plan/.state-card.md`
+- `{project_root}/stage/0.5/test-plan/.state-card.md`
+- `{project_root}/stage/1/spec/.state-card.md`
+- `{project_root}/stage/1.5/prototype/.state-card.md`
+- `{project_root}/stage/2/contract/.state-card.md`
+- `{project_root}/stage/3/implement/.state-card.md`
+- `{project_root}/stage/3.5/real-verify/.state-card.md`
+- `{project_root}/stage/4/review/.state-card.md`
+- `{project_root}/stage/4.5/rot-scan/.state-card.md`
+- `{project_root}/stage/5/accept/.state-card.md`
 
-**作用**: 记录单个 change 的状态（当前 stage + 阶段产物 + 阶段门禁）
+**V11 单卡路径(V11.8.7.1 永久废弃,不得新增)**: `docs/specs/changes/{change-id}/.state-card.md`
 
-**生命周期**: change 启动 → Accept 归档（归档后冻结,不可改）
+**作用**: 记录单个 stage 的状态(本 stage 产物 + 本 stage 门禁 + handoff 桥接)
+
+**生命周期**: stage 启动 → stage 门禁通过(归档到 `docs/archive/done/{change-id}/stage/{N}/`)+ 状态卡冻结不可改)
 
 **字段重点**:
 ```yaml
-change_id: "{change-id}"
-stage: "{stage-name}"                 # 当前 stage（-1 到 5）
+change_id:
+current_stage: "{stage-name}"                 # 当前 stage（-1 到 5）
 stage_status: "in_progress|done|blocked"
-artifacts:                            # 本 stage 产物
-  spec: "docs/specs/changes/{change-id}/spec.md"
+artifacts:                                    # 本 stage 产物
+  spec: "fact/spec.md"
   tests: "tests/..."
-gate_result:                          # 本 stage 门禁结果
+handoff_out:                                  # 给下一 stage
+  note: "..."
+gate_result:                                  # 本 stage 门禁结果
   status: "pass|fail"
   evidence: ["file:line", ...]
 ```
 
-**谁维护**: 各 stage 的 post-stage hook 自动更新 / reviewer 验收时更新
+**谁维护**: 各 stage 的 post-stage hook 自动更新 / reviewer 验收时更新 / 主上下文(V12 §5.8 多卡子代理允许写 stage_status,见下方段)
 
 ### 1.3 Bug 单状态卡
 
@@ -355,13 +374,19 @@ notes: 涉及 regex 宽松校验，需前后端契约三方同步
 ---
 ```
 
-### §5.8 子代理擅自升级状态协议（V11.2.1 NEW — 蒸馏自 canvas-asset-folders）
+### §5.8 子代理擅自升级状态协议（V12.0.0 沿用 V11.2.1 — 蒸馏自 canvas-asset-folders）
 
-> **位置说明**: 本章节按任务编号 §5.8 追加到 §5（状态卡模板）末尾，但本质是"协议"而非"模板"。后续 V11.3 重排时可考虑移到独立 §七、状态卡写入权限章节。
+> **位置说明**: 本章节按任务编号 §5.8 追加到 §5（状态卡模板）末尾，但本质是"协议"而非"模板"。后续 V12.0.0 重排时可考虑移到独立 §七、状态卡写入权限章节。
 >
-> **问题**：Round 2 implementer 完成后**未经主上下文审核**就把状态卡 `stage_status` 从 `in_progress` 改成 `completed` + `health: 🟢 healthy` — 主上下文发现后强制纠正。V11 state-card §5 强制重置协议未涵盖此场景。
+> **问题**：Round 2 implementer 完成后**未经主上下文审核**就把状态卡 `stage_status` 从 `in_progress` 改成 `completed` + `health: 🟢 healthy` — 主上下文发现后强制纠正。V12 state-card §5 强制重置协议未涵盖此场景。
 
-**铁律**：
+**V12 多卡模式(V12.0.0 沿用 + 调整)**：
+
+- **主上下文独占字段**(`fact/.state-card.md` 项目级): `project_health` / `current_change` / `active_blockers` / `next_action`
+- **子代理允许写字段**(每 stage 独立卡 `stage/{N}/.state-card.md`): `stage_status`(V12 多卡子代理允许写,V11 单卡模式下不允许)
+- **每 stage 卡专属字段**: `current_stage` / `stage_started_at` / `stage_ended_at` / `artifacts` / `gate_result` / `handoff_out` / `reset_history` — 由本 stage 的 sub-agent 写,主上下文抽检
+
+**V11 单卡铁律(已废)**：
 
 ```
 MUST: stage_status / current_stage / gate_result.status / health / next_stage.id
@@ -372,6 +397,19 @@ MUST: 子代理只能在 Completion Report 中"建议"状态变更,主上下文�
 NEVER: implementer / reviewer / debugger 等 sub-agent 直接 Edit .state-card.md 关键字段。
 
 NEVER: sub-agent 自动推 stage_status = completed。
+```
+
+**V12 多卡铁律(生效)**：
+
+```
+MUST: 项目级 fact/.state-card.md 由主上下文亲自 Edit,子代理禁止直接写入。
+
+MAY: 每 stage 独立卡 stage/{N}/.state-card.md 的 stage_status 子代理可写(V12 多卡语义),
+     但必走 audit_state_card_change() 审计(V12 沿用 V11.8.x §10.6)。
+
+MUST: 主代理必亲自 9 CROSS-SESSION VERIFY 验收 evidence 后才允许 sub-agent 写 stage_status = completed。
+
+NEVER: sub-agent 自动推 stage_status = completed(未跑真验证即写 = 反例 §7)。
 ```
 
 **机械化校验**（[state-card-validator.py](../scripts/state-card-validator.py) V11.2.1 NEW）：
@@ -712,16 +750,16 @@ python scripts/ac-gate.py \
 
 > **来源**:[references/todos/v12-physical-isolation/V12-ADR-DRAFT.md](../todos/v12-physical-isolation/V12-ADR-DRAFT.md) §5 Step 5 + [stage-physical-isolation.md §2](stage-physical-isolation.md)
 >
-> **V12 默认行为**:13 stage 各有独立 `.state-card.md` 落 `stage/{N}/.state-card.md`,取代 V11 单卡模式。
+> **V12.0.0 主版本升级后强制**:13 stage 各有独立 `.state-card.md` 落 `stage/{N}/.state-card.md`,取代 V11 单卡模式。V11 单卡模式永久废弃。
 
 ### 10.1 V11 vs V12 对比
 
 ```
-V11 单卡模式(V11 项目, --layout v11-default):
+V11 单卡模式(V11.8.7.1 已永久废弃,所有项目强制 V12 模式):
 docs/specs/changes/{id}/
-└── .state-card.md    # 单卡塞 13 stage 全部数据
+└── .state-card.md    # 单卡塞 13 stage 全部数据 — 已废,不得新增
 
-V12 多卡模式(V12 默认, --layout v12-preview):
+V12 多卡模式(V12.0.0 默认, 强制):
 docs/specs/changes/{id}/
 ├── fact/.state-card.md    # 项目级状态卡副本(只读)
 └── stage/
@@ -774,11 +812,13 @@ reset_history: []                  # 仅 stage-gate.py --reset-to 后非空
 
 ### 10.4 V11 兼容
 
-既有 V11 项目保留单卡(`--layout v11-default`)。`stage-gate.py` 默认 `--state-card docs/specs/changes/{id}/.state-card.md`(V11 模式);V12 模式加 `--state-card-per-stage` 参数指定 stage 子目录。V11 项目**不强制迁移**。
+V11.8.7.1 起:**V11 单卡模式永久废弃**,所有项目(新项目 + 既有 V11 项目)**必须**走 V12 多卡模式 + `--migrate-from-v11` 升级。`init-from-zero.py --layout` 仅 `v12-preview`,V11 项目必须 `--migrate-from-v11` 升级。`stage-gate.py` 默认 `--state-card stage/{N}/.state-card.md`(per-stage, V12 多卡模式);V11 单卡模式无对应参数(已废)。
+
+**🛑 V12.0.0 铁律**: 任何 agent 不得新增 V11 单卡模式路径(`docs/specs/changes/{id}/.state-card.md` 整张卡塞 13 stage 数据)。V11 单卡模式 = 🛑 REJECT。
 
 ### 10.5 强制实现机制(V12 默认)
 
-- `stage-gate.py --state-card` 参数支持项目级 + per-stage 两种路径
+- `stage-gate.py --state-card` 参数默认走 V12 多卡路径(`stage/{N}/.state-card.md`)
 - `process-layer-guard.sh` 校验 `stage/{N}/` 必须含 `.state-card.md`(V12 项目)
 - `init-from-zero.py --layout v12-preview` 创建 `stage/{N}/` 时自动生成空白 `.state-card.md` 模板
 - `state-card-validator.py --strict-audit` 扩到多卡校验(V12 默认)

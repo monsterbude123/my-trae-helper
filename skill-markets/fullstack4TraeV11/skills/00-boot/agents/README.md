@@ -1,33 +1,33 @@
-# V11 角色注册表（Role × Stage 正交）
+# V12.0.0 角色注册表（Role × Stage 正交 — V12 已授权）
 
 > **定位**: 本目录是 role-protocol.md §2 的 8 角色定义落盘处。角色回答"谁、职责边界、权限";stage skill 回答"何时、流程、产物"。一个角色跨多 stage 履职，一个 stage 由多角色协作——**不是每个 stage 配一个角色**。
-> **权威源**: 角色规格全文见 [role-protocol.md](../../references/role-protocol.md) §2（本目录 8 个 .md 均为其逐字落盘）。
+> **权威源**: 角色规格全文见 [role-protocol.md](../../references/role-protocol.md) §2（本目录 8 个 .md 与权威源双向漂移后失效，冲突时以 V12.0.0 强制布局为准）。
 
 ## 8 角色文件路径
 
 | 角色 | 文件 | 依据 | 备注 |
 |------|------|------|------|
-| 贾维斯 | `jarvis.md` | §2.1 | 现有，批次3 由 guard-smith 扩展时机④⑤⑥ |
-| 产品策划经理 | `product-manager.md` | §2.2 | 含 uiux 双文档 + 落地追踪表 |
-| 技术策划 | `tech-planner.md` | §2.3 | 三段拆分 + 验收规则 |
-| 后端实施者 | `backend-implementer.md` | §2.4 | 后端 TDD |
-| 前端实施者 | `frontend-implementer.md` | §2.5 | 前端 TDD + 原型对照 |
-| 原型设计师 | `prototype-designer.md` | §2.6 | **核心新增**，产品↔前端桥梁 |
-| 代码提测 | `qa-submitter.md` | §2.7 | **核心新增**，提测主代理 |
-| 测试专家 | `test-expert.md` | §2.8 | **核心新增**，提测裁判 |
+| 贾维斯 | `jarvis.md` | §2.1 | 现有，V12.0.0 已扩展时机④⑤⑥ + `registry/roles.yaml` 白名单(V12 §1.11 增补条款) |
+| 产品策划经理 | `product-manager.md` | §2.2 | V12 fact/ 白名单 + 落地追踪表 |
+| 技术策划 | `tech-planner.md` | §2.3 | V12 fact/tech-plan.md + 验收规则 |
+| 后端实施者 | `backend-implementer.md` | §2.4 | V12 stage/3/implement/backend-impl-notes.md |
+| 前端实施者 | `frontend-implementer.md` | §2.5 | V12 stage/3/implement/frontend-impl-notes.md |
+| 原型设计师 | `prototype-designer.md` | §2.6 | **核心新增**,V12 stage/1.5/prototype/ 物理隔离 |
+| 代码提测 | `qa-submitter.md` | §2.7 | **核心新增**,V12 stage/3/implement/qa-submit-notes.md |
+| 测试专家 | `test-expert.md` | §2.8 | **核心新增**,V12 stage/3.5/real-verify/verify-notes.md |
 
-## Role × Stage 履职矩阵（对照 role-protocol.md §1）
+## Role × Stage 履职矩阵（对照 role-protocol.md §1,V12.0.0 已扩 7/health 列）
 
-| 角色 \ Stage | -1 | 0/0.5 | 1 | 1.5 | 2 | 3 | 3.5 | 4 | 4.5/5 | 6 |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 贾维斯 | ✅全域 gate（见 jarvis.md §3） | | | | | | | | | |
-| 产品策划经理 | ✅需求 | | ✅spec 产品侧 | | | | | ⚙验收对照 | ✅归档 | |
-| 技术策划 | | ✅方案拆分 | ⚙ | | ✅契约输入 | | | | | |
-| 后端实施者 | | | | | ✅契约输入 | **主** | | | | |
-| 前端实施者 | | | | ⚙原型对照 | ✅契约输入 | **主** | | | | |
-| 原型设计师 | | | | **主** | | ⚙交接/演进 | | | | |
-| 代码提测 | | | | | | | **主代理** | | ✅提测报告 | **主代理** |
-| 测试专家 | | ✅测试计划 | ⚙AC 可测性 | | | | **子代理** | **子代理** | ⚙bug 单验收 | **子代理** |
+| 角色 \ Stage | -1 | 0/0.5 | 1 | 1.5 | 2 | 3 | 3.5 | 4 | 4.5/5 | 6 | 7/health |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| 贾维斯 | ✅全域 gate | ✅全域 gate | ✅全域 gate | ✅全域 gate | ✅全域 gate | ✅全域 gate | ✅全域 gate | ✅全域 gate | ✅全域 gate | ✅全域 gate | ✅全域 gate |
+| 产品策划经理 | ✅需求 | | ✅spec 产品侧 | | | | | ⚙验收对照 | ✅归档 | | ⚙项目健康 |
+| 技术策划 | | ✅方案拆分 | ⚙ | | ✅契约输入 | | | | | | ⚙项目健康 |
+| 后端实施者 | | | | | ✅契约输入 | **主** | | | | | |
+| 前端实施者 | | | | ⚙原型对照 | ✅契约输入 | **主** | | | | | |
+| 原型设计师 | | | | **主** | | ⚙交接/演进 | | | | | |
+| 代码提测 | | | | | | | **主代理** | | ✅提测报告 | **主代理** | |
+| 测试专家 | | ✅测试计划 | ⚙AC 可测性 | | | | **子代理** | **子代理** | ⚙bug 单验收 | **子代理** | ⚙项目健康 |
 
 **协作注释**:
 - **主/子**: 同一 stage 的"主"与"子"/"⚙"协作关系由该 stage 的 SKILL.md 声明，不由角色自定（矩阵铁律 2）。

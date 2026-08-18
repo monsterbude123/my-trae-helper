@@ -1,4 +1,4 @@
-name: V11 Gate
+name: V12 Gate
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   # ---- L1/L2 兜底 Gate：拦截本地 `--no-verify` 绕过 husky ----
-  v11-gate-l12:
+  v12-gate-l12:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
         run: |
           SC=$(find docs/specs -name .state-card.md 2>/dev/null | head -1)
           if [ -z "$SC" ]; then
-            echo "::error::No state card found — 必须先跑 V11 intake 初始化状态卡"
+            echo "::error::No state card found — 必须先跑 V12 intake 初始化状态卡"
             exit 1
           fi
           echo "State card: $SC"
@@ -57,7 +57,7 @@ jobs:
           fi
 
   # ---- L3 Gate：PR merge（Stage 2/4/4.5 归并 + E2E）----
-  v11-gate-l3:
+  v12-gate-l3:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -75,10 +75,11 @@ jobs:
           python scripts/run-gate-level.py --level L3 \
             --config gates/gate-config.json \
             --project-root "$GITHUB_WORKSPACE" \
-            --gates-yaml gates/gates.yaml
+            --gates-yaml gates/gates.yaml \
+            --allow-v12-layout
 
   # ---- L4 Gate：Release / tag（Stage 5 Accept + 安全审计）----
-  v11-gate-l4:
+  v12-gate-l4:
     if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
@@ -96,4 +97,5 @@ jobs:
           python scripts/run-gate-level.py --level L4 \
             --config gates/gate-config.json \
             --project-root "$GITHUB_WORKSPACE" \
-            --gates-yaml gates/gates.yaml
+            --gates-yaml gates/gates.yaml \
+            --allow-v12-layout

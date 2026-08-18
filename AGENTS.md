@@ -126,6 +126,7 @@ my-trae-helper/
    ├─ 测试/验收 → acceptance-discipline + test-experience
    ├─ 安全扫描 → trae-security-review
    ├─ **新建/升级 skill → [`.agents/skills/project-rule-skill/references/skill-creation-workflow.md`](.agents/skills/project-rule-skill/references/skill-creation-workflow.md) 必读(V11.8.0.1 路径迁移到 project-rule-skill 网关,协议先行 + 多维度一致)** + skill-acceptance §7
+   ├─ **skill 升级 / 引入 / 合并 / 跨版本验证 → [`.agents/skills/case-driven-skill-audit/SKILL.md`](.agents/skills/case-driven-skill-audit/SKILL.md)(2026-08-17 NEW)委派子代理实跑 case 后再评估,不靠读文档判断(V11 §3.7 反虚假交付禁止)** — 触发关键词: "case study" / "实跑 case" / "走完整流水线" / "skill 真假" / "演练收集经验" / "case-driven audit"
    ├─ Gate/CI 配置 → skill-acceptance §7 + agent-dev-control-kit §11
    └─ 重构/升级 → fullstack-skill-architect
 3. 只 Read needed_rules + 加载的 skill 列出的文件

@@ -1,6 +1,6 @@
 # Stage Physical Isolation — 阶段物理隔离规范（V12 NEW）
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > **核心思想（借鉴 husky）**: 每个 stage 是独立"提交门",stage 之间通过物理目录隔离而非软链接 / 逻辑层。
@@ -64,16 +64,16 @@ docs/specs/changes/{change-id}/
 
 ```
 Step 1: 保留 fact/ 整个目录（spec/plan/contract 是事实源）
-Step 2: 删除 stage/3-implement/ ~ stage/5-accept/ 全部内容（重置后 stage 流程文档）
-Step 3: 保留 stage/-1-intake/ ~ stage/2-contract/（如果用户决策"保留"则跳过删除）
-Step 4: 重置当前 stage 状态卡 = 3-implement,stage_status=pending
+Step 2: 删除 stage/3/implement/ ~ stage/5/accept/ 全部内容（重置后 stage 流程文档）
+Step 3: 保留 stage/-1/intake/ ~ stage/2/contract/（如果用户决策"保留"则跳过删除）
+Step 4: 重置当前 stage 状态卡 = stage/3/implement/.state-card.md,stage_status=pending
 Step 5: 写入 reset_history 字段（V11 §7.4 沿用）
 ```
 
 **V12 强制**：
 
 ```bash
-python scripts/stage-gate.py --change {id} --reset-to stage/3-implement
+python scripts/stage-gate.py --change {id} --reset-to stage/3/implement
 # 此命令不可被主上下文手动覆盖（husky 式阻断）
 ```
 
@@ -82,7 +82,7 @@ python scripts/stage-gate.py --change {id} --reset-to stage/3-implement
 ```
 scripts/stage-gate.py V12 NEW:
   --check {stage-id}:     强制门禁校验（FAIL = 退出码 1，阻断下一 stage 启动）
-  --reset-to {stage-id}:  物理重置（保留 fact/，删除 stage/ 后续目录）
+  --reset-to {stage-id}:  物理重置（保留 fact/，删除 stage/{N+1}/ 后续目录）
   --status {change-id}:   列出当前 stage 状态 + 门禁结果
 ```
 
@@ -104,16 +104,16 @@ scripts/stage-gate.py V12 NEW:
 | Stage | 白名单（只读） | 黑名单（不可读） |
 |---|---|---|
 | -1 Intake | fact/spec.md（如果存在）+ AGENTS.md + rules/ | 其他 stage/ 全部 |
-| 0 Plan | fact/spec.md + stage/-1-intake/handoff-out.md + 同 stage | 其他 stage |
-| 0.5 Test Plan | fact/spec.md + fact/plan.md + stage/0-plan/handoff-out.md | 其他 stage |
-| 1 Spec | fact/plan.md + stage/0.5-test-plan/handoff-out.md | 其他 stage |
-| 1.5 Prototype | fact/spec.md + stage/1-spec/handoff-out.md | 其他 stage |
-| 2 Contract | fact/spec.md + stage/1-spec/handoff-out.md | 其他 stage |
-| 3 Implement | fact/contracts/ + stage/2-contract/handoff-out.md | 其他 stage |
-| 3.5 Real Verify | fact/contracts/ + stage/3-implement/handoff-out.md + code/ | 其他 stage |
-| **4 Review** | **fact/spec.md AC + 截图 + 视频** | **stage/3-implement/*（代码细节）** |
+| 0 Plan | fact/spec.md + stage/-1/intake/handoff-out.md + 同 stage | 其他 stage |
+| 0.5 Test Plan | fact/spec.md + fact/plan.md + stage/0/plan/handoff-out.md | 其他 stage |
+| 1 Spec | fact/plan.md + stage/0.5/test-plan/handoff-out.md | 其他 stage |
+| 1.5 Prototype | fact/spec.md + stage/1/spec/handoff-out.md | 其他 stage |
+| 2 Contract | fact/spec.md + stage/1/spec/handoff-out.md | 其他 stage |
+| 3 Implement | fact/contracts/ + stage/2/contract/handoff-out.md | 其他 stage |
+| 3.5 Real Verify | fact/contracts/ + stage/3/implement/handoff-out.md + code/ | 其他 stage |
+| **4 Review** | **fact/spec.md AC + 截图 + 视频** | **stage/3/implement/*（代码细节）** |
 | 4.5 Rot Scan | fact/ + 全 stage/（只读诊断） | archive/ |
-| 5 Accept | fact/ + stage/4.5-rot-scan/handoff-out.md | archive/（写） |
+| 5 Accept | fact/ + stage/4.5/rot-scan/handoff-out.md | archive/（写） |
 
 **主上下文责任**:
 
@@ -171,12 +171,12 @@ review-report 必填 ≤ 300 字:
 
 ```
 主上下文收到 Stage N agent Completion Report:
-  1. 读 stage/N/handoff-out.md（agent 必填）
-  2. 读 stage/N/notes.md（仅主上下文，agent 不可读）
+  1. 读 stage/{N}/handoff-out.md（agent 必填）
+  2. 读 stage/{N}/notes.md（仅主上下文，agent 不可读）
   3. 主上下文提纯跨 stage 信息：
      - Stage 3 → Stage 4 注入: "实现细节: 用 X 库处理 Y"（帮助 reviewer 理解视觉决策）
      - Stage 3 → Stage 5 注入: "实施发现: Z 接口需扩展"（帮助 accept 决策）
-  4. 写入 stage/N+1/handoff-in.md（注入到下一 stage agent）
+  4. 写入 stage/{N+1}/handoff-in.md（注入到下一 stage agent）
 ```
 
 **核心**：
@@ -195,7 +195,7 @@ review-report 必填 ≤ 300 字:
 ### 反例 1：sub-agent 读过白名单外文件
 
 ```
-现象: Stage 3 implementer 读了 stage/4-review/ 的旧 review-report 试图"避免之前提的问题"
+现象: Stage 3 implementer 读了 stage/4/review/ 的旧 review-report 试图"避免之前提的问题"
 后果: 上下文膨胀 + agent 决策被旧报告污染 + Stage 4 反而失去独立性
 纠正: 委派注入 doc_whitelist 严格边界 + Completion Report 校验"未读白名单外"
 ```

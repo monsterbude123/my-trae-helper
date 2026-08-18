@@ -1,6 +1,6 @@
 # Agent 错误诊断手册（V11 — 5 模式根因 → 现有铁律映射）
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > V11 实战反馈蒸馏。任何 agent 失败先查此手册，**避免重复创建新铁律**。
@@ -60,8 +60,8 @@ Step 4: 若现有铁律缺失 → 🛑 必新增 Article + 反例（不走 Artic
 
 **修复方向**：
 - 项目级：rule 拆分（>200 行必拆）
-- 项目级：V11 §0.5 加载协议强化（必先列"我能踩的雷"）
-- agent 必走：列"我能踩的雷" → 自评 PASS 前逐项核对自己
+- 项目级：V11 §0.5 加载协议强化（必先列"我不能踩的雷"）
+- agent 必走：列"我不能踩的雷" → 自评 PASS 前逐项核对自己
 
 ---
 

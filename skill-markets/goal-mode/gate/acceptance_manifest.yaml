@@ -1,49 +1,445 @@
-# Goal-Mode 验收清单模板
+# Goal-Mode PR-1+PR-2+PR-3+PR-4 验收清单 (强门禁)
 #
-# 使用方法：
-#   1. 从目标中提炼验收项（Agent 草拟 + 人类确认后冻结）
-#   2. 每个检查项必须有明确的验证方式（文件存在/命令退出码/内容包含）
-#   3. 运行 python gate/verify-goal.py --manifest gate/acceptance_manifest.yaml --candidate state/completion_candidate.yaml
+# 状态: FROZEN by goal-mode (用户授权 2026-08-18, "全程主导和决策")
+# 目标: 修复 fullstack4TraeV11 V12 腐败内容 PR-1 + PR-2 + PR-3 + PR-4 共 22 项修复
+# 范围: skill-markets/fullstack4TraeV11/ 内 ~30 文件
 #
-# 安全不变量：
-#   - 此文件受 CODEOWNERS 保护，Agent 不可编辑
-#   - 验证器只读真实产物，不读 Agent 声明
+# 验证协议:
+#   python skill-markets/goal-mode/gate/verify-goal.py \
+#     --manifest skill-markets/goal-mode/gate/acceptance_manifest.yaml \
+#     --candidate state/completion_candidate.yaml
+#
+# 任何文件改动后必须重新跑此验证器。
 
-goal: ""
-description: ""
+goal: "修复 fullstack4TraeV11 V12 腐败内容 PR-1 (P0 14 项) + PR-2 (P0 9 项) + PR-3 (P1 11 项) + PR-4 (P2 2 项) = 36 项"
+
+description: "PR-1 = V12 物理路径语义落地首批 14 项 P0 修复;PR-2 = 描述层 + agents 落位补全 9 项 P0 修复;PR-3 = references 描述层 V12 化 + 脚本 V12 化 11 项 P1 修复;PR-4 = 死文件清理 + 展平函数确认 2 项 P2 修复."
 
 surfaces:
-  - id: ""
+  - id: stage-naming
     user_visible: true
-    paths: []
+    paths:
+      - "skill-markets/fullstack4TraeV11/scripts/init-from-zero.py"
+  - id: hooks-v12
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/templates/hooks/pre-stage.sh"
+      - "skill-markets/fullstack4TraeV11/templates/hooks/pre-commit-hardened.sh"
+      - "skill-markets/fullstack4TraeV11/templates/hooks/pre-push-hardened.sh"
+      - "skill-markets/fullstack4TraeV11/templates/hooks/pre-accept.sh"
+  - id: scaffold-consistent
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/scaffolds/nodejs/scaffold.yaml"
+      - "skill-markets/fullstack4TraeV11/scaffolds/python/scaffold.yaml"
+      - "skill-markets/fullstack4TraeV11/scaffolds/nodejs/files/gates/gate-config.json"
+      - "skill-markets/fullstack4TraeV11/scaffolds/python/files/gates/gate-config.json"
+  - id: scanner-v12
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/scripts/proactive-scan.py"
+      - "skill-markets/fullstack4TraeV11/scripts/orphan-detector.py"
+      - "skill-markets/fullstack4TraeV11/scripts/spec-purge.py"
+      - "skill-markets/fullstack4TraeV11/scripts/change-status.py"
+      - "skill-markets/fullstack4TraeV11/scripts/setup-feature.py"
+  - id: bug-state-machine
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/scripts/bug-state-machine-validator.py"
+      - "skill-markets/fullstack4TraeV11/skills/12-bug-fix/references/bug-state-machine.md"
+      - "skill-markets/fullstack4TraeV11/skills/01-intake/references/bug-state-machine.md"
+
+  # PR-2 新增 surfaces
+  - id: description-layer
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/README.md"
+      - "skill-markets/fullstack4TraeV11/SKILL.md"
+      - "skill-markets/fullstack4TraeV11/CHANGELOG.md"
+      - "skill-markets/fullstack4TraeV11/references/state-card-protocol.md"
+      - "skill-markets/fullstack4TraeV11/references/project-structure.md"
+      - "skill-markets/fullstack4TraeV11/references/document-layer.md"
+  - id: agents-landing
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/skills/00-boot/agents/product-manager.md"
+      - "skill-markets/fullstack4TraeV11/skills/00-boot/agents/tech-planner.md"
+      - "skill-markets/fullstack4TraeV11/skills/00-boot/agents/prototype-designer.md"
+      - "skill-markets/fullstack4TraeV11/skills/00-boot/agents/qa-submitter.md"
+      - "skill-markets/fullstack4TraeV11/skills/00-boot/agents/jarvis.md"
+      - "skill-markets/fullstack4TraeV11/skills/00-boot/agents/README.md"
+  - id: state-card-stage1
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/skills/04-spec/references/state-card-stage1-fields.md"
+      - "skill-markets/fullstack4TraeV11/skills/04-spec/anti-patterns/V10-battle-tested.md"
+  - id: bug-hunt-scripts
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/skills/12-bug-fix/scripts/bug-hunt/new-bug.sh"
+      - "skill-markets/fullstack4TraeV11/skills/12-bug-fix/scripts/bug-hunt/close-bug.sh"
+
+  # PR-3 surfaces
+  - id: references-v12-entry
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/references/constitution.md"
+      - "skill-markets/fullstack4TraeV11/references/common-iron-rules.md"
+      - "skill-markets/fullstack4TraeV11/references/common-anti-patterns.md"
+      - "skill-markets/fullstack4TraeV11/references/role-protocol.md"
+      - "skill-markets/fullstack4TraeV11/references/unread-rule-pass.md"
+      - "skill-markets/fullstack4TraeV11/references/stage-physical-isolation.md"
+  - id: ci-v12-gate
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/templates/ci/v12-gate.yml"
+  - id: scripts-v12
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/scripts/sync-after-upgrade.py"
+      - "skill-markets/fullstack4TraeV11/scripts/upgrade-from-v10.py"
+      - "skill-markets/fullstack4TraeV11/scripts/v11-doc-sync.py"
+      - "skill-markets/fullstack4TraeV11/scripts/gate-installer.py"
+
+  # PR-4 surfaces
+  - id: dead-code-cleanup
+    user_visible: true
+    paths:
+      - "skill-markets/fullstack4TraeV11/scripts/spec-purge.py"
 
 checks:
-  - id: file_exists_check
-    type: file_exists
-    path: ""
-    description: "检查产物文件是否存在"
-    
-  - id: content_check
+  # === P0-1: stage 命名空间统一为斜杠 (PR-1) ===
+  - id: P0-1-init-slash-format
     type: file_contains
-    path: ""
-    substring: ""
-    description: "检查文件包含目标内容"
-    
-  - id: test_check
+    path: "skill-markets/fullstack4TraeV11/scripts/init-from-zero.py"
+    substring: '"-1/intake"'
+    description: "init-from-zero.py 骨架分支用斜杠命名 (与 state-machine.yaml 对齐)"
+  - id: P0-1-state-machine-aligned
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/registry/state-machine.yaml"
+    substring: '"-1/intake"'
+    description: "registry/state-machine.yaml 13 stage 斜杠命名权威源 (确认未改坏)"
+  - id: P0-1-python-syntax-ok
     type: command_exit_zero
-    command: "pytest tests/ -v"
-    description: "运行测试套件"
-    
-  - id: data_points_check
-    type: min_series_points
-    path: ""
-    series: ""
-    min_points: 2
-    description: "检查数据点数量"
+    command: "cd d:/workspace/my-trae-helper && python -c \"import ast; ast.parse(open('skill-markets/fullstack4TraeV11/scripts/init-from-zero.py', encoding='utf-8').read())\""
+    description: "init-from-zero.py 修改后语法正确"
+
+  # === P0-2a: pre-stage.sh V12 唯一路径 ===
+  - id: P0-2a-prestage-syntax
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && bash -n skill-markets/fullstack4TraeV11/templates/hooks/pre-stage.sh"
+    description: "pre-stage.sh 修改后语法正确"
+  - id: P0-2a-prestage-v12-unique
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/templates/hooks/pre-stage.sh"
+    substring: "stage/-1/intake/.state-card.md"
+    description: "pre-stage.sh 唯一指向 V12 stage/-1/intake/.state-card.md"
+
+  # === P0-2b: pre-commit-hardened.sh ===
+  - id: P0-2b-precommit-syntax
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && bash -n skill-markets/fullstack4TraeV11/templates/hooks/pre-commit-hardened.sh"
+    description: "pre-commit-hardened.sh 语法正确"
+  - id: P0-2b-precommit-v12-stages
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/templates/hooks/pre-commit-hardened.sh"
+    substring: "VALID_STAGES"
+    description: "pre-commit-hardened.sh 含 VALID_STAGES 校验 13 stage"
+
+  # === P0-2c: pre-push-hardened.sh ===
+  - id: P0-2c-prepush-syntax
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && bash -n skill-markets/fullstack4TraeV11/templates/hooks/pre-push-hardened.sh"
+    description: "pre-push-hardened.sh 语法正确"
+  - id: P0-2c-prepush-v12-unique
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/templates/hooks/pre-push-hardened.sh"
+    substring: "IMPLEMENT_CARD"
+    description: "pre-push-hardened.sh 含 IMPLEMENT_CARD 变量指向 V12 stage/3/implement/.state-card.md"
+
+  # === P0-2d: pre-accept.sh ===
+  - id: P0-2d-preaccept-syntax
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && bash -n skill-markets/fullstack4TraeV11/templates/hooks/pre-accept.sh"
+    description: "pre-accept.sh 语法正确"
+  - id: P0-2d-preaccept-v12-path
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/templates/hooks/pre-accept.sh"
+    substring: "stage/5/accept"
+    description: "pre-accept.sh 找 V12 stage/5/accept/.state-card.md"
+
+  # === P0-3: scaffold 一致 ===
+  - id: P0-3-nodejs-yaml-slash
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scaffolds/nodejs/scaffold.yaml"
+    substring: "stage:"
+    description: "nodejs scaffold yaml 含 stage: 字段"
+  - id: P0-3-python-yaml-slash
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scaffolds/python/scaffold.yaml"
+    substring: "stage:"
+    description: "python scaffold yaml 含 stage: 字段"
+
+  # === P0-4a: proactive-scan ===
+  - id: P0-4a-proactive-syntax
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && python -c \"import ast; ast.parse(open('skill-markets/fullstack4TraeV11/scripts/proactive-scan.py', encoding='utf-8').read())\""
+    description: "proactive-scan.py 语法正确"
+  - id: P0-4a-proactive-v12-path
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scripts/proactive-scan.py"
+    substring: "stage/3.5/real-verify"
+    description: "proactive-scan.py 找 V12 stage/3.5/real-verify/"
+
+  # === P0-4b: orphan-detector ===
+  - id: P0-4b-orphan-syntax
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && python -c \"import ast; ast.parse(open('skill-markets/fullstack4TraeV11/scripts/orphan-detector.py', encoding='utf-8').read())\""
+    description: "orphan-detector.py 语法正确"
+  - id: P0-4b-orphan-v12-path
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scripts/orphan-detector.py"
+    substring: "fact/contracts"
+    description: "orphan-detector.py 找 V12 fact/contracts/"
+
+  # === P0-4c: spec-purge ===
+  - id: P0-4c-spec-purge-syntax
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && python -c \"import ast; ast.parse(open('skill-markets/fullstack4TraeV11/scripts/spec-purge.py', encoding='utf-8').read())\""
+    description: "spec-purge.py 语法正确"
+  - id: P0-4c-spec-purge-v12-review
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scripts/spec-purge.py"
+    substring: "stage/4/review/review-notes"
+    description: "spec-purge.py V12_STAGE_ARTIFACTS 用 review-notes"
+
+  # === P0-4d: change-status ===
+  - id: P0-4d-change-status-syntax
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && python -c \"import ast; ast.parse(open('skill-markets/fullstack4TraeV11/scripts/change-status.py', encoding='utf-8').read())\""
+    description: "change-status.py 语法正确"
+
+  # === P0-4e: setup-feature ===
+  - id: P0-4e-setup-feature-syntax
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && python -c \"import ast; ast.parse(open('skill-markets/fullstack4TraeV11/scripts/setup-feature.py', encoding='utf-8').read())\""
+    description: "setup-feature.py 语法正确"
+
+  # === P0-5a: 12-bug-fix bug 文档权威源 ===
+  - id: P0-5a-12-bug-fix-7-state
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/skills/12-bug-fix/references/bug-state-machine.md"
+    substring: "IN-FIX"
+    description: "12-bug-fix bug 文档含 IN-FIX (7 态权威源)"
+
+  # === P0-5b: validator 扩到 7 态 ===
+  - id: P0-5b-validator-syntax
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && python -c \"import ast; ast.parse(open('skill-markets/fullstack4TraeV11/scripts/bug-state-machine-validator.py', encoding='utf-8').read())\""
+    description: "bug-state-machine-validator.py 语法正确"
+  - id: P0-5b-validator-7-state
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scripts/bug-state-machine-validator.py"
+    substring: "IN-FIX"
+    description: "validator 唯一含 IN-FIX (7 态)"
+
+  # === P0-5c: 01-intake bug 文档对齐 ===
+  - id: P0-5c-01-intake-7-state
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/skills/01-intake/references/bug-state-machine.md"
+    substring: "IN-FIX"
+    description: "01-intake bug 文档含 IN-FIX"
+
+  # === P0-6 (PR-2): README.md V12 化 ===
+  - id: P0-6-readme-v12
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/README.md"
+    substring: "12.0.0"
+    description: "README.md 顶部 V12.0.0 主版本升级声明"
+
+  # === P0-7 (PR-2): SKILL.md 16 处 V11→V12 ===
+  - id: P0-7-skill-md-no-v11
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/SKILL.md"
+    substring: "V12 NEW"
+    description: "SKILL.md 改 V12 NEW 标记"
+
+  # === P0-8 (PR-2): state-card-protocol §一 + §5.8 V12 多卡 ===
+  - id: P0-8-state-card-multicard
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/references/state-card-protocol.md"
+    substring: "stage/-1/intake/.state-card.md"
+    description: "state-card-protocol.md §一 V12 多卡 stage/-1/intake/.state-card.md 路径声明"
+
+  # === P0-9 (PR-2): project-structure.md + document-layer.md V12 ===
+  - id: P0-9-project-structure-fact
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/references/project-structure.md"
+    substring: "fact/"
+    description: "project-structure.md V12 fact/ 路径声明"
+  - id: P0-9-document-layer-fact
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/references/document-layer.md"
+    substring: "fact/spec.md"
+    description: "document-layer.md V12 fact/spec.md 路径声明"
+
+  # === P0-10 (PR-2): templates 6 文件 V12 路径 ===
+  - id: P0-10-templates-fact-path
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/references/templates/test-plan-template.md"
+    substring: "fact/test-plan.md"
+    description: "test-plan-template.md V12 fact/test-plan.md 路径"
+
+  # === P0-11 (PR-2): 4 agents V12 落位补全 ===
+  - id: P0-11-agents-v12-landing
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/skills/00-boot/agents/qa-submitter.md"
+    substring: "stage/3"
+    description: "qa-submitter.md V12 stage/3 落位声明"
+  - id: P0-11-product-manager-fact
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/skills/00-boot/agents/product-manager.md"
+    substring: "fact/uiux-spec.md"
+    description: "product-manager.md V12 fact/uiux-spec.md 落位"
+
+  # === P0-12 (PR-2): CHANGELOG + ADR + §5.8 自一致 ===
+  - id: P0-12-changelog-v11-defunct
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/CHANGELOG.md"
+    substring: "V11.8.7.1 已永久废弃"
+    description: "CHANGELOG.md V12.0.0 兼容表 v11-default 行加注已永久废弃"
+  - id: P0-12-adr-5-point-remedy
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/references/todos/v12-physical-isolation/V12-ADR-DRAFT.md"
+    substring: "run-all-guards.py --allow-v12-layout"
+    description: "V12-ADR-DRAFT.md §12 5 点补救声明"
+
+  # === P0-13 (PR-2): state-card-stage1 + V10-battle-tested V12 ===
+  - id: P0-13-state-card-stage1-v12
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/skills/04-spec/references/state-card-stage1-fields.md"
+    substring: "stage/1/spec/.state-card.md"
+    description: "state-card-stage1-fields.md V12 多卡 stage/1/spec/.state-card.md 路径"
+  - id: P0-13-v10-battle-tested-v12
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/skills/04-spec/anti-patterns/V10-battle-tested.md"
+    substring: "handoff-in"
+    description: "V10-battle-tested.md V12 多卡 + handoff-in.md 桥接"
+
+  # === P0-14 (PR-2): bug-hunt 6 脚本 V12 ===
+  - id: P0-14-bug-hunt-v12
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/skills/12-bug-fix/scripts/bug-hunt/close-bug.sh"
+    substring: "stage/6/bug-fix"
+    description: "close-bug.sh V12 stage/6/bug-fix/.state-card.md 路径(V12 多卡)"
+
+  # === P1-1 (PR-3): references V12.0.0+ 统一 ===
+  - id: P1-1-references-v12-entry
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/references/constitution.md"
+    substring: "V12.0.0+"
+    description: "constitution.md V12.0.0+ 设计入口标记"
+  - id: P1-1-no-v11-7-entry
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && python -c \"import os, glob; cnt=sum(1 for p in glob.glob('skill-markets/fullstack4TraeV11/references/**/*.md', recursive=True) for line in open(p, encoding='utf-8', errors='ignore') if 'V11.7.0+ 设计入口' in line); assert cnt == 0, f'found {cnt} V11.7.0 occurrences'\""
+    description: "references 0 个 V11.7.0+ 设计入口残留 (PowerShell 兼容)"
+    description: "references/ 下 0 处 V11.7.0+ 设计入口残留(已全部 V12.0.0+)"
+
+  # === P1-2 (PR-3): v11-gate.yml → v12-gate.yml ===
+  - id: P1-2-ci-v12-gate
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/templates/ci/v12-gate.yml"
+    substring: "V12 Gate"
+    description: "v12-gate.yml name=V12 Gate"
+  - id: P1-2-ci-v11-gate-removed
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && python -c \"import os; assert not os.path.exists('skill-markets/fullstack4TraeV11/templates/ci/v11-gate.yml'), 'v11-gate.yml still exists'\""
+    description: "v11-gate.yml 已删除"
+
+  # === P1-3 (PR-3): role-protocol V12.0.0 已授权 ===
+  - id: P1-3-role-protocol-v12
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/references/role-protocol.md"
+    substring: "V12.0.0 已授权"
+    description: "role-protocol.md 顶部 V12.0.0 已授权声明"
+
+  # === P1-4 (PR-3): jarvis registry/roles.yaml 白名单 ===
+  - id: P1-4-jarvis-roles-whitelist
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/skills/00-boot/agents/jarvis.md"
+    substring: "registry/roles.yaml"
+    description: "jarvis.md 白名单补 registry/roles.yaml"
+
+  # === P1-5 (PR-3): agents/README.md 矩阵 7 列 + jarvis 行 ===
+  - id: P1-5-agents-readme-7-cols
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/skills/00-boot/agents/README.md"
+    substring: "7/health"
+    description: "agents/README.md 矩阵加 7/health 列"
+
+  # === P1-7 (PR-3): unread-rule-pass §23 → §24 ===
+  - id: P1-7-unread-rule-pass-renamed
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/references/unread-rule-pass.md"
+    substring: "## §24 — init-from-zero"
+    description: "unread-rule-pass.md §23 init-from-zero → §24 init-from-zero"
+
+  # === P1-8 (PR-3): sync-after-upgrade.py required_stages V12 ===
+  - id: P1-8-sync-after-upgrade-v12
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scripts/sync-after-upgrade.py"
+    substring: "- 7/project-health"
+    description: "sync-after-upgrade.py required_stages 含 13 stage V12"
+
+  # === P1-9 (PR-3): upgrade-from-v10.py markers V12 ===
+  - id: P1-9-upgrade-v10-required-v12
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scripts/upgrade-from-v10.py"
+    substring: "required_v12_fields"
+    description: "upgrade-from-v10.py 改 V12 required_v12_fields"
+
+  # === P1-10 (PR-3): v11-doc-sync.py V12 ===
+  - id: P1-10-v11-doc-sync-default-v12
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scripts/v11-doc-sync.py"
+    substring: "V12.0.0+"
+    description: "v11-doc-sync.py DEFAULT_MARK 改 V12.0.0+"
+
+  # === P1-11 (PR-3): gate-installer.py layer 字段消费 ===
+  - id: P1-11-gate-installer-layer-field
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scripts/gate-installer.py"
+    substring: "required_artifacts:"
+    description: "gate-installer.py V12 扩消费 layer / host / stage / required_artifacts / script 字段"
+
+  # === P2-2 (PR-4): spec-knowledge-extract.py.bak 删除 ===
+  - id: P2-2-bak-removed
+    type: command_exit_zero
+    command: "cd d:/workspace/my-trae-helper && python -c \"import os; assert not os.path.exists('skill-markets/fullstack4TraeV11/scripts/spec-knowledge-extract.py.bak'), 'bak still exists'\""
+    description: "spec-knowledge-extract.py.bak 死文件已删除"
+
+  # === P2-3 (PR-4): flatten_v12_to_v11_layout 删除确认 ===
+  - id: P2-3-flatten-removed
+    type: file_contains
+    path: "skill-markets/fullstack4TraeV11/scripts/spec-purge.py"
+    substring: "def archive_keep_v12_layout"
+    description: "spec-purge.py 用 archive_keep_v12_layout(替代 flatten_v12_to_v11_layout)"
 
 review_items: []
 
+# 唯一性铁律 (无兼容层)
+invariants:
+  - "V12 是唯一布局. V11 扁平布局彻底废弃. 不允许任何 'V11 兜底' / 'V11 兼容' / '为老项目保留' 描述."
+  - "init-from-zero.py 只保留 --layout v12-preview 一个选项. 不保留 v11-default."
+  - "scripts/spec-purge.py 不保留 flatten_v12_to_v11_layout() 函数 (V11.8.7.1 Req 2 已废)."
+  - "scripts/bug-state-machine-validator.py 只保留 7 态 (OPEN/IN-FIX/FIXED/VERIFIED/CLOSED/REOPENED/OBSOLETE). 不保留 IN_PROGRESS/BLOCKED/SKIPPED 别名."
+  - "任何文件改动后, agent 不得新增 '兼容' / '兜底' / 'fallback' / 'legacy' 字样."
+
 meta:
-  created_by: "human"
-  frozen_at: ""
-  version: "1.0.0"
+  created_by: "goal-mode (draft) + user-authorized (frozen)"
+  frozen_at: "2026-08-18T10:50:00"
+  updated_at: "2026-08-18T14:30:00"
+  version: "2.0.0-frozen"
+  pr_scope: "PR-1 (P0 14 项) + PR-2 (P0 9 项) + PR-3 (P1 11 项) + PR-4 (P2 2 项) = 36 项"
+  related_research: "logs/research-2026-08-18/{F-skeptical-cross-check.md, G-spec-kit-skeleton.md}"
+  frozen_authority: "用户授权 2026-08-18 '你全程做技能开发者的主导和决策就行'"

@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
 """
-V11 bug-state-machine-validator.py — Bug 单状态机校验器(P3-5 NEW)
+V12 bug-state-machine-validator.py — Bug 单状态机校验器(P3-5 NEW, V12 收敛)
 
-定位:skills/01-intake/references/bug-state-machine.md 定义 5 状态机 +
-状态转换矩阵,但 reason-classifier.py 完全不消费。新增本脚本程序化校验。
+定位:skills/12-bug-fix/references/bug-state-machine.md 定义 7 状态机(权威源) +
+状态转换矩阵。01-intake/references/bug-state-machine.md + 本脚本必须向 12-bug-fix 对齐。
 
-5 状态(bug-state-machine.md L11-19 + state-card-protocol.md VALID_STAGE_STATUS):
-  - OPEN        — Bug 已录入,等待 Stage 6 处理
-  - IN_PROGRESS — Stage 6 Bug Fix 进行中
-  - CLOSED      — Bug 修复 + 回归通过 + 用户确认
-  - BLOCKED     — 阻塞状态(回退态,5 字段阻塞报告)
-  - SKIPPED     — 跳过状态(回退态,无需修复)
+7 状态(bug-state-machine.md L11-19):
+  - OPEN       — Bug 已录入,等待 Stage 6 处理
+  - IN-FIX     — Stage 6 Bug Fix 进行中(6 层排查 + TDD 修复)
+  - FIXED      — 已修复,待测试专家复测
+  - VERIFIED   — 测试专家复测通过,再观察无 regression
+  - CLOSED     — 关闭归档(终态,三方确认)
+  - REOPENED   — 测试专家复测 FIXED 失败回退
+  - OBSOLETE   — 功能变更致过时(终态)
 
-状态转换矩阵(bug-state-machine.md L28-38):
+状态转换矩阵(bug-state-machine.md L36-46):
   - (无) → OPEN
-  - OPEN → IN_PROGRESS
-  - IN_PROGRESS → CLOSED
-  - IN_PROGRESS → OPEN  (e2e 初始 PASS / TDD 修复 FAIL 回退)
-  - IN_PROGRESS → BLOCKED  (阻塞)
-  - CLOSED → OPEN  (回归发现新问题,新建 bug 单引用)
-  - BLOCKED → IN_PROGRESS  (解除阻塞)
-  - SKIPPED 任何状态 → OPEN  (重新激活)
+  - OPEN → IN-FIX
+  - IN-FIX → FIXED
+  - FIXED → VERIFIED
+  - FIXED → REOPENED
+  - VERIFIED → CLOSED
+  - REOPENED → IN-FIX
+  - IN-FIX → OPEN  (e2e 初始 PASS / TDD 修复 FAIL 回退)
+  - OPEN/FIXED/VERIFIED → OBSOLETE
 
 Usage:
     python bug-state-machine-validator.py --bug-state-card <path> [--json]
@@ -28,7 +31,7 @@ Usage:
     python bug-state-machine-validator.py --validate-only  # 仅校验状态机文件结构
 
 Exit codes:
-    0 = PASS(status ∈ 5 状态 + 转换合法)
+    0 = PASS(status ∈ 7 状态 + 转换合法)
     1 = FAIL(status 不合法 或 转换非法)
 """
 import argparse
@@ -39,17 +42,19 @@ import sys
 from typing import List, Dict, Tuple, Optional
 
 
-# 5 状态(3 主态 + 2 回退态)
-VALID_BUG_STATUSES = ["OPEN", "IN_PROGRESS", "CLOSED", "BLOCKED", "SKIPPED"]
+# 7 状态(权威源:skills/12-bug-fix/references/bug-state-machine.md)
+VALID_BUG_STATUSES = ["OPEN", "IN-FIX", "FIXED", "VERIFIED", "CLOSED", "REOPENED", "OBSOLETE"]
 
 # 状态转换矩阵(从 → 到)
-# 依据 bug-state-machine.md L28-38 + V11 实战扩展(BLOCKED / SKIPPED)
+# 依据 skills/12-bug-fix/references/bug-state-machine.md 转换矩阵 L36-46
 VALID_TRANSITIONS = {
-    "OPEN": ["IN_PROGRESS", "BLOCKED", "SKIPPED"],
-    "IN_PROGRESS": ["CLOSED", "OPEN", "BLOCKED"],
-    "CLOSED": ["OPEN"],  # 回归发现新问题
-    "BLOCKED": ["IN_PROGRESS", "OPEN", "SKIPPED"],  # 解除阻塞 / 退单 / 跳过
-    "SKIPPED": ["OPEN"],  # 重新激活
+    "OPEN": ["IN-FIX", "OBSOLETE"],          # 进入修复 或 功能变更致过时
+    "IN-FIX": ["FIXED", "OPEN"],             # 修复完成 或 回退(e2e 初始 PASS / TDD FAIL)
+    "FIXED": ["VERIFIED", "REOPENED", "OBSOLETE"],  # 复测通过 / 复测失败 / 功能变更致过时
+    "VERIFIED": ["CLOSED", "OBSOLETE"],      # 三方确认关闭 或 功能变更致过时
+    "CLOSED": [],                             # 终态
+    "REOPENED": ["IN-FIX"],                  # 回到修复队列
+    "OBSOLETE": [],                          # 终态
 }
 
 
@@ -64,7 +69,7 @@ def extract_bug_status(fields: dict) -> Tuple[Optional[str], Optional[str]]:
     """从状态卡 frontmatter 提取 status / ready_to_close。
 
     返回 (status_value, ready_to_close_value)。两个都可能 None。
-    status 字段名兼容:status / stage_status / bug_status。
+    status 字段名读取顺序:status → stage_status → bug_status(从前往后命中即返回)。
     """
     status = (
         fields.get("status")
@@ -115,7 +120,7 @@ def validate_bug_state_card(path: pathlib.Path) -> dict:
         errors.append("状态卡缺 status / stage_status / bug_status 字段")
         return {"status": "FAIL", "errors": errors, "current_status": None}
 
-    # 2. status ∈ 5 合法状态
+    # 2. status ∈ 7 合法状态
     if status not in VALID_BUG_STATUSES:
         errors.append(
             f"status 非法: {status!r}（应在 {VALID_BUG_STATUSES} 中）"
@@ -132,7 +137,7 @@ def validate_bug_state_card(path: pathlib.Path) -> dict:
         prev = history[i - 1]
         cur = history[i]
         if prev not in VALID_TRANSITIONS:
-            errors.append(f"status_history[{i-1}] 状态 {prev!r} 不在 5 状态中")
+            errors.append(f"status_history[{i-1}] 状态 {prev!r} 不在 7 状态中")
             continue
         if cur not in VALID_TRANSITIONS[prev]:
             errors.append(

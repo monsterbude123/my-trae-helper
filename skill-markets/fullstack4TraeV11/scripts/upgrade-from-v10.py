@@ -43,11 +43,12 @@ def check_v10_markers(project_root: pathlib.Path) -> dict:
     """检测 V10 项目标记"""
     markers = {
         "has_AGENTS_md": (project_root / "AGENTS.md").exists(),
-        "has_state_card": (project_root / "docs/specs/.state-card.md").exists(),
+        "has_state_card": (project_root / "docs/specs/changes").exists(),  # V12 多卡状态卡在 stage/{N}/.state-card.md
         "has_docs_specs": (project_root / "docs/specs/changes").exists(),
         "has_archive_done": (project_root / "docs/archive/done").exists(),
         "has_trae_rules": (project_root / ".trae/rules").exists(),
         "has_v10_reference": False,
+        "has_fact_dir": (project_root / "docs/specs/changes" / "_module.md").exists(),  # V12 项目级模块真相源
     }
 
     # 检测 V10 references（AGENTS.md 中引用 V10）
@@ -95,22 +96,23 @@ def upgrade_state_card(project_root: pathlib.Path, dry_run: bool = False) -> tup
 
     content = state_card.read_text(encoding="utf-8")
 
-    # V11 必含字段（新增）
-    required_v11_fields = [
-        "stage_started_at",  # V11 NEW
-        "gate_result",       # V11 NEW
-        "next_stage",        # V11 NEW
-        "duration_minutes",  # V11 NEW
+    # V12.0.0 必含字段（新增,V12 多卡语义）
+    required_v12_fields = [
+        "stage_started_at",  # V12 多卡必备字段
+        "gate_result",       # V12 多卡必备字段
+        "next_stage",        # V12 多卡必备字段
+        "duration_minutes",  # V12 多卡必备字段
+        "handoff_out",       # V12 NEW 桥接字段(每 stage 卡必备)
     ]
 
-    missing = [f for f in required_v11_fields if f not in content]
+    missing = [f for f in required_v12_fields if f not in content]
     if not missing:
-        return True, "已含 V11 字段（跳过）"
+        return True, "已含 V12 字段（跳过）"
 
     if dry_run:
-        return True, f"DRY-RUN: 将补 {len(missing)} 个 V11 字段"
+        return True, f"DRY-RUN: 将补 {len(missing)} 个 V12 字段"
 
-    # 补 V11 字段（默认空值）
+    # 补 V12 字段（默认空值,V12 多卡语义）
     new_content = content
     additions = []
     if "stage_started_at:" not in new_content:
@@ -121,13 +123,15 @@ def upgrade_state_card(project_root: pathlib.Path, dry_run: bool = False) -> tup
         additions.append("next_stage:\n  id: {next-stage-id}\n  skill_name: skills/{NN}-{name}/SKILL.md\n  expected_inputs: []\n  prerequisites: []")
     if "duration_minutes:" not in new_content:
         additions.append("duration_minutes: 0")
+    if "handoff_out:" not in new_content:
+        additions.append("handoff_out:\n  next: {next-stage-id}\n  note: 待补")
 
     if additions:
         # 注入到现有字段后
         new_content = new_content.rstrip() + "\n" + "\n".join(additions) + "\n"
 
     state_card.write_text(new_content, encoding="utf-8")
-    return True, f"已补 {len(additions)} 个 V11 字段"
+    return True, f"已补 {len(additions)} 个 V12 字段"
 
 
 def create_v11_config(project_root: pathlib.Path, dry_run: bool = False) -> tuple:

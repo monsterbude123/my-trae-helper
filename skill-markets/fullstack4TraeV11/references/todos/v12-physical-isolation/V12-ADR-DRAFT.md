@@ -195,8 +195,18 @@ V12 升级**不变**:
 
 ### Step 8:Edit scripts/init-from-zero.py
 - `--layout` 参数默认值 `v11-default` → **`v12-preview`**(新项目默认 V12 layout)
-- 既有 V11 项目用 `--layout v11-default` 显式声明向后兼容
+- 既有 V11 项目用 `--layout v11-default` 显式声明向后兼容(**V11.8.7.1 已永久废弃**)
 - 加 `scripts/init-from-zero.py --upgrade-from-v11` 子命令(从 V11 升 V12 自动迁移)
+
+### §12 承诺 5 点补救（2026-08-17 case 3 ai-chat-openai-v11 蒸馏 — V11 harness 兼容范围声明）
+
+case 3 audit-cycle 实跑 V11 工具链发现 5 处兼容缺口,5 点补救措施:
+
+1. **`run-all-guards.py --allow-v12-layout`**: 加新 flag 显式声明 V12 物理布局(V11 默认 V11 布局,V12 项目必加此 flag 否则 9/13 FAIL)
+2. **`registry/gates.yaml` 同步 V12 路径**: `required_artifacts` 含 `fact/spec.md` / `fact/plan.md` / `fact/contracts/*` / `stage/{N}/*.md`,取代 V11 扁平路径
+3. **`spec-purge.py` post-archive state check**: `archive_keep_v12_layout()` 后跑 `state-card-validator.py` 校验归档目录保留 V12 物理布局(不退化为 V11 扁平)
+4. **`process-layer-guard.sh` 强制路径校验**: V12 项目默认启用,`docs/specs/changes/{id}/` 根禁止 .md,`fact/` 禁 process 层命名,`stage/{N}/` 禁 fact 层命名
+5. **`migrate-from-v11` 8 步原子迁移**: 加 `--migrate-from-v11` 主路径子命令,8 步原子迁移(创建 fact/ + stage/ + 拆分 .state-card.md + 生成 handoff 模板 + 删 V11 扁平文件 + 写迁移报告),Post-flight 失败自动回滚到 `.pre_v12_migration_<ts>/`
 
 ---
 

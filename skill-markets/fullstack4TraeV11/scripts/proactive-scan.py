@@ -33,7 +33,8 @@ try:
     from _lib_paths import load_paths
 except ImportError:
     def load_paths(project_root: pathlib.Path) -> dict:
-        return {"archive": "docs/archive/done", "changes_archive": "docs/specs/changes/archive"}
+        # V11.8.7.1: 单 archive 真相源,无 changes_archive 双键
+        return {"archive": "docs/archive/done"}
 
 # 10 项扫描定义（V10.10 合并 V10.5 8 项 + V10.10 +2 项）
 SCAN_ITEMS = [
@@ -55,9 +56,12 @@ REASON_FABRICATION_PATTERNS = [
 
 def scan_visual(project_root: pathlib.Path) -> Tuple[bool, str]:
     """Check 1: 视觉腐烂"""
-    verifications = project_root / "docs/verifications"
+    # V12 物理布局:视觉证据位于 stage/3.5/real-verify/ 下
+    # 路径常量字面(V12 唯一):"stage/3.5/real-verify"
+    V12_VISUAL_DIR = "stage/3.5/real-verify"
+    verifications = project_root / "stage" / "3.5" / "real-verify"
     if not verifications.exists():
-        return True, "无 docs/verifications/ 目录（N/A）"
+        return True, "无 stage/3.5/real-verify/ 目录（N/A）"
 
     pngs = list(verifications.rglob("*.png"))
     if not pngs:
@@ -91,10 +95,14 @@ def scan_archive(project_root: pathlib.Path) -> Tuple[bool, str]:
 
 def scan_self_attest(project_root: pathlib.Path) -> Tuple[bool, str]:
     """Check 3: 自验腐烂"""
-    # 检测 review-report.md 是否声明 reviewer 亲自跑了测试
-    reviews = [p for p in project_root.rglob("review-report.md") if "_invalidated" not in p.parts]
+    # V12 物理布局:review-notes.md 位于 stage/4/review/ 下
+    reviews = [
+        p for p in project_root.rglob("review-notes.md")
+        if "_invalidated" not in p.parts
+        and "stage" in p.parts  # 仅匹配 stage/4/review/ 路径
+    ]
     if not reviews:
-        return True, "无 review-report.md（N/A）"
+        return True, "无 stage/4/review/review-notes.md（N/A）"
 
     suspicious = []
     for r in reviews:

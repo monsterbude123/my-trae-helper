@@ -1,6 +1,6 @@
 # Constitution — 17 Articles 宪法
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
 > V11 总编排器与所有 stage skill 必读的宪法文件。V10.10 增 XV/XVI，V11 全数继承。
@@ -35,6 +35,10 @@ TDD 三步循环（RED → GREEN → REFACTOR + DRIFT CHECK）是实施唯一路
 
 ### Article VIII — Archive Immutable
 归档目录（`docs/archive/done/{change-id}/`）下文件禁止修改。归档只能新增，不可删除。
+
+> **路径配置（V11.8.7+）**：`docs/archive/done` 是默认路径，由 `.trae/fullstack4traev11.config.yaml` 的 `paths.archive` 字段配置（脚本读 [`scripts/_lib_paths.py`](../scripts/_lib_paths.py) 的 `get_archive_dir()`）。若项目自定义路径，需同步更新本 Article 引用 + [config.example.yaml](./config.example.yaml) 默认值 + [trap-instructions.yaml §V11-AP15](./trap-instructions.yaml)。
+>
+> 反例：5 个脚本独立硬编码 archive 路径产生 3 个不一致路径 → 见 [feedback03-answer.md §2](../../../.trae/reports/feedback03-answer.md) + 反例 AP-15。
 
 ### Article IX — Cross-Session Verify
 自评 = `self_attested`，主上下文必二次抽检。子代理"已通过"不等于主上下文已通过。

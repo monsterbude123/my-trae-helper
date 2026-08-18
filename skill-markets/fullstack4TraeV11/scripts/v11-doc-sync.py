@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
-V11 v11-doc-sync.py — V11 技能文档批量同步工具(V11.7.0 NEW)
+V12 v12-doc-sync.py — V12.0.0 技能文档批量同步工具(V12.0.0 替代 V11.7.0 入口)
+
+**V12.0.0 状态**: 本工具脚本保留向后兼容文件名,但默认入口标记改 V12.0.0+。
+新项目请使用 v12-doc-sync.py(本文件) 或调用 `--mark "V12.0.0+"` 参数。
 
 Usage:
-    python v11-doc-sync.py [--v11-root <path>] [--mark <text>] [--check] [--dry-run] [--json]
+    python v12-doc-sync.py [--v12-root <path>] [--mark <text>] [--check] [--dry-run] [--json]
 
 场景:
-  1. 升级 V11 技能(本版本或更新版本)后,跑此脚本给所有未同步文档追加设计入口标记
+  1. 升级 V12 技能(本版本或更新版本)后,跑此脚本给所有未同步文档追加设计入口标记
   2. 配合 --check 校验所有文档是否带入口标记(供 CI gate)
-  3. --mark 自定义入口文本(默认 V11.7.0 入口)
+  3. --mark 自定义入口文本(默认 V12.0.0 入口)
 
 设计原则:
   - 不破坏原文: 只在 # 标题后插入 1 行入口标记,不修改正文
@@ -35,10 +38,10 @@ import json
 
 DEFAULT_V11_ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_MARK = (
-    "> **V11.7.0+ 设计入口**: "
+    "> **V12.0.0+ 设计入口**: "
     "[AC 核销门禁](../skills/09-review/SKILL.md) · "
     "[贾维斯门禁守护](../skills/00-boot/SKILL.md) · "
-    "评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)"
+    "评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)"
 )
 
 # 白名单: 这类路径完全跳过,不插任何标记
@@ -52,11 +55,11 @@ ALWAYS_SKIP = [
 
 # 完整入口块(stage SKILL.md 用,L2 层)
 FULL_ENTRY_BLOCK = """
-> **V11.7.0+ 设计入口**:
+> **V12.0.0+ 设计入口**:
 > - **AC 核销门禁(Stage 4 Review)** → [skills/09-review/SKILL.md]({rel}skills/09-review/SKILL.md) + [acceptance-baseline-extract.md]({rel}skills/09-review/workflows/acceptance-baseline-extract.md)
 > - **贾维斯门禁守护(防 agent 改标准)** → [skills/00-boot/SKILL.md]({rel}skills/00-boot/SKILL.md) + [agents/jarvis.md]({rel}skills/00-boot/agents/jarvis.md) + [gate-configuration-protocol.md]({rel}references/gate-configuration-protocol.md)
-> - **新增脚本**: `scripts/ac-gate.py` (AC 核销 G1-G5) / `scripts/gate-installer.py` (贾维斯 installer) / `scripts/gate-integrity-guard.py` (hash 锁 --verify/--generate/--force)
-> - **变更**: 评分制废除 → 门禁制;4 维详情转附加检查;`registry/gates.yaml` v1.2.0 加 layer 分层字段(docs/module/app/system)
+> - **新增脚本**: `scripts/ac-gate.py` (AC 核销 G1-G5) / `scripts/gate-installer.py` (贾维斯 installer) / `scripts/gate-integrity-guard.py` (hash 锁 --verify/--generate/--force) / `scripts/init-from-zero.py --migrate-from-v11` (V12 主路径迁移)
+> - **变更**: 评分制废除 → 门禁制;V12 多卡模式强制默认(fact/ + stage/{N}/);`registry/gates.yaml` v1.2.0 加 layer 分层字段(docs/module/app/system);`registry/roles.yaml` v1.0.0 (V12 NEW 角色注册表)
 
 """
 
@@ -69,10 +72,10 @@ def should_skip(rel: str) -> bool:
 
 
 def _has_marker(text: str, mark: str) -> bool:
-    """检测文档是否已含 V11.7.0+ 入口标记(任一关键字命中即视为已同步)。"""
+    """检测文档是否已含 V12.0.0+ 入口标记(任一关键字命中即视为已同步)。"""
     keywords = [
-        "V11.7.0+",
-        "V11.6.0",
+        "V12.0.0+",
+        "V12.0.0",
         "AC 核销门禁",
         "贾维斯",
         "gate-configuration-protocol",
@@ -98,7 +101,7 @@ def inject_light(path: pathlib.Path, mark: str) -> tuple:
 def inject_full_entry(path: pathlib.Path, v11_root: pathlib.Path) -> tuple:
     """L2 stage SKILL.md 模式: 完整入口块 + scripts 列表. 幂等."""
     text = path.read_text(encoding="utf-8")
-    if _has_marker(text, "V11.7.0+ 设计入口"):
+    if _has_marker(text, "V12.0.0+ 设计入口"):
         return ("skip", "已同步")
 
     # 计算相对路径前缀(基于文件相对于 v11_root 的位置)
@@ -212,7 +215,7 @@ def cmd_check(args) -> int:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="V11 文档批量同步工具(V11.7.0+)")
+    ap = argparse.ArgumentParser(description="V12.0.0 文档批量同步工具(V12.0.0+)")
     ap.add_argument("--v11-root", type=pathlib.Path, default=DEFAULT_V11_ROOT,
                     help="V11 包根(默认 scripts/ 父目录)")
     ap.add_argument("--mark", default=DEFAULT_MARK, help="入口标记文本(默认 V11.7.0)")

@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# close-bug.sh — bug-hunt 三文件状态同步回写（V11.8.2 NEW Stage 6 Phase B Step 7）
+# close-bug.sh — bug-hunt 三文件状态同步回写（V12.0.0 UPDATE Stage 6 Phase B Step 7）
 #
 # 用法: bash scripts/bug-hunt/close-bug.sh BUG-017 <agent-id>
-# 三文件同步:
+# 三文件同步(V12 多卡):
 #   1. docs/bugs/<YYYY-MM-DD>/<BUG-NNN>-<module>.md  status: OPEN → FIXED
 #   2. docs/bugs/index.md                            BUG-NNN | OPEN → | FIXED (timestamp)
-#   3. docs/bugs/.state-card.md                       BUG-NNN: OPEN → BUG-NNN: FIXED
+#   3. stage/6/bug-fix/.state-card.md(V12 多卡)     BUG-NNN: OPEN → BUG-NNN: FIXED
 #
+# V12.0.0 UPDATE: 旧 V11 扁平路径(V12 永久废弃) → stage/6/bug-fix/.state-card.md(V12 物理布局)
 # 反 V11-BH4 反例: 修复后 status 未回写 → 主代理二次误判。
 #
 # 校验命令（必 0 命中）:
@@ -54,13 +55,13 @@ if [[ -f "$INDEX_FILE" ]]; then
     fi
 fi
 
-# 3. docs/bugs/.state-card.md 同步
-STATE_FILE="docs/bugs/.state-card.md"
+# 3. stage/6/bug-fix/.state-card.md 同步(V12 多卡)
+STATE_FILE="stage/6/bug-fix/.state-card.md"
 if [[ -f "$STATE_FILE" ]]; then
     if grep -qE "^${BUG_ID}: OPEN" "$STATE_FILE"; then
         sed -i.bak "s/^${BUG_ID}: OPEN/${BUG_ID}: FIXED (${TIMESTAMP})/" "$STATE_FILE"
         rm -f "${STATE_FILE}.bak"
-        echo "[OK] docs/bugs/.state-card.md 同步"
+        echo "[OK] stage/6/bug-fix/.state-card.md 同步"
     fi
 fi
 

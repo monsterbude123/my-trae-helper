@@ -29,12 +29,15 @@ import json
 from datetime import datetime, timezone
 
 try:
-    from _lib_paths import get_changes_archive_dir, load_paths
+    from _lib_paths import load_paths, get_archive_dir
 except ImportError:
     def load_paths(project_root: pathlib.Path) -> dict:
-        return {"archive": "docs/archive/done", "changes_archive": "docs/specs/changes/archive"}
-    def get_changes_archive_dir(project_root: pathlib.Path) -> pathlib.Path:
-        return project_root / "docs" / "specs" / "changes" / "archive"
+        # V11.8.7.1: 单 archive 路径(真相源 = docs/archive/done)
+        return {"archive": "docs/archive/done"}
+
+    def get_archive_dir(project_root: pathlib.Path) -> pathlib.Path:
+        # V11.8.7.1: fallback 单真相源 = docs/archive/done
+        return project_root / "docs" / "archive" / "done"
 
 V11_SKILL_ROOT = pathlib.Path("~/.trae-cn/skills/fullstack4TraeV11").expanduser()
 V11_TEMPLATES = V11_SKILL_ROOT / "templates"
@@ -267,11 +270,15 @@ def create_agents_md(project_root: pathlib.Path, project_name: str, project_type
 
 
 def create_docs_skeleton(project_root: pathlib.Path) -> bool:
-    """Step 4: 生成 V11 文档系统骨架"""
+    """Step 4: 生成 V11 文档系统骨架
+
+    V11.8.7.1: 移除 `docs/specs/changes/archive/` 目录创建(多 archive 路径统一)。
+    真相源 = `docs/archive/done/{change-id}/`(由 spec-purge.py + paths.archive 配置)。
+    """
     paths_cfg = load_paths(project_root)
     dirs = [
-        "docs/specs/changes",       # change 级 spec
-        paths_cfg["changes_archive"],  # 归档(由 .trae/fullstack4traev11.config.yaml 配置)
+        "docs/specs/changes",       # change 级 spec 目录
+        paths_cfg["archive"],       # 归档(真相源,V11 Constitution Article VIII 不可变)
         "docs/bugs",                # bug 单
         "docs/verifications",       # 验证报告
         "docs/reports",             # 周期报告
@@ -294,7 +301,8 @@ def create_docs_skeleton(project_root: pathlib.Path) -> bool:
         print(f"   ✅ docs/ 骨架: {len(created)} 个目录")
     else:
         print(f"   ⏭️  docs/ 骨架已存在")
-    print(f"   📋 agent 需初始化 docs/specs/.state-card.md（项目级状态卡）")
+    print(f"   📋 agent 需初始化 docs/specs/.state-card.md(项目级状态卡)")
+    print(f"   📋 V11.8.7.1: archive 单路径 = {paths_cfg['archive']}(V11 Constitution Article VIII)")
     return True
 
 
@@ -355,7 +363,8 @@ def cmd_migrate_from_v11(args) -> int:
         print(f"   ✓ 项目不在 lock 状态")
 
     # 1.3 校验 archive/done/ 不与 change 重名(Article VIII 不可变)
-    archive_dir = get_changes_archive_dir(project_root)
+    # V11.8.7.1: get_changes_archive_dir 已删除,改用 get_archive_dir
+    archive_dir = get_archive_dir(project_root)
     if archive_dir.is_dir():
         archive_changes = {d.name for d in archive_dir.iterdir() if d.is_dir()}
         for change_dir in changes_dir.iterdir():
@@ -450,11 +459,11 @@ def cmd_migrate_from_v11(args) -> int:
     failed = []
     skipped = []
 
-    # V12 stage 子目录清单(对齐 templates/change-dir-layout-v12-preview.md)
+    # V12 stage 子目录清单(对齐 templates/change-dir-layout-v12-preview.md + state-machine.yaml)
     v12_stage_subdirs = [
         "-1/intake", "0/plan", "0.5/test-plan", "1/spec", "1.5/prototype",
         "2/contract", "3/implement", "3.5/real-verify", "4/review",
-        "4.5/rot-scan", "5/accept",
+        "4.5/rot-scan", "5/accept", "6/bug-fix", "7/health",
     ]
 
     for change_dir in sorted(changes_dir.iterdir()):
@@ -733,25 +742,25 @@ def cmd_upgrade_to_v11(args) -> int:
 def create_v12_preview_skeleton(project_root: pathlib.Path) -> bool:
     """Step 4.5(V11.8.6 NEW): 生成 V12 物理隔离预览骨架
 
-    仅在 --layout v12-preview 时调用。创建 fact/ + stage/{11 个 stage 子目录}。
+    仅在 --layout v12-preview 时调用。创建 fact/ + stage/{13 个 stage 子目录}。
     不创建 change-id 目录(每个 change 跑 --layout v12-preview --change {id} 时单独建)。
     模板见 templates/change-dir-layout-v12-preview.md。
-
-    注意:V11 主版本兼容,不破坏现有 V11 归档(Article VIII)。
     """
-    # 11 个 stage 子目录(对齐 V12 §1)
+    # 13 个 stage 子目录(对齐 V12 §1,斜杠命名空间,权威源 registry/state-machine.yaml)
     v12_stage_subdirs = [
-        "-1-intake",
-        "0-plan",
-        "0.5-test-plan",
-        "1-spec",
-        "1.5-prototype",
-        "2-contract",
-        "3-implement",
-        "3.5-real-verify",
-        "4-review",
-        "4.5-rot-scan",
-        "5-accept",
+        "-1/intake",
+        "0/plan",
+        "0.5/test-plan",
+        "1/spec",
+        "1.5/prototype",
+        "2/contract",
+        "3/implement",
+        "3.5/real-verify",
+        "4/review",
+        "4.5/rot-scan",
+        "5/accept",
+        "6/bug-fix",
+        "7/health",
     ]
 
     # 在 docs/specs/changes/ 下创建 _v12-preview-template/ 目录(供 --change 时参照)
@@ -790,7 +799,7 @@ def create_v12_preview_skeleton(project_root: pathlib.Path) -> bool:
         encoding="utf-8",
     )
 
-    # stage/ 目录 + 11 个 stage 子目录
+    # stage/ 目录 + 13 个 stage 子目录
     stage_dir = template_dir / "stage"
     stage_dir.mkdir(exist_ok=True)
     for sub in v12_stage_subdirs:
@@ -834,8 +843,64 @@ def create_v12_preview_skeleton(project_root: pathlib.Path) -> bool:
     )
 
     print(f"   ✅ V12 preview 骨架已创建: {template_dir}")
-    print(f"      (11 stage 子目录 + fact/ + archive/,共 13 个目录)")
+    print(f"      (11 stage 子目录 + fact/(含 module.md) + archive/,共 13 个目录)")
     print(f"   📋 用法: agent 创建新 change 时,cp -r 此模板到 docs/specs/changes/{id}/")
+    print(f"   📋 同时: 写入项目级 _module.md(Step 5),并由 spec-purge.py 复制到 fact/module.md")
+    return True
+
+
+def create_project_module(project_root: pathlib.Path, project_name: str, project_type: str) -> bool:
+    """V11.8.7.1 NEW(Req 3+4 修复合并):项目级模块声明
+
+    写到 `docs/specs/changes/_module.md`,作为整个项目的模块真相源。
+    - 不再是占位文件:含项目模块清单 + 接口边界 + 引用约定
+    - spec-purge.py 创建 change 时会复制本文件 → `fact/module.md`
+    - 归档时本文件随 archive 走(项目级档案的一部分)
+    """
+    module_file = project_root / "docs/specs/changes/_module.md"
+    if module_file.exists():
+        print(f"   ⏭️  项目级模块声明已存在（{module_file}）")
+        return True
+
+    module_file.parent.mkdir(parents=True, exist_ok=True)
+    module_file.write_text(
+        f"""# 项目级模块声明 — {project_name}
+
+> V11.8.7.1: 本文件由 `init-from-zero.py` 自动创建,作为项目模块真相源。
+> - 每个新 change 创建时,`spec-purge.py` 会把本文件**复制注入** `fact/module.md`
+> - 归档(Stage 5-accept)时,本文件随 archive 走(进入 `docs/archive/done/<change-id>/_module.md`)
+> - 严禁保持占位:写明模块清单、接口边界、依赖关系
+
+## 项目元信息
+
+- **项目名**: `{project_name}`
+- **类型**: `{project_type}`
+- **V12 物理布局**: 强制(fact/ + stage/{{N}}/)
+
+## 模块清单
+
+<!-- V11.8.7.1: 在此列出本项目的核心模块 + 职责 + 边界。
+     例:
+     - `src/auth/` — 认证模块(JWT + Refresh Token,边界:不接触 DB schema)
+     - `src/api/`  — REST API 层(边界:只做 HTTP 转换,业务逻辑下沉到 service)
+-->
+
+## 接口边界
+
+<!-- V11.8.7.1: 模块间调用方向 + 禁止跨层调用规则 -->
+
+## 跨模块约定
+
+<!-- V11.8.7.1: 共享类型 / 错误码 / 日志格式 / 国际化等 -->
+
+---
+
+> ⚠️ 此文件为项目级真相源 — 任何 change 都不应单独"另起炉灶"重写模块清单,
+>     而是引用本文件 + 在本 change 的 `fact/module.md` 中补充 change-specific 增量。
+""",
+        encoding="utf-8",
+    )
+    print(f"   ✅ 项目级模块声明已创建: {module_file}")
     return True
 
 
@@ -1124,11 +1189,11 @@ def main():
     )
     parser.add_argument(
         "--layout",
-        choices=["v11-default", "v12-preview"],
-        # V12.0.0 升主版本后默认改 v12-preview(V11.8.6 之前是 v11-default)
-        # V11 兼容:V11 项目显式传 --layout v11-default
+        choices=["v12-preview"],
+        # V11.8.7.1: 移除 v11-default 选项(V11 扁平已废弃,所有项目强制 V12 物理布局)
+        # V11 既有项目必须用 --migrate-from-v11 升级到 V12,不允许继续维持 V11 扁平
         default="v12-preview",
-        help="V12.0.0 NEW: change-id 物理布局。v12-preview(V12 默认,fact/ + stage/{N}/) 或 v11-default(V11 兼容,扁平 layout,显式声明)",
+        help="V11.8.7.1 NEW: change-id 物理布局。v12-preview(V12 唯一,fact/ + stage/{N}/);v11-default 已废弃(永远保留 V12 布局)",
     )
     # V12.0.0 NEW: --upgrade-to-v11 子命令(V12 项目回滚到 V11 layout 用,见 V12-ADR-DRAFT.md §7.2)
     parser.add_argument(
@@ -1182,12 +1247,12 @@ def main():
 
     # V11.8.7: switch to --rules-layout {files|skill}; default = files (no move)
     rules_layout = args.rules_layout
-    step_count = 5 if rules_layout == "skill" else 4
-    layout_step = "+ Step 4.5(V12 preview)" if args.layout == "v12-preview" else ""
-    # V12.0.0 升主版本:V11 → V12 名称标识
+    step_count = 6 if rules_layout == "skill" else 5  # V11.8.7.1: +Step 4.6 项目级模块声明
+    layout_step = "+ Step 4.5(V12 物理布局)"  # V11.8.7.1: 唯一布局,无条件
+    # V11.8.7.1: V12 强制物理布局,移除 V11 兼容回退文案
     print(f"🚀 V12 初始化（{step_count} 步全流程{layout_step}）— {project_root}")
     print(f"   项目名: {project_name} | 类型: {project_type} | 语言: {language}")
-    print(f"   物理布局: {args.layout}" + ("(V12 默认,fact/ + stage/{N}/)" if args.layout == "v12-preview" else "(V11 兼容,扁平 layout,显式声明)"))
+    print(f"   物理布局: {args.layout}(V12 强制,fact/ + stage/{N}/,V11 扁平已废弃)")
     if rules_layout == "files":
         print(f"   rules 布局: --rules-layout files(.trae/rules/*.md 留源文件,agent 直接 Read)")
     else:
@@ -1201,9 +1266,11 @@ def main():
         ("Step 4: docs/ 骨架", lambda: create_docs_skeleton(project_root)),
     ]
 
-    # V11.8.6 NEW: 仅 --layout v12-preview 时跑 Step 4.5(创建 V12 物理布局模板)
-    if args.layout == "v12-preview":
-        steps.append(("Step 4.5: V12 物理布局 preview 骨架", lambda: create_v12_preview_skeleton(project_root)))
+    # V11.8.6 NEW: V12 强制物理布局(Step 4.5 必跑,V11.8.7.1 起无条件)
+    steps.append(("Step 4.5: V12 物理布局 preview 骨架", lambda: create_v12_preview_skeleton(project_root)))
+
+    # V11.8.7.1 NEW: Step 4.6 项目级模块声明(为 fact/module.md 提供真相源)
+    steps.append(("Step 4.6: 项目级模块声明 _module.md", lambda: create_project_module(project_root, project_name, project_type)))
 
     # V11.8.7: --rules-layout skill 才走 Step 5 move(skill 收纳);files 模式不跑
     if rules_layout == "skill":

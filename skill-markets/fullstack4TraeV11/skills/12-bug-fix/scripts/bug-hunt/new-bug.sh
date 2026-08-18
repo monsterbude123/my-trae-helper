@@ -2,8 +2,9 @@
 # new-bug.sh — bug-hunt 7 字段 bug 单生成脚本（V11.8.2 NEW Stage 6 Phase A；V11.9 扩展 --source）
 #
 # 用法: bash scripts/bug-hunt/new-bug.sh BUG-017 M4-asset /zh/workspace/asset-hub L2 "evidence" [--source qa-found|user-feedback|scan]
-# 产物: docs/bugs/<YYYY-MM-DD>/<bug_id>-<module_slug>.md
+# 产物: docs/bugs/<YYYY-MM-DD>/<bug_id>-<module_slug>.md + stage/6/bug-fix/.state-card.md (V12 多卡同步)
 #
+# V12.0.0 UPDATE: V12 多卡模式,bug 单创建时同步写 `stage/6/bug-fix/.state-card.md`(V12 物理布局)
 # 反 V11-BH3 反例: 16 个 bug 单每单 1 min 手填 = 16 min 浪费。本脚本替代手填。
 #
 # 占位符:

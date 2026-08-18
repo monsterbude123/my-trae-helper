@@ -39,6 +39,27 @@ python "<doc-map-manager-skill>/scripts/build-index.py"
 python "<doc-map-manager-skill>/scripts/build-index.py" --detect-changes
 ```
 
+### 从非项目根调用(跨项目场景)
+
+build-index.py 默认从当前工作目录(CWD)找 docs/。若 CWD 不是项目根:
+
+```bash
+# 传 --docs-dir 指定 docs 目录
+python "<doc-map-manager-skill>/scripts/build-index.py" --incremental --docs-dir <project_root>/docs
+```
+
+示例(github-kownledge-helper 的 add 命令):
+```typescript
+// src-cli/src/commands/add.ts
+export function runBuildIndex(
+  scriptsDir: string = getEnv('doc_map_scripts'),
+  docsDir: string = getEnv('docs_root')  // ← 从 load_env 收口
+): Promise<BuildIndexResult> {
+  // ...
+  spawn('python', [scriptPath, '--incremental', '--docs-dir', docsDir], {...});
+}
+```
+
 ## 3. 新鲜度协议(强制)
 
 ```

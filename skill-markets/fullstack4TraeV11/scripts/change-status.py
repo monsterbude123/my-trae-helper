@@ -24,12 +24,15 @@ import yaml
 from datetime import datetime, timezone
 
 
+# V12 物理布局唯一:fact/ + stage/{N}/{name}/
 REQUIRED_ARTIFACTS = [
-    "spec.md",
-    "plan.md",
-    "contracts/domain-models.md",
-    "contracts/api-contracts.md",
-    "review-report.md",
+    "fact/spec.md",
+    "fact/plan.md",
+    "fact/ac_list.md",
+    "fact/edge_cases.md",
+    "fact/contracts/domain-models.md",
+    "fact/contracts/api-contracts.md",
+    "stage/4/review/review-notes.md",
 ]
 
 
@@ -93,7 +96,7 @@ def main():
     args = parser.parse_args()
 
     project_root = pathlib.Path(args.project_root).resolve()
-    change_dir = project_root / f"docs/specs/changes/{args.change_id}"
+    change_dir = project_root / "docs" / "specs" / "changes" / args.change_id
 
     if not change_dir.exists():
         result = {"status": "FAIL", "message": f"change 不存在: {change_dir}"}
@@ -103,13 +106,26 @@ def main():
             print(f"❌ {result['message']}")
         return 1
 
-    state_card = read_state_card(change_dir / ".state-card.md")
+    # V12 物理布局:状态卡由当前 stage 子目录持有
+    # V12 唯一布局:从 -1/intake 到 7/health 任一 stage 子目录读取最新 .state-card.md
+    state_card_candidates = sorted(
+        change_dir.glob("stage/*/*/.state-card.md"),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    state_card_path = state_card_candidates[0] if state_card_candidates else None
+
+    if state_card_path:
+        state_card = read_state_card(state_card_path)
+    else:
+        state_card = {"current_stage": "unknown", "stage_status": "unknown", "health": "unknown"}
 
     # P3-6 NEW: 记录 read-via-change-status 审计,防止 ghost read 绕过审计链
-    audit_read_operation(
-        state_card_path=change_dir / ".state-card.md",
-        project_root=project_root,
-    )
+    if state_card_path:
+        audit_read_operation(
+            state_card_path=state_card_path,
+            project_root=project_root,
+        )
 
     artifacts = check_artifacts(change_dir)
 

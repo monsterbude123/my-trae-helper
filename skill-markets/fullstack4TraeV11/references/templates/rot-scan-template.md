@@ -1,9 +1,9 @@
 # Rot Scan Report Template — Stage 4.5
 
-> **V11.7.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V11.7.0](../CHANGELOG.md)
+> **V12.0.0+ 设计入口**: [AC 核销门禁](../skills/09-review/SKILL.md) · [贾维斯门禁守护](../skills/00-boot/SKILL.md) · 评分制废除 → 门禁制 · 详见 [CHANGELOG.md V12.0.0](../CHANGELOG.md)
 
 
-> 位置: `docs/reports/rot-scan-{date}.md`
+> 位置: `docs/specs/changes/{id}/stage/4.5/rot-scan/rot-scan-{date}.md` (V12 物理布局,stage/4.5/rot-scan/ 子目录)
 
 ---
 

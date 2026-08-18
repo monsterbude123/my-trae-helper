@@ -94,13 +94,21 @@ def sync_config(project_root: pathlib.Path, dry_run: bool = False) -> dict:
 
     current = config_path.read_text(encoding="utf-8")
 
-    # V11 最新的 required_stages(从 init-from-zero.py CONFIG_TEMPLATE 推导)
+    # V12.0.0 最新的 required_stages(从 init-from-zero.py CONFIG_TEMPLATE 推导,V12 多卡语义)
     required_stages = [
         "- -1/intake",
         "- 0/plan",
+        "- 0.5/test-plan",
         "- 1/spec",
+        "- 1.5/prototype",
+        "- 2/contract",
+        "- 3/implement",
         "- 3.5/real-verify",
+        "- 4/review",
         "- 4.5/rot-scan",
+        "- 5/accept",
+        "- 6/bug-fix",
+        "- 7/project-health",
     ]
 
     # 检查是否有缺失的 required_stage

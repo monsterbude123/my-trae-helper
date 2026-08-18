@@ -55,7 +55,22 @@ references/todos/
 > - 2026-08-17 V11.8.7 audit-fix 7 项 5/7 done(F 留 case-only)
 > - 2026-08-17 case 2 + case 3 audit 闭环 done(本期)
 
-### §2.1 根目录保留文件说明
+### §2.1 修正收尾(2026-08-17 本会话 — V11.8.7 followup 自检)
+
+修正不彻底残留 status 字段 → 修正为 done + evidence:
+
+| 文件 | 修正前 status | 修正后 | 修正依据 |
+|------|---------------|--------|----------|
+| `archive/done/2026-08-16-batch-repair/P2-bug-flow-and-stage-gate.md` P2-3 | in_progress | **done** | `templates/hooks/pre-stage.sh` L137-171 Step 3 真调用 stage-gate.py + V11.8.6 commit `06269ae` |
+| `archive/done/2026-08-16-batch-repair/P3-cross-skill-and-doc.md` P3-6 | pending | **done** | `archive/done/2026-08-16-batch-repair-2/P3-6-commit-minimum.md` 抽出独立归档 + V11.8.7 followup `02d0d90` 第 5 项 secret scan |
+| `v12-physical-isolation/V11.3-fact-stage-rationale.md` | pending | **done** | V12.0.0 commit `8913af3` 主版本升级落地,思想起点作引用证据保留 |
+
+修正后**全目录 `0 pending`**。§3 followup 问题分流:
+- #11/.state-card.md / #12 测试 262 passed / #13 commit — 已在 `02d0d90` 修正(verified)
+- #1-5 V11.8.7 半成品 — 已记入 V12-ADR §12 跟踪(V12 升主版本后解决)
+- #6-10 未暴露项 — 留作 case-only 留置(超出本会话范围)
+
+### §2.2 根目录保留文件说明
 
 **`P0-v12-physical-rollout.md`**(保留不归档):
 - 文件自身 §0 标 `done(2026-08-16)`,按 Article VIII 原则应归档

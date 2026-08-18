@@ -1,12 +1,15 @@
-# V11 — Fullstack4TraeV11（高内聚专家架构）
+# V12 — Fullstack4TraeV11（高内聚专家架构）
 
-> 全栈文档驱动开发技能包 V11。V10 思想传承 + 架构升级。
+> 全栈文档驱动开发技能包 V12.0.0。V11 物理隔离思想升主版本（2026-08-16 ADR ACCEPTED）。
 >
-> **当前版本 V11.8.6** — V12 物理隔离思想在 V11 主版本内渐进落地（6 步，不升主版本）
+> **当前版本 V12.0.0** — V12 默认布局 = `fact/` + `stage/{N}/` 物理隔离 + `handoff-out/handoff-in` 桥接 + 状态卡每 stage 独立。
 >
 > 历次重要升级：
-> - **V11.8.6** (2026-08-16) — V12 物理隔离渐进落地：`init-from-zero.py --layout v12-preview` + `process-layer-guard.sh` + `stage-gate.py --reset-to` + 4 个 agent 产物落位规则。详见 [CHANGELOG.md V11.8.6 条目](CHANGELOG.md) + [references/todos/P0-v12-physical-rollout.md](references/todos/P0-v12-physical-rollout.md)
-> - **V11.8.5.P1** (2026-08-16) — §3.7 #10 commit 准入最小集程序化（`commit-minimum-check.py` + 4 项校验 + 16 单测）
+> - **V12.0.0** (2026-08-16) — 主版本升级：`init-from-zero.py --layout` 默认 `v12-preview`；V11 扁平布局**永久废弃**；`registry/roles.yaml` 升格为白名单；13 stage 命名约定斜杠
+> - **V11.8.7.1** (2026-08-18) — 5 项用户硬要求 3 连修（V11 扁平默认移除 / archive 保留 V12 / module 占位修复 / 多 archive 路径合一）
+> - **V11.8.7** (2026-08-17) — case 2 audit-fix（7 个 V11 规范问题修补）
+> - **V11.8.6** (2026-08-16) — V12 物理隔离渐进落地（6 步）
+> - **V11.8.5.P1** (2026-08-16) — §3.7 #10 commit 准入最小集程序化
 > - **V11.8.5** (2026-08-16) — 协议层承诺 → 脚本落地（13/14 done + 1 留置）
 > - **V11.8.4** (2026-08-15) — commit 准入最小集与全量验收分层（Stage 3.5/4.5 异步化）
 > - **V11.8.3** (2026-08-15) — Stage 6 重构为 4 层分层决策框架
@@ -20,8 +23,9 @@
 
 - **高内聚专家架构**: 每个 stage 自包含（SKILL/README/workflows/references/templates/anti-patterns）
 - **13 stage 流水线**: Intake → Plan → Test Plan → Spec → Prototype → Contract → Implement → Real Verify → Review → Rot Scan → Accept + Bug Fix + Project Health
-- **贾维斯门禁守护（V11.7.0 NEW）**: 唯一可改 gate 的 sub-agent + 三层防线(协议/白名单/hash 锁)+ L-module/app/system 分层
-- **AC 核销门禁（V11.6.0 NEW）**: 验收是 Guard/Gate 层的机械门禁,不再是评审员打分
+- **贾维斯门禁守护（V12 沿用 V11.7.0）**: 唯一可改 gate 的 sub-agent + 三层防线(协议/白名单/hash 锁)+ L-module/app/system 分层
+- **AC 核销门禁（V12 沿用 V11.6.0）**: 验收是 Guard/Gate 层的机械门禁,不再是评审员打分
+- **V12 默认布局**: `fact/` + `stage/{N}/` 物理隔离 + 13 stage 独立状态卡
 - **独立部署**: 不依赖 V10 目录
 - **V10 思想完整继承**: 17 Articles 宪法（V11.1 新增 Article XVII Secret Redaction）+ 10 项腐化扫描 + 5 类项目验证
 
@@ -29,11 +33,11 @@
 
 ## 工作原理
 
-V11 是一个**文档驱动 + 三层控制**的全栈开发技能包。它的核心不是"写代码"，而是通过一套**不可绕过的门禁**，强制 agent 在每一阶段产出正确产物，防止"虚假交付"。
+V12 是一个**文档驱动 + 三层控制**的全栈开发技能包。它的核心不是"写代码"，而是通过一套**不可绕过的门禁**，强制 agent 在每一阶段产出正确产物，防止"虚假交付"。
 
-### 1. 三层控制架构（V11.4 NEW + V11.7.0 加固）
+### 1. 三层控制架构（V12 沿用 V11.4 + V11.7.0 加固）
 
-V11 用三层架构把"靠 agent 自觉"升级为"靠制度硬化"：
+V12 用三层架构把"靠 agent 自觉"升级为"靠制度硬化"：
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -67,17 +71,17 @@ V11 用三层架构把"靠 agent 自觉"升级为"靠制度硬化"：
 **联动铁律**：Gate PASS → Guard → Execution。任一层 FAIL → 阻断 + 5 字段阻塞报告。Gate 层失败不可绕过（exit ≠ 0）。
 
 **硬化手段**（防止 agent 欺骗绕过）：
-- **环境变量强制**：gate 脚本要求 `V11_GATE_ENFORCED` / `V11_GATE_STAGE` / `V11_GATE_CALLER`，缺失即失败
+- **环境变量强制**：gate 脚本要求 `V12_GATE_ENFORCED` / `V12_GATE_STAGE` / `V12_GATE_CALLER`，缺失即失败
 - **SHA-256 签名**：门禁结果签名验签，无法伪造
 - **审计轨迹**：状态卡变更写入 `.trae/logs/state-card-audit.jsonl`
 - **echo-skip 检测**：守卫脚本拒绝占位符/假通过
 - **hooks-fidelity**：验证 hook 是否真实安装、真实执行
-- **hash 锁（V11.7.0 NEW）**：所有 gate 相关文件(scripts/ac-gate.py + gates/gate-config.json + .husky/*)锁在 gate.lock.yaml;任何未委派贾维斯的改动 → hash 不匹配 → BLOCK
-- **AC 核销门禁（V11.6.0 NEW）**：验收从"评审员打分"重构为"逐 AC 机械核销";AC-ID ↔ TC-ID 强映射,UI 交互 AC 引用 ui-ux-logic 流
+- **hash 锁（V12 沿用 V11.7.0）**：所有 gate 相关文件(scripts/ac-gate.py + gates/gate-config.json + .husky/*)锁在 gate.lock.yaml;任何未委派贾维斯的改动 → hash 不匹配 → BLOCK
+- **AC 核销门禁（V12 沿用 V11.6.0）**：验收从"评审员打分"重构为"逐 AC 机械核销";AC-ID ↔ TC-ID 强映射,UI 交互 AC 引用 ui-ux-logic 流
 
-### 1.5 贾维斯门禁守护（V11.7.0 NEW — 防 agent 改标准通过自己）
+### 1.5 贾维斯门禁守护（V12 沿用 V11.7.0 — 防 agent 改标准通过自己）
 
-> 借鉴市场级 `guard-gate-smith` 架构(管 my-trae-helper 仓库本身),贾维斯管 **V11 装载后的目标项目**,作用域互不重叠。
+> 借鉴市场级 `guard-gate-smith` 架构(管 my-trae-helper 仓库本身),贾维斯管 **V12 装载后的目标项目**,作用域互不重叠。
 
 **核心问题**:任何 agent(包括 reviewer / implementer / 主 agent 自己)都可能为通过门禁改标准 — 文档约束对 LLM 是软的,白名单机制对"懂规矩的 agent"是中的,**机械兜底对一切 agent 是硬的**。
 
@@ -89,13 +93,16 @@ V11 用三层架构把"靠 agent 自觉"升级为"靠制度硬化"：
 | 白名单层 | jarvis.md §3 路径白名单 | 越权直改的 agent(事后审计) |
 | 机械层 | `gate-integrity-guard.py` hash 锁 | **一切绕过行为(事前拦截)** |
 
-**贾维斯 3 时机**:
+**贾维斯 6 时机**:
 
 | 时机 | 触发 | 贾维斯动作 |
 |------|------|-----------|
-| ① 初始化 | 项目首次用 V11 / 新增分层 | `gate-installer.py` 铺三层 gate + 生成 `gate.lock.yaml` |
+| ① 初始化 | 项目首次用 V12 / 新增分层 | `gate-installer.py` 铺三层 gate + 生成 `gate.lock.yaml` |
 | ② 自检 | 任何 gate 执行前(自动) | `gate-integrity-guard.py --verify`,不匹配 = BLOCK |
 | ③ 指导开发 | 任何 agent 请求改 gate | 接受委派 → 评估 → 改 → 重签 lock → 报告 |
+| ④ 通用验收 gate 设计 | 技术策划产出/更新技术方案 | 接收 `[JARVIS-DELEGATION]`（type: gate-design）→ 把方案的验收规则转译为可执行 gate 配置 |
+| ⑤ 文档-代码一致性 gate | 技术策划方案声明文档↔代码映射约束 | 配置 doc-sync-gate.py 规则(spec 字段 ↔ 实现符号) |
+| ⑥ 升级初始化与迁移 | V12 技能升级 / 既有 V11 项目迁移 | 跑 `--migrate-from-v11` 主路径迁移脚本 → 校验 gate.lock 兼容 → 重新初始化并出迁移报告 |
 
 **L-module / L-app / L-system 分层模型**(每层独立扩 guard,不交叉污染):
 
@@ -120,16 +127,16 @@ python gate-integrity-guard.py --generate --root . --force --reason "JARVIS-2026
 
 ### 2. 文档驱动：状态卡（State Card）
 
-每个变更（change）在 `docs/specs/changes/{id}/.state-card.md` 维护一张状态卡，记录：
+V12 多卡模式:每个变更（change）在 `stage/{N}/.state-card.md` 维护独立的阶段状态卡,项目级副本落 `fact/.state-card.md`：
 
 ```yaml
 card_type: state-card
-current_stage: 1-spec
-gate_result: PENDING
+current_stage: 1/spec
+stage_status: pending
 last_gate_time: null
 ```
 
-- **阶段切换**：`stage-gate.py --state-card ...` 校验当前阶段产物是否达标
+- **阶段切换**：`stage-gate.py --state-card stage/{N}/.state-card.md` 校验当前阶段产物是否达标
 - **全局门禁**：`phase-gate.py --verify-rot-scan` 校验跨阶段完整性
 - 状态卡是 13 stage 流水线的"方向盘"，gate 都是围绕它运转
 
@@ -150,21 +157,24 @@ last_gate_time: null
 ```
 
 - **高内聚**：每个 stage skill 自包含（SKILL/README/workflows/references/scripts），编排器只做路由 + 门禁 + 状态卡同步
-- **物理隔离（V11.3）**：`fact/` + `stage/` 目录隔离，防止子代理越界改非本 stage 文件
+- **物理隔离（V12 强制默认）**：`fact/` + `stage/{N}/` 目录隔离，防止子代理越界改非本 stage 文件
 - **验收即证据**：不接受"应该可以了"，只接受命令实际输出
 
 ### 4. 版本演进
 
 | 版本 | 核心演进 |
 |------|---------|
-| V11.0 | 高内聚专家架构 + 13 stage |
-| V11.1 | Article XVII Secret Redaction + 反虚假交付 |
-| V11.2 | 项目级生态管理 + 可验证声明硬约束 |
-| V11.3 | 物理隔离 + prototype 演进 + 人工判定覆盖 |
-| V11.4 | **三层架构**（Gate/Guard/Execution）+ 门禁硬化 |
-| V11.5 | Flow 层 Registry + 13 stage 声明式门禁登记 |
-| V11.6.0 | **AC 核销门禁**(取代评分制)+ 6 类 AC(新增 UI 交互 AC) |
-| V11.7.0 | **贾维斯门禁守护体系**(防 agent 改标准)+ hash 锁 + 分层模型 |
+| **V12.0.0** | **主版本升级**：V12 默认布局(`fact/` + `stage/{N}/`) + 13 stage 独立状态卡 + handoff-out/handoff-in 桥接 + `--migrate-from-v11` 主路径 |
+| V11.8.7.1 | 5 项用户硬要求 3 连修（V11 扁平默认移除 / archive 保留 V12 / module 占位修复）|
+| V11.8.7 | case 2 audit-fix（7 个 V11 规范问题修补）|
+| V11.8.6 | V12 物理隔离渐进落地（6 步）|
+| V11.8.5.P1 | §3.7 #10 commit 准入最小集程序化 |
+| V11.8.5 | 协议层承诺 → 脚本落地 |
+| V11.8.4 | commit 准入最小集与全量验收分层 |
+| V11.8.3 | Stage 6 重构为 4 层分层决策框架 |
+| V11.8.2 | Stage 6 Bug Fix & Hunt 统一工序 |
+| V11.8.1 | bug-hunt / E2E 跨阶段实战报告 |
+| V11.7.0 | 贾维斯门禁守护体系(防 agent 改标准)+ hash 锁 + 分层模型 |
 
 ---
 
@@ -176,39 +186,40 @@ fullstack4TraeV11/
 ├── README.md             # 本文件
 ├── CHANGELOG.md          # 版本变更
 ├── references/           # 公共 references
-│   ├── gate-configuration-protocol.md   # V11.7.0 贾维斯委派 7 步 SOP
+│   ├── gate-configuration-protocol.md   # V12 沿用 V11.7.0 贾维斯委派 7 步 SOP
 │   ├── trap-instructions.yaml            # 反例 → 指令映射
 │   └── ...
 ├── templates/            # 公共 templates
 ├── scripts/              # 公共脚本（Python，全部实装）
-│   ├── ac-gate.py                       # V11.6.0 AC 核销门禁(G1-G5)
-│   ├── stage-gate.py                    # V11 阶段门禁(SHA-256 签名)
-│   ├── gate-installer.py                # V11.7.0 贾维斯 installer
-│   └── gate-integrity-guard.py          # V11.7.0 hash 锁(防篡改)
-├── registry/             # Flow 层 Registry(V11.5+)
-│   ├── gates.yaml                       # 13 stage 门禁 + V11.7.0 layer 字段
+│   ├── ac-gate.py                       # V12 沿用 V11.6.0 AC 核销门禁(G1-G5)
+│   ├── stage-gate.py                    # V12 阶段门禁(SHA-256 签名)
+│   ├── gate-installer.py                # V12 沿用 V11.7.0 贾维斯 installer
+│   └── gate-integrity-guard.py          # V12 沿用 V11.7.0 hash 锁(防篡改)
+├── registry/             # Flow 层 Registry(V11.5+, V12 沿用)
+│   ├── gates.yaml                       # 13 stage 门禁 + V12 沿用 layer 字段
 │   ├── guards.yaml
+│   ├── roles.yaml                       # V12 NEW: 8 角色注册表 + 路径白名单
 │   ├── state-machine.yaml
 │   ├── repair-flow.yaml
 │   └── stacks.yaml
 ├── skills/               # 13 stage skill（高内聚）
-│   ├── 00-boot/             # V11.7.0 NEW pre-stage 装载层
+│   ├── 00-boot/             # V12 沿用 V11.7.0 pre-stage 装载层
 │   │   ├── SKILL.md
 │   │   └── agents/jarvis.md # 贾维斯定义
 │   ├── 01-intake/
 │   ├── 02-plan/
 │   ├── ...
 │   └── 13-project-health/
-└── stage-physical-isolation.md  # 物理隔离规范（V11.3 NEW）
+└── stage-physical-isolation.md  # 物理隔离规范（V12 强制默认）
 ```
 
 ---
 
 ## 13 stage 流水线
 
-| 阶段 | 名称 | SKILL.md | layer (V11.7.0) |
-|:---:|------|----------|-----------------|
-| pre | **贾维斯装载(V11.7.0)** | [skills/00-boot/SKILL.md](skills/00-boot/SKILL.md) + [agents/jarvis.md](skills/00-boot/agents/jarvis.md) | — |
+| 阶段 | 名称 | SKILL.md | layer (V12 沿用 V11.7.0) |
+|:---:|------|----------|------------------|
+| pre | **贾维斯装载(V12 沿用 V11.7.0)** | [skills/00-boot/SKILL.md](skills/00-boot/SKILL.md) + [agents/jarvis.md](skills/00-boot/agents/jarvis.md) | — |
 | -1 | Intake | [skills/01-intake/SKILL.md](skills/01-intake/SKILL.md) | docs |
 | 0 | Plan | [skills/02-plan/SKILL.md](skills/02-plan/SKILL.md) | docs |
 | 0.5 | Test Plan | [skills/03-test-plan/SKILL.md](skills/03-test-plan/SKILL.md) | docs |
@@ -217,7 +228,7 @@ fullstack4TraeV11/
 | 2 | Contract | [skills/06-contract/SKILL.md](skills/06-contract/SKILL.md) | app |
 | 3 | Implement | [skills/07-implement/SKILL.md](skills/07-implement/SKILL.md) | module |
 | 3.5 | Real Verify | [skills/08-real-verify/SKILL.md](skills/08-real-verify/SKILL.md) | app |
-| 4 | Review | [skills/09-review/SKILL.md](skills/09-review/SKILL.md) | **system (V11.6.0 ac-gate)** |
+| 4 | Review | [skills/09-review/SKILL.md](skills/09-review/SKILL.md) | **system (V12 沿用 V11.6.0 ac-gate)** |
 | 4.5 | Rot Scan | [skills/10-rot-scan/SKILL.md](skills/10-rot-scan/SKILL.md) | system |
 | 5 | Accept | [skills/11-accept/SKILL.md](skills/11-accept/SKILL.md) | system |
 | 6 | Bug Fix | [skills/12-bug-fix/SKILL.md](skills/12-bug-fix/SKILL.md) | system |
@@ -229,15 +240,15 @@ fullstack4TraeV11/
 
 ## 快速开始
 
-### 1. 加载 V11 主 SKILL.md
+### 1. 加载 V12 主 SKILL.md
 
 主上下文收到 "Use Skill: fullstack4traev11" 后必走 §0.5 加载协议：
 
 1. 加载 SKILL.md（含 stage_config）
-2. 必读公共 references（constitution / common-iron-rules / common-anti-patterns / stage-card-protocol / stage-interaction-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns）
+2. 必读公共 references（constitution / common-iron-rules / common-anti-patterns / state-card-protocol / stage-interaction-protocol / dependency-config / document-layer / report-growth / ask-question-anti-patterns）
 3. Glob 项目级约定（AGENTS.md / docs/ / .trae/rules/）
-4. 3 层依赖合并（项目 > V11 > 全局）
-5. **V11.7.0 NEW**: 会话第一步委派贾维斯铺三层 gate + 签 hash 锁（见 [skills/00-boot/SKILL.md](skills/00-boot/SKILL.md)）
+4. 3 层依赖合并（项目 > V12 > 全局）
+5. **V12 沿用 V11.7.0**: 会话第一步委派贾维斯铺三层 gate + 签 hash 锁（见 [skills/00-boot/SKILL.md](skills/00-boot/SKILL.md)）
 6. 进入 Stage -1 Intake 工作模式
 
 ### 2. 委派到 Stage skill
@@ -254,11 +265,13 @@ fullstack4TraeV11/
 ### 3. 公共脚本使用
 
 ```bash
-# 状态卡门禁
-python scripts/stage-gate.py --state-card docs/specs/changes/{id}/.state-card.md
+# V12 默认状态卡门禁(per-stage)
+python scripts/stage-gate.py --state-card stage/-1/intake/.state-card.md
+python scripts/stage-gate.py --state-card stage/3/implement/.state-card.md
+python scripts/stage-gate.py --reset-to stage/3/implement
 
 # 全局阶段门禁（含 verify-rot-scan）
-python scripts/phase-gate.py --state-card docs/specs/.state-card.md --verify-rot-scan --change-id {id}
+python scripts/phase-gate.py --state-card fact/.state-card.md --verify-rot-scan --change-id {id}
 
 # 腐化扫描
 python scripts/proactive-scan.py --project-root . --output rot-scan.md --output-fix-list fix-list.json
@@ -266,81 +279,85 @@ python scripts/proactive-scan.py --project-root . --output rot-scan.md --output-
 # 元检测（rot-detector 自身）
 python scripts/self-diagnose.py --project-root .
 
-# V11.6.0 NEW: AC 核销门禁(取代评分制)
+# V12 沿用 V11.6.0 AC 核销门禁(取代评分制)
 python scripts/ac-gate.py \
-  --review-report docs/specs/changes/{id}/review-report.md \
-  --spec docs/specs/changes/{id}/spec.md \
-  --test-plan docs/specs/changes/{id}/test-plan.md
+  --review-report stage/4/review/review-notes.md \
+  --spec fact/spec.md \
+  --test-plan fact/test-plan.md
 
-# V11.7.0 NEW: 贾维斯 installer(项目初始化/分层新增)
+# V12 沿用 V11.7.0 贾维斯 installer(项目初始化/分层新增)
 python scripts/gate-installer.py --target <项目根> --preset <nodejs|python> --layers module,app,system
 
-# V11.7.0 NEW: hash 锁校验(跑 gate 前必调)
+# V12 沿用 V11.7.0 hash 锁校验(跑 gate 前必调)
 python scripts/gate-integrity-guard.py --verify --root <项目根>
 
-# V11.7.0 NEW: 重新签锁(仅贾维斯)
+# V12 沿用 V11.7.0 重新签锁(仅贾维斯)
 python scripts/gate-integrity-guard.py --generate --root <项目根>
 # 强制重签(检测到未授权前提时,需附 --reason):
 python scripts/gate-integrity-guard.py --generate --root <项目根> --force --reason "JARVIS-2026-08-15-001 阈值变更描述"
+
+# V12 主路径迁移(既有 V11 项目)
+python scripts/init-from-zero.py --migrate-from-v11 [path] [--dry-run] [--no-backup]
 ```
 
 ---
 
-## V11.7.0 增强(opt-in)
+## V12 增强(强制默认)
 
-### 贾维斯门禁守护体系(防 agent 改标准)
+### V12 默认布局(`fact/` + `stage/{N}/`)
 
-- **skills/00-boot/SKILL.md** + **agents/jarvis.md** — pre-stage 角色装载层 + 贾维斯定义(3 时机/3 层/白名单/5 步流程)
+- **`fact/`**: 4 层文档真相源(spec.md / plan.md / contracts/ / test-plan.md / prototype.md / module.md)
+- **`stage/{N}/`**: 13 stage 流程产物(notes/handoff-out/state-card),每 stage 独立子目录
+- **状态卡每 stage 独立**: `stage/{N}/.state-card.md` + 项目级副本 `fact/.state-card.md`
+- **`process-layer-guard.sh`**: 强制路径校验 hook(V12 默认启用)
+- **`--migrate-from-v11`**: V11 项目迁移主路径(8 步原子迁移)
+- 见 [CHANGELOG.md V12.0.0 条目](CHANGELOG.md) 详情
+
+### 贾维斯门禁守护体系(V12 沿用 V11.7.0)
+
+- **skills/00-boot/SKILL.md** + **agents/jarvis.md** — pre-stage 角色装载层 + 贾维斯定义(6 时机/3 层/白名单/5 步流程)
 - **references/gate-configuration-protocol.md** — 调用方 7 步 SOP
 - **scripts/gate-installer.py** — 时机① installer(读 registry/gates.yaml 按分层铺目标项目 hook)
 - **scripts/gate-integrity-guard.py** — 时机② hash 锁(`--verify`/`--generate`/`--force --reason`)
 - **registry/gates.yaml v1.2.0** — 13 gate 全部加 `layer` 字段(docs/module/app/system)
+- **registry/roles.yaml v1.0.0** (V12 NEW) — 8 角色注册表 + 路径白名单
 - **3 反例**(trap-instructions.yaml) — `V11-JARVIS-BYPASS-LOCK` / `V11-JARVIS-FORCE-WITHOUT-AUDIT` / `V11-JARVIS-OVERRIDE-LAYER`
-- 见 [CHANGELOG.md V11.7.0 条目](CHANGELOG.md) 详情
 
-### V11.6.0 AC 核销门禁(取代评分制)
+### AC 核销门禁(V12 沿用 V11.6.0)
 
 - **scripts/ac-gate.py** — G1-G5 机械门禁(矩阵存在/至少 1 行/逐行通过/spec 全覆盖/TC 防编造)
 - **skills/04-spec/workflows/acceptance-criteria-extract.md** — 6 类 AC(新增 UI 交互 AC,引用 ui-ux-logic 流)
 - **skills/09-review/workflows/acceptance-baseline-extract.md** — Step -2 验收基准提取 4 步流程
 - **skills/09-review/templates/review-report-template.md** — AC 核销矩阵(6 列)为判定本体
 - **skills/03-test-plan/workflows/coverage-mapping.md** — 强制 `ac: AC-ID` + `ui_flow` 字段 + Step 3.5 双向补齐检
-- 见 [CHANGELOG.md V11.6.0 条目](CHANGELOG.md) 详情
 
-### V11.3 物理隔离
+### 物理隔离(V12 强制默认)
 
 - **stage-gate-pre-stage.sh**: husky 式硬阻断门禁（templates/hooks/，独立于 pre-stage.sh）
-- **stage-physical-isolation.md**: fact/ + stage/ 物理隔离规范
-- 见 [CHANGELOG.md V11.3 条目](CHANGELOG.md) 详情
+- **stage-physical-isolation.md**: fact/ + stage/ 物理隔离规范(V12 强制默认)
 
 ---
 
-## 项目状态（2026-08-16 update）
+## 项目状态（2026-08-18 update）
 
-V11.8.5 — 协议层承诺 → 脚本落地：
+V12.0.0 — 主版本升级 + V11.8.7.1 5 项硬要求 3 连修：
 
 | 维度 | 进度 |
 |------|------|
-| 协议层覆盖率（13/14） | 93%（P3-6 commit-minimum + V12 留置） |
-| 测试套件 | pytest 232 passed in 9.52s |
-| 新增脚本 | 3 个（project-priority-resolver / secrets-detector / bug-state-machine-validator） |
-| 新增 references | 6 个（含 references/todos/ 全套） |
-| 新增单测 | 79 用例（9 文件） |
-| 待办状态 | [references/todos/README.md §2](references/todos/README.md)（13 done / 2 pending） |
+| V12 主版本升级 | ✅ DONE |
+| 13 stage 独立状态卡 | ✅ DONE |
+| handoff-out/handoff-in 桥接 | ✅ DONE |
+| `--migrate-from-v11` 主路径 | ✅ DONE |
+| 5 项用户硬要求(V11.8.7.1) | ✅ DONE |
 
 **注**：本仓库是 my-trae-helper 元项目的 `skill-markets/fullstack4TraeV11/` 子目录，跨仓 commit 受 §B 7 步 SOP 治理。详见 [CHANGELOG.md](CHANGELOG.md) 与 [references/todos/](references/todos/README.md)。
-
-## V11.8.5.P1 commit 准入最小集(2026-08-16 update)
-
-[P3-6] scripts/commit-minimum-check.py 实现 — 4 项准入校验(typecheck / spot-check / admin 探针 / lint 预存),exit 0=PASS / 1=FAIL / 2=WARN,仅前 3 项 FAIL 阻断 commit。
-详见 [CHANGELOG.md](CHANGELOG.md) 与 [references/todos/](../todos/README.md)。
 
 ---
 
 ## 部署
 
 ```bash
-# V11 部署到 ~/.trae-cn/skills/
+# V12 部署到 ~/.trae-cn/skills/
 cp -r skill-markets/fullstack4TraeV11/* ~/.trae-cn/skills/fullstack4TraeV11/
 
 # 验证
@@ -352,13 +369,14 @@ ls ~/.trae-cn/skills/fullstack4TraeV11/scripts/
 
 ## 关联引用
 
-- [SKILL.md](SKILL.md) - V11 总编排器（V11 入口）
-- [CHANGELOG.md](CHANGELOG.md) - 版本变更(V11.6.0 AC 核销 + V11.7.0 贾维斯)
+- [SKILL.md](SKILL.md) - V12 总编排器（V12 入口）
+- [CHANGELOG.md](CHANGELOG.md) - 版本变更(V12.0.0 主版本升级 + V11.6.0 AC 核销 + V11.7.0 贾维斯)
 - [references/constitution.md](references/constitution.md) - 17 Articles 宪法
 - [references/common-iron-rules.md](references/common-iron-rules.md) - 公共铁律
-- [references/stage-physical-isolation.md](references/stage-physical-isolation.md) - 物理隔离规范
-- [references/gate-configuration-protocol.md](references/gate-configuration-protocol.md) - **V11.7.0 NEW** 贾维斯委派 7 步 SOP
+- [references/stage-physical-isolation.md](references/stage-physical-isolation.md) - 物理隔离规范(V12 强制默认)
+- [references/gate-configuration-protocol.md](references/gate-configuration-protocol.md) - **V12 沿用 V11.7.0** 贾维斯委派 7 步 SOP
 - [references/trap-instructions.yaml](references/trap-instructions.yaml) - 反例 → 指令映射
-- [skills/00-boot/SKILL.md](skills/00-boot/SKILL.md) - **V11.7.0 NEW** 贾维斯启动装载器
-- [skills/00-boot/agents/jarvis.md](skills/00-boot/agents/jarvis.md) - **V11.7.0 NEW** 贾维斯定义(白名单 + 5 步响应流程)
-- [registry/gates.yaml](registry/gates.yaml) - **V11.7.0 NEW layer 字段** 13 stage 门禁 + 分层
+- [skills/00-boot/SKILL.md](skills/00-boot/SKILL.md) - **V12 沿用 V11.7.0** 贾维斯启动装载器
+- [skills/00-boot/agents/jarvis.md](skills/00-boot/agents/jarvis.md) - **V12 沿用 V11.7.0** 贾维斯定义(白名单 + 5 步响应流程 + 6 时机)
+- [registry/gates.yaml](registry/gates.yaml) - **V12 沿用 V11.7.0 layer 字段** 13 stage 门禁 + 分层
+- [registry/roles.yaml](registry/roles.yaml) - **V12 NEW** 8 角色注册表 + 路径白名单
