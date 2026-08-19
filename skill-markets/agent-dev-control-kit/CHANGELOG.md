@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **SKILL.md 体积瘦身(482 → 244 行,vibe-coding-standards v2.5 弹性范围 100~350 内)**:按 §1.5 地图 vs 规范判定,把已存在于 references/ 的内容改为指针引用
+  - §1.2 / §2-§4:5 Execution / 5 Guard / 4 Gate 详细流程 → `references/{execution,guard,gate}-skills-guide.md`
+  - §5 使用方式长 bash 脚本列表(10+ 行)→ `scenarios/01-05.md` + `scripts/README.md`
+  - §6 目录结构二级展开 → `§0.2 一级 tree`
+  - §7.3 状态机 ASCII → `references/implementation-roadmap.md`
+  - §9 完整指标表(质量/效率/风险 11 行) → 3 行摘要 + 指针
+  - §11 Gate 自验收**保留内联**(会话蒸馏硬约束,必须可见)
+  - 章节编号保留:`required_sections` 契约要求 §11,瘦身时未改章节顺序,直接复用原编号
+  - §0 标题保留原貌"定位":`MANIFEST.yaml` must_contain 硬约束
+- **version: 1.2.0 → 1.2.1**(PATCH — 纯文档瘦身,无 API/契约变更)
+
+### Tests
+- `pytest -m trap` 31 passed
+- `pytest tests/unit/` 118 passed
+
+### Source
+- 由 my-trae-helper 2026-08-19 vibe-coding-standards v2.5 行数守卫触发,源头是 AGENTS.md §1.11 + §7 路径治理 + 此次会话 "处理 agent-dev-control-kit/SKILL.md 超限问题" 指令
+
+## [1.2.0] - 2026-08-14
+
+### Changed
 - **README.md / SKILL.md / CHANGELOG.md 数字对齐**:移除"30+ 契约检查脚本 / 6 Agent Skills"夸大口径,改为真实"10 业务脚本 + 5 Execution Skill + 3 控制核心 Skill"
 - **references/implementation-roadmap.md**:删除 P0/P1/P2/P3 backlog 优先级与时间估算,只保留"必要性"三档(必须/推荐/可选)
 - **SKILL.md §5.1 / README.md 方式一**:删除不存在的 `template-project/` / `init-project.sh` / `hooks/install-hooks.sh` 路径,改为真实 `scripts/init-control-kit.py` + `validate-gate-integrity.py` + `install-husky.py`

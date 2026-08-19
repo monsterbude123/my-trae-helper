@@ -12,7 +12,7 @@
 >
 | find-skills V1.0 接入 | 2026-08-18 | vercel-labs/skills 同步 SKILL.md 入仓(单文件纯文档),src/execution/skill-install-control.mjs 委托 installer.mjs | [skill-markets/find-skills/SKILL.md](find-skills/SKILL.md) + [src/execution/skill-install-control.mjs](../../src/execution/skill-install-control.mjs) |
 
-> **Last Updated**: 2026-08-16（聚合归档 V11.8.5 脚本落地）
+> **Last Updated**: 2026-08-19（agent-dev-control-kit SKILL.md 482→244 行瘦身 + 章节编号契约对齐 §0/§11）
 
 | V11.8.5 | 2026-08-16 | project-priority-resolver / secrets-detector / bug-state-machine-validator + todos 全套 | [scripts/README.md L40-42](fullstack4TraeV11/scripts/README.md) + [references/todos/README.md §2](fullstack4TraeV11/references/todos/README.md) |
 | V11.8.5.P1 | 2026-08-16 | commit-minimum-check.py + 4 项准入校验(typecheck/spot-check/admin 探针/lint 预存) | [scripts/commit-minimum-check.py](fullstack4TraeV11/scripts/commit-minimum-check.py) + [tests/unit/test_commit_minimum_check.py](fullstack4TraeV11/tests/unit/test_commit_minimum_check.py) |

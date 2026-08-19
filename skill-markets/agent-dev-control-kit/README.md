@@ -1,5 +1,7 @@
 # Agent Development Control Kit
 
+> **2026-08-19 更新**:SKILL.md 瘦身 482 → 244 行(vibe-coding-standards v2.5 弹性阈值治理),版本 1.2.0 → 1.2.1;详见 [CHANGELOG.md §1.2.1](CHANGELOG.md)。
+
 通用 Agent 开发控制体系技能包 — 从 vvicat AI 影视 Studio 项目提炼的三层控制方法论。
 
 > **核心能力描述与三层控制体系详见 [SKILL.md](./SKILL.md)**。本 README 仅做目录与快速开始导航。

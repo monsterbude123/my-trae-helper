@@ -123,4 +123,4 @@
 
 ## 版本
 
-最新版本: **1.1.0** — 详见 [CHANGELOG.md](./CHANGELOG.md)
+最新版本: **1.2.1** — 详见 [CHANGELOG.md](./CHANGELOG.md)

@@ -5,6 +5,17 @@
 
 ## [Unreleased]
 
+### agent-dev-control-kit SKILL.md 瘦身 482 → 244 行(2026-08-19)
+
+- **触发**:vibe-coding-standards v2.5 弹性阈值(100~350)超限治理
+- **§1.5 地图 vs 规范判定**:内联保留 三层架构 ASCII / 整体流程 mermaid / 摘要表 / 联动 mermaid + 失败矩阵 / 5 条设计原则 / 目录结构一级 tree / §11 Gate 自验收;指针化已存在 references/ 内容 + scenarios/01-05 + 完整指标表 → 摘要 + 指针
+- **两道契约守卫生效**(不退让):
+  - `tests/catalogs/skill-catalog.yaml` required_sections 硬要求 §11 → 主标题 §10 → §11 + 子章节编号对齐
+  - `skill-markets/MANIFEST.yaml` must_contain 硬要求 `## §0 定位` → 标题保留原貌
+- **版本**:1.2.0 → 1.2.1(PATCH — 纯文档瘦身)
+- **验证**:`pytest -m trap` 31 passed + `pytest tests/unit/` 118 passed + `python scripts/catalog-guard.py` ✅
+- 参考 [skill-markets/agent-dev-control-kit/SKILL.md](skill-markets/agent-dev-control-kit/SKILL.md) + [skill-markets/agent-dev-control-kit/CHANGELOG.md §1.2.1](skill-markets/agent-dev-control-kit/CHANGELOG.md)
+
 ### vibe-coding-standards v2.5 落地 + fullstack4TraeV11 SKILL.md 瘦身(2026-08-19)
 
 - **vibe-coding-standards 注册 + 挂载 pre-commit gate**(guard-smith 委派)

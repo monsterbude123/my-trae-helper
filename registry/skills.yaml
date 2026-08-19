@@ -4,6 +4,7 @@
 #   每个 skill 在本文件中按同名条目注册 guard + gate 引用,确保:
 #     1. 每个 skill 必须有自己专属的 guard（项目侧 scripts/<name>-guard.*,不在 skill 子目录）
 # 版本（last_updated）：2026-08-19 common-project-coding-conf v1.0 新建注册 + project-rules-gate 整块删除(目录已删)+ github-kownledge-helper agents/ 子目录 + case-driven-skill-audit (V1.0.0) 接入
+# 2026-08-19 微更新: agent-dev-control-kit SKILL.md 文档瘦身 (482→244 行),注册表条目本身无变更,仅顶部 last_updated 注释同步(§1.11 增补条款 — 注释行豁免)
 #     2. 每个 skill 必须有自己的 gate 路由条目（项目侧 .husky/<name>-gate 或 scripts/<name>-gate）
 #     3. 只有 guard-smith agent 有写权维护此文件 + scripts/<name>-guard.* + .husky/<name>-gate
 #     4. 其他 agent 试图 Edit 这些路径 → 强拦截 BLOCK（src/guards/skill-registration-guard.mjs 兜底）

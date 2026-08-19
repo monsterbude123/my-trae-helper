@@ -286,6 +286,7 @@ code auto_reports\{package_name}_{timestamp}.md
 ---
 
 *生成日期: 2026-08-13 | 扫描引擎: trae-security-review/scan_skills_dir.py v2.1*
+*本次微更新 2026-08-19: agent-dev-control-kit SKILL.md 文档瘦身 (482→244 行,纯 PATCH),无脚本/契约变更,评分不变 (3.6 🟡)*
 *本次更新: agent-dev-control-kit 首次登记（独立群岛表新增一行）。**实跑扫描（2026-08-13 23:58）**：HIGH 0 + MEDIUM 3 + LOW 4 → **PASS**（决策矩阵 HIGH 0 + MEDIUM ≤ 3）。3 MEDIUM = release-process-control/SKILL.md ×1 + release-process-template.md ×1 HTTP_INSECURE（文档 HTTP 示例）+ scaffolds/python/files/guards/test-coverage-guard.py ×1 SHELL_EXEC（子进程 pytest 调用，参数化命令）；4 LOW = init-control-kit.py ×3 STACK_LEAK（DEBUG 栈追踪示例）+ asset-management-control/SKILL.md ×1 WEAK_CRYPTO（SHA-256 升级建议文档引用）。本子代理 V0.5 升级：改 3 文件（presets/README.md + registry/gates.yaml + pre-commit-template.sh opt-in 化）+ 新增 6 文件（changed-file-impact-guard 模板/脚本 ×3 + install-husky.py/.test.py ×2 + guard 同步模板 ×1）。下一轮升级前 backlog: 无（已 PASS）*
 
 | skill-bundle | 1 md | 0 | 0 | 0 | **5.0** | 🟢 | 纯规范文档,无脚本,无网络面；关联 src/bundle.mjs + install-guards.mjs（命令均经三道闸，命令路径在仓库内）；BND-001~007 守卫接入 L1-L4 Gate 7 处（pre-commit diff / pre-push all / CI L3+L4 all / 显式 npm run test:bundle） |
