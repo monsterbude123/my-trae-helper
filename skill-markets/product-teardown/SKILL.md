@@ -24,12 +24,61 @@ requires: ["product-teardown-analyze", "product-teardown.tech", "product-teardow
 
 ---
 
+## 一.5、产出落盘协议（强制）
+
+**所有中间产物 + 最终交付物都必须落盘到 `docs/product-analysis/<产品名>/`**，聊天回复只回「路径 + 摘要 + 关键提示」，不再全文打印。
+
+### 路径与命名
+
+| 产物 | 文件路径 | 文件名模式 | 谁写 |
+|------|----------|-----------|------|
+| 5 维度产品拆解 | `docs/product-analysis/<产品名>/` | `<产品名>-product-<YYYYMMDD-HHmm>.md` | analyze Agent（用 Write 工具） |
+| 技术拆解文档 | 同上 | `<产品名>-tech-<YYYYMMDD-HHmm>.md` | tech Agent（用 Write 工具） |
+| 功能菜单 | 同上 | `<产品名>-menu-<YYYYMMDD-HHmm>.md` | 编排器自己（用 Write 工具） |
+| PRD（最终） | 同上 | `<产品名>-prd-<完整\|精简>-<YYYYMMDD-HHmm>.md` | prd Agent（用 Write 工具） |
+
+`<产品名>` 用 kebab-case（如 `notion`、`duolingo`、`apple-music`），目录在阶段 1 资料齐后立刻 `mkdir -p docs/product-analysis/<产品名>/` 一次创建。
+
+### 时间戳生成
+
+```
+TS=$(date +%Y%m%d-%H%M)   # 一次采集,阶段 2/3/5 复用同一时间戳 → 同次拆解产物天然分组
+```
+
+### 编排器职责
+
+| 阶段 | 接收子 Agent 输出后 | 下一步动作 |
+|------|--------------------|-----------|
+| 阶段 2a 后 | 收到 5 维度分析 | **等子 Agent 已写入文件** → 仅校验 `Read` 一下文件存在 + 5 节齐全 → 聊天回「✅ 已落盘 `docs/product-analysis/<产品>/...md`，摘要：…」 |
+| 阶段 2b 后 | 收到技术拆解 | 同上 |
+| 阶段 3 后 | 整理完功能菜单 | **自己用 Write 落盘**到 menu 文件 → 聊天回「✅ 功能菜单已落盘路径 X，请勾选 → 回复我」 |
+| 阶段 5a 后 | 收到 PRD | **等子 Agent 已写入文件** → Read 校验 → 聊天回「✅ PRD 已落盘路径 X」 |
+| 阶段 5b 后 | 渲染技术文档 | **自己用 Write 落盘**（覆盖同名 tech 文件，加注最终版标记）→ 聊天回两份交付物路径 |
+
+### 反例（绝对禁止）
+
+```
+❌ 阶段 2a 收到 PART A 后，把 5 维度全文贴到聊天回复
+   → 撑爆上下文 + 用户无法复用
+
+❌ 阶段 3 把功能菜单 markdown 直接打印，不落盘
+   → 用户无法二次打开 / 无法被其他 agent 引用
+
+❌ 阶段 5a 收到 PRD 后，整份贴聊天回复
+   → 同上
+
+❌ 产物写在 logs/ 或 /tmp/ 或 .trae/ 临时目录
+   → 不在 docs/，不进 git 跟踪 = 丢
+```
+
+---
+
 ## 二、工作流总览
 
 ```
-阶段1：L0 信息收集 → 阶段2a：L1 产品拆解 [→ analyze Agent] / 阶段2b：L2 技术拆解 [→ tech Agent]
-    → 阶段3：功能菜单 → 阶段4：用户确认 → 阶段5a：PRD 生成 [→ prd Agent] / 阶段5b：技术文档渲染
-         ↑ 自己干            ↑ 用 Task 委派（两轨并行）      ↑ 停下等用户    ↑ 确认+问交付范围    ↑ 用 Task 委派 + 渲染 tech-doc
+阶段1：L0 信息收集 → 阶段2a：L1 产品拆解 [→ analyze Agent 写文件] / 阶段2b：L2 技术拆解 [→ tech Agent 写文件]
+    → 阶段3：功能菜单 [→ 编排器写文件] → 阶段4：用户确认 → 阶段5a：PRD 生成 [→ prd Agent 写文件] / 阶段5b：技术文档渲染 [→ 编排器写文件]
+         ↑ 自己干           ↑ Task 委派（产物写文件）               ↑ Write 自己写   ↑ 停下等用户   ↑ Task 委派 + 自己写
 ```
 
 ---

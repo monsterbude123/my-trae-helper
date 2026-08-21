@@ -1,0 +1,156 @@
+# quality-documentation-manager / references / trap-instructions.yaml
+#
+# 仓库内反例库 — 按 .agents/rules/learning.md §3 字段命名铁律:
+#   severity      / what_is_wrong / detect_signal / see_also
+# 不使用全局 self-improving-agent 的 Logged / Priority / Status / Reproducible / Related Files / Source 字段。
+#
+# 触发机制:本文件用作程序化反例库(可被 pytest trap 测试扫描 + 校验)。
+# 与 SKILL.md §9 一一对应。
+
+schema_version: "1.0.0"
+skill_name: quality-documentation-manager
+trap_version: "1.0.0"
+last_updated: "2026-08-21"
+
+# 字段命名铁律(必读 — 与 .agents/rules/learning.md §3 对齐)
+field_naming:
+  forbidden_global_fields:
+    - Logged
+    - Priority
+    - Status
+    - Reproducible
+    - Related Files
+    - Source
+  required_local_fields:
+    - severity
+    - what_is_wrong
+    - detect_signal
+    - see_also
+
+traps:
+
+  # ── HIGH ─────────────────────────────────────────────────
+  - id: AP-1
+    severity: HIGH
+    what_is_wrong: |
+      把 fullstack4TraeV11/skills/10-rot-scan 的 ROT(腐化扫描,10 项腐化指标)
+      与本 skill ROT(三态文档审计:Redundant / Outdated / Trivial)混淆。
+      同缩写异义,引用 / 调用 / 配置 ROT 时未明确"文档治理 ROT"。
+    detect_signal: |
+      grep -rn "ROT" skill-markets/fullstack4TraeV11 skill-markets/quality-documentation-manager
+      | grep -v "CHANGELOG" | grep -v "trap-instructions"
+      # 命中后必须检查上下文是否声明"文档治理 ROT"还是"腐化扫描 ROT"
+    see_also: SKILL.md §0 缩写避坑
+
+  - id: AP-2
+    severity: HIGH
+    what_is_wrong: |
+      把 SSOT 当成"一个数据库 / 一个工具"(如"装个 Confluence 就 SSOT 了")。
+      SSOT 是协议,核心是"所有人用同样的定义、规则、ID",而非技术选型。
+    detect_signal: |
+      grep -rn "SSOT" docs/ skill-markets/*/SKILL.md
+      | grep -iE "(database|tool|install|configure)" | grep -v "协议"
+      # 出现"SSOT 是数据库/工具"等表述 → 反例
+    see_also: references/ssot-protocol.md §1
+
+  - id: AP-3
+    severity: HIGH
+    what_is_wrong: |
+      文档中复制粘贴大段内容(>50 字符),而非相对引用源文件。
+      违反 SSOT §铁律 3(相对引用替代复制粘贴)。
+    detect_signal: |
+      # 跨文件段落重复检测(L2 pre-commit check-redundancy-hint.py)
+      python scripts/check-redundancy-hint.py $(find docs -name '*.md')
+      # 任意一段 >50 字符在 ≥2 文件出现 → 反例
+    see_also: SKILL.md §2 铁律 3 / references/ssot-protocol.md §4.1
+
+  - id: AP-4
+    severity: HIGH
+    what_is_wrong: |
+      改动文档前不跑 doc-map-manager --impact,不知道下游影响面。
+      违反 SSOT §铁律 4(反向引用图谱必构建)。
+    detect_signal: |
+      # git commit hook(可选)检查 commit msg 是否声明"已跑 --impact"
+      git log --format="%B" -1 | grep -E "(impact|影响面)"
+      # 缺 → 反例
+    see_also: SKILL.md §2 铁律 4 / SKILL.md §4.1
+
+  - id: AP-5
+    severity: HIGH
+    what_is_wrong: |
+      outdated 文档超过 P0 24h 时限不修复(P1 7d / P2 30d)。
+      触发 §5.2 超时强制降级为 deprecated。
+    detect_signal: |
+      # 每周一 CI 扫描 freshness 🔴/⚫ 文档超 P0 24h
+      python scripts/auto-deprecate.py --dry-run
+      # 列出超期未降级文档 → 反例
+    see_also: references/freshness-state-machine.md §2
+
+  # ── MEDIUM ────────────────────────────────────────────────
+  - id: AP-6
+    severity: MEDIUM
+    what_is_wrong: |
+      frontmatter 缺 `quadrant` 字段(Diátaxis 四象限必填)。
+      违反 SKILL.md §1.1 强制纪律。
+    detect_signal: |
+      python scripts/check-frontmatter.py $(find docs -name '*.md')
+      # 任意文件 missing/invalid quadrant → 反例
+    see_also: SKILL.md §1.1 / references/diataxis-quadrants.md §2.3
+
+  - id: AP-7
+    severity: MEDIUM
+    what_is_wrong: |
+      frontmatter 缺 `doc_status` 字段(draft / stable / outdated / deprecated)。
+      违反 SKILL.md §5.1 状态机必填。
+    detect_signal: |
+      python scripts/check-frontmatter.py $(find docs -name '*.md')
+      # 任意文件 missing/invalid doc_status → 反例
+    see_also: SKILL.md §5.1 / references/freshness-state-machine.md §1.1
+
+  - id: AP-8
+    severity: MEDIUM
+    what_is_wrong: |
+      CI 不区分内链 / 外链阻断规则。
+      全阻断 = 误报多(GitHub issue 链接等);全放行 = 失防御。
+      必须:内链 100%,外链 retry × 2 后失败 + issue 跟踪。
+    detect_signal: |
+      grep -rn "lychee" .github/workflows/ | grep -v "offline"
+      # 缺 --offline 参数(内链 100%)或缺 retry_count → 反例
+    see_also: SKILL.md §4.2 / references/ci-gate-stack.md §4.2
+
+  - id: AP-9
+    severity: MEDIUM
+    what_is_wrong: |
+      lychee.toml 写死 GitHub issue 链接排除规则过宽(如 `https://.*`),
+      导致真死链漏报。
+      应只排除 GitHub issues / 社交媒体等已知误报源。
+    detect_signal: |
+      grep -E "^exclude" lychee.toml
+      # 匹配过宽(.*)或过多条目(>10)→ 反例
+    see_also: references/docs-as-code-toolchain.md §1
+
+  # ── LOW ───────────────────────────────────────────────────
+  - id: AP-10
+    severity: LOW
+    what_is_wrong: |
+      文档作者用绝对路径(如 `/Users/foo/project/docs/x.md`)而非相对路径。
+      违反 SSOT §铁律 3(相对引用),且破坏跨平台 / 跨用户可移植性。
+    detect_signal: |
+      grep -rn "\\[.*\\](/[A-Z]:\\\\|/[a-z]/)" docs/  # Windows / Unix 绝对路径
+      # 或:grep -rn "\\[.*\\](/home/|/Users/|C:\\\\)" docs/
+      # 命中 → 反例
+    see_also: SKILL.md §2 铁律 3 / references/ssot-protocol.md §4.1
+
+# ── 反例汇总 ──────────────────────────────────────────────
+summary:
+  total_traps: 10
+  high: 5
+  medium: 4
+  low: 1
+  coverage:
+    - "SKILL.md §0 缩写避坑"
+    - "SKILL.md §1 Diátaxis frontmatter 强制"
+    - "SKILL.md §2 SSOT 6 条铁律"
+    - "SKILL.md §4 死链处理纪律"
+    - "SKILL.md §5 状态机 + 时限红线"
+    - "SKILL.md §6 CI 阻断规则"

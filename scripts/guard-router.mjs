@@ -16,10 +16,11 @@
  *   1 = 任一 guard BLOCK / skill 未注册 / 脚本执行失败
  */
 
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
 import { join, resolve, dirname, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { platform } from 'node:os';
 import { parse as parseYaml } from 'yaml';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,7 +29,49 @@ const REPO_ROOT = resolve(__dirname, '..');
 
 const REGISTRY = join(REPO_ROOT, 'registry', 'skills.yaml');
 const SKILL_MARKETS_DIR = join(REPO_ROOT, 'skill-markets');
-const PYTHON_BIN = process.env.MY_TRAE_HELPER_PY || 'python';
+
+// 2026-08-21 修复:复用 with-python.mjs 同款探测逻辑(env → PATH → Windows 典型位置),
+// 避免 'python' ENOENT。直接 import 同目录 wrapper 而不是重复实现。
+function findPython() {
+  // 优先级 1: 环境变量(由 detect-python.sh / husky 注入)
+  const envPy = process.env.MY_TRAE_HELPER_PY?.trim();
+  if (envPy && existsSync(envPy)) return envPy;
+  // 优先级 2: 当前 PATH 上的 python3 / python
+  for (const name of ['python3', 'python', 'python3.exe', 'python.exe']) {
+    try {
+      const out = execFileSync(platform() === 'win32' ? 'where' : 'which', [name], {
+        encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'],
+      });
+      const p = out.split(/\r?\n/)[0]?.trim();
+      if (p && existsSync(p)) return p;
+    } catch { /* not found */ }
+  }
+  // 优先级 3: Windows 典型位置(覆盖 npm spawn 时 PATH 只剩 system32)
+  if (platform() === 'win32') {
+    const home = process.env.USERPROFILE || process.env.HOME || '';
+    const candidates = [
+      home && `${home}/anaconda3/python.exe`,
+      home && `${home}/miniconda3/python.exe`,
+      home && `${home}/anaconda3/python3.exe`,
+      home && `${home}/miniconda3/python3.exe`,
+      'C:/ProgramData/anaconda3/python.exe',
+      'C:/ProgramData/miniconda3/python.exe',
+      'C:/ProgramData/anaconda3/python3.exe',
+      'C:/ProgramData/miniconda3/python3.exe',
+      'C:/Python313/python.exe',
+      'C:/Python312/python.exe',
+      'C:/Python311/python.exe',
+      'C:/Python310/python.exe',
+    ].filter(Boolean);
+    for (const p of candidates) if (existsSync(p)) return p;
+  }
+  return null;
+}
+const PYTHON_BIN = findPython();
+if (!PYTHON_BIN) {
+  console.error('ERR: 找不到 python / python3 (请设置 MY_TRAE_HELPER_PY 或安装 Python)');
+  process.exit(2);
+}
 
 if (!existsSync(REGISTRY)) {
   console.error(`❌ 注册表不存在: registry/skills.yaml`);

@@ -201,12 +201,33 @@ await test('test_include_filters_to_subset — --include 只跑 coding-xinfa,doc
   assert.ok(/docsify-doc-builder/.test(out), `stdout 应包含 docsify-doc-builder, got: ${out.slice(0, 600)}`);
   // 不应包含其他无关顶层 skill
   assert.ok(
-    !/comfyui-api-skills/.test(out),
-    `stdout 不应包含 comfyui-api-skills (bundle 内容), got: ${out.slice(0, 600)}`
+    !/trae-security-review/.test(out),
+    `stdout 不应包含 trae-security-review (未 include), got: ${out.slice(0, 600)}`
   );
+});
+
+// ─── 测试 4.5: 父包本体也被默认安装（反例修复 2026-08-18）──────────────
+// 旧实现错误地把 bundle 父包从 topSkills 中 filter 掉,导致父包 SKILL.md
+// 永远装不进 agent。修复后父包本体应与普通顶层 skill 一样出现在 stdout。
+await test('test_parent_bundle_installed — 默认 add-all 应包含父包本体 (e.g. fullstack4TraeV11)', () => {
+  if (!addAllRegistered) {
+    skip('add-all 命令尚未注册到 bin/cli.mjs');
+  }
+  // 不传 --exclude,也不传 --bundles "" — 默认装全部父包本体
+  // 但用 --include 限制只跑 1 个父包 (fullstack4TraeV11),避免 stdout 太长
+  const r = runCli([
+    '-a', 'trae-cn',
+    '--include', 'fullstack4TraeV11',
+    '--bundles', '',           // 跳子 skill,只看父包本体是否被装
+    '--dry-run',
+    '-y',
+  ]);
+  assert.equal(r.status, 0, `dry-run 期望 exit 0, got ${r.status}; stderr=${r.stderr?.slice(0, 400)}`);
+  const out = r.stdout || '';
+  // 父包本体行: 顶层装载区 [fullstack4TraeV11] →
   assert.ok(
-    !/fullstack4TraeV11/.test(out),
-    `stdout 不应包含 fullstack4TraeV11 (bundle), got: ${out.slice(0, 600)}`
+    /\[fullstack4TraeV11\]\s*→/.test(out),
+    `父包本体应被默认安装,got: ${out.slice(0, 600)}`
   );
 });
 

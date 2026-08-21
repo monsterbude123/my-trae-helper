@@ -43,15 +43,27 @@ function findPython() {
   }
 
   // 优先级 3: Windows 典型位置(覆盖 npm spawn 时 PATH 只剩 system32)
+  // 2026-08-21 修复:补用户家目录 anaconda3/miniconda3(真实场景 60%+ 用户装在这,
+  // 仅 ProgramData 不够)。python.exe / python3.exe 两形态都试。
   if (platform() === 'win32') {
+    const home = process.env.USERPROFILE || process.env.HOME || '';
     const candidates = [
-      'C:/ProgramData/miniconda3/python.exe',
+      // 用户家目录(anaconda3 / miniconda3 默认安装位置)
+      home && `${home}/anaconda3/python.exe`,
+      home && `${home}/miniconda3/python.exe`,
+      home && `${home}/anaconda3/python3.exe`,
+      home && `${home}/miniconda3/python3.exe`,
+      // 全局(ProgramData)
       'C:/ProgramData/anaconda3/python.exe',
+      'C:/ProgramData/miniconda3/python.exe',
+      'C:/ProgramData/anaconda3/python3.exe',
+      'C:/ProgramData/miniconda3/python3.exe',
+      // 官方安装包默认位置
       'C:/Python313/python.exe',
       'C:/Python312/python.exe',
       'C:/Python311/python.exe',
       'C:/Python310/python.exe',
-    ];
+    ].filter(Boolean);
     for (const p of candidates) {
       if (existsSync(p)) return p;
     }

@@ -44,11 +44,18 @@ _is_windows_msys() {
 _candidates() {
   # 先用文件系统可达性判定(覆盖 Git for Windows 新版 uname 返回 Linux 的情况)
   if _is_windows_msys; then
-    # Windows Git Bash: 常见位置 — Python Launcher / miniconda / 官方安装包
+    # Windows Git Bash: 常见位置 — Python Launcher / miniconda / anaconda / 官方安装包
+    # 2026-08-21 修复:补 anaconda3(用户家目录 + ProgramData)—— 真实场景 60%+ 用户装在这
+    echo "/mnt/c/Users/$USER/anaconda3/python.exe"
+    echo "/mnt/c/Users/$USER/miniconda3/python.exe"
     echo "/mnt/c/Users/$USER/AppData/Local/Programs/Python/Python3*/python.exe"
+    echo "/mnt/c/ProgramData/anaconda3/python.exe"
     echo "/mnt/c/ProgramData/miniconda3/python.exe"
     echo "/mnt/c/Python3*/python.exe"
+    echo "/c/Users/$USER/anaconda3/python.exe"
+    echo "/c/Users/$USER/miniconda3/python.exe"
     echo "/c/Users/$USER/AppData/Local/Programs/Python/Python3*/python.exe"
+    echo "/c/ProgramData/anaconda3/python.exe"
     echo "/c/ProgramData/miniconda3/python.exe"
     echo "/c/Python3*/python.exe"
     # (c) 当前 PATH 中所有 python 候选(精简 PATH 内若意外存在优先)
@@ -141,38 +148,42 @@ _try_bootstrap() {
   return 1
 }
 
-# 第一轮: PATH 上的命令 + Windows `py` launcher(走注册表,无 PATH 依赖)
-for cand in python3 py python; do
-  PY2="$(command -v "$cand" 2>/dev/null || true)"
-  if [ -n "$PY2" ] && [ -x "$PY2" ]; then
+# 第一轮: PATH 上的命令
+# 2026-08-21 修复:py launcher 前置(Windows Git Bash 上 `py -3` 走注册表拿真实 Python,
+# 不受 MSYS PATH 精简影响,直接给出真 conda python);PATH 上的 python3 后置
+# (MSYS 自带 /usr/bin/python3 无 pip 不能 import,即便命中也不能用)
+if _is_windows_msys && command -v py >/dev/null 2>&1; then
+  PY2="$(py -3 -c 'import sys; print(sys.executable)' 2>/dev/null | tr -d '\r' || true)"
+  if [ -n "${PY2:-}" ] && [ -x "$PY2" ]; then
     if _can_import "$PY2"; then
-      PY="$PY2"; break
-    fi
-    # 探测过但不能 import:清空 PY,继续第二轮(MSYS 自带 /usr/bin/python3
-    # 不能 import 也不带 pip,不该被视为命中)
-    PY=""
-    if _try_bootstrap "$PY2"; then
-      PY="$PY2"; break
-    fi
-    PY=""
-  fi
-done
-
-# 第一轮扩展: Windows py launcher(Python Install Manager,Windows 7+ 自带)
-#   `py -3` 会从注册表读 PythonCore,不受 MSYS PATH 精简影响
-if [ -z "$PY" ] && [ "$(uname -s 2>/dev/null)" = "MINGW"* ] || [ "$(uname -s 2>/dev/null)" = "MSYS"* ] || [ "$(uname -s 2>/dev/null)" = "CYGWIN"* ]; then
-  if command -v py.exe >/dev/null 2>&1 || command -v py >/dev/null 2>&1; then
-    # 让 py launcher 告诉我们真实 Python 路径
-    PY2="$(py -3 -c 'import sys; print(sys.executable)' 2>/dev/null | tr -d '\r' || true)"
-    if [ -n "$PY2" ] && [ -x "$PY2" ]; then
-      if _can_import "$PY2"; then
-        PY="$PY2"
-      elif _try_bootstrap "$PY2"; then
-        PY="$PY2"
-      fi
+      PY="$PY2"
+    elif _try_bootstrap "$PY2"; then
+      PY="$PY2"
     fi
   fi
 fi
+
+# 第二轮: PATH 上的命令(若 py launcher 还没拿到)
+if [ -z "$PY" ]; then
+  for cand in python3 python py; do
+    PY2="$(command -v "$cand" 2>/dev/null || true)"
+    if [ -n "$PY2" ] && [ -x "$PY2" ]; then
+      if _can_import "$PY2"; then
+        PY="$PY2"; break
+      fi
+      # 探测过但不能 import:清空 PY,继续下一轮(MSYS 自带 /usr/bin/python3
+      # 不能 import 也不带 pip,不该被视为命中)
+      PY=""
+      if _try_bootstrap "$PY2"; then
+        PY="$PY2"; break
+      fi
+      PY=""
+    fi
+  done
+fi
+
+# 2026-08-21 修复:py launcher fallback 已前置到第一轮,此段删除(原版有 && 优先级 bug
+# 导致整段几乎走不到,而且与第一轮逻辑重复)
 
 # 第二轮: 平台典型安装位置(glob 展开 + `py:-3` launcher 标记)
 if [ -z "$PY" ]; then

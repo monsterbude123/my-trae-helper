@@ -5,14 +5,15 @@
  *
  * 流程:
  *   Step 1: 扫 skill-markets(Scan) + 找 bundles(父包)
- *   Step 2: 过滤顶层(top-level,非父包)— 白名单 / 黑名单 / deprecated
+ *   Step 2: 过滤顶层(全部)— 白名单 / 黑名单 / deprecated
  *   Step 3: 跑三道闸(deprecation / version / name-conflict)— block 立即终止, warn 继续
- *   Step 4: 装顶层(40 个左右)到每个目标 agent
+ *   Step 4: 装顶层(含父包本体,40 个左右)到每个目标 agent
  *   Step 5: 装子 skill(对每个指定父包,遍历 bundle.subSkills,装到 <pkg>-<subName>)
  *   Step 6: 输出汇总(success / skip / fail)
  *
  * 设计要点:
- *   - 父包 dirName 与顶层 dirName 一一对应,父包本身不单独装(由其子 skill 覆盖)
+ *   - 父包与顶层并存 — 父包本体(SKILL.md)装为 <pkg>,子 skill 装为 <pkg>-<subName>
+ *     命名空间隔离,互不冲突
  *   - 子 skill 装入后命名空间 = `<pkg>-<subName>`
  *   - 跨平台:统一走 installer.mjs(Windows junction / POSIX symlink),禁止自写 fs.symlinkSync
  *   - 重复 agent 通过 Set 去重
@@ -118,10 +119,11 @@ export async function runAddAll(args) {
     process.exit(1);
   }
   const bundles = findBundles(SKILL_MARKETS_DIR);
-  const bundleDirNames = new Set(bundles.map((b) => b.dirName));
 
-  // Step 2: 过滤顶层 — 排除父包 + 白/黑名单 + deprecated
-  let topSkills = allTop.filter((s) => !bundleDirNames.has(s.dirName));
+  // Step 2: 过滤顶层 — 白/黑名单 + deprecated
+  // 注意:父包(bundle)也是合法顶层 skill,必须保留 — 它的 SKILL.md 可独立加载
+  // 子 skill 装到 <bundle.dirName>-<subName> 命名空间,不与父包冲突
+  let topSkills = allTop;
   if (includeList.length > 0) {
     const includeSet = new Set(includeList.map((n) => n.toLowerCase()));
     topSkills = topSkills.filter((s) => includeSet.has(s.dirName.toLowerCase()));
