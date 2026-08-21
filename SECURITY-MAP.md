@@ -94,6 +94,15 @@
 - 新增 scripts/commit-minimum-check.py: LOW(仅读取 + 探测 dev server,无网络写入 / 不上传 secret)
 - 4 项校验:typecheck / spot-check / admin 探针(本地 urllib + 5s 超时) / lint 预存(写本地日志)
 
+#### V11.8.7 gitnexus 三件套(2026-08-18)
+
+- 来源:用户第 14 次质问 — fullstack4TraeV11 SKILL.md 写"必跑 gitnexus"但主上下文/子代理从未真调,纯文字声明。
+- 落 3 件硬约束,把声明变可执行:
+  1. **scripts/gitnexus-trace.py** (注册表守卫委派已落)— append-only 写 `.trae/logs/gitnexus-trace.jsonl(.trae/ 不提交云端)` + summary + check 24h 内 PASS
+  2. **references/sub-agent-rules.md §7** — `[GITNEXUS]` 从"提示符"改"可执行咒语",含 `mcp__gitnexus__impact()...` + trace 写盘 + 反例 §7.1
+  3. **scripts/commit-minimum-check.py #6 check_gitnexus_invocation_trace** — 24h 内有 ok=true 调用才 PASS,纯 blocked 阻断,trace 缺/stale 走 WARN(无首次 commit 即失败的硬伤)
+- 安全评分:**LOW**(仅读写本地文件 + git ls-files + 时间窗口判断;不上传任何外部;trace 路径在 .trae/ 不提交云端)
+
 #### V11.8.6 — V12 物理隔离渐进落地(2026-08-16)
 
 - 新增 `templates/change-dir-layout-v12-preview.md`:**LOW**(纯协议文档,无代码)

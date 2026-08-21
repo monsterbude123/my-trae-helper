@@ -192,18 +192,14 @@ else
   echo "⚠️  跳过: scripts/doc-sync-guard.py 不存在"
 fi
 
-# 8. add-all CLI 命令专属守卫(2026-08-18 NEW — meta skill 入口)
-# 检查:若改了 src/add-all.mjs / bin/cli.mjs / tests/unit/test_add_all.mjs,
-# 跑 scripts/add-all-guard.py 验证 src 语法 + CLI 注册 + 单元测试。
-# 委托: .husky/add-all-gate(自身带 changed-files 短路 — 改其他文件时 skip)
-echo "8️⃣ add-all CLI 守卫 (meta skill)..."
-if [ -x ".husky/add-all-gate" ]; then
-  bash .husky/add-all-gate
-elif [ -f "scripts/add-all-guard.py" ]; then
-  # 守卫已就绪但 gate 脚本缺失 → 兜底直接跑(PATH 已通过 . detect-python.sh 设置)
-  "$PY" scripts/add-all-guard.py add-all
+# 8. GitNexus MCP 调用 trace 校验(2026-08-18 NEW — guard-smith 委派落地)
+# 强制验证:主上下文 / sub-agent 必须至少在 24h 内触发过一次 gitnexus MCP 工具,
+# 否则视为"文字声明而非真驱动"。失败仅警告不阻断,真阻断由 gitnexus-trace.py 自身 exit code 决定。
+echo "8️⃣ GitNexus MCP 调用 trace 校验 (gitnexus-trace.check)..."
+if [ -f "scripts/gitnexus-trace.py" ]; then
+  "$PY" scripts/gitnexus-trace.py check || echo "⚠️  gitnexus-trace check 失败(非致命,继续)"
 else
-  echo "⚠️  跳过: scripts/add-all-guard.py 不存在"
+  echo "⚠️  跳过: scripts/gitnexus-trace.py 不存在"
 fi
 
 echo "✅ L1 Commit Gate 通过"

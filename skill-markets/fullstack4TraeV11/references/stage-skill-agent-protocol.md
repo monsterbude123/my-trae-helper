@@ -30,12 +30,26 @@
   # V11.8.5 反馈补完 — 全局配置文件白名单（sub-agent 禁止改）:
   # playwright.config.ts, vitest.config.ts, acceptance_manifest.yaml,
   # .trae/fullstack4traev11.config.yaml, .trae/hooks.json, .trae/registry/*.yaml
-[GITNEXUS] impact()      # 必填：必跑 gitnexus
+[GITNEXUS] impact()      # 必填：必跑 gitnexus (V11.8.7 硬化 → 必须可执行, 见下)
 [TASK] {一句话 ≤200 chars}
 [OUTPUT] 4 字段: status / evidence / pass_count / next_hook
+
+[GITNEXUS MUST-INVOKE — 收到本头部后第一次工具调用前必跑 — V11.8.7 蒸馏]
+# 1. 选工具(impact / context / query / detect_changes),基于任务需要的 symbol 名填充
+# 2. 通过 run_mcp 工具发起调用(server_name="mcp_gitnexus", tool_name="impact")
+# 3. 调用成功后写 trace(项目侧脚本,跨平台 stdlib):
+python scripts/gitnexus-trace.py append \
+  --tool impact --target "<SYMBOL>" --ok true \
+  --note "stage={N} agent={ROLE} commit={HASH}"
+# 4. 失败按 [gitnexus-retry-protocol.md] 3 次重试(修参数 → 换工具 → list_repos)
+#    每次失败前写 trace(--ok false)便于审计
+# 5. 仍失败 → 5 字段阻塞报告(违反 [sub-agent-rules §7.1] 反例)
 ```
 
 **agent 启动时主上下文必填**。
+
+> **【V11.8.7 蒸馏补 — 2026-08-18】** 早期 V11 `[GITNEXUS] impact()` 字段仅是"提示符"，
+> 文字层面写"必跑"但从未硬约束。可执行化见 [sub-agent-rules.md §7 反例 §7.1](sub-agent-rules.md)。
 
 ### Step 2: agent 加载 stage skill（V11 §0.5）
 

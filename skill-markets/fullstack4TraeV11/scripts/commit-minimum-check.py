@@ -6,23 +6,32 @@ V11 commit-minimum-check.py — commit 准入最小集程序化校验(AUDIT-#13 
 定位:SKILL.md §3.7 #10 反虚假交付反转陷阱 + references/common-anti-patterns.md §7.3
      "commit 准入最小集 ≠ 全量验收"协议落地。
 
-5 项准入最小集校验(适配 Python 后端工具集,无 TS / Next.js 依赖):
+5+1 项准入最小集校验(适配 Python 后端工具集,无 TS / Next.js 依赖):
     1. typecheck 0 错   → compileall 全部 .py
     2. 关键 5 路由 spot-check  → docs/specs/changes/{id}/spot-check.json 探测
     3. admin 探针 200    → .trae/fullstack4traev11.config.yaml gate.base_url + /health
     4. lint 预存问题不阻塞  → pyflakes 收集 → 写 .trae/logs/commit-readiness-warnings.jsonl
     5. **secret 在 git tracked 文件** → git ls-files + sk-{20+} regex(Article XVII P0,V11.8.7 case 3 反馈)
+    6. **gitnexus 实际驱动证据** → .trae/logs/gitnexus-trace.jsonl 24h 内有 ok=true 的 impact/context/query/detect_changes 调用
+       (V11.8.7 NEW — 2026-08-18 蒸馏:用户第 14 次质问指 fullstack4TraeV11 子代理从未真的调 gitnexus MCP,
+        文字层 "必跑"=空声明 → 反例 §7.1。本 check 兜底落 trace 必 1 条)
+    缺 trace 时的等级:
+      - 24h 内 0 条  → FAIL(阻断 commit,除非 --allow-stale-gitnexus)
+      - 仅 blocked  → FAIL(失败重试协议未按 §[gitnexus-retry-protocol.md] 写透)
+      - trace 文件不存在 → WARN(给首次 commit / 新项目窗口,exit 2)
+      - 通过 → PASS
 
 Usage:
     python scripts/commit-minimum-check.py
     python scripts/commit-minimum-check.py --project-root .
     python scripts/commit-minimum-check.py --json
     python scripts/commit-minimum-check.py --strict   # admin 探针失败 = 1, 不允许 N/A
+    python scripts/commit-minimum-check.py --allow-stale-gitnexus   # #6 缺失不阻断(罕见,如纯文档变更)
 
 Exit codes:
-    0 = PASS(全部 4 项通过 / 前 3 pass + 第 4 WARN 入 log)
-    1 = FAIL(前 3 任一 FAIL,阻断 commit)
-    2 = N/A(未启动 dev server 跳过 #3,进 WARN)
+    0 = PASS(全部 5+1 项通过 / 前 5 pass + 第 4 WARN 入 log)
+    1 = FAIL(前 5 任一 FAIL,阻断 commit)
+    2 = N/A(未启动 dev server 跳过 #3,进 WARN / 或 #6 stale 进 WARN)
 
 实现要点:
     - 跨平台:Windows / macOS / Linux 统一 pathlib + subprocess(timeout=5)
@@ -491,6 +500,124 @@ def check_secret_in_tracked_files(project_root: Path) -> CheckResult:
     )
 
 
+def check_gitnexus_invocation_trace(project_root: Path, allow_stale: bool = False) -> CheckResult:
+    """#6 gitnexus 实际驱动证据(V11.8.7 NEW - 2026-08-18 蒸馏)。
+
+    case: 用户 14 次质问指 fullstack4TraeV11 主上下文 / 子代理从未真的调过 gitnexus MCP
+          SKILL.md 写"必跑"但仅是文字声明,无执行约束。
+    fix: 三件套 - guard-smith 安装 trace 写盘(scripts/gitnexus-trace.py)
+         + V11 sub-agent 头部 §7 [GITNEXUS] 改为可执行咒语
+         + 本 check 强制 commit 时验证 24h 内 trace 有 ok=true。
+
+    判定逻辑(防误伤 + 防假通过):
+      0. trace 文件不存在 -> WARN(exit 2): 首次 commit / 新项目 / 还没装 trace 写盘
+      1. mtime 距今 > 24h -> WARN(exit 2,除非 --allow-stale-gitnexus):
+         stale=不阻断,给文档变更或 agent 长时间挂窗口
+      2. 有 ok=true 调用且 target 非空 -> PASS
+      3. 仅 ok=false / blocked_attempts > 0 且 ok_count=0 -> FAIL:
+         失败重试未按 [gitnexus-retry-protocol.md] 3 次修透,或全失败未报阻塞
+
+    V11 反例 §7.1 联动:
+      - 委派 sub-agent 头部 [GITNEXUS] MUST-INVOKE 但 trace 缺此条 -> 装"已跑"反例
+      - 主上下文验收时必 python scripts/gitnexus-trace.py summary 看 called_count
+    """
+    trace_path = project_root / ".trae" / "logs" / "gitnexus-trace.jsonl"
+    if not trace_path.exists():
+        return CheckResult(
+            name="gitnexus-invocation",
+            status="warn",
+            detail=f"{trace_path.relative_to(project_root)} 不存在(请先装 gitnexus-trace.py,见 [sub-agent-rules §7])",
+            exit_code=2,
+            evidence={"reason": "no-trace-file", "expected_path": str(trace_path)},
+        )
+
+    try:
+        content = trace_path.read_text(encoding="utf-8", errors="ignore")
+    except OSError as e:
+        return CheckResult(
+            name="gitnexus-invocation",
+            status="warn",
+            detail=f"trace 不可读: {e}",
+            exit_code=2,
+            evidence={"error": str(e)},
+        )
+
+    if not content.strip():
+        return CheckResult(
+            name="gitnexus-invocation",
+            status="warn",
+            detail="trace 文件为空",
+            exit_code=2,
+            evidence={"path": str(trace_path)},
+        )
+
+    # mtime 24h 滑动窗口
+    mtime = trace_path.stat().st_mtime
+    age_seconds = int(time.time() - mtime)
+    if age_seconds > 86400:
+        if allow_stale:
+            return CheckResult(
+                name="gitnexus-invocation",
+                status="warn",
+                detail=f"trace 距今 {age_seconds}s > 24h(--allow-stale-gitnexus 仅告警)",
+                exit_code=2,
+                evidence={"age_seconds": age_seconds, "allow_stale": True},
+            )
+        return CheckResult(
+            name="gitnexus-invocation",
+            status="warn",
+            detail=f"trace 距今 {age_seconds}s > 24h(stale · 不阻断,首次装 trace 后会自然过)",
+            exit_code=2,
+            evidence={"age_seconds": age_seconds, "stale": True},
+        )
+
+    # 解析 JSONL,统计 ok=true / ok=false / 各 tool 计数
+    ok_count = 0
+    blocked = 0
+    tools: dict = {}
+    last_target = None
+    for raw in content.splitlines():
+        raw = raw.strip()
+        if not raw:
+            continue
+        try:
+            entry = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        tool = entry.get("tool", "")
+        ok = entry.get("ok", False)
+        target = entry.get("target", "")
+        if tool:
+            tools[tool] = tools.get(tool, 0) + 1
+        if ok:
+            ok_count += 1
+            last_target = target
+        else:
+            blocked += 1
+
+    total = ok_count + blocked
+    if ok_count == 0 and blocked > 0:
+        return CheckResult(
+            name="gitnexus-invocation",
+            status="fail",
+            detail=f"{blocked} 条调用全失败,失败重试未按 [gitnexus-retry-protocol.md] 写透 ok=true",
+            exit_code=1,
+            evidence={"ok_count": 0, "blocked": blocked, "tools": tools},
+        )
+
+    return CheckResult(
+        name="gitnexus-invocation",
+        status="pass",
+        detail=f"{ok_count}/{total} ok · tools={tools} · last target='{last_target or '-'}'",
+        exit_code=0,
+        evidence={
+            "ok_count": ok_count,
+            "blocked": blocked,
+            "tools": tools,
+            "last_target": last_target,
+            "age_seconds": age_seconds,
+        },
+    )
 def check_lint_pre_existing(project_root: Path) -> CheckResult:
     """#4 lint \u9884\u5b58\u95ee\u9898\u4e0d\u963b\u65ad \u2014 pyflakes \u6536\u96c6 + \u5199 jsonl"""
     py_files = list((project_root / "scripts").rglob("*.py"))
@@ -591,7 +718,7 @@ def aggregate(results: List[CheckResult], strict: bool) -> Tuple[str, int]:
 
 def format_text(report: Report) -> str:
     """人类可读输出(PASS \u4fe1\u606f \u2192 stdout)."""
-    lines = [f"[v11-commit-min] 4 \u9879\u68c0\u67e5 \u00b7 strict={report.strict}"]
+    lines = [f"[v11-commit-min] {len(report.checks)} 项检查(V11.8.7 = 5+1) · strict={report.strict}"]
     for i, c in enumerate(report.checks, 1):
         marker = {"pass": "pass", "fail": "FAIL", "warn": "warn", "na": "N/A"}.get(c.status, c.status)
         lines.append(f"[{i}/{len(report.checks)}] {c.name}: {marker} ({c.detail})")
@@ -627,6 +754,12 @@ def main() -> int:
         action="store_true",
         help="\u4e25\u91cd\u6a21\u5f0f:admin \u63a2\u9488\u5931\u8d25 \u2192 FAIL \u963b\u65ad commit",
     )
+    parser.add_argument(
+        "--allow-stale-gitnexus",
+        action="store_true",
+        dest="allow_stale_gitnexus",
+        help="#6 gitnexus trace >24h \u4ec5\u544a\u8b66\u4e0d\u963b\u65ad(\u7eaf\u6587\u6863\u53d8\u66f4\u7a97\u53e3)",
+    )
     args = parser.parse_args()
 
     project_root = Path(args.project_root).resolve()
@@ -636,7 +769,11 @@ def main() -> int:
         check_spot_check(project_root),
         check_admin_probe(project_root, strict=args.strict),
         check_lint_pre_existing(project_root),
-        check_secret_in_tracked_files(project_root),  # V11.8.7 NEW — Article XVII P0
+        check_secret_in_tracked_files(project_root),
+        check_gitnexus_invocation_trace(
+            project_root,
+            allow_stale=args.allow_stale_gitnexus,
+        ),
     ]
     summary_str, summary_exit = aggregate(results, strict=args.strict)
     report = Report(

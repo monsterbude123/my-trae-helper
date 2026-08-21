@@ -126,15 +126,44 @@ V11.8.6 历史(参考):本节 V11.8.6 时为"V11 项目可选按 V12"措辞,V12.
 ## §7. 委派注入模板（V11 升级）
 
 > 完整 6 字段委派头部详见 [stage-skill-agent-protocol.md §1](stage-skill-agent-protocol.md)。
+>
+> **【V11.8.7 硬化 — 2026-08-18 蒸馏】** `[GITNEXUS] impact()` 字段从纯文本提示改为**可执行咒语**。
+> sub-agent 收到头部后,必须在**第一次工具调用前**按下面 python 块向 `run_mcp` 工具发起调用,
+> 并把 ok=true 的 trace 写盘(脚本 `scripts/gitnexus-trace.py append`)。
+> 主上下文在委派验证阶段(`§8 三层验证`)必查 trace 存在,缺则按反例 §7.1 处理。
 
 ```
 [MUST-READ] AGENTS.md + .trae/rules/
 [PIPELINE] stage: {N}
 [DOC_WHITELIST] {whitelist}
 [FORBIDDEN] docs/archive/**, .trae/tmp/**, diagnostic/bugs/**
-[GITNEXUS] impact()
+[GITNEXUS] impact()  # 见下方 MUST-INVOKE — 不可降级
 [TASK] {≤200 chars}
 [OUTPUT] 4 字段: status / evidence / pass_count / next_hook
+
+[GITNEXUS MUST-INVOKE — 收到本头部后第一次工具调用前必跑]
+# 1. 选工具(impact / context / query / detect_changes),基于任务需要的 symbol 名填充
+# 2. 通过 run_mcp 工具发起调用(server_name="mcp_gitnexus", tool_name="impact")
+# 3. 调用成功后写 trace:
+mcp__gitnexus__impact(target="<SYMBOL>", direction="upstream")  # 例
+python scripts/gitnexus-trace.py append \
+  --tool impact --target "<SYMBOL>" --ok true \
+  --note "stage={N} agent={ROLE} commit={HASH}"
+
+# 4. 调用失败按 §[gitnexus-retry-protocol.md] 3 次重试:
+#    修参数 → 换工具 → list_repos → 仍失败 → 5 字段阻塞报告
+#    重试前每次失败也写 trace(--ok false)便于事后审计
+```
+
+**反例 §7.1 — 文字声明 ≠ 实际调用**
+
+```
+现象: sub-agent 返回 Completion Report 含 "已跑 gitnexus"，但 .trae/logs/gitnexus-trace.jsonl 0 条
+根因: 主上下文未独立抽 trace，盲信 sub-agent
+教训:
+  - 主上下文必须 `python scripts/gitnexus-trace.py summary` 验证 called_count > 0
+  - 缺 trace = 反例 #7 反虚假交付(§3.7) + 不可证伪理由 → REJECT
+  - 兜底: pre-commit 调用 `gitnexus-trace.py check`，24h 无 trace 也阻断
 ```
 
 ---

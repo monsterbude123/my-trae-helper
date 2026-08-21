@@ -320,6 +320,7 @@ skills:
       - { id: fullstack4TraeV11-flow, category: flow, script: scripts/fullstack4TraeV11-flow-guard.py, triggers: [pre-commit, pre-push, L3] }
       - { id: fullstack4TraeV11-gate-config, category: gate-config, script: scripts/fullstack4TraeV11-gate-config-guard.py, triggers: [pre-push, L3] }
       - { id: fullstack4TraeV11-trap, category: trap, script: scripts/fullstack4TraeV11-trap-guard.py, triggers: [L4] }
+      - { id: fullstack4TraeV11-gitnexus, category: capability, script: scripts/gitnexus-trace.py, triggers: [pre-commit, L3] }
     gates:
       - { id: fullstack4TraeV11-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack4TraeV11-structure, fullstack4TraeV11-flow] }
       - { id: fullstack4TraeV11-pre-push, level: L2, hooks: [.husky/fullstack4TraeV11-pre-push, .husky/pre-push], runs_guards: [fullstack4TraeV11-flow, fullstack4TraeV11-gate-config] }
@@ -327,11 +328,16 @@ skills:
       - { id: fullstack4TraeV11-l3-doc-check, level: L3, hooks: [.github/workflows/v11-doc-check.yml], runs_guards: [fullstack4TraeV11-structure] }
       - { id: fullstack4TraeV11-l3-security-check, level: L3, hooks: [.github/workflows/v11-security-check.yml], runs_guards: [fullstack4TraeV11-structure] }
       - { id: fullstack4TraeV11-l4, level: L4, hooks: [.husky/fullstack4TraeV11-l4, .github/workflows/skill-market-gate.yml], runs_guards: [fullstack4TraeV11-flow, fullstack4TraeV11-trap] }
+      - { id: fullstack4TraeV11-gitnexus, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack4TraeV11-gitnexus] }
     maintainer: guard-smith
     notes: |
       V11.7.0+ 升级:V11.7.0 贾维斯门禁守护(jarvis sub-agent + 三层防线 + hash 锁) + V11.6.0 AC 核销门禁(ac-gate.py 取代评分制)。
       V11.8.0+:新增 L3 专用 PR 触发 gate — v11-doc-check.yml(文档入口标记校验,扫 v11-doc-sync.py --check)
       + v11-security-check.yml(改动 V11 时跑 trae-security-review 扫描,PASS/WARNING/BLOCKED 报告评论)。
+      V11.8.7+:2026-08-18 新增 gitnexus MCP 调用 trace 能力(guard-smith 委派),把 V11 文字声明 gitnexus
+      调用变硬执行 — trace 写盘(.trae/logs/gitnexus-trace.jsonl)+ pre-commit 主动 check + SessionStart/Stop
+      时机探测(scripts/gitnexus-session-check.py / gitnexus-session-finalize.py)。
+      V11.8.7.1+:2026-08-18 注册表条目 3 连修(5 项用户硬要求) + gitnexus-trace capability guard 接入 L1 pre-commit。
 
   - skill: game-production-kit
     status: active
