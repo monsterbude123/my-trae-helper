@@ -6,6 +6,7 @@ import pathlib
 import sys
 import subprocess
 import re
+import json
 
 SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent.parent
 GUARD_SCRIPT = SKILL_DIR / "scripts" / "ai-testmate-guard.py"
@@ -87,3 +88,179 @@ def test_no_python_path_hardcoding_in_scripts():
         if sh.name == "detect-python.sh":
             continue
         assert not pattern.search(text), f"AP-6:{sh.name} 含 Python 路径硬编码"
+
+
+# ===== v1.1 新增 6 用例(输入自适应 + 禅道降级) =====
+
+def test_openapi_extractor_basic_conversion():
+    """V2-AP-1:openapi 基本转换 + 鉴权字段不丢"""
+    import yaml
+    spec = {
+        "openapi": "3.0.0",
+        "info": {"title": "demo"},
+        "security": [{"bearerAuth": []}],
+        "paths": {
+            "/users/{id}": {
+                "get": {
+                    "operationId": "getUser",
+                    "tags": ["core"],
+                    "parameters": [{"name": "id", "in": "path", "required": True}],
+                    "responses": {"200": {}, "404": {}},
+                }
+            }
+        }
+    }
+    spec_file = SKILL_DIR / "tests" / "unit" / "_tmp_openapi.json"
+    spec_file.write_text(json.dumps(spec), encoding="utf-8")
+    try:
+        r = subprocess.run(
+            [sys.executable, str(SKILL_DIR / "scripts" / "openapi-extractor.py"),
+             "--input", str(spec_file), "--mode", "auto"],
+            capture_output=True, text=True, cwd=SKILL_DIR,
+        )
+        assert r.returncode == 0, f"openapi-extractor 失败:{r.stderr}"
+        data = yaml.safe_load(r.stdout)
+        assert len(data["test_cases"]) == 1
+        c = data["test_cases"][0]
+        assert c["data"]["auth_required"] is True, "V2-AP-1:鉴权字段丢失"
+        assert c["data"]["path_params"]["id"] == "<fill>"
+        assert c["data"]["expected_status"] == 200
+        assert c["priority"] == "P0", f"core tag 应映射 P0,实际 {c['priority']}"
+        assert c["source"] == "openapi"
+    finally:
+        spec_file.unlink(missing_ok=True)
+
+
+def test_openapi_extractor_generates_negative_case():
+    """V2-AP-1 变体:每 op 必生成至少 1 负例"""
+    import yaml
+    spec = {
+        "openapi": "3.0.0",
+        "paths": {
+            "/items/{id}": {
+                "get": {
+                    "operationId": "getItem",
+                    "responses": {"200": {}, "404": {}},
+                }
+            }
+        }
+    }
+    spec_file = SKILL_DIR / "tests" / "unit" / "_tmp_openapi2.json"
+    spec_file.write_text(json.dumps(spec), encoding="utf-8")
+    try:
+        r = subprocess.run(
+            [sys.executable, str(SKILL_DIR / "scripts" / "openapi-extractor.py"),
+             "--input", str(spec_file)],
+            capture_output=True, text=True, cwd=SKILL_DIR,
+        )
+        data = yaml.safe_load(r.stdout)
+        c = data["test_cases"][0]
+        assert c["data"]["negative_cases"] is not None, "V2-AP-1:缺负例"
+        assert c["data"]["negative_cases"][0]["expected_status"] == 404
+        assert len(c["steps"]) >= 2, "V2-AP-1:steps 至少含正+负"
+    finally:
+        spec_file.unlink(missing_ok=True)
+
+
+def test_planner_input_router_decision_matrix():
+    """V2-AP-4:planner §1 决策矩阵 4 模式齐全(文档自检)"""
+    router = SKILL_DIR / "references" / "input-router.md"
+    text = router.read_text(encoding="utf-8")
+    # 必须覆盖 4 模式标签
+    assert "prd-only" in text
+    assert "prd-tree" in text
+    assert "prd+openapi" in text
+    assert "openapi-only" in text
+    # 用例 source 标签约定 4 个值(在反例段里出现)
+    for s in ("prd", "prd-tree", "openapi", "mixed"):
+        assert s in text, f"input-router.md 缺 source 值: {s}"
+
+
+def test_planner_mode_d_no_prd_dependency():
+    """V2-AP-5:planner §1 决策矩阵显式禁止模式 D 读 PRD"""
+    planner = SKILL_DIR / "agents" / "planner.md"
+    text = planner.read_text(encoding="utf-8")
+    # 模式 D 必须有"跳过所有 PRD 操作"
+    assert "模式 D" in text
+    assert "跳过所有 PRD 操作" in text or "不读 PRD" in text
+
+
+def test_reporter_zentao_optional_with_fallback():
+    """V2-AP-2:reporter §3.3 含禅道降级到本地路径"""
+    reporter = SKILL_DIR / "agents" / "reporter.md"
+    text = reporter.read_text(encoding="utf-8")
+    # 必须显式声明双路径
+    assert "路径 A" in text and "路径 B" in text
+    assert "本地 markdown" in text or "本地 bug" in text
+    assert "降级" in text
+
+
+def test_bug_storage_frontmatter_has_source_field():
+    """V2-AP-3:bug 单 frontmatter 7 字段必带 source"""
+    bug_md = SKILL_DIR / "references" / "bug-storage.md"
+    text = bug_md.read_text(encoding="utf-8")
+    # 必须出现 source 字段示例
+    assert "source: qa-found" in text
+    # 7 字段 ID/title/status/created/priority/severity/source
+    required = ["id", "title", "status", "created", "priority", "severity", "source"]
+    for f in required:
+        assert f in text, f"bug-storage.md 缺字段 {f}"
+
+
+# ===== v1.2 新增 3 用例(工作空间自动探测) =====
+
+def test_workspace_detect_cwd_mode():
+    """V3-2:cwd 直接含 .agents/.env → detected_mode=cwd"""
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = pathlib.Path(tmp)
+        agents_dir = tmp_path / ".agents"
+        agents_dir.mkdir()
+        (agents_dir / ".env").write_text("X=1\n", encoding="utf-8")
+        r = subprocess.run(
+            [sys.executable, str(SKILL_DIR / "scripts" / "workspace-detect.py"),
+             "--start", str(tmp_path), "--json"],
+            capture_output=True, text=True,
+        )
+        assert r.returncode == 0, r.stderr
+        import json
+        data = json.loads(r.stdout)
+        assert data["detected_mode"] == "cwd"
+        assert data["workspace_root"] == str(tmp_path.resolve())
+        assert data["env_file"].endswith(".env")
+
+
+def test_workspace_detect_ancestor_mode():
+    """V3-2 变体:从子目录向上找到 .agents/.env → detected_mode=ancestor"""
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = pathlib.Path(tmp)
+        agents_dir = tmp_path / ".agents"
+        agents_dir.mkdir()
+        (agents_dir / ".env").write_text("X=1\n", encoding="utf-8")
+        # 子目录,深度 2 层
+        nested = tmp_path / "src" / "tests"
+        nested.mkdir(parents=True)
+        r = subprocess.run(
+            [sys.executable, str(SKILL_DIR / "scripts" / "workspace-detect.py"),
+             "--start", str(nested), "--json"],
+            capture_output=True, text=True,
+        )
+        import json
+        data = json.loads(r.stdout)
+        assert data["detected_mode"] == "ancestor", f"应 ancestor,实际 {data['detected_mode']}"
+        assert data["workspace_root"] == str(tmp_path.resolve())
+
+
+def test_workspace_detect_strict_fallback_exit_2():
+    """V3-2 变体:找不到 .agents/.env + --strict → exit 2"""
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        # tmp 目录无 .agents
+        r = subprocess.run(
+            [sys.executable, str(SKILL_DIR / "scripts" / "workspace-detect.py"),
+             "--start", tmp, "--strict"],
+            capture_output=True, text=True,
+        )
+        assert r.returncode == 2, f"应 exit 2,实际 {r.returncode}"
+        assert "未找到 .agents/.env" in r.stderr

@@ -271,9 +271,30 @@ Gate 自验收失败时:
 
 ---
 
-## §8 版本历史
+## §8 通用 Self-Check Iron Law(2026-08-21 NEW)
+
+> **核心命题**:每个 skill 应自带 `scripts/<name>-self-check.sh`(POSIX sh,无 Python/Node 依赖),
+> 在 `SKILL.md` §X 明示:**触发时机 / 检测项 / 失败 remediation**。
+> 详见 [references/self-check-iron-law.md](references/self-check-iron-law.md)(完整 §8.1~§8.6 规范 + 三态设计 + 反例库 + 标杆引用)。
+> SKILL.md 仅保留**摘要 + 指针**(`vibe-coding-standards` v2.5 §1.5 地图 vs 规范判定:规范 → references/)。
+
+### 8.0 摘要(地图)
+
+| 项 | 简述 | 详见 |
+|----|------|------|
+| 必备三段 | 触发时机 + 检测项 + 失败 remediation | §8.1 |
+| 三态设计 | INSTALLED(0) / MISSING_CONFIG_FILE(1) / MISSING_HOOK_ENTRY(1) | §8.2 |
+| 反例库 | 不写 self-check / 永远返回 0 / 静默退出 / 自动改 config / 依赖 Py·Node / 无三态 | §8.3 |
+| 与 §7 差别 | §7 = Gate 真的能阻断 / §8 = Skill 真的被启用(正交) | §8.4 |
+| 标杆实现 | `project-self-improving/scripts/hook-self-check.sh` | §8.5 |
+| 落地清单 | 6 项 checkbox | §8.6 |
+
+---
+
+## §9 版本历史
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | 0.1.0 | 2026-08-XX | 初始版本:6 项检查 + verify.py |
 | 0.2.0 | 2026-08-14 | **新增 §7 Gate 自验收协议**(本会话蒸馏) |
+| 0.3.0 | 2026-08-21 | **新增 §8 通用 Self-Check Iron Law**(project-self-improving 标杆实现驱动) |

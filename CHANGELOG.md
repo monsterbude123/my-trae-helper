@@ -5,6 +5,27 @@
 
 ## [Unreleased]
 
+### 归档 fullstack4TraeV9 + fullstack4TraeV10 (2026-08-21)
+
+- **背景**:V11 已稳定为主线, V9/V10 物理目录与所有公开索引条目全部归档退役,保留可追溯性
+- **物理归档**(主代理):
+  - `skill-markets/fullstack4TraeV9/` → `docs/archive/fullstack4TraeV9/`(git mv 保留历史)
+  - `skill-markets/fullstack4TraeV10/` → `docs/archive/fullstack4TraeV10/`(git mv 保留历史)
+  - `.publish/skill-markets/fullstack4TraeV{9,10}/` 镜像目录已删除(下次 publish 自动重建)
+- **注册表清理**(guard-smith 委派):
+  - `registry/skills.yaml`:删除 V9/V10 完整条目(-16 行,total_skills 58 → 56)
+  - 删除 `scripts/fullstack4TraeV9-guard.py` + `scripts/fullstack4TraeV10-guard.py`
+- **公开索引移除 + 归档备注**(主代理):
+  - `skill-markets/MANIFEST.yaml`:删除 V9/V10 完整条目,加注释"已归档 → docs/archive/..."
+  - `skill-markets/CAPABILITY-MAP.md`:V9/V10 主条目加 `⚠ 已归档` 标记,演化链路 + 降级表 12 行全部加归档备注
+  - `SECURITY-MAP.md`:V9/V10 安全评分行加 `⚠ 已归档 → docs/archive/...` 备注(原评分 5.0 保留作历史)
+  - `README.md`:mindmap 中 V9/V10 节点加 `⚠ 已归档` 备注
+  - `skill-markets/docs/技能包/fullstack4TraeV{9,10}.md`:改为归档占位 md(保留版本信息 + 归档路径 + 演进链路)
+- **过渡期 guard-smith 收尾**(二次委派,本次未执行):
+  - `scripts/skill-structure-guard.py` 的 `LEGACY_NAMING_DIRS` 仍含 V9/V10(临时目录未删前的兼容),归档完成后由 guard-smith 删除这两行
+  - `scripts/forge-skill-guard.py` 注释"5 个历史 skill 名含大写字母"待改"3 个"
+- **历史脉络保留**(不动):`fullstack4TraeV11/` 内部多处引用 V10(如 `scripts/upgrade-from-v10.py` / `references/skeptical-validation-protocol.md` / `skills/03-test-plan/anti-patterns/V10-battle-tested.md` / `skills/05-prototype/templates/ui-ux-logic.md` 等)— 是 V11 升级协议的一部分,绝对不能删
+
 ### common-project-coding-conf (cpcc) v1.0 新建 + project-rules-gate 删除 + add-all CLI 整合(2026-08-19)
 
 - **新建 cpcc 三件套**(guard-smith 委派):

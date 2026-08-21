@@ -31,8 +31,9 @@ import { appendFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { homedir } from 'node:os';
 
-// --home 支持: 写在 $HOME/.self-improving-agent/logs/agent-hints.jsonl
-// 默认: homedir()/.self-improving-agent/logs/agent-hints.jsonl
+// --home 支持: 写在 $HOME/.user-self-improving/logs/agent-hints.jsonl
+// 默认: homedir()/.user-self-improving/logs/agent-hints.jsonl
+// D-7(2026-08-21):仅认新路径,旧路径 .self-improving-agent 已彻底废弃
 function getHintPath() {
   const argv = process.argv;
   for (let i = 0; i < argv.length - 1; i++) {
@@ -40,7 +41,7 @@ function getHintPath() {
       return join(argv[i + 1], 'logs', 'agent-hints.jsonl');
     }
   }
-  return join(homedir(), '.self-improving-agent', 'logs', 'agent-hints.jsonl');
+  return join(homedir(), '.user-self-improving', 'logs', 'agent-hints.jsonl');
 }
 
 async function readStdin() {

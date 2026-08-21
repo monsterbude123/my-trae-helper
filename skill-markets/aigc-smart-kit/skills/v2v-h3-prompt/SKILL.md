@@ -1,6 +1,6 @@
 ---
 name: v2v-h3-prompt
-description: 视频 → 视频(MiniMax H3 / Hailuo 2.3)提示词专项。当用户提供已有视频、想续写 / 拼接 / 风格化 / 元素替换时加载。继承 video-prompt-method 爹 skill 的方法论,加 H3 平台 + V2V 场景特化层(3 大子模式:extend / first-last-frame / edit)。Use when the user wants video-to-video prompts for MiniMax H3 or Hailuo, including extension, first-last-frame interpolation, or editing.
+description: 视频 → 视频(MiniMax H3 / Hailuo 2.3)提示词专项。当用户提供已有视频、想续写 / 拼接 / 风格化 / 元素替换时加载。继承 video-prompt-method 父级 skill 的方法论,加 H3 平台 + V2V 场景特化层(3 大子模式:extend / first-last-frame / edit)。Use when the user wants video-to-video prompts for MiniMax H3 or Hailuo, including extension, first-last-frame interpolation, or editing.
 version: 1.0.0
 license: MIT
 metadata:
@@ -55,10 +55,10 @@ MUST: 显式"保留 X / 修改 Y"
 
 详细 → [references/sub-modes.md](references/sub-modes.md)
 
-## §2 V2V 视频连续性约束(继承爹 + 加严)
+## §2 V2V 视频连续性约束(继承父级 + 加严)
 
 ```
-爹铁律:主角锁定 ≥ 60% 篇幅,场景 ≤ 1-2 句,配角 ≤ 2 个
+父级铁律:主角锁定 ≥ 60% 篇幅,场景 ≤ 1-2 句,配角 ≤ 2 个
 V2V 加严 3 条:
   1. 主体 LOCKED: prompt 显式 "(KEEP IDENTITY LOCKED)"
   2. 场景继承:不再"创建场景",而是"延续场景"(复用原视频场景词)
@@ -81,7 +81,7 @@ V2V 加严 3 条:
 
 详细 → [references/keyframe-analysis.md](references/keyframe-analysis.md)
 
-## §4 时间切片(继承爹 §2)
+## §4 时间切片(继承父级 §2)
 
 ```
 extend:续写部分独立切段(不再复用原视频时段);
@@ -190,11 +190,11 @@ edit:与原视频同时长对齐;仅描述"变化点"出现的时间点
 
 - [sub-modes.md](references/sub-modes.md) — 3 子模式详细协议 + 完整示例
 - [keyframe-analysis.md](references/keyframe-analysis.md) — 关键帧抽取 + vision 分析
-- 继承爹 video-prompt-method references/(三段式 / 主角锁定 / 中文笔记法)
+- 继承父级 video-prompt-method references/(三段式 / 主角锁定 / 中文笔记法)
 - 兄弟 i2v-h3-prompt references/camera-grammar.md / audio-layers.md / hailuo02-migration.md
 
 ## §9 来源
 
 - H3 提示词指南:https://minimaxh3.studio/zh/guide/minimax-h3
 - H3 平台 API:https://platform.minimax.io/docs/guides/video-generation
-- 爹 skill:video-prompt-method(本仓内)
+- 父级 skill:video-prompt-method(本仓内)

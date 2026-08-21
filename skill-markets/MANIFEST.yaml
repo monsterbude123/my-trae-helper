@@ -202,78 +202,6 @@ skills:
       - path: references/methodology.md
     tests: []
 
-  - name: fullstack4TraeV10
-    scripts:
-      - path: scripts/acceptance-audit.py
-        cli_entry: acceptance-audit
-        exit_codes: [0, 2]
-      - path: scripts/change-status.py
-        cli_entry: change-status
-        exit_codes: [0, 2]
-      - path: scripts/check_integration_contract.py
-        cli_entry: check_integration_contract
-        exit_codes: [0, 2]
-      - path: scripts/check_prerequisites.py
-        cli_entry: check_prerequisites
-        exit_codes: [0, 2]
-      - path: scripts/code-hygiene.py
-        cli_entry: code-hygiene
-        exit_codes: [0, 2]
-      - path: scripts/common.py
-        cli_entry: common
-        exit_codes: [0, 2]
-      - path: scripts/dispatch-agent.py
-        cli_entry: dispatch-agent
-        exit_codes: [0, 2]
-      - path: scripts/dist-hash-check.py
-        cli_entry: dist-hash-check
-        exit_codes: [0, 2]
-      - path: scripts/install-hooks.py
-        cli_entry: install-hooks
-        exit_codes: [0, 2]
-      - path: scripts/migrate-v9-to-v10.py
-        cli_entry: migrate-v9-to-v10
-        exit_codes: [0, 2]
-      - path: scripts/orphan-detector.py
-        cli_entry: orphan-detector
-        exit_codes: [0, 2]
-      - path: scripts/phase-gate.py
-        cli_entry: phase-gate
-        exit_codes: [0, 2]
-      - path: scripts/proactive-scan.py
-        cli_entry: proactive-scan
-        exit_codes: [0, 2]
-      - path: scripts/reason-classifier.py
-        cli_entry: reason-classifier
-        exit_codes: [0, 2]
-      - path: scripts/scan-templates.py
-        cli_entry: scan-templates
-        exit_codes: [0, 2]
-      - path: scripts/scenario-dispatch.py
-        cli_entry: scenario-dispatch
-        exit_codes: [0, 2]
-      - path: scripts/self-diagnose.py
-        cli_entry: self-diagnose
-        exit_codes: [0, 2]
-      - path: scripts/setup-feature.py
-        cli_entry: setup-feature
-        exit_codes: [0, 2]
-      - path: scripts/spec-knowledge-extract.py
-        cli_entry: spec-knowledge-extract
-        exit_codes: [0, 2]
-      - path: scripts/spec-purge.py
-        cli_entry: spec-purge
-        exit_codes: [0, 2]
-      - path: scripts/visual-content-check.py
-        cli_entry: visual-content-check
-        exit_codes: [0, 2]
-    docs:
-      - path: SKILL.md
-        must_contain:
-          - "## 哲学"
-      - path: references/acceptance-gates-v10.md
-    tests: []
-
   - name: fullstack4TraeV11
     scripts:
       - path: scripts/acceptance-audit.py
@@ -358,33 +286,7 @@ skills:
       - path: references/agent-error-diagnosis.md
     tests: []
 
-  - name: fullstack4TraeV9
-    scripts:
-      - path: scripts/change-status.py
-        cli_entry: change-status
-        exit_codes: [0, 2]
-      - path: scripts/install-hooks.py
-        cli_entry: install-hooks
-        exit_codes: [0, 2]
-      - path: scripts/migrate-v8-to-v9.py
-        cli_entry: migrate-v8-to-v9
-        exit_codes: [0, 2]
-      - path: scripts/spec-knowledge-extract.py
-        cli_entry: spec-knowledge-extract
-        exit_codes: [0, 2]
-      - path: scripts/spec-merge.py
-        cli_entry: spec-merge
-        exit_codes: [0, 2]
-      - path: scripts/spec-validate.py
-        cli_entry: spec-validate
-        exit_codes: [0, 2]
-    docs:
-      - path: SKILL.md
-        must_contain:
-          - "## 哲学（内化自 OpenSpec）"
-      - path: references/acceptance-gates.md
-    tests: []
-
+  # fullstack4TraeV9 已归档(2026-08-21)→ docs/archive/fullstack4TraeV9/
   - name: game-production-kit
     scripts:
       - path: scripts/export-collaborator-brief.py
@@ -504,15 +406,6 @@ skills:
       - path: SKILL.md
         must_contain:
           - "## 前置条件"
-    tests: []
-
-  - name: security-review
-    scripts: []
-    docs:
-      - path: SKILL.md
-        must_contain:
-          - "## When to Use This Skill"
-      - path: references/language-patterns.md
     tests: []
 
   - name: session-distiller
@@ -724,4 +617,52 @@ skills:
       - path: SKILL.md
         must_contain:
           - "## 一、端口管理 (Port)"
+    tests: []
+
+  - name: project-self-improving
+    scripts:
+      - path: scripts/hook-self-check.sh
+        cli_entry: hook-self-check
+        exit_codes: [0, 1]
+      - path: scripts/install-snippet.sh
+        cli_entry: install-snippet
+        exit_codes: [0, 1]
+      - path: scripts/activator.sh
+        cli_entry: activator
+        exit_codes: [0]
+      - path: scripts/error-detector.sh
+        cli_entry: error-detector
+        exit_codes: [0]
+      - path: scripts/detect-node.sh
+        cli_entry: detect-node
+        exit_codes: [0]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §1 What This Skill Does (and Does Not)"
+      - path: references/hook-self-check.md
+    tests: []
+
+  - name: user-self-improving
+    scripts:
+      - path: scripts/hook-self-check.sh
+        cli_entry: hook-self-check
+        exit_codes: [0, 1]
+      - path: scripts/install-snippet.sh
+        cli_entry: install-snippet
+        exit_codes: [0, 1]
+      - path: scripts/activator.sh
+        cli_entry: activator
+        exit_codes: [0]
+      - path: scripts/error-detector.sh
+        cli_entry: error-detector
+        exit_codes: [0]
+      - path: scripts/detect-node.sh
+        cli_entry: detect-node
+        exit_codes: [0]
+    docs:
+      - path: SKILL.md
+        must_contain:
+          - "## §1 What This Skill Does (and Does Not)"
+      - path: references/hook-self-check.md
     tests: []

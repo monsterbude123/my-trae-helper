@@ -242,7 +242,7 @@ Step 4:在 prompt 标注让位关系
 ✓ R1(主体身份)只分配给 1 张图?
 ✓ 冲突场景已走 §5 4 步?
 ✓ 素材总数 ≤ 12(混合)且分类 ≤ 上限(9/3/3)?
-✓ 时间切片(继承爹 video-prompt-method §2)按 6s 切 3 段?
+✓ 时间切片(继承父级 video-prompt-method §2)按 6s 切 3 段?
 ✓ 三段式公式(继承自 i2v-h3-prompt §1)顺序正确?
 ```
 
@@ -277,7 +277,7 @@ Soft mechanical click of a shutter, no other ambient sound.
 - [references/material-role-binding.md](references/material-role-binding.md) — 9 类素材角色分配完整协议
 - [references/conflict-resolution.md](references/conflict-resolution.md) — 冲突解决 4 步法 + 让位语句模板
 - [references/sub-modes.md](references/sub-modes.md) — 3 子模式 prompt 结构 + 反例
-- 爹方法论: [../video-prompt-method/SKILL.md](../video-prompt-method/SKILL.md)(子模式路由 + 时间切片)
+- 父级方法论: [../video-prompt-method/SKILL.md](../video-prompt-method/SKILL.md)(子模式路由 + 时间切片)
 - 平台公式: [../i2v-h3-prompt/SKILL.md](../i2v-h3-prompt/SKILL.md)(三段式 + 运镜三件套 + 失败模式)
 - 中文笔记法: [../i2v-h3-prompt/references/chinese-prompt-method.md](../i2v-h3-prompt/references/chinese-prompt-method.md)
 

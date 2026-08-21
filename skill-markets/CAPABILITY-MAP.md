@@ -276,18 +276,18 @@ L0 基座（独立可用，无外部依赖）
 
 | 被依赖技能 | 依赖者 | 降级后果 |
 |-----------|--------|---------|
-| acceptance-discipline | fullstack4TraeV9 | 🛑 阻断 — 验收门禁不可跳过 |
-| acceptance-discipline | fullstack4TraeV10 | 🛑 阻断 — 四维验收门禁不可跳过 |
-| ponytail4Trae | fullstack4TraeV9 | ⚠️ 代码可能过度工程，无懒人模式提示 |
-| ponytail4Trae | fullstack4TraeV10 | ⚠️ 代码可能过度工程，无懒人模式提示 |
-| gitnexus4Trae | fullstack4TraeV9 | ⚠️ 影响面分析降级为 grep，存在盲区风险 |
-| gitnexus4Trae | fullstack4TraeV10 | ⚠️ 影响面分析降级为 grep，存在盲区风险 |
-| doc-map-manager | fullstack4TraeV9 | ⚠️ 文档索引无法自动更新，DOC SYNC 不完整 |
-| doc-map-manager | fullstack4TraeV10 | ⚠️ 文档索引无法自动更新，DOC SYNC 不完整 |
-| acceptance-discipline | fullstack4traev9 | 🛑 阻断 — 验收门禁不可跳过 |
-| ponytail4Trae | fullstack4traev9 | ⚠️ 代码可能过度工程，无懒人模式提示 |
-| gitnexus4Trae | fullstack4traev9 | ⚠️ 影响面分析降级为 grep，存在盲区风险 |
-| doc-map-manager | fullstack4traev9 | ⚠️ 文档索引无法自动更新，DOC SYNC 不完整 |
+| acceptance-discipline | fullstack4TraeV9 | ⚠ V9 已归档(2026-08-21)→ docs/archive/fullstack4TraeV9/ — 验收门禁依赖对历史版本仍生效 |
+| acceptance-discipline | fullstack4TraeV10 | ⚠ V10 已归档(2026-08-21)→ docs/archive/fullstack4TraeV10/ — 四维验收门禁依赖对历史版本仍生效 |
+| ponytail4Trae | fullstack4TraeV9 | ⚠ V9 已归档 — 历史脉络 |
+| ponytail4Trae | fullstack4TraeV10 | ⚠ V10 已归档 — 历史脉络 |
+| gitnexus4Trae | fullstack4TraeV9 | ⚠ V9 已归档 — 历史脉络 |
+| gitnexus4Trae | fullstack4TraeV10 | ⚠ V10 已归档 — 历史脉络 |
+| doc-map-manager | fullstack4TraeV9 | ⚠ V9 已归档 — 历史脉络 |
+| doc-map-manager | fullstack4TraeV10 | ⚠ V10 已归档 — 历史脉络 |
+| acceptance-discipline | fullstack4traev9 | ⚠ V9 已归档(2026-08-21)→ docs/archive/fullstack4TraeV9/ — 历史脉络重复条目 |
+| ponytail4Trae | fullstack4traev9 | ⚠ V9 已归档 — 历史脉络 |
+| gitnexus4Trae | fullstack4traev9 | ⚠ V9 已归档 — 历史脉络 |
+| doc-map-manager | fullstack4traev9 | ⚠ V9 已归档 — 历史脉络 |
 
 > **2026-08-14 聚合说明**：test-experience / e2e-module-audit / test-partition-runner 三个 L0 skill 已并入 acceptance-discipline（内部子体系），不再作为独立外部依赖。其原降级后果已并入 acceptance-discipline 的硬依赖降级链。skills-security-scan 同理并入 trae-security-review。
 
@@ -297,7 +297,9 @@ L0 基座（独立可用，无外部依赖）
 |-------|------|------|---------|
 | [project-rule-skill](file:///D:/workspace/my-trae-helper/.agents/skills/project-rule-skill/SKILL.md) | 纯Skill | 项目级规则加载网关 — 任何任务开始前必走 | 3 references(skill-creation / protocol-coverage / skills-development) |
 | [security-review](file:///D:/workspace/my-trae-helper/.agents/skills/security-review/SKILL.md) | 纯Skill | 代码安全审查 — 5 类漏洞 + 密钥检测 | 5 references |
-| [self-improving-agent](file:///D:/workspace/my-trae-helper/.agents/skills/self-improving-agent/SKILL.md) | 纯Skill | 跨会话经验沉淀 — LEARN/ERROR/FEATURE_REQUESTS | assets/{LEARNINGS,SKILL-TEMPLATE} + 3 references + openclaw hooks |
+| [self-improving-agent](file:///D:/workspace/my-trae-helper/.agents/skills/self-improving-agent/SKILL.md) ⚠️ **DEPRECATED 2026-08-21**(redirect → [user-self-improving](#user-self-improving-v10-new-2026-08-21))| 纯Skill | 跨会话经验沉淀 — LEARN/ERROR/FEATURE_REQUESTS(原版,openclaw 习惯;2026-08-21 拆分为 project-self-improving + user-self-improving,保留兼容壳) | assets/{LEARNINGS,SKILL-TEMPLATE} + 3 references + openclaw hooks(legacy) |
+| [project-self-improving](file:///D:/workspace/my-trae-helper/skill-markets/project-self-improving/SKILL.md)(**V1.0 NEW 2026-08-21**) | 纯Skill | 项目内经验沉淀(替代 `self-improving-agent` 的项目内角色)— agent-原生 hook 协议 + 必跑 `hook-self-check.sh` 自检 + 4 agent 接入(Trae/Claude Code/Codex/Copilot) | 4 assets + 7 references + 5 scripts + todos/ + 348 行 SKILL.md |
+| [user-self-improving](file:///D:/workspace/my-trae-helper/skill-markets/user-self-improving/SKILL.md)(**V1.0 NEW 2026-08-21**) | 纯Skill | 个人级补充入口(替代 `self-improving-agent` 软删除兼容壳)— `$HOME/.user-self-improving/.learnings/` + SOUL/TOOLS/MEMORY 个人可选(opt-in) + agent-原生 hook 协议 | 7 assets + 10 references + 5 scripts + todos/ + 226 行 SKILL.md |
 | [case-driven-skill-audit](file:///D:/workspace/my-trae-helper/.agents/skills/case-driven-skill-audit/SKILL.md)(**V1.0 NEW 2026-08-17**) | 纯Skill | 演练驱动 skill 审计 — 7 步工作流(选题 → 子代理委派 → 硬验收 → 暴露漏洞) | 1 reference(case-2-evidence 实战证据) |
 
 ### 完整协议

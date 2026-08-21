@@ -46,7 +46,7 @@ REGISTRY = REPO_ROOT / 'registry' / 'skills.yaml'
 
 # 守卫脚本的合法字符（kebab-case + 历史大写命名）
 # 设计目的:
-#   AGENTS.md §1 要求 kebab-case,但 5 个历史 skill 名含大写字母(fullstack4TraeV9/V10/V11,
+#   AGENTS.md §1 要求 kebab-case,但 3 个历史 skill 名含大写字母(fullstack4TraeV11,
 #   gitnexus4Trae, ponytail4Trae)是合法目录命名,rename 会破坏 CLI 已装的
 #   symlink,因此放宽 KEBAB_RE 接受大写字母 + 数字开头。
 #   详见 skill-markets/<name>/SKILL.md frontmatter name 字段(可与目录名不一致,如

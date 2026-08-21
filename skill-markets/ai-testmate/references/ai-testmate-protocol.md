@@ -10,15 +10,18 @@
 
 - **package**: `skill-markets/ai-testmate/`
 - **定位**:AI 端到端测试助理 — 读产品文档 + 测试计划 → 在指定工作空间新建测试项目 → 并行执行 UI(playwright)+ API(requests)测试 → 输出 4 份报告 + 禅道回写 + 飞书推送
+- **v1.1 增量定位**:输入自适应 4 模式(PRD / PRD 目录树 / PRD+openapi / 仅 openapi)+ 禅道可选(降级到本地 `<app-test>/docs/bugs/` 管理 bug 生命周期)
 - **借用清单**(仅借鉴,不替代):
-  - `fullstack4TraeV11`:三层架构骨架(Gate/Guard/Execution)+ 协议程序化解析思路 + 反例库格式
-  - `zentao-cli`:命令集(本 skill 仅声明调用时机)
+  - `fullstack4TraeV11`:三层架构骨架(Gate/Guard/Execution)+ 协议程序化解析思路 + 反例库格式 + **bug 状态机简化版**(OPEN/FIXED/CLOSED + source 字段,见 v11-bug-flow-borrowed.md)
+  - `zentao-cli`:命令集(本 skill 仅声明调用时机)**+ 可选,缺失降级到本地 bug storage**
   - `lark MCP`:通知能力(本 skill 仅声明卡片格式)
 - **不借用清单**(明确边界):
-  - ❌ 不调 V11 的 13 stage / spec-kit / qa-loop / guard-smith 委派
+  - ❌ 不调 V11 的 13 stage / spec-kit / qa-loop / guard-smith 委派 / 6 层排查 / 角色矩阵
   - ❌ 不重写 zentao-cli 的命令实现
   - ❌ 不重写 lark MCP 的通知能力
   - ❌ 不写 registry/skills.yaml 注册(独立 skill,不入 V11 注册表 — 如需注册,由 guard-smith 委派)
+  - ❌ V11 bug 单的 IN-FIX / VERIFIED / REOPENED / OBSOLETE 状态(开发流程相关,测试 agent 自动建单不需要)
+  - ❌ V11 CLOSED 三方协议(代码提测 / 测试专家会签 / 用户确认)— 测试 agent 只能标 CLOSED 候选,真正 CLOSED 由开发流人工确认
   - ❌ 不挂 .husky/ai-testmate-gate(同上)
 
 ---
@@ -108,8 +111,31 @@ BLOCK :真反例 → exit ≠ 0 + 定位信息
 
 ## §6 协议版本
 
+- **V1.2**(2026-08-20 增量):自动工作空间探测(`scripts/workspace-detect.py`,cwd 向上找 `.agents/.env`)
+- **V1.1**(2026-08-20 增量):输入自适应 4 模式 + 禅道可选降级 + bug-storage 本地生命周期
 - **V1.0**(2026-08-20 蒸馏首版)
-- 更新日志:首版发布,待 V1.1 补 trap-instructions.yaml 与 pytest-patterns 同步
+
+---
+
+## §7 v1.1 增量反例
+
+| AP# | 反例 | 检测 |
+|-----|------|------|
+| **V2-AP-1** | openapi 解析忽略 `security` 字段(鉴权失败) | openapi-extractor.py 单元测试 |
+| **V2-AP-2** | 禅道不可用时硬 exit(应降级) | reporter pytest mock zentao 不可达 |
+| **V2-AP-3** | bug 单 frontmatter 字段不齐 | bug-storage.md 模板校验 |
+| **V2-AP-4** | planner 4 模式漏 source 标签 | input-router.md 测试矩阵 |
+| **V2-AP-5** | openapi-only 模式仍试图读 PRD | planner §1 决策树 |
+
+---
+
+## §8 v1.1 新增引用
+
+- [references/input-router.md](input-router.md)— 4 模式决策矩阵
+- [references/openapi-to-testcases.md](openapi-to-testcases.md)— openapi.json → test-cases.yaml 映射
+- [references/v11-bug-flow-borrowed.md](v11-bug-flow-borrowed.md)— V11 bug 流程借鉴白名单
+- [references/bug-storage.md](bug-storage.md)— 本地 bug 生命周期(降级路径)
+- [scripts/openapi-extractor.py](../scripts/openapi-extractor.py)— openapi 解析器
 
 ---
 

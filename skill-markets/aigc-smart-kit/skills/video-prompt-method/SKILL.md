@@ -1,6 +1,6 @@
 ---
 name: video-prompt-method
-description: 视频提示词通用方法论 — 时间切片 / 主角锁定 / 抽象具体化 / 声音设计 / 留白原则。适配任何视频生成场景: t2v / i2v / v2v / ref2v / multi-media-to-v 等。本 skill 是 aigc-smart-kit 的"方法学爹",所有视频 prompt 儿子都应继承此处方法论 + 加平台 / 场景特化层。Use when the user wants to learn or apply general video prompting methodology, or build platform-specific video prompt skills.
+description: 视频提示词通用方法论 — 时间切片 / 主角锁定 / 抽象具体化 / 声音设计 / 留白原则。适配任何视频生成场景: t2v / i2v / v2v / ref2v / multi-media-to-v 等。本 skill 是 aigc-smart-kit 的"方法学父级",所有视频 prompt 儿子都应继承此处方法论 + 加平台 / 场景特化层。Use when the user wants to learn or apply general video prompting methodology, or build platform-specific video prompt skills.
 version: 1.0.0
 parent: aigc-smart-kit
 role: method-father
@@ -8,7 +8,7 @@ license: MIT
 created: 2026-08-20
 ---
 
-# video-prompt-method — 视频提示词方法学(爹 skill)
+# video-prompt-method — 视频提示词方法学(父级 skill)
 
 > 本 skill 是 `aigc-smart-kit` 下所有"视频 prompt 儿子"的**方法学来源**。不写平台特化(H3 / Seedance / 可灵 / Vidu / 万相),只沉淀**通用规律**。平台特化放在儿子 skill(`i2v-h3-prompt` / `i2v-seedance-prompt` / `t2v-h3-prompt` / `v2v-h3-prompt` / `ref2v-h3-prompt`)里。
 >
@@ -191,7 +191,7 @@ references(从 i2v-h3-prompt/references/chinese-prompt-method.md 提炼,删除 H
 - [negative-space.md](references/negative-space.md) — 避免过度指定 + 留白 + 反例
 - [audio-design.md](references/audio-design.md) — 声音三层设计 + 节拍卡点
 
-references/ 责任分工: 本 skill (爹) → 通用方法论;儿子 skill (H3 等) → 平台特化(三段式 / Hailuo02 迁移 / R2V 分配) + 英文运镜词表 / 平台原生失败模式
+references/ 责任分工: 本 skill (父级) → 通用方法论;儿子 skill (H3 等) → 平台特化(三段式 / Hailuo02 迁移 / R2V 分配) + 英文运镜词表 / 平台原生失败模式
 
 ## §13 来源
 

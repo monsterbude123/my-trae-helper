@@ -1,6 +1,6 @@
 ---
 name: i2v-h3-prompt
-description: MiniMax H3 / Hailuo 2.3 图生视频(I2V)提示词专项。当用户要在 MiniMax / Hailuo 平台上为一张参考图写视频生成 prompt 时加载。继承爹 skill `video-prompt-method` 通用方法论,加 H3 平台特化(三段式 / 运镜三件套)+ I2V 场景特化(单图 I2V / 首尾帧补帧 / 多镜头切镜)。Use when the user needs image-to-video prompts for MiniMax H3 or Hailuo 2.3, including first/last-frame, reference-to-video, and timed multi-shot cuts.
+description: MiniMax H3 / Hailuo 2.3 图生视频(I2V)提示词专项。当用户要在 MiniMax / Hailuo 平台上为一张参考图写视频生成 prompt 时加载。继承父级 skill `video-prompt-method` 通用方法论,加 H3 平台特化(三段式 / 运镜三件套)+ I2V 场景特化(单图 I2V / 首尾帧补帧 / 多镜头切镜)。Use when the user needs image-to-video prompts for MiniMax H3 or Hailuo 2.3, including first/last-frame, reference-to-video, and timed multi-shot cuts.
 version: 1.1.0
 license: MIT
 metadata:
@@ -26,7 +26,7 @@ metadata:
 
 # i2v-h3-prompt — MiniMax H3 / Hailuo I2V 提示词专项
 
-> 本 skill 是 `aigc-smart-kit` 下 I2V 模式的**祖传儿子**:继承爹 [`video-prompt-method`](../video-prompt-method/SKILL.md) 的通用方法论,加 H3 平台特化层(三段式 / 运镜三件套)+ I2V 场景特化层(单图 I2V / 首尾帧 / 多镜头切镜)。
+> 本 skill 是 `aigc-smart-kit` 下 I2V 模式的**祖传儿子**:继承父级 [`video-prompt-method`](../video-prompt-method/SKILL.md) 的通用方法论,加 H3 平台特化层(三段式 / 运镜三件套)+ I2V 场景特化层(单图 I2V / 首尾帧 / 多镜头切镜)。
 >
 > **Ref2V**(多模态参考生视频)→ 改去 [`ref2v-h3-prompt`](../ref2v-h3-prompt/SKILL.md)。
 
@@ -63,7 +63,7 @@ MUST NOT 加载:
   选填: 环境 / 美学风格 / 镜头 / 音频 / 文字渲染
 ```
 
-通用方法学(具体性 / 主角锁定 / 一个镜头三句话)→ 爹 [§3-§5](../video-prompt-method/SKILL.md)。失败模式 → [references/failure-modes.md](references/failure-modes.md)。
+通用方法学(具体性 / 主角锁定 / 一个镜头三句话)→ 父级 [§3-§5](../video-prompt-method/SKILL.md)。失败模式 → [references/failure-modes.md](references/failure-modes.md)。
 
 ### §1.1 完整示例(单图 I2V)
 
@@ -87,7 +87,7 @@ joined by sparse upright-bass notes and a gentle fade at the end.
 
 > I2V 第一帧 = 用户图。**prompt 必须承诺"图到末帧不变",否则模型自由发挥 = 面目全非**。
 >
-> 通用主角锁定 → 爹 [§3](../video-prompt-method/SKILL.md) + [character-lock.md](../video-prompt-method/references/character-lock.md)。
+> 通用主角锁定 → 父级 [§3](../video-prompt-method/SKILL.md) + [character-lock.md](../video-prompt-method/references/character-lock.md)。
 
 ```
 MUST 显式写入 constraints.must_not_change(I2V 模板):
@@ -107,7 +107,7 @@ MUST NOT:
 
 > ⚠️ **必读**:Hailuo 02 的方括号运镜 `[Push in] [Truck left]` 在 H3 上**不再生效**。H3 要求把运镜写进句子里,作为自然英语,三件套 = **运动类型 + 振幅 + 速度**。
 >
-> 通用镜头公式 → 爹 [§7](../video-prompt-method/SKILL.md)。H3 特有词表 → [references/camera-grammar.md](references/camera-grammar.md)。
+> 通用镜头公式 → 父级 [§7](../video-prompt-method/SKILL.md)。H3 特有词表 → [references/camera-grammar.md](references/camera-grammar.md)。
 
 ### §3.1 三件套结构
 
@@ -157,11 +157,11 @@ MUST:
 - 一个 Shot 一句独立描述(主体/动作/镜头独立完整)
 - 时间戳用 5 位小数 `00:05.000` 而非整数
 - **切镜判断标准:有新信息到来才切** — 仅距离变化时移动相机而非切镜
-- 时段分配 → 爹 [§2](../video-prompt-method/SKILL.md)(5/6/8s 切 3 段 / 10s+ 切 4-5 段)
+- 时段分配 → 父级 [§2](../video-prompt-method/SKILL.md)(5/6/8s 切 3 段 / 10s+ 切 4-5 段)
 
 ## §6 输出模板(交付格式 · 时间切片)
 
-子 skill 触发后,主代理按此结构产出(继承爹时间切片 + H3 三段式):
+子 skill 触发后,主代理按此结构产出(继承父级时间切片 + H3 三段式):
 
 ```yaml
 【平台】MiniMax H3
@@ -186,12 +186,12 @@ MUST:
 <BGM + 节奏 + 卡点 cue + 淡出>
 ```
 
-时间切片填空法 → 爹 [§9 填空法 V2.0](../video-prompt-method/SKILL.md)。具体性反例 → 爹 [§11](../video-prompt-method/SKILL.md)。
+时间切片填空法 → 父级 [§9 填空法 V2.0](../video-prompt-method/SKILL.md)。具体性反例 → 父级 [§11](../video-prompt-method/SKILL.md)。
 
 ## §7 子 skill 自检
 
 ```
-继承爹(§11 反例速查) + I2V 平台特化项:
+继承父级(§11 反例速查) + I2V 平台特化项:
 - [ ] 三段顺序:description → soundscape → music
 - [ ] 运镜必带三件套(类型 / 振幅 / 速度)
 - [ ] 多镜头必带时间戳 00:NN.NNN
@@ -209,7 +209,7 @@ MUST:
 - [references/failure-modes.md](references/failure-modes.md) — 7 类失败模式 + 修复指令(209 行,含中文笔记法反例)
 - [references/hailuo02-migration.md](references/hailuo02-migration.md) — Hailuo 02 → H3 迁移对照表(96 行)
 
-### 继承爹 skill(通用方法学)
+### 继承父级 skill(通用方法学)
 - [../video-prompt-method/SKILL.md](../video-prompt-method/SKILL.md) — 通用方法论(198 行)
 - [../video-prompt-method/references/time-segments.md](../video-prompt-method/references/time-segments.md) — 时间切片法
 - [../video-prompt-method/references/character-lock.md](../video-prompt-method/references/character-lock.md) — 主角锁定 + 配角限定
@@ -218,7 +218,7 @@ MUST:
 - [../video-prompt-method/references/audio-design.md](../video-prompt-method/references/audio-design.md) — 声音三层设计
 
 ### 历史
-- ~~references/chinese-prompt-method.md~~ — 已删除(337 行私有内容已上提至爹 skill 5 个 references)
+- ~~references/chinese-prompt-method.md~~ — 已删除(337 行私有内容已上提至父级 skill 5 个 references)
 
 ## §9 来源
 
@@ -227,4 +227,4 @@ MUST:
 - [海螺图生视频 API(Hailuo 02)](https://platform.minimaxi.com/document/image_to_video)
 - [promptslove H3 generator 实战](https://promptslove.com/free-tools/minimax-video-prompt-generator/)
 - [ComfyUI H3 教程](https://docs.comfy.org/tutorials/video/minimax/minimax-h3)
-- 爹 skill `video-prompt-method` SKILL.md(2026-08-20)
+- 父级 skill `video-prompt-method` SKILL.md(2026-08-20)

@@ -6,7 +6,7 @@ license: MIT
 metadata:
   parent-skill: aigc-smart-kit
   role: input-understanding
-  extends: video-prompt-method  (方法学爹)
+  extends: video-prompt-method  (方法学父级)
   replaces: i2v-image-analyzer(v0.9-deprecated)
   input: [images (0..N, URL or local path), videos (0..M), audios (0..K), user-text (string), user-keywords (zero or more)]
   output: structured-input-report.json v2.0
@@ -19,7 +19,7 @@ metadata:
 >
 > **替代关系**:本 skill 是 `i2v-image-analyzer/v0.9` 的多模态升级版。老 skill 保留作向后兼容包装(见 ../i2v-image-analyzer/SKILL.md),新调用走本 skill。
 >
-> **方法学继承**:`extends: video-prompt-method` — 时间切片 / 主角锁定 / 留白等方法学来自爹 skill。本 skill 只聚焦"输入理解"层,不写 prompt 公式。
+> **方法学继承**:`extends: video-prompt-method` — 时间切片 / 主角锁定 / 留白等方法学来自父级 skill。本 skill 只聚焦"输入理解"层,不写 prompt 公式。
 
 ## §0 何时加载
 

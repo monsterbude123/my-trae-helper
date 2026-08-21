@@ -47,8 +47,6 @@ EXCLUDED_NON_SKILL_DIRS = {
 # (注册表 registry/skills.yaml + AGENTS.md 大量引用,改名校验成本极高)
 # 降级为 info 提示,不阻断
 LEGACY_NAMING_DIRS = {
-    "fullstack4TraeV9",
-    "fullstack4TraeV10",
     "fullstack4TraeV11",
     "shuxia-novel-engine",   # V11.8.1 留待:agents 用 snake_case 文件名,需迁移到 kebab-case
 }

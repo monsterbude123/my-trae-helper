@@ -162,8 +162,8 @@ mindmap
       fullstack4TraeV11
         13 stage skills
         registry/guards/gates
-      fullstack4TraeV10
-      fullstack4TraeV9
+      fullstack4TraeV10 (⚠ 已归档 2026-08-21 → docs/archive/fullstack4TraeV10/)
+      fullstack4TraeV9 (⚠ 已归档 2026-08-21 → docs/archive/fullstack4TraeV9/)
       fullstack-skill-architect
       fullstack-auto
     编码心法 & 质量

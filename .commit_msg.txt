@@ -1,0 +1,33 @@
+chore: 全量提交 — 删除 V9/V10/security-review + 新增 3 skill + skill 治理 + MANIFEST.yaml 同步(2026-08-21)
+
+删除:
+- skill-markets/fullstack4TraeV9/ (V9 已废弃)
+- skill-markets/fullstack4TraeV10/ (V10 已被 V11 取代)
+- skill-markets/security-review/ (旧安全 skill)
+- scripts/fullstack4TraeV9-guard.py / scripts/fullstack4TraeV10-guard.py (随 skill 一起删除)
+
+新增 skill:
+- project-self-improving (项目级经验沉淀)
+- user-self-improving (个人级经验沉淀, 可选 SOUL/TOOLS/MEMORY)
+- find-skills (skill 发现, 从 vercel-labs/skills 同步, 已合并到 junction)
+
+skill 治理:
+- ai-testmate: 新增 bug-storage / input-router / openapi-to-testcases / v11-bug-flow-borrowed references + openapi-extractor.py / workspace-detect.py; 改 agents (credential-keeper/planner/reporter) + publish-protocol.py / run-test.sh
+- aigc-smart-kit: i2v-h3-prompt / ref2v-h3-prompt / t2v-h3-prompt / v2v-h3-prompt / video-input-analyzer / video-prompt-method SKILL.md 治理
+- skill-acceptance: SKILL.md 修订
+- skill-markets/MANIFEST.yaml: 清理 fullstack4TraeV10 / security-review 残留条目 (manifest-assert 同步)
+- tests/unit/test_post_commit_self_improving.sh: 同步更新
+
+基础设施:
+- registry/skills.yaml: 新增 project-self-improving / user-self-improving 注册 + 移除 V9/V10/security-review
+- scripts/project-self-improving-guard.py + scripts/user-self-improving-guard.py: 新增结构守卫
+- .husky/project-self-improving-gate + .husky/user-self-improving-gate: 新增 husky gate
+- scripts/agent-signal-detect.mjs / scripts/forge-skill-guard.py / scripts/skill-structure-guard.py / scripts/self-improving-agent.mjs: 治理同步
+- scripts/import_learnings.py: 新增 (本次未挂载, 待后续)
+- .husky/post-commit: 同步更新
+- references/learnings-2026-08-21.json: 经验沉淀 (本次导出)
+- SECURITY-MAP.md / CHANGELOG.md / README.md / skill-markets/CAPABILITY-MAP.md: 同步
+
+未跟踪 (本次不提交):
+- case-studies/ai-chat-openai-v11/ (嵌入式 git repo)
+- case-studies/desktop-pet-v11/ (嵌入式 git repo)

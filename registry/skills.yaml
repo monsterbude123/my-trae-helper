@@ -31,6 +31,8 @@
 
 version: 1.0.0
 description: My Trae Helper 技能注册表 — 每个 skill 必带同名 guard + gate 路由
+# 版本（last_updated）：2026-08-21 user-self-improving v1.0 新建注册(个人级补充入口 skill,7 assets + 10 references + 5 scripts,226 行 SKILL.md),注册表条目新增 + total_skills 57→58。原 .agents/skills/self-improving-agent 兼容壳登记于 CAPABILITY-MAP.md,不进本注册表
+# 2026-08-21 微更新: fullstack4TraeV9 + fullstack4TraeV10 归档清理 — 删除 2 个 deprecated 条目 + 2 个 scripts/<name>-guard.py,total_skills 58→56(guard-smith 委派)
 updated: 2026-08-21
 total_skills: 56
 
@@ -298,24 +300,6 @@ skills:
     maintainer: guard-smith
 
   # ── L2 编排层 ────────────────────────────────────────────────────────────
-  - skill: fullstack4TraeV9
-    status: deprecated
-    guards:
-      - { id: fullstack4TraeV9-structure, category: structure, script: scripts/fullstack4TraeV9-guard.py, triggers: [pre-commit] }
-    gates:
-      - { id: fullstack4TraeV9-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack4TraeV9-structure] }
-    maintainer: guard-smith
-    notes: V9 已并入 V10,保留兼容壳
-
-  - skill: fullstack4TraeV10
-    status: deprecated
-    guards:
-      - { id: fullstack4TraeV10-structure, category: structure, script: scripts/fullstack4TraeV10-guard.py, triggers: [pre-commit] }
-    gates:
-      - { id: fullstack4TraeV10-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [fullstack4TraeV10-structure] }
-    maintainer: guard-smith
-    notes: V10 已替代 V9,保留兼容壳
-
   - skill: fullstack4TraeV11
     status: active
     guards:
@@ -608,4 +592,73 @@ skills:
         (1) node --check src/add-all.mjs(语法 OK)
         (2) bin/cli.mjs add-all --help + install-all --help(已注册)
         (3) tests/unit/test_add_all.mjs node 跑通(exit 0)
+      本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
+
+  # ── 新增:project-self-improving — 项目内经验沉淀 skill(2026-08-21 V1.0 NEW) ─────
+  # 替代 self-improving-agent 项目内角色,agent-原生 hook 协议 + 必跑 hook-self-check.sh 自检。
+  # SKILL.md 348 行(合规,符合 vibe-coding-standards v2.5 阈值 100~350)+ 4 assets + 9 references + 5 scripts + todos/。
+  # 原 self-improving-agent 保留作"用户全局陪跑"(见 todos/task.md §B-1)。
+  - skill: project-self-improving
+    status: active
+    guards:
+      - { id: project-self-improving-structure, category: structure, script: scripts/project-self-improving-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: project-self-improving-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [project-self-improving-structure] }
+      - { id: project-self-improving-gate-pre-commit, level: L1, hooks: [.husky/project-self-improving-gate], runs_guards: [project-self-improving-structure] }
+    maintainer: guard-smith
+    notes: |
+      项目内经验沉淀 skill(2026-08-21 V1.0 NEW)— 替代 self-improving-agent 项目内角色,
+      agent-原生 hook 协议(不发明 hook 系统)+ 必跑 hook-self-check.sh 自检。
+      SKILL.md 348 行(合规,vibe-coding-standards v2.5 阈值 100~350)
+      + 4 assets(LEARNINGS.md / ERRORS.md / FEATURE_REQUESTS.md / SKILL-TEMPLATE.md)
+      + 9 references(trae-integration / claude-code-integration / codex-integration /
+        copilot-integration / hook-self-check / examples / multi-agent-matrix /
+        best-practices / periodic-review)
+      + 5 scripts(detect-node.sh / hook-self-check.sh / activator.sh /
+        error-detector.sh / install-snippet.sh,均 POSIX sh 跨平台 + bash -n 通过)
+      + todos/(task.md / checklist.md)。
+      守卫 scripts/project-self-improving-guard.py 5 项硬检查(>errors 即 BLOCK):
+        (1) 顶层 SKILL.md frontmatter(name + description,version 警告)
+        (2) 顶层 SKILL.md 行数 ≤350(vibe-coding-standards v2.5)
+        (3) 4 assets 文件齐全
+        (4) 9 references 文件齐全
+        (5) 5 scripts 文件齐全 + bash -n 通过
+      原 self-improving-agent 保留作"用户全局陪跑",二者互斥安装(见 skill-markets/project-self-improving/todos/task.md §B-1)。
+      本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
+ 
+  # ── 新增:user-self-improving — 个人级补充入口 skill(2026-08-21 V1.0 NEW) ─────
+  # 与 project-self-improving 互补,默认 home $HOME/.user-self-improving/。
+  # 替代原 .agents/skills/self-improving-agent(项目侧无对应 skill 包,兼容壳登记在 CAPABILITY-MAP.md)。
+  # SKILL.md 225 行(合规)+ 7 assets + 10 references + 5 scripts + todos/。
+  # SOUL/TOOLS/MEMORY 三件个人表达文件(明为 opt-in,不再绑定 openclaw)。
+  - skill: user-self-improving
+    status: active
+    guards:
+      - { id: user-self-improving-structure, category: structure, script: scripts/user-self-improving-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: user-self-improving-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [user-self-improving-structure] }
+      - { id: user-self-improving-gate-pre-commit, level: L1, hooks: [.husky/user-self-improving-gate], runs_guards: [user-self-improving-structure] }
+    maintainer: guard-smith
+    notes: |
+      个人级补充入口 skill(2026-08-21 V1.0 NEW) — 与 project-self-improving 互补,
+      默认 home $HOME/.user-self-improving/。替代原 .agents/skills/self-improving-agent
+      (项目侧无对应 skill 包,兼容壳登记在 CAPABILITY-MAP.md,本注册表无 deprecated 条目)。
+      SKILL.md 226 行(合规,vibe-coding-standards v2.5 阈值 100~350)
+      + 7 assets(LEARNINGS.md / ERRORS.md / FEATURE_REQUESTS.md / SOUL.md / TOOLS.md / MEMORY.md / SKILL-TEMPLATE.md)
+      + 10 references(trae-integration / claude-code-integration / codex-integration /
+        copilot-integration / hook-self-check / examples / multi-agent-matrix /
+        best-practices / periodic-review / legacy-openclaw-handler)
+      + 5 scripts(detect-node.sh / hook-self-check.sh / activator.sh /
+        error-detector.sh / install-snippet.sh,均 POSIX sh 跨平台 + bash -n 通过)
+      + todos/(task.md / checklist.md)。
+      SOUL/TOOLS/MEMORY 三件个人表达文件(明为 opt-in,不再绑定 openclaw)。
+      守卫 scripts/user-self-improving-guard.py 6 项硬检查(>errors 即 BLOCK):
+        (1) 顶层 SKILL.md frontmatter(name + description,version 警告)
+        (2) 顶层 SKILL.md 行数 ≤350(vibe-coding-standards v2.5)
+        (3) 7 assets 文件齐全
+        (4) 10 references 文件齐全
+        (5) 5 scripts 文件齐全 + bash -n 通过
+        (6) hooks/ 目录已删除(原 OpenClaw handler 已搬到 references/legacy-openclaw-handler.md)
+      与 project-self-improving 互不替代:本 skill 服务个人级全局(默认 home + opt-in 三件),
+      project-self-improving 服务项目内(.user-self-improving/ + agent-原生 hook)。
       本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。

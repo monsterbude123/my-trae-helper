@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * self-improving-agent shim v2 (A+B+C 组合,2026-08-14)
+ * user-self-improving shim v4 (A+B+C 组合,2026-08-14 创建,2026-08-21 迁移,D-7 彻底废弃旧路径)
  *
  * 三个子命令对应三个自动化路径:
  *   reflect     (B) 扫 logs/*.log 的 warn/error 行 + git log,append .learnings/*
@@ -8,30 +8,41 @@
  *   scan-hints  (C) 扫 logs/agent-hints.jsonl(主 agent 写入的会话级 hint)
  *
  * 数据落地: --home 指定路径/.learnings/{LEARNINGS,ERRORS,FEATURE_REQUESTS}.md
- * HOME 解析: --home CLI > SELF_IMPROVING_HOME env > $HOME/.self-improving-agent
+ * HOME 解析(D-7 彻底废弃 SELF_IMPROVING_HOME 旧名 + .self-improving-agent 旧路径,2026-08-21+):
+ *   1. --home CLI
+ *   2. USER_SELF_IMPROVING_HOME env(唯一接受,2026-08-21+)
+ *   3. 默认 $HOME/.user-self-improving
+ *
+ * 已废弃(不再支持,2026-08-21 之前):旧 env `SELF_IMPROVING_HOME` + 旧路径 `.self-improving-agent`。
+ * 旧数据已通过 2026-08-21 的 `migrate` 子命令一次性 cp 到新路径(代码已删除,旧数据继续可用)。
  *
  * 关联:
- *   - .trae/rules/learning.md §5 路径 C
- *   - .husky/post-commit (调用方)
+ *   - skill-markets/user-self-improving/SKILL.md
+ *   - .husky/post-commit (调用方,D-7 已同步切到新路径)
  *   - 关联反例: skill-markets/agent-dev-control-kit/references/trap-instructions.yaml AP-8
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, appendFileSync, renameSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, appendFileSync, renameSync, cpSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
-// HOME 解析(每次重新计算,因为 main() 会修改 process.env.SELF_IMPROVING_HOME)
-// 优先级: --home CLI > SELF_IMPROVING_HOME env > homedir()/.self-improving-agent
+// HOME 解析(每次重新计算,因为 main() 会修改 process.env)
+// 优先级(D-7 已彻底废弃 SELF_IMPROVING_HOME 旧名 + .self-improving-agent 旧路径,2026-08-21+):
+//   1. --home CLI
+//   2. USER_SELF_IMPROVING_HOME env(2026-08-21+ 唯一接受)
+//   3. 默认 $HOME/.user-self-improving
 // 注意: 跨平台时(homedir)Windows native node 返回 C:\Users\foo(正确);
-//       WSL→Windows 调 node 时,如果想写到仓库内,显式传 --home "$PWD/.self-improving-agent"
+//       WSL→Windows 调 node 时,如果想写到仓库内,显式传 --home "$PWD/.user-self-improving"
 function getHome() {
   const argv = process.argv;
   for (let i = 0; i < argv.length - 1; i++) {
     if (argv[i] === '--home') return argv[i + 1];
   }
-  if (process.env.SELF_IMPROVING_HOME) return process.env.SELF_IMPROVING_HOME;
-  return join(homedir(), '.self-improving-agent');
+  // 唯一接受的新名 env(2026-08-21+)
+  if (process.env.USER_SELF_IMPROVING_HOME) return process.env.USER_SELF_IMPROVING_HOME;
+  // 默认路径
+  return join(homedir(), '.user-self-improving');
 }
 function getLearnDir() {
   return join(getHome(), '.learnings');
@@ -361,7 +372,7 @@ function cmdReflect(args) {
   if (!quiet && errN > 0) console.log(`[sia-shim] scan-logs: ${errN} entries written to ERRORS.md`);
 
   // 3) agent-hints.jsonl → ERRORS/FEATURE_REQUESTS
-  //    扫两个位置: 仓库内 logs/ + $HOME/.self-improving-agent/logs/
+  //    扫两个位置: 仓库内 logs/ + $HOME/.user-self-improving/logs/(2026-08-21+ 唯一路径)
   const hintPaths = [
     join(cwd, 'logs', 'agent-hints.jsonl'),
     join(getHome(), 'logs', 'agent-hints.jsonl'),
@@ -392,10 +403,15 @@ function usage() {
   console.log('  log --type <error|feature|learning> --summary <text> [--detail <text>]');
   console.log('    主 agent 显式调用,直接落一条 entry(A 路径)');
   console.log('  scan-hints [--quiet]');
-  console.log('    单独扫 logs/agent-hints.jsonl(C 路径)');
+    console.log('    单独扫 logs/agent-hints.jsonl(C 路径)');
   console.log('');
   console.log('Env:');
-  console.log('  SELF_IMPROVING_HOME  覆盖默认 $HOME/.self-improving-agent');
+  console.log('  USER_SELF_IMPROVING_HOME  覆盖默认 $HOME/.user-self-improving(2026-08-21+ 唯一接受)');
+  console.log('');
+  console.log('Default home(2026-08-21+):$HOME/.user-self-improving/');
+  console.log('');
+  console.log('DEPRECATED(2026-08-21 之前):旧 env `SELF_IMPROVING_HOME` + 旧路径 `.self-improving-agent` 已彻底废弃');
+  console.log('  旧数据如需访问,请手动 cp 到 $HOME/.user-self-improving/');
 }
 
 function main() {
@@ -405,7 +421,7 @@ function main() {
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--home' && i + 1 < argv.length) {
       // 同步到 process.env,让 getHome() 也能读到
-      process.env.SELF_IMPROVING_HOME = argv[i + 1];
+      process.env.USER_SELF_IMPROVING_HOME = argv[i + 1];
       i++;
     } else {
       filteredArgv.push(argv[i]);

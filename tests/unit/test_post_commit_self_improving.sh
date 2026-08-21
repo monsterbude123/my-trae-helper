@@ -34,12 +34,12 @@ check() {
 }
 
 # 状态 1: HOME 不存在
-SELF_IMPROVING_HOME="/nonexistent" bash "$POST_COMMIT" > /dev/null 2>&1
+USER_SELF_IMPROVING_HOME="/nonexistent" bash "$POST_COMMIT" > /dev/null 2>&1
 check $? "0" "SIA 存在但 HOME 不存在 → skip 不阻断"
 
 # 状态 2: HOME 存在 → SIA 真实调用
 mkdir -p /tmp/sia-home-test
-SELF_IMPROVING_HOME="/tmp/sia-home-test" bash "$POST_COMMIT" > /dev/null 2>&1
+USER_SELF_IMPROVING_HOME="/tmp/sia-home-test" bash "$POST_COMMIT" > /dev/null 2>&1
 RC=$?
 check $RC "0" "SIA 存在 + HOME 存在 → 真实调用不阻断"
 grep -q "fake-sia.*called" "$LOG_FILE"
@@ -48,8 +48,18 @@ check $? "0" "SIA 真实被调用(参数链路完整)"
 # 状态 3: SIA 不可用时静默 skip(改用一个空 PATH 但 SIA 已存在于 /usr/local/bin → SIA 探测成功,HOME 不存在则 skip)
 # 这里改测:把 SIA 链接移除,确认 SIA 探测分支
 rm -f /usr/local/bin/self-improving-agent
-SELF_IMPROVING_HOME="/tmp/sia-home-test" bash "$POST_COMMIT" > /dev/null 2>&1
+USER_SELF_IMPROVING_HOME="/tmp/sia-home-test" bash "$POST_COMMIT" > /dev/null 2>&1
 check $? "0" "SIA 不可用时静默 skip"
+
+# 状态 4: D-7 验证 — 旧 env SELF_IMPROVING_HOME 应被彻底废弃
+# 先恢复 SIA 链接(状态 3 删了)— 测新 env 优先级 +旧 env 被忽略
+cp /tmp/fake-sia.sh /usr/local/bin/self-improving-agent 2>/dev/null
+USER_SELF_IMPROVING_HOME="/tmp/new-home-D7" SELF_IMPROVING_HOME="/tmp/old-home-D7" bash "$POST_COMMIT" > /dev/null 2>&1
+check $? "0" "D-7: 旧 env SELF_IMPROVING_HOME 被彻底废弃,新 env 生效"
+grep -q "new-home-D7" "$LOG_FILE"
+check $? "0" "D-7: post-commit 探测日志含新 env 路径(优先级正确)"
+! grep -q "old-home-D7" "$LOG_FILE"
+check $? "0" "D-7: 旧 env 路径从未出现在日志中(彻底忽略)"
 
 # bash 语法静态检查
 bash -n "$POST_COMMIT"

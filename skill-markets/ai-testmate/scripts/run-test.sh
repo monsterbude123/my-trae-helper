@@ -18,14 +18,23 @@ fi
 # === 时间戳(AP-7)===
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 
-# === 工作空间(AP-1:从 env 注入,不硬编码)===
-WORKSPACE_ROOT="${TESTMATE_WORKSPACE_ROOT:-$(pwd)}"
+# === 工作空间探测(v1.2:自动从 cwd 向上找 .agents/.env)===
+DETECT_JSON="$("$MY_TRAE_HELPER_PY" "$SCRIPT_DIR/workspace-detect.py" --start "$(pwd)" --json 2>/dev/null || true)"
+if [ -z "$DETECT_JSON" ]; then
+  # 探测失败:回退到 env 注入(AP-1)
+  WORKSPACE_ROOT="${TESTMATE_WORKSPACE_ROOT:-$(pwd)}"
+  DETECTED_MODE="env-fallback"
+else
+  WORKSPACE_ROOT="$(echo "$DETECT_JSON" | grep -oP '"workspace_root"\s*:\s*"\K[^"]+' || echo "$(pwd)")"
+  DETECTED_MODE="$(echo "$DETECT_JSON" | grep -oP '"detected_mode"\s*:\s*"\K[^"]+' || echo 'unknown')"
+fi
 REPORT_DIR="${TESTMATE_REPORT_DIR:-$WORKSPACE_ROOT/reports/$TIMESTAMP}"
 
 echo "=== ai-testmate run ==="
-echo "  timestamp: $TIMESTAMP"
-echo "  workspace: $WORKSPACE_ROOT"
-echo "  report:    $REPORT_DIR"
+echo "  timestamp:    $TIMESTAMP"
+echo "  workspace:    $WORKSPACE_ROOT"
+echo "  detect_mode:  $DETECTED_MODE"
+echo "  report:       $REPORT_DIR"
 
 # === 守卫自检(AGENTS.md §2.4 Gate 自验收)===
 "$MY_TRAE_HELPER_PY" "$SCRIPT_DIR/publish-protocol.py"

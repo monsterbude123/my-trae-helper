@@ -1,16 +1,21 @@
 #!/bin/bash
-# Skill Market — post-commit hook (路径 C 落地,2026-08-14 v3)
+# Skill Market — post-commit hook (路径 C 落地,2026-08-14 v3,D-7 切新路径 2026-08-21)
 #
 # 触发时机: git commit 成功之后
-# 职责: 把本次 commit 期间产生的跨会话经验沉淀到全局 self-improving-agent
+# 职责: 把本次 commit 期间产生的跨会话经验沉淀到全局 user-self-improving
 #        兜底 §5.3 推荐组合中的 C 路径
 #
 # 设计原则(对照 .trae/rules/learning.md §5):
 #   - 不阻断 commit(已 commit 成功,失败仅 warn)
-#   - 探测式降级(self-improving-agent 不存在时静默 skip)
+#   - 探测式降级(user-self-improving 不存在时静默 skip)
 #   - 优先级: 全局 PATH → node 探测 → 仓库内 shim
 #   - 用 bash 数组存命令,正确处理带空格路径(node.exe 可能在 C:\Program Files\)
 #   - 把 stdout/stderr 全部丢 logs/,不污染 commit 输出
+#
+# D-7 迁移(2026-08-21):
+#   - 旧 env `SELF_IMPROVING_HOME` + 旧路径 `.self-improving-agent` 已彻底废弃
+#   - 仅认 `USER_SELF_IMPROVING_HOME` env + `.user-self-improving` 路径
+#   - 命令名仍是 `self-improving-agent`(命令行向后兼容)
 
 set +e   # 关键:任何失败都不影响 commit 状态
 
@@ -60,14 +65,14 @@ echo "[post-commit] resolved: SIA=${SIA_CMD[*]}" >> "$LOG_FILE"
 #    shim 在 Windows 原生 node 跑,读 Windows 路径 — 需把 WSL 路径转换
 #    关键: $HOME 在 WSL root 下是 /root,不是 Windows 用户家目录
 #    改用 USERPROFILE 翻译 或硬编码 Windows 路径探测
-SIA_HOME_LINUX="${SELF_IMPROVING_HOME:-$HOME/.self-improving-agent}"
+SIA_HOME_LINUX="${USER_SELF_IMPROVING_HOME:-$HOME/.user-self-improving}"
 # 1) 优先用 USERPROFILE 转换
 if [ -n "$USERPROFILE" ]; then
-  SIA_HOME_LINUX="$(cygpath -u "$USERPROFILE" 2>/dev/null || echo "$USERPROFILE")/.self-improving-agent"
+  SIA_HOME_LINUX="$(cygpath -u "$USERPROFILE" 2>/dev/null || echo "$USERPROFILE")/.user-self-improving"
 fi
 # 2) 还是 /root 这种 WSL 默认,直接用 Windows 用户家目录
-if [[ "$SIA_HOME_LINUX" =~ ^/root/?$ ]] || [[ "$SIA_HOME_LINUX" == *"/root/.self-improving-agent" ]]; then
-  SIA_HOME_LINUX="/mnt/c/Users/septe/.self-improving-agent"
+if [[ "$SIA_HOME_LINUX" =~ ^/root/?$ ]] || [[ "$SIA_HOME_LINUX" == *"/root/.user-self-improving" ]]; then
+  SIA_HOME_LINUX="/mnt/c/Users/septe/.user-self-improving"
 fi
 # 3) /mnt/c/... → C:\... 翻译
 if [[ "$SIA_HOME_LINUX" =~ ^/mnt/([a-z])/(.*)$ ]]; then
@@ -101,7 +106,7 @@ fi
 
 RC=$?
 if [ $RC -ne 0 ]; then
-  echo "[post-commit] warn: self-improving-agent reflect 退出码 $RC(不阻断 commit)" >> "$LOG_FILE"
+  echo "[post-commit] warn: user-self-improving reflect 退出码 $RC(不阻断 commit)" >> "$LOG_FILE"
 fi
 
 echo "[post-commit] 完成 (rc=$RC)" >> "$LOG_FILE"

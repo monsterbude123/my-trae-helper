@@ -215,7 +215,7 @@ i2v-h3-prompt 接管:
   → I2V 用 "图是场景"原则,省略维度 1/2/3
   → I2V 必加 must_not_change 锁脸/锁物(T2V 不加)
 
-video-prompt-method(爹)接管:
+video-prompt-method(父级)接管:
   → 跨平台方法学(Seedance/可灵也适用)
   → 抽象→具体的通用方法论
   → 不绑 MiniMax H3 平台
@@ -228,4 +228,4 @@ video-prompt-method(爹)接管:
 - MiniMax H3 官方文档(蒸馏实战)
 - H3 T2V 实战案例 50+ 蒸馏
 - 兄弟 skill `i2v-h3-prompt/references/chinese-prompt-method.md`(中文笔记法基础)
-- 爹 skill `video-prompt-method` SKILL.md(抽象→具体通用方法论)
+- 父级 skill `video-prompt-method` SKILL.md(抽象→具体通用方法论)

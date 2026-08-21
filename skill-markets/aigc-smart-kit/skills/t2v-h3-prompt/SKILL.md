@@ -1,6 +1,6 @@
 ---
 name: t2v-h3-prompt
-description: 纯文字 → MiniMax H3 / Hailuo 视频提示词专项(T2V)。当用户想从一段文字描述(无图)生成 MiniMax H3 或 Hailuo 系列视频时加载。继承爹 skill `video-prompt-method` 的方法论,加 H3 平台特化(三段式 / 运镜三件套)+ T2V 场景特化(主体 / 场景 / 构图全部精确化描述)。Use when the user wants text-to-video prompts for MiniMax H3 / Hailuo without an input image.
+description: 纯文字 → MiniMax H3 / Hailuo 视频提示词专项(T2V)。当用户想从一段文字描述(无图)生成 MiniMax H3 或 Hailuo 系列视频时加载。继承父级 skill `video-prompt-method` 的方法论,加 H3 平台特化(三段式 / 运镜三件套)+ T2V 场景特化(主体 / 场景 / 构图全部精确化描述)。Use when the user wants text-to-video prompts for MiniMax H3 / Hailuo without an input image.
 version: 1.0.0
 license: MIT
 metadata:
@@ -18,7 +18,7 @@ metadata:
 
 # t2v-h3-prompt — MiniMax H3 / Hailuo T2V 提示词专项
 
-> T2V(纯文字 → 视频)在 MiniMax H3 上跑偏率高,**根因是抽象 prompt**。本 skill = 爹 `video-prompt-method` 方法论 + H3 三段式 + T2V 7 维度精确化公式。
+> T2V(纯文字 → 视频)在 MiniMax H3 上跑偏率高,**根因是抽象 prompt**。本 skill = 父级 `video-prompt-method` 方法论 + H3 三段式 + T2V 7 维度精确化公式。
 
 ## §0 何时加载
 
@@ -96,7 +96,7 @@ MUST NOT 加载:
 
 完整公式 + 三件套词表 → [references/i2v-h3-prompt/camera-grammar.md](references/i2v-h3-prompt/camera-grammar.md) + [references/i2v-h3-prompt/audio-layers.md](references/i2v-h3-prompt/audio-layers.md)
 
-## §5 时间切片(继承爹 §2 + 中文笔记法 §10)
+## §5 时间切片(继承父级 §2 + 中文笔记法 §10)
 
 ```
 6s 切 3 段:
@@ -177,7 +177,7 @@ T2V 时段内必含:
 - [references/i2v-h3-prompt/audio-layers.md](references/i2v-h3-prompt/audio-layers.md) — 三层音频分离(继承)
 - [references/i2v-h3-prompt/failure-modes.md](references/i2v-h3-prompt/failure-modes.md) — 7 类失败模式 + 修复指令(继承)
 - [references/i2v-h3-prompt/chinese-prompt-method.md](references/i2v-h3-prompt/chinese-prompt-method.md) — 中文笔记法完整方法学(继承)
-- **爹 skill**:`../video-prompt-method/SKILL.md` — 通用方法论(三段式 / 时序 / 主角锁定 / 抽象→具体)
+- **父级 skill**:`../video-prompt-method/SKILL.md` — 通用方法论(三段式 / 时序 / 主角锁定 / 抽象→具体)
 
 ## §10 边界声明(避免与兄弟 skill 重复)
 
@@ -193,7 +193,7 @@ i2v-h3-prompt 接管:
   → 参考素材角色分配(图片/视频/音频职责)
   → "图是场景"原则(I2V 默认场景来图)
 
-video-prompt-method(爹)接管:
+video-prompt-method(父级)接管:
   → 通用方法论(三段式骨架 / 时序切镜原理 / 主角锁定通用原则)
   → 跨平台方法学(种子 / 可灵 / Vidu 等通用部分)
   → 抽象→具体的通用公式
@@ -205,4 +205,4 @@ video-prompt-method(爹)接管:
 - [MiniMax H3 视频生成 API](https://platform.minimax.io/docs/guides/video-generation)
 - [海螺文生视频 API](https://platform.minimaxi.com/document/text_to_video)
 - [promptslove H3 generator 实战](https://promptslove.com/free-tools/minimax-video-prompt-generator/)
-- 爹 skill `video-prompt-method` SKILL.md(同包内,sibling)
+- 父级 skill `video-prompt-method` SKILL.md(同包内,sibling)

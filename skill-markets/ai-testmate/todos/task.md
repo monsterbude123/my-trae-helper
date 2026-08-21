@@ -1,105 +1,67 @@
-# ai-testmate Skill — Task Tracker
+# ai-testmate Skill v1.1 — Task Tracker
 
 > **依据**:`.trae/rules/skills开发细则.md` + V11 `references/skill-creation-workflow.md` §3.1
-> **状态**:进行中(独立 Skill,不替代任何现有 skill)
+> **继承**:v1.0 todos 11 步已完成并 commit(暂存,未 commit)
+> **本次**:v1.1 — 输入自适应 + 禅道可选化
 
 ---
 
 ## §0 蒸馏元信息
 
-- **创建触发**:用户 2026-08-20 提出"AI testmate:参考产品文档 + 出测试计划 → 使用指定账号在指定网页测试 → 综合汇报"
-- **形态**:Web UI(playwright) + HTTP API(requests) 混合模式
-- **MCP 依赖**:`zentao-cli`(拉需求/同步 Bug/登记测试单)+ `lark`(webhook 推送)
-- **项目侧配置**:`<project>/.agents/.env`(变量:LARK_WEBHOOK_CHAT_ID / ZENTAO_PRODUCT_ID / TEST_USER_POOL / REPORT_PUSH_USERS)
-- **产品文档位置**:`<workspace>/docs/prds/xxxx-prd.md`
-- **独立性声明**:独立专精测试工程师 skill,**不替代** fullstack4TraeV11 / zentao-cli / lark MCP,**仅借鉴** V11 的三层骨架 + 协议程序化解析思路
-- **本次执行边界**:不动 AGENTS.md / V11 / zentao / lark,只做 ai-testmate 自身
+- **升级触发**:用户 2026-08-20 提问"4 种输入形态(PRD / PRD 树 / PRD+openapi / 仅 openapi)技能能否自适应" + "禅道可选,降级到 `<app-test>/docs/bugs/`"
+- **新增能力**:
+  1. **4 种输入自适应** — planner 探测后决策模式 A/B/C/D
+  2. **openapi 自动提取用例** — 纯 API 模式 / 与 PRD 合并
+  3. **禅道可选降级** — 无 zentao 配置时用本地 `<app-test>/docs/bugs/` 管理 bug 生命周期
+- **借鉴 V11**:
+  - ✅ 借鉴:**7 状态机简化版(OPEN/FIXED/CLOSED)+ source 第 7 字段**
+  - ❌ 不借鉴:6 层排查 / 角色矩阵 / IN-FIX/VERIFIED/REOPENED/OBSOLETE(开发流程相关,与测试 agent 自动建单无关)
 
 ---
 
-## §1 任务清单(V11 §3.1 11 步 + 本次按用户约束精简)
+## §1 任务清单(v1.1 增量)
 
-| # | 步骤 | 状态 | 产出文件 | 预计落行 | 完成自验收 |
-|:-:|------|:---:|----------|:-------:|------------|
-| 0 | todos 契约(task + checklist) | ✅ | `todos/task.md` + `todos/checklist.md` | 2 文件 | 本身 |
-| 1 | 协议先行 | ✅ | `references/ai-testmate-protocol.md` | 1 文件 | publish-protocol.py PASS |
-| 2 | 创建目录 + SKILL.md frontmatter | ✅ | `SKILL.md` | ≤350 行 | line-guard.py PASS |
-| 3 | SKILL.md 正文(铁律 + 流水线 + 三层) | ✅ | `SKILL.md` 全文 | ≤350 行 | line-guard.py PASS |
-| 4 | 5 个 agent 文件 | ✅ | `agents/{planner,credential-keeper,api-tester,ui-tester,reporter}.md` | 5 文件 × ≤200 行 | 边界检查 |
-| 5 | 8 份 references | ✅ | `references/*.md` | 8 文件 | publish-protocol.py PASS |
-| 6 | scripts/publish-protocol.py | ✅ | `scripts/publish-protocol.py` | 1 文件 | 自跑 PASS |
-| 7 | scripts/run-test.sh | ✅ | `scripts/run-test.sh` | 1 文件 | bash -n PASS |
-| 8 | scripts/ai-testmate-guard.py | ✅ | `scripts/ai-testmate-guard.py` | 1 文件 | 三态自检 |
-| 9 | scripts/detect-python.sh(共享) | ✅ | `scripts/detect-python.sh` | 1 文件 | shellcheck |
-| 10 | .env.example + tests/unit/ | ✅ | `.env.example` + `tests/unit/test_ai_testmate.py` | 2 文件 | pytest ≥ 3 用例 |
-| 11 | 三态自检 + pytest trap | ✅ | `logs/agent-hints.jsonl` 记录 | 1 报告 | PASS/BLOCK/边界 |
-
-> ⚠️ Batch B 项(guard-smith 委派 / registry / AGENTS §7 / SECURITY-MAP / catalog)按用户"独立完成,不管其他"指示,**本次不做**,列入 §4 留置。
+| # | 步骤 | 状态 | 产出文件 |
+|:-:|------|:---:|----------|
+| v2-0 | todos 契约(task + checklist v2) | ✅ | todos/task.md + checklist.md |
+| v2-1 | 协议修改(扩 scope + bug-storage 选项 + V11 借鉴白名单) | ✅ | references/ai-testmate-protocol.md |
+| v2-2 | input-router.md 决策矩阵 | ✅ | references/input-router.md |
+| v2-3 | openapi-to-testcases.md + openapi-extractor.py | ✅ | references/openapi-to-testcases.md + scripts/openapi-extractor.py |
+| v2-4 | v11-bug-flow-borrowed.md + bug-storage.md | ✅ | references/v11-bug-flow-borrowed.md + references/bug-storage.md |
+| v2-5 | planner.md §1 自适应 + reporter.md §3.3 双路径 | ✅ | agents/planner.md + agents/reporter.md |
+| v2-6 | pytest +6 用例 + 三态自检 + publish-protocol 重跑 | ✅ | tests/unit/test_ai_testmate.py |
 
 ---
 
-## §2 用户决策记录(本会话)
+## §2 关键决策记录
 
-| 轮次 | 用户表态 | 我是否贯彻 |
-|:---:|----------|:---------:|
-| 1 | "新建 ai testmate,py 写端点测试,综合汇报" | ✅ |
-| 2 | 测试形态=混合 / 配置走 .agents/.env / 报告4 份 | ✅ |
-| 3 | 飞书走 lark MCP + 禅道 MCP 接入 + docs/prds/ 路径 + 独立治理 | ✅ |
-| 4 | "你为啥不关心 fullstack4traev11" | ✅ 我承认失职,重新走 V11 协议 |
-| 5 | "先做 skills todos 和骨架" | ✅ 当前 |
-| 6 | "独立完成,不管 AGENTS/V11 互引" | ✅ 留置 Batch B |
-
----
-
-## §3 雷清单(V11 §0.5 同款,本 skill 专属)
-
-按 V11 反虚假交付铁律,本 skill 不能踩的雷:
-
-| # | 雷 | 检测方法 |
-|:-:|----|----------|
-| 1 | 工作空间路径硬编码到 skill 内 | `grep '/workspace/' scripts/*.sh` |
-| 2 | 账号池从 .env 复制到 skill 内部 | `grep -r 'TEST_USER_' skill-markets/ai-testmate/`(除 .env.example 外) |
-| 3 | 禅道写权越界(planner 调 bug create) | `grep 'zentao bug create' agents/*.md` |
-| 4 | 飞书直连 webhook URL | `grep 'hooks.lark' scripts/` |
-| 5 | 截图脱敏漏做 | ui-tester.md 内 grep `mask\|redact` |
-| 6 | 跨平台 Python 路径硬编码 | `grep '/mnt/c/' scripts/` |
-| 7 | 报告不写时间戳 | `grep 'YYYYMMDD' scripts/run-test.sh` |
-| 8 | SKILL.md 超 350 行 | `python scripts/vibe-coding-standards-line-guard.py` |
+| 决策 | 选择 | 理由 |
+|------|------|------|
+| input 4 模式 | A:PRD单文件 / B:PRD目录树 / C:PRD+openapi / D:仅 openapi | 用户原话列举的 4 种 |
+| openapi 解析深度 | 单 operation 1 个正例 + 1 个负例(404/422) | 防用例爆炸,pytest-patterns §5 已约定 |
+| 禅道降级触发 | `.env` 缺 `ZENTAO_PRODUCT_ID` 或 zentao-cli 不可用 | 双触发条件,任意满足即降级 |
+| bug 状态数 | 简化到 3 个(OPEN/FIXED/CLOSED)+ source 字段 | V11 7 状态机对测试 agent 过重,IN-FIX/VERIFIED 是开发流程 |
+| bug 路径 | `<app-test>/docs/bugs/<YYYYMMDD>-<id>.md` | V11 docs/bugs/ 同款命名风格 |
+| bug 单字段数 | 7 字段(ID/title/steps/expected/actual/severity/source) | V11 8 字段的简化版(去掉 fix/修复文件等开发字段) |
 
 ---
 
-## §4 Batch B 留置(用户明示本次不做)
+## §3 雷清单(v1.1 增量)
 
-按"独立完成,不管其他" + AGENTS.md §1.11 写权边界,以下事项本会话不做,后续如需启动单独委派 guard-smith:
-
-- [ ] `registry/skills.yaml` 注册 ai-testmate 条目
-- [ ] `scripts/ai-testmate-guard.py`(项目侧,非 skill 内部 `scripts/ai-testmate-guard.py` — **二者同名不同物**,留待后续明确分工)
-- [ ] `.husky/ai-testmate-gate`(L1 pre-commit 挂载)
-- [ ] AGENTS.md §7 加 ai-testmate 条目
-- [ ] CHANGELOG.md 蒸馏条目
-- [ ] SECURITY-MAP.md 量化评分
-- [ ] `tests/catalogs/skill-catalog.yaml` 加 SKILL 条目
-- [ ] `.github/workflows/skill-market-gate.yml` 接入
+| # | 雷 | 检测 |
+|:-:|----|------|
+| V2-1 | openapi 解析忽略 `security` 字段(鉴权需求) | openapi-extractor.py 单元测试 |
+| V2-2 | 禅道不可用时硬 exit,而不是降级 | reporter pytest mock |
+| V2-3 | bug 单 frontmatter 字段不齐 | bug-storage.md 模板 + pytest |
+| V2-4 | planner 4 模式没全部产出 source 标签 | input-router.md 测试矩阵 |
+| V2-5 | openapi-only 模式还试图读 PRD | planner §1 决策树 |
 
 ---
 
-## §5 完成报告
+## §4 完成报告占位
 
-- **完成率**:11/11
-- **本次执行**:Phase 0~5 全部完成(Batch B 按用户指示留置,不入本次完成)
-- **pytest 结果**:8 passed(超过 protocol §5.1 要求的 ≥ 3)
-- **三态自检**:✅ PASS / ✅ BLOCK(检测到 1 项)/ ✅ 边界(无误报)
-- **协议覆盖自检**:✅ 8 份 references 全 PASS
-- **入口自检**:`bash run-test.sh` ✅ 全通过,生成 reports/20260820_175614/
-- **踩雷修复**(V11 §3.7 反虚假交付真修):
-  - AP-2 检测器加 .env.example / guard 自身 / 代码块 / 注释行豁免
-  - AP-3 检测器加 markdown 代码块豁免
-  - AP-6 检测器加 detect-python.sh 自身 + 注释行豁免
-  - planner.md §4 改写:"禁止禅道写命令字符串" → "不调任何禅道写操作"(避免文档被自身检测器误判)
-  - 守卫脚本 BOM / 末尾 ``` ``` ``` 清理(Write 工具副作用)
-- **Batch B 留置**(用户明示本次不做):
-  - registry/skills.yaml 注册
-  - 项目侧 scripts/ai-testmate-guard.py + .husky/ai-testmate-gate
-  - AGENTS.md §7 + CHANGELOG + SECURITY-MAP + catalog
-- **主代理身份**:todo-tracker + skill-creator(skeleton → protocol → agents → references → scripts → tests)
-```
+- 完成率:v1.1 6/6
+- 协议覆盖:11 references 全 PASS(原 8 + 新 3)
+- pytest:14 用例(原 8 + 新 6)
+- 三态自检:PASS / BLOCK / 边界 全过
+- 留置:v1.0 Batch B 暂存 27 文件 commit 待用户授权

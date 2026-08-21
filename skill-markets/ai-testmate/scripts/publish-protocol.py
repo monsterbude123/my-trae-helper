@@ -20,6 +20,14 @@ REQUIRED_SECTIONS = {
         "## §4 反例库",
         "## §5 测试要求",
         "## §6 协议版本",
+        "## §7 v1.1 增量反例",
+        "## §8 v1.1 新增引用",
+    ],
+    "agents/credential-keeper.md": [
+        "## §1 工作空间探测",
+        "## §2 输入",
+        "## §4 行为",
+        "## §6 反例",
     ],
     "references/workflow.md": [
         "## §1 6 步流水线",
@@ -51,6 +59,24 @@ REQUIRED_SECTIONS = {
         "## §2 report.md",
         "## §3 junit.xml",
         "## §4 manifest.json",
+    ],
+    "references/input-router.md": [
+        "## §1 4 模式决策矩阵",
+        "## §2 探测顺序",
+        "## §3 各模式行为",
+    ],
+    "references/openapi-to-testcases.md": [
+        "## §1 openapi 字段映射",
+        "## §2 负例生成规则",
+    ],
+    "references/v11-bug-flow-borrowed.md": [
+        "## §1 借鉴白名单",
+        "## §2 不借鉴清单",
+    ],
+    "references/bug-storage.md": [
+        "## §1 触发降级条件",
+        "## §2 bug 单 frontmatter",
+        "## §3 状态转换",
     ],
 }
 

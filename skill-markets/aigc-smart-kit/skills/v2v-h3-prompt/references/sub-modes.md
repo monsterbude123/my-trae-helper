@@ -196,5 +196,5 @@
 ## §5 来源
 
 - 主 SKILL.md §1 / §4 / §5(同目录父文件)
-- 爹 skill video-prompt-method(本仓内)
+- 父级 skill video-prompt-method(本仓内)
 - 兄弟 skill i2v-h3-prompt / i2v-kling-prompt(同仓内)
