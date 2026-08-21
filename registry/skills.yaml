@@ -33,8 +33,9 @@ version: 1.0.0
 description: My Trae Helper 技能注册表 — 每个 skill 必带同名 guard + gate 路由
 # 版本（last_updated）：2026-08-21 user-self-improving v1.0 新建注册(个人级补充入口 skill,7 assets + 10 references + 5 scripts,226 行 SKILL.md),注册表条目新增 + total_skills 57→58。原 .agents/skills/self-improving-agent 兼容壳登记于 CAPABILITY-MAP.md,不进本注册表
 # 2026-08-21 微更新: fullstack4TraeV9 + fullstack4TraeV10 归档清理 — 删除 2 个 deprecated 条目 + 2 个 scripts/<name>-guard.py,total_skills 58→56(guard-smith 委派)
+# 2026-08-21 微更新: quality-documentation-manager v1.0 补救注册 — 远程 commit 7199b79 拉下后新增目录但漏注册,补注册表条目 + scripts/<name>-guard.py + .husky/<name>-gate 三件套,total_skills 56→57(主代理 quick fix,user 在场授权;guard-smith 委派后续回顾)
 updated: 2026-08-21
-total_skills: 56
+total_skills: 57
 
 skills:
 
@@ -662,3 +663,22 @@ skills:
       与 project-self-improving 互不替代:本 skill 服务个人级全局(默认 home + opt-in 三件),
       project-self-improving 服务项目内(.user-self-improving/ + agent-原生 hook)。
       本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
+
+  - skill: quality-documentation-manager
+    status: active
+    guards:
+      - { id: quality-documentation-manager-structure, category: structure, script: scripts/quality-documentation-manager-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: quality-documentation-manager-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [quality-documentation-manager-structure] }
+      - { id: quality-documentation-manager-gate-pre-commit, level: L1, hooks: [.husky/quality-documentation-manager-gate], runs_guards: [quality-documentation-manager-structure] }
+    maintainer: guard-smith
+    notes: |
+      元项目方法论沉淀 skill(2026-08-21 V1.0 NEW) — Diátaxis 四象限信息架构 + SSOT 协议 +
+      Docs-as-Code 工具栈(lychee / Vale / markdownlint-cli2)+ 反向引用图谱 +
+      文档状态机 + 4 层强制链(CI Gate)。纯文档 skill(SKILL.md + references/),
+      无 scripts/。本次为补救远程 commit 7199b79 漏注册,主代理 quick fix(user 在场授权,
+      guard-smith 委派后续回顾)。守卫 scripts/quality-documentation-manager-guard.py 极简 2 项:
+        (1) 顶层 SKILL.md frontmatter(name + description)
+        (2) 顶层 SKILL.md 行数 100~350 弹性(vibe-coding-standards v2.5)
+      软依赖:doc-map-manager(反向引用图谱)/ vibe-coding-standards(行数弹性)/
+      skill-acceptance(发布前 verify)/ common-project-coding-conf(路由补充)。
