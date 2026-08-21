@@ -3,7 +3,7 @@
 # 设计目的（2026-08-14 §3 三层控制体系收紧方案 A）：
 #   每个 skill 在本文件中按同名条目注册 guard + gate 引用,确保:
 #     1. 每个 skill 必须有自己专属的 guard（项目侧 scripts/<name>-guard.*,不在 skill 子目录）
-# 版本（last_updated）：2026-08-18 fullstack4TraeV11 V11.8.7.1(5 项用户硬要求 3 连修 + V11-AP17 修复) + github-kownledge-helper agents/ 子目录 + case-driven-skill-audit (V1.0.0) 接入
+# 版本（last_updated）：2026-08-19 common-project-coding-conf v1.0 新建注册 + project-rules-gate 整块删除(目录已删)+ github-kownledge-helper agents/ 子目录 + case-driven-skill-audit (V1.0.0) 接入
 #     2. 每个 skill 必须有自己的 gate 路由条目（项目侧 .husky/<name>-gate 或 scripts/<name>-gate）
 #     3. 只有 guard-smith agent 有写权维护此文件 + scripts/<name>-guard.* + .husky/<name>-gate
 #     4. 其他 agent 试图 Edit 这些路径 → 强拦截 BLOCK（src/guards/skill-registration-guard.mjs 兜底）
@@ -161,17 +161,17 @@ skills:
     status: active
     guards:
       - { id: vibe-coding-standards-structure, category: structure, script: scripts/vibe-coding-standards-guard.py, triggers: [pre-commit] }
+      - { id: vibe-coding-standards-line, category: structure-or-line, script: scripts/vibe-coding-standards-line-guard.py, triggers: [pre-commit, L3] }
     gates:
-      - { id: vibe-coding-standards-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [vibe-coding-standards-structure] }
+      - { id: vibe-coding-standards-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [vibe-coding-standards-structure, vibe-coding-standards-line] }
+      - { id: vibe-coding-standards-line-pre-commit, level: L1, hooks: [.husky/vibe-coding-standards-gate], runs_guards: [vibe-coding-standards-line] }
     maintainer: guard-smith
-
-  - skill: project-rules-gate
-    status: active
-    guards:
-      - { id: project-rules-gate-structure, category: structure, script: scripts/project-rules-gate-guard.py, triggers: [pre-commit] }
-    gates:
-      - { id: project-rules-gate-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [project-rules-gate-structure] }
-    maintainer: guard-smith
+    notes: |
+      2026-08-19 NEW: vibe-coding-standards-line 守卫入注册表 — 强制执行 SKILL.md 行数弹性
+      100~350 检查(沿用 skill-markets/vibe-coding-standards/SKILL.md v2.5 阈值)。
+      触发场景:任何 skill 改 SKILL.md / AGENTS.md / agents/*.md 后 > 350 行即硬阻断,
+      必须把超量部分提取到 references/ 子目录。fix 路径:见 skill-markets/vibe-coding-standards/SKILL.md
+      "体积弹性范围"段。
 
   - skill: session-distiller
     status: active
@@ -512,3 +512,21 @@ skills:
         (2) bin/cli.mjs add-all --help + install-all --help(已注册)
         (3) tests/unit/test_add_all.mjs node 跑通(exit 0)
       本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
+
+
+  # ── 新增:common-project-coding-conf — 通用项目级编码配置中心(2026-08-19) ─────
+  - skill: common-project-coding-conf
+    status: active
+    guards:
+      - { id: common-project-coding-conf-self-check, category: structure, script: skill-markets/common-project-coding-conf/scripts/cpcc-self-check.mjs, triggers: [pre-commit] }
+      - { id: common-project-coding-conf-registration, category: registration, script: src/guards/skill-registration-guard.mjs, triggers: [pre-commit] }
+    gates:
+      - { id: common-project-coding-conf-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [common-project-coding-conf-self-check, common-project-coding-conf-registration] }
+    maintainer: guard-smith
+    notes: |
+      新建 skill(2026-08-19)— 接管 project-rules-gate v0.2 + vibe-coding-routes 合并职责。
+      三件套:§1 路由表 / §2 自检协议(cpcc-self-check.mjs)/ §3 forge 协议。
+      删除整个 skill-markets/project-rules-gate/,forge 脚本/templates 全量迁移到 cpcc。
+      注:cpcc 的 guard 脚本位于 skill 子目录(因 forge 工具链全部内聚在 cpcc 内),
+      暂未拆出项目侧 scripts/common-project-coding-conf-guard.* — 后续如需符合 §1.11
+      项目侧 guard 范式,可由 guard-smith 委派补建薄壳脚本转发到 cpcc-self-check.mjs。

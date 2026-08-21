@@ -202,4 +202,15 @@ else
   echo "⚠️  跳过: scripts/gitnexus-trace.py 不存在"
 fi
 
+# 9. vibe-coding-standards 行数弹性 Gate(2026-08-19 NEW — guard-smith 委派落地)
+# 强制执行 SKILL.md / AGENTS.md / agents/*.md 行数 100~350 弹性阈值(v2.5),
+# 防止 SKILL.md 膨胀击穿上下文(参考 vibe-coding-standards SKILL.md §体积弹性范围)。
+# 由独立 husky gate(本仓库白名单路径)实现 + 跨平台 Python 探测 + 仅扫变更 skill。
+echo "9️⃣ vibe-coding-standards 行数弹性 Gate (.husky/vibe-coding-standards-gate)..."
+if [ -f ".husky/vibe-coding-standards-gate" ]; then
+  bash .husky/vibe-coding-standards-gate
+else
+  echo "⚠️  跳过: .husky/vibe-coding-standards-gate 不存在"
+fi
+
 echo "✅ L1 Commit Gate 通过"

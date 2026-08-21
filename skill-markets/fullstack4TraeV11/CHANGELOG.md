@@ -5,6 +5,134 @@
 
 ---
 
+## [V12.0.0.P4] - 2026-08-19
+
+### 🛠️ SKILL.md 瘦身(vibe-coding-standards v2.5 合规化)
+
+> **背景**:本 SKILL.md 从 V11.5.0 升级到 V12.0.0 全程膨胀,2026-08-19 实测 644 行,远超 vibe-coding-standards v2.5 弹性上限 350 行。但 `skill-markets/vibe-coding-standards/scripts/validate_vibe_docs.sh` 从未注册到注册表 + 未挂载 husky pre-commit,导致体积行数检查从未强制执行。
+>
+> **修复**:guard-smith 委派落地完整闭环:
+> - 新建 `scripts/vibe-coding-standards-line-guard.py`(封装 SKILL.md 行数 100~350 弹性检查 + 5 Pillar 联动)
+> - 新建 `.husky/vibe-coding-standards-gate`(跨平台 husky 文件)
+> - `.husky/pre-commit` 追加 step 9 调用新 gate
+> - `registry/skills.yaml` 新增 vibe-coding-standards-line guard + gate 注册
+>
+> **瘦身成果**:SKILL.md 644 行 → 349 行(100~350 弹性范围内 ✅),详细协议抽到 5 个 references/v11-*.md。
+
+### 抽出到 references/(v2.5 瘦身 5 段)
+
+| 段 | 抽出到 | 行数节省 |
+|----|--------|----------|
+| §0 贾维斯 + L1-L4 Gate + Stage 子层 + Hook 5 event + Execution 13 stage | [v11-three-layer-control.md](references/v11-three-layer-control.md) | ~150 行 |
+| §3.7 反虚假交付 + §8 fidelity 等级(L1/L2/L3) | [v11-fidelity-protocol.md](references/v11-fidelity-protocol.md) | ~110 行 |
+| §0.5 加载 9 步 + 同类约定 10 项 + 加载后 3 项验证 | [v11-load-protocol.md](references/v11-load-protocol.md) | ~70 行 |
+| §14 项目级生态管理(5 项铁律 + V11.8.7 三件套 + 优先级) | [v11-project-ecosystem.md](references/v11-project-ecosystem.md) | ~85 行 |
+| §15 paths 配置化(4 类路径 + `_lib_paths.py` 单源 + 自验收 3 步) | [v11-paths-config.md](references/v11-paths-config.md) | ~60 行 |
+
+### 自检三态(已跑通)
+
+- **真超限**:`fullstack4TraeV11` (644 行) → `vibe-coding-standards-line-guard.py` exit=1,`.husky/vibe-coding-standards-gate` BLOCK ✅
+- **真合规**:`vibe-coding-standards` 自身(170 行) → exit=0 PASS ✅
+- **真合规(瘦身后)**:`fullstack4TraeV11` (349 行) → exit=0 PASS ✅
+
+---
+
+## [V11.8.7.P3] - 2026-08-18
+
+### 🛠️ qa-loop 真闭环 — 5 大结构性缺口根治(本轮)
+
+> **来源**:2026-08-18 ai-short-studio-monster 项目实测 — 5 change × 30min 拖不完 + bug 流窜链式反应 + 主代理亲自抽样 5 张图 + Stage 5 三件套跑 3 N/A entry + build OOM 重跑 5min。
+> **本质**:V11 协议层缺"运行时反向守门" + 顶层脚本散落,任何用 V11 的项目都会踩同一个坑。
+> **治本**:协议层(2 段)+ 核对器层(c7/c8)+ 顶层 scripts(3 文件)+ Stage 5 light_mode 开关 + 反例库(§22)五者联动,跨项目复用,不靠每个项目自己发明。
+> **决策**:本轮留在 V11.8.7 子版本(不动 V12.0.0 主版本轴,只补结构性缺口);SKILL.md frontmatter 加 changelog 子版本记录。
+
+### 协议层(references/)
+
+| 协议段 | 内容 | 来源 |
+| |
+| [role-protocol.md §H+](references/role-protocol.md) | bug-in-scope 闭环硬约束(3 MUST + 1 NEVER) | 2026-08-18 实测:5 change 全程违反 §H+-1 |
+| [role-protocol.md §I+](references/role-protocol.md) | qa-loop 反向守门自检(2 MUST) | 2026-08-18 实测:主代理亲自抽样 5 张图违反 §I+-1 |
+| [stage-interaction-protocol.md §L+](references/stage-interaction-protocol.md) | Stage 5 light_mode_when_zero_scope(3 MUST) | 2026-08-18 实测:5 change 跑 3 N/A entry 25-50min |
+| [common-anti-patterns.md §22](references/common-anti-patterns.md) | 主代理亲自跑测试 — qa-loop 空转反模式 | 2026-08-18 实测:Stage 4 Review 由主代理亲自跑 |
+| [config.example.yaml](references/config.example.yaml) | `intake.intents_no_change` 增 `qa-loop-audit` + `stage_5.light_mode_when_zero_scope: true` + `build.*` 字段 | 协议层 SSOT 联动 |
+
+### 核对器层(scripts/completion-self-check.py — V11.8.7 NEW)
+
+| 核对器 | 检测目标 | 触发 |
+| |
+| **c7 qa-loop-audit** | 扫最近 24h git log,检测主代理亲自跑 vitest/playwright(无 [test-expert] tag) | `--intent qa-loop-audit` 或 `--intent change-start` |
+| **c8 bug-in-scope** | 扫 `docs/bugs/` OPEN/IN-FIX bug 单,断言 backlog = 0 | `--intent qa-loop-audit` 或 `--intent change-start` |
+
+**实测三态(已跑通)**:
+- 真违反:`tmp` 造 author="主代理" + commit msg="npx vitest run" → c7 FAIL(exit=1)
+- 真合规:`tmp` 造 author="test-expert [test-expert]" → c7 PASS(exit=0)
+- 边界态:`tmp` 造 author="sub-agent-foo"(无 [test-expert]) → c7 WARN(exit=2)
+
+### 顶层 scripts 层(3 文件)
+
+| 文件 | 职责 | 替代的反模式 |
+| |
+| [scripts/build-prod-warmup.sh](scripts/build-prod-warmup.sh) | POSIX build cache 顶层脚本(固定 NODE_OPTIONS + Turbopack) | 2026-08-18 实测:每次 build 5min + OOM 重跑 |
+| [scripts/build-prod-warmup.ps1](scripts/build-prod-warmup.ps1) | Windows build cache 顶层脚本 | 同上(跨平台) |
+| [scripts/screenshots/README.md](scripts/screenshots/README.md) | 顶层截图脚本索引 | 2026-08-18 实测:`m3-production-shot.mjs` 反复改 3 次 |
+| [scripts/screenshots/production-shot.mjs](scripts/screenshots/production-shot.mjs) | 生产路由截图模板(playwright) | 2026-08-18 实测:change 内散落的 production 截图脚本 |
+| [scripts/screenshots/verify-screenshots.mjs](scripts/screenshots/verify-screenshots.mjs) | 自动 OCR + spec keywords 断言(tesseract.js) | 2026-08-18 实测:主代理手动 Read 5 张图 2-3min |
+
+### 跨项目复用锚点
+
+```
+V11.8.7 前(2026-08-18 ai-short-studio-monster):
+  - 5 change × 30min 拖不完
+  - bug 在 change 间流转(backlog = 0 但实际 5 change × 2 fail 未闭环)
+  - 主代理亲自抽样 5 张图(2-3min × 5 = 10-15min)
+  - Stage 5 三件套跑 3 N/A entry(5-10min × 5 = 25-50min)
+  - build OOM 重跑 5min
+
+V11.8.7 后(预期):
+  - 主代理启动会话第一步必跑 --intent qa-loop-audit(c7+c8 双核对器)
+  - 主代理亲自跑测试 = c7 FAIL,自动阻断提测
+  - bug 不在 current change 闭环 = c8 FAIL,REJECT Accept
+  - 0 scope change 自动 light_mode,Stage 5 5-10min → 1-2min
+  - build cache 命中 + NODE_OPTIONS 固定,5min → 1-2min
+  - 视觉抽样 10s(verify-screenshots.mjs 自动化)
+```
+
+### 反例库 §22(common-anti-patterns.md — V11.8.7 NEW)
+
+| 段 | 反例描述 | 检测方法 | 实测锚点 |
+| |
+| §22.1 | 主代理亲自跑 vitest/playwright + Read 5 张图 + 跑 Stage 4 | c7 git log 扫描 | ai-short-studio-monster 2026-08-18 全程违反 |
+| §22.2 | c7 核对器三态检测(PASS / FAIL / WARN) | completion-self-check.py --intent qa-loop-audit | 实测已跑通 |
+| §22.3 | 协议层 + 核对器层 + 顶层脚本 三者联动 | --intent qa-loop-audit + verify-screenshots | 本 change 自验 |
+| §22.4 | 不允许的补救方式(口头声明 / 特殊情况 / 事后补 tag / 跑一次没事) | Article V 可验证声明 | 反反例库 |
+| §22.5 | 实测三态自验报告 | tmp 真违反 / 真合规 / 边界态 | 已跑通 |
+
+### 不破坏性变更(沿用 V11.8.6 + V12.0.0)
+
+```
+未动:
+  - init-from-zero.py
+  - spec-knowledge-extract.py
+  - commit-minimum-check.py(V11.8.5.P1)
+  - skills/00-boot/agents/*.md 8 角色(role-protocol 已锁版)
+  - registry/*.yaml
+  - V11.8.6 V12 物理隔离 layout
+  - V11.8.5.P1 commit 准入最小集
+  - V11.8.4 commit 准入最小集与全量验收分层
+
+新增:
+  - completion-self-check.py(V11.8.7 NEW)
+  - scripts/build-prod-warmup.{sh,ps1}(V11.8.7 NEW)
+  - scripts/screenshots/{README,production-shot,verify-screenshots}.mjs(V11.8.7 NEW)
+  - role-protocol.md §H+/§I+(V11.8.7 NEW)
+  - stage-interaction-protocol.md §L+(V11.8.7 NEW)
+  - common-anti-patterns.md §22(V11.8.7 NEW)
+  - config.example.yaml intake/stage_5/build 字段扩展(V11.8.7 NEW)
+  - SKILL.md frontmatter changelog 子版本记录(V11.8.7 NEW)
+```
+
+---
+
 ## [V11.8.7.P2] - 2026-08-18
 
 ### 🛠️ 项目级 rules skill 创建 三件套(用户提"指导 agent 初始化建立 project rules skills")

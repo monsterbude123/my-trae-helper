@@ -2,6 +2,8 @@
 
 > 单一事实来源。新增技能前先查此地图，确认不重复。脚本复用前先查共享注册表。
 
+> **2026-08-19 升级**：vibe-coding-standards v2.5 行数守卫上线(`scripts/vibe-coding-standards-line-guard.py` + `.husky/vibe-coding-standards-gate`,commit 时强制 SKILL.md 100~350 弹性区间)。fullstack4TraeV11 SKILL.md 644→349 行瘦身(5 段抽 `references/v11-*.md`)。详见 [fullstack4TraeV11 CHANGELOG.md V12.0.0.P4](fullstack4TraeV11/CHANGELOG.md)。
+>
 > **2026-08-15 升级**：fullstack4TraeV11 V11.8.4 提交准入最小集与全量验收分层（Stage 3.5/4.5 异步化），Stage 6 重构为 4 层分层决策框架（V11.8.3）。详见各 skill CHANGELOG。
 >
 > **2026-08-16 升级**：fullstack4TraeV11 V11.8.5 协议层承诺 → 脚本落地（13/14）— 新增 3 个脚本 + 6 个 references + 79 单测。详见 V11.8.5 CHANGELOG。

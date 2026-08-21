@@ -5,6 +5,21 @@
 
 ## [Unreleased]
 
+### vibe-coding-standards v2.5 落地 + fullstack4TraeV11 SKILL.md 瘦身(2026-08-19)
+
+- **vibe-coding-standards 注册 + 挂载 pre-commit gate**(guard-smith 委派)
+  - 新建 `scripts/vibe-coding-standards-line-guard.py`(封装 SKILL.md 行数 100~350 弹性检查 + 5 Pillar 联动)
+  - 新建 `.husky/vibe-coding-standards-gate`(跨平台 husky 文件,detect-python.sh 探测)
+  - `.husky/pre-commit` 追加 step 9 调用新 gate
+  - `registry/skills.yaml` 新增 vibe-coding-standards-line guard + gate
+- **fullstack4TraeV11 SKILL.md 拆分**(vibe-coding-standards v2.5 阈值 350 行)
+  - 644 → 349 行(100~350 弹性范围内 ✅)
+  - 5 段抽到 `references/v11-*.md`(three-layer-control / fidelity-protocol / load-protocol / project-ecosystem / paths-config)
+  - 详见 `skill-markets/fullstack4TraeV11/CHANGELOG.md V12.0.0.P4`
+- **注册表 pre-existing 错误修复**(guard-smith 委派)
+  - 删除注册表中残留的 `- skill: project-rules-gate` 条目
+  - 新增 `- skill: common-project-coding-conf` 条目
+
 ### find-skills 接入(2026-08-18)
 
 - **V1.0 NEW** — 从 [vercel-labs/skills](https://github.com/vercel-labs/skills) 同步 `skills/find-skills/SKILL.md` 入仓(纯文档,单文件),用途:帮助用户发现并安装 agent skill("how do I do X" / "is there a skill for X")

@@ -4,6 +4,8 @@
 >
 > 评分规则：1（极危）→ 5（安全），三档阈值：< 3.0 🔴 需整改，3.0-4.0 🟡 警告，> 4.0 🟢 通过
 
+> **2026-08-19 蒸馏**：vibe-coding-standards v2.5 行数守卫上线（`scripts/vibe-coding-standards-line-guard.py` + `.husky/vibe-coding-standards-gate`，仅 Python stdlib + importlib，无 subprocess/shell=True/网络外联），HIGH=0 MEDIUM=0 LOW=0 → 5.0。fullstack4TraeV11 SKILL.md 644→349 行瘦身（5 段抽 references/v11-*.md，无新执行面）— 评分不变 4.5。
+
 > **2026-08-15 蒸馏**：fullstack4TraeV11 scripts/bug-hunt/dev-hmr-recovery.{sh,ps1} 安全扫描 HIGH=0（路径白名单 + scan-ignore-line）。Stage 6 4 层框架新增 4 references（无脚本）。
 
 ---
@@ -230,7 +232,8 @@
 | `scripts/webhook_server.py` | browser-use-cloud | 🟡 MEDIUM | HTTP 服务端 |
 | `scripts/scan_skills_dir.py` | trae-security-review | 🟢 LOW | 仅文件扫描，无 Shell/网络执行 |
 | `scripts/init-docs.ps1` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行（New-Item/Compress-Archive/IO.File.WriteAllText）+ 本地 dev server 提示 |
-| `scripts/forge_project_rules_skill.py` | project-rules-gate | 🟢 LOW | 纯文件 IO + 模板渲染；无 subprocess / 无网络 / 无 eval-exec；仅在 --project-root 内操作；改写 .trae/rules/README.md 是高频写操作（明确语义）；--move 用 pathlib.Path.replace() 移走到 _archived/（归档非删除，可回溯）；frontmatter 注入只追加不覆盖（已有则跳过） |
+| `scripts/forge_project_rules_skill.py` | project-rules-gate → common-project-coding-conf（2026-08-19 迁移） | 🟢 LOW | 纯文件 IO + 模板渲染；无 subprocess / 无网络 / 无 eval-exec；仅在 --project-root 内操作；改写 .trae/rules/README.md 是高频写操作（明确语义）；--move 用 pathlib.Path.replace() 移走到 _archived/（归档非删除，可回溯）；frontmatter 注入只追加不覆盖（已有则跳过） |
+| `scripts/cpcc-self-check.mjs` | common-project-coding-conf | 🟢 LOW | 纯文件 IO（fs.readFileSync / fs.statSync）+ child_process.execSync（探测 npx gitnexus --version，超时 10s，stdio: 'ignore'）；JSON 输出；无网络外联 / 无 eval-exec / 无写入项目路径外 |
 | `scripts/serve.ps1` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行（Start-Process 启动 docsify serve）+ localhost 浏览器唤起 |
 | `scripts/init-docs.sh` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行 + localhost 浏览器唤起 |
 | `scripts/serve.sh` | docsify-doc-builder | 🟡 MEDIUM | Shell 执行 + localhost 浏览器唤起 |

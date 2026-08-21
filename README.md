@@ -6,6 +6,8 @@ Trae IDE 技能包开发工程 + 跨 Agent 技能市场 CLI。
 > - `skill-markets/` —— 49 个技能包
 > - `bin/` + `src/` —— `@my-trae-helper/cli`(已发布到 npm)
 >
+> **2026-08-19 合规化落地**：vibe-coding-standards v2.5 行数守卫上线(`scripts/vibe-coding-standards-line-guard.py` + `.husky/vibe-coding-standards-gate`)— commit 时强制 SKILL.md 行数 100~350 弹性区间。fullstack4TraeV11 SKILL.md 644 → 349 行瘦身(5 段抽 `references/v11-*.md`),完整闭环。详见 [CHANGELOG.md Unreleased §vibe-coding-standards v2.5 落地](CHANGELOG.md)
+>
 > **2026-08-18 新增 skill**：`find-skills`（来自 [vercel-labs/skills](https://github.com/vercel-labs/skills) 的 `skills/find-skills/SKILL.md` 同步入仓）— 第 49 个技能包，纯文档 skill（V1.0），单 SKILL.md 文件。**用途**：帮助用户发现并安装 agent skill（"how do I do X" / "is there a skill for X"）。详见 [skill-markets/find-skills/SKILL.md](skill-markets/find-skills/SKILL.md) 与 [CHANGELOG.md Unreleased §find-skills 接入](CHANGELOG.md)
 >
 > **2026-08-16 新增 skill**：`github-kownledge-helper`（本地 GitHub 仓库管家）— 第 48 个技能包（V1.0），纯文档 + 9 references + TS CLI（`pnpm ghh add/update/sync-to/sync-docs/verify-docs`，CLI 落本项目根）；详见 [skill-markets/github-kownledge-helper/SKILL.md](skill-markets/github-kownledge-helper/SKILL.md) 与 [CHANGELOG.md Unreleased §github-kownledge-helper 接入](CHANGELOG.md)
