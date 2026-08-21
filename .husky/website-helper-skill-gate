@@ -1,0 +1,49 @@
+#!/bin/bash
+# .husky/website-helper-skill-gate — website-helper-skill L1 Commit Gate (2026-08-21 guard-smith 委派落地)
+#
+# 触发时机: git commit (由 .husky/pre-commit 调用) / 手动 `bash .husky/website-helper-skill-gate`
+# 门禁项:
+#   1. website-helper-skill 4 项薄壳守卫(SKILL.md frontmatter / 自闭环 / pyproject / 密钥扫描)
+#   2. 仅对 staged 修改过的 website-helper-skill 触发(优化 pre-commit 性能)
+#   3. 仅 guard-smith agent 可改本文件 + scripts/website-helper-skill-guard.py(AGENTS.md §1.11)
+#
+# 跨平台 Python 探测: 复用 scripts/detect-python.sh(详见 AGENTS.md §4.1.3)
+#                    不硬编码任何具体路径,只信 PATH + 能力校验
+
+# shellcheck disable=SC1091
+. "$(dirname "$0")/../scripts/detect-python.sh" || exit 1
+PY="$MY_TRAE_HELPER_PY"
+
+# PowerShell 调 bash 子进程时, stdout 句柄可能被父进程 pipe 截断
+exec 1>&2
+set -e
+
+echo "🔍 执行 website-helper-skill L1 Gate (PY=$PY)..."
+
+# 探测是否触及 website-helper-skill 相关文件 — 仅在改动时才跑守卫,避免无意义开销
+CHANGED=$(git diff --name-only --cached 2>/dev/null | grep -E '^skill-markets/website-helper-skill/' || true)
+if [ -z "$CHANGED" ]; then
+    echo "ℹ️  本次 commit 未触及 website-helper-skill 相关文件,跳过守卫"
+    echo "✅ website-helper-skill L1 Gate 通过(无变更)"
+    exit 0
+fi
+
+echo "📋 改动文件 ($(echo "$CHANGED" | wc -l) 项):"
+echo "$CHANGED" | sed 's/^/  - /'
+
+# 跑专属守卫(项目侧薄壳)
+echo ""
+echo "  ▶ $PY scripts/website-helper-skill-guard.py skill-markets/website-helper-skill"
+if ! "$PY" scripts/website-helper-skill-guard.py skill-markets/website-helper-skill; then
+    echo ""
+    echo "❌ website-helper-skill L1 Gate BLOCK:守卫返回非 0"
+    echo "   修复指引:"
+    echo "     - SKILL.md frontmatter 缺字段:补 name + description(AGENTS.md §1 铁律)"
+    echo "     - publish/ 自闭环缺失:确认 publish/cli.py 入口存在"
+    echo "     - pyproject.toml 缺失:从源仓库同步或新建"
+    echo "     - 硬编码密钥:替换为 \${ENV_VAR} 形式"
+    exit 1
+fi
+
+echo ""
+echo "✅ website-helper-skill L1 Gate 通过"

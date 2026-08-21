@@ -1,0 +1,54 @@
+#!/bin/bash
+# .husky/ai-testmate-gate — ai-testmate L1 Commit Gate (2026-08-20 NEW)
+#
+# 触发时机: git commit (由 .husky/pre-commit 调用) / 手动 `bash .husky/ai-testmate-gate`
+# 门禁项:
+#   1. ai-testmate 8 AP 反例守卫(项目侧薄壳 → 委托 skill-markets/ai-testmate/scripts/ai-testmate-guard.py)
+#   2. 仅对 staged 修改过的 ai-testmate 触发(优化 pre-commit 性能)
+#   3. 仅 guard-smith agent 可改本文件 + scripts/ai-testmate-guard.py(AGENTS.md §1.11)
+#
+# 跨平台 Python 探测: 复用 scripts/detect-python.sh(详见 AGENTS.md §4.1.3)
+#                    不硬编码任何具体路径,只信 PATH + 能力校验
+
+# shellcheck disable=SC1091
+. "$(dirname "$0")/../scripts/detect-python.sh" || exit 1
+PY="$MY_TRAE_HELPER_PY"
+
+# PowerShell 调 bash 子进程时, stdout 句柄可能被父进程 pipe 截断
+exec 1>&2
+set -e
+
+echo "🔍 执行 ai-testmate L1 Gate (PY=$PY)..."
+
+# 探测是否触及 ai-testmate 相关文件 — 仅在改动时才跑守卫,避免无意义开销
+CHANGED=$(git diff --name-only --cached 2>/dev/null | grep -E '^skill-markets/ai-testmate/' || true)
+if [ -z "$CHANGED" ]; then
+    echo "ℹ️  本次 commit 未触及 ai-testmate 相关文件,跳过守卫"
+    echo "✅ ai-testmate L1 Gate 通过(无变更)"
+    exit 0
+fi
+
+echo "📋 改动文件 ($(echo "$CHANGED" | wc -l) 项):"
+echo "$CHANGED" | sed 's/^/  - /'
+
+# 跑专属守卫(项目侧薄壳 → 委托 skill 内置守卫)
+echo ""
+echo "  ▶ $PY scripts/ai-testmate-guard.py skill-markets/ai-testmate"
+if ! "$PY" scripts/ai-testmate-guard.py skill-markets/ai-testmate; then
+    echo ""
+    echo "❌ ai-testmate L1 Gate BLOCK:守卫返回非 0"
+    echo "   修复指引:"
+    echo "     - AP-1 工作空间硬编码:从 env 注入 TESTMATE_WORKSPACE_ROOT"
+    echo "     - AP-2 账号池泄露:.env.example 只允许 __FROM_VAULT__ 占位"
+    echo "     - AP-3 禅道写权越界:仅 reporter.md 可调 zentao bug/testtask create"
+    echo "     - AP-4 webhook 直连:走 lark MCP,禁止直连 hooks.lark/open.feishu.cn"
+    echo "     - AP-5 截图未脱敏:ui-tester 必 mask 密码字段"
+    echo "     - AP-6 .env 缺失:补全 <project>/.agents/.env 必填变量"
+    echo "     - AP-7 报告覆盖:reports/ 强制 YYYYMMDD_HHMMSS/ 时间戳"
+    echo "     - AP-8 跨平台硬编码:复用 scripts/detect-python.sh,禁绝对路径"
+    echo "   完整 8 AP:skill-markets/ai-testmate/references/trap-instructions.yaml"
+    exit 1
+fi
+
+echo ""
+echo "✅ ai-testmate L1 Gate 通过"

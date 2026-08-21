@@ -1,0 +1,49 @@
+#!/bin/bash
+# .husky/common-project-coding-conf-gate — cpcc L1 Commit Gate (2026-08-21 guard-smith 委派落地)
+#
+# 触发时机: git commit (由 .husky/pre-commit 调用) / 手动 `bash .husky/common-project-coding-conf-gate`
+# 门禁项:
+#   1. cpcc 3 项薄壳守卫(SKILL.md frontmatter + 触发词 / cpcc-self-check.mjs 语法 / 密钥扫描)
+#   2. 仅对 staged 修改过的 common-project-coding-conf 触发(优化 pre-commit 性能)
+#   3. 仅 guard-smith agent 可改本文件 + scripts/common-project-coding-conf-guard.py(AGENTS.md §1.11)
+#
+# 跨平台 Python 探测: 复用 scripts/detect-python.sh(详见 AGENTS.md §4.1.3)
+#                    不硬编码任何具体路径,只信 PATH + 能力校验
+
+# shellcheck disable=SC1091
+. "$(dirname "$0")/../scripts/detect-python.sh" || exit 1
+PY="$MY_TRAE_HELPER_PY"
+
+# PowerShell 调 bash 子进程时, stdout 句柄可能被父进程 pipe 截断
+exec 1>&2
+set -e
+
+echo "🔍 执行 common-project-coding-conf (cpcc) L1 Gate (PY=$PY)..."
+
+# 探测是否触及 cpcc 相关文件 — 仅在改动时才跑守卫,避免无意义开销
+CHANGED=$(git diff --name-only --cached 2>/dev/null | grep -E '^skill-markets/common-project-coding-conf/' || true)
+if [ -z "$CHANGED" ]; then
+    echo "ℹ️  本次 commit 未触及 cpcc 相关文件,跳过守卫"
+    echo "✅ cpcc L1 Gate 通过(无变更)"
+    exit 0
+fi
+
+echo "📋 改动文件 ($(echo "$CHANGED" | wc -l) 项):"
+echo "$CHANGED" | sed 's/^/  - /'
+
+# 跑专属守卫(项目侧薄壳)
+echo ""
+echo "  ▶ $PY scripts/common-project-coding-conf-guard.py skill-markets/common-project-coding-conf"
+if ! "$PY" scripts/common-project-coding-conf-guard.py skill-markets/common-project-coding-conf; then
+    echo ""
+    echo "❌ cpcc L1 Gate BLOCK:守卫返回非 0"
+    echo "   修复指引:"
+    echo "     - SKILL.md frontmatter 缺字段:name + description + version + triggers 必填"
+    echo "     - cpcc-self-check.mjs 语法错:跑 node --check 验证"
+    echo "     - 硬编码密钥:替换为 \${ENV_VAR} 形式"
+    echo "   完整协议:skill-markets/common-project-coding-conf/SKILL.md §三件套"
+    exit 1
+fi
+
+echo ""
+echo "✅ cpcc L1 Gate 通过"

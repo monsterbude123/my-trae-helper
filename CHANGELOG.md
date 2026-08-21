@@ -5,6 +5,19 @@
 
 ## [Unreleased]
 
+### common-project-coding-conf (cpcc) v1.0 新建 + project-rules-gate 删除 + add-all CLI 整合(2026-08-19)
+
+- **新建 cpcc 三件套**(guard-smith 委派):
+  - §1 路由表(13 场景关键词 → 必加载 skills)
+  - §2 自检协议(`scripts/cpcc-self-check.mjs` 6 项检查)
+  - §3 forge 协议(接管 project-rules-gate v0.2 全量迁移)
+  - 同步修复:coding-xinfa description 加触发词 + fullstack4TraeV11 补 description
+- **删除 project-rules-gate**:forge 工具链迁移到 cpcc;SKILL.md/templates/workflows 全量搬移并按 cpcc §3 改写
+- **add-all CLI 整合**(origin/feat/fullstack-role):`src/add-all.mjs`(419 行)+ `bin/cli.mjs` 路由(别名 install-all)+ `tests/unit/test_add_all.mjs`(6 反例 PASS)
+- **MANIFEST.yaml 治理**:删除 project-rules-gate 条目;新增 cpcc 条目
+- **守卫/门禁**:registry/skills.yaml cpcc + add-all 双条目注册;pre-commit step 10 (add-all-gate) + step 9 (vibe-coding-standards-gate) 同步上线
+- **目录扫描**:`trae-security-review scan_skills_dir.py` V2.1 → HIGH=0 MEDIUM=0 LOW=0 → 5.0
+
 ### agent-dev-control-kit SKILL.md 瘦身 482 → 244 行(2026-08-19)
 
 - **触发**:vibe-coding-standards v2.5 弹性阈值(100~350)超限治理

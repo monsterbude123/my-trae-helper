@@ -6,6 +6,8 @@
 >
 > **2026-08-19 重要更新**:SKILL.md 644 → 349 行瘦身(vibe-coding-standards v2.5 合规化,5 段抽到 `references/v11-*.md`)。同时上线 `.husky/vibe-coding-standards-gate` + `scripts/vibe-coding-standards-line-guard.py`(commit 时强制 100~350 行检查)。
 >
+> **2026-08-19 V12.0.0.P5**:AGENTS.md/CHANGELOG.md/CAPABILITY-MAP.md/SECURITY-MAP.md/README.md 同步治理完成。本批次 cpcc 三件套入仓 + project-rules-gate 删除 + add-all CLI 整合由 guard-smith 委派。
+>
 > 历次重要升级：
 > - **V12.0.0** (2026-08-16) — 主版本升级：`init-from-zero.py --layout` 默认 `v12-preview`；V11 扁平布局**永久废弃**；`registry/roles.yaml` 升格为白名单；13 stage 命名约定斜杠
 > - **V11.8.7.1** (2026-08-18) — 5 项用户硬要求 3 连修（V11 扁平默认移除 / archive 保留 V12 / module 占位修复 / 多 archive 路径合一）

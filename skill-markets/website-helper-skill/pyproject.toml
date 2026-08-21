@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "publish"
+version = "0.3.0"  # 2026-08-20: 4-layer 解耦 + Pipeline + docker/ + commands/
+description = "One-command subdomain publishing tool (DNS + Nginx + SSL)"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.9",
+    "paramiko>=3.0",
+    "httpx>=0.24",
+    "pyyaml>=6.0",
+    "aliyun-python-sdk-core>=2.14",
+    "aliyun-python-sdk-alidns>=3.0",
+]
+
+[project.scripts]
+publish = "publish.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["publish*"]

@@ -1,0 +1,119 @@
+# ai-testmate 反例库
+# 字段命名刻意避开全局 schema(参见 AGENTS.md §1.4 + .agents/rules/learning.md §3)
+
+# 本文件 trap 字段约定:
+#   severity: high | medium | low
+#   what_is_wrong: 错误描述
+#   detect_signal: 检测信号(grep 模式 / 命令)
+#   see_also: 文本引用
+#   fix_hint: 修复建议
+
+traps:
+  - id: AP-1
+    title: 工作空间路径硬编码
+    severity: high
+    what_is_wrong: |
+      skill 脚本中硬编码 `/workspace/` 或绝对路径,导致用户切换 workspace 后脚本失效
+    detect_signal: |
+      grep -rE '/workspace/|/Users/[^/]+/|C:\\\\workspace' scripts/*.sh
+    see_also: protocol §4 AP-1
+    fix_hint: |
+      从 env 注入 TESTMATE_WORKSPACE_ROOT,所有路径用 ${TESTMATE_WORKSPACE_ROOT} 拼接
+
+  - id: AP-2
+    title: 账号池泄露到 skill 内部
+    severity: high
+    what_is_wrong: |
+      真实密码落到 .env.example 或 skill 内任意文件,导致凭证泄露
+    detect_signal: |
+      grep -rE 'TEST_USER_[A-Z]_PASSWORD=[^_]' skill-markets/ai-testmate/
+    see_also: protocol §4 AP-2 + env-config-spec §6
+    fix_hint: |
+      .env.example 只允许写变量名 = __FROM_VAULT__ 占位,真实密码只在用户 .agents/.env
+
+  - id: AP-3
+    title: 禅道写权越界
+    severity: high
+    what_is_wrong: |
+      planner / api-tester / ui-tester 调 zentao bug create / testtask create
+    detect_signal: |
+      grep -rE 'zentao (bug|testtask) create' agents/
+    see_also: protocol §4 AP-3 + zentao-integration §1
+    fix_hint: |
+      写权全部收敛到 reporter.md,其他 agent 文件禁止 grep 到 zentao 写命令
+
+  - id: AP-4
+    title: 飞书直连 webhook URL
+    severity: high
+    what_is_wrong: |
+      脚本直连 https://open.feishu.cn/... 或把 webhook URL 写进 .env.example
+    detect_signal: |
+      grep -rE 'hooks.lark|webhook.*http|open\.feishu\.cn/open-apis/bot/v2/hook' scripts/ .env.example
+    see_also: protocol §4 AP-4 + lark-webhook-spec §6
+    fix_hint: |
+      必须走 lark MCP `lark_im_message send`,不允许直连
+
+  - id: AP-5
+    title: 截图脱敏漏做
+    severity: high
+    what_is_wrong: |
+      ui-tester 失败截图前未 mask 密码字段,凭据暴露在 screenshots/*.png
+    detect_signal: |
+      grep -E 'mask|redact' agents/ui-tester.md
+    see_also: protocol §4 AP-5 + playwright-patterns §2
+    fix_hint: |
+      ui-tester.md §3 必带 mask_password_fields 函数,失败截图前调用
+
+  - id: AP-6
+    title: 跨平台 Python 路径硬编码
+    severity: medium
+    what_is_wrong: |
+      脚本硬编码 /mnt/c/ProgramData/.../python.exe 或 /usr/bin/python
+    detect_signal: |
+      grep -rE '/mnt/c/|/usr/bin/python|/ProgramData/' scripts/
+    see_also: protocol §4 AP-6
+    fix_hint: |
+      复用 scripts/detect-python.sh(共享脚本),导出 MY_TRAE_HELPER_PY
+
+  - id: AP-7
+    title: 报告无时间戳
+    severity: medium
+    what_is_wrong: |
+      reports/ 目录不带时间戳,新报告覆盖旧报告
+    detect_signal: |
+      grep -rE 'reports/' scripts/run-test.sh | grep -v YYYYMMDD | grep -v %Y%m%d
+    see_also: protocol §4 AP-7 + workflow §3
+    fix_hint: |
+      路径强制 reports/$(date +%Y%m%d_%H%M%S)/,Windows 用 Get-Date
+
+  - id: AP-8
+    title: SKILL.md 超 350 行
+    severity: medium
+    what_is_wrong: |
+      SKILL.md 内容膨胀,违反 vibe-coding-standards v2.5 弹性
+    detect_signal: |
+      wc -l SKILL.md
+    see_also: protocol §3.1
+    fix_hint: |
+      超出 350 行必须瘦身,内容移到 references/
+
+# 失败根因规则库(供 reporter 用)
+failure_root_causes:
+  - rule_id: timeout
+    match: "TimeoutError|Read timed out|ConnectionTimeout"
+    suggestion: "检查网络/服务响应时间,适当增加 timeout 配置或检查服务是否健康"
+  - rule_id: unauthorized
+    match: "401 Unauthorized|invalid_token|token expired"
+    suggestion: "检查 TEST_USER_* 凭据是否过期,或 bearer token 是否需要刷新"
+  - rule_id: forbidden
+    match: "403 Forbidden|permission denied"
+    suggestion: "检查账号权限,或调整 RBAC 配置"
+  - rule_id: element_not_found
+    match: "ElementNotFound|locator.*not found|selector.*resolved to 0 elements"
+    suggestion: "页面结构可能变更,人工核对 selector 是否需要更新"
+  - rule_id: assertion_failed
+    match: "AssertionError|expected.*but was"
+    suggestion: "检查期望值是否与最新接口契约一致,可能是后端字段变更"
+  - rule_id: navigation_timeout
+    match: "Navigation timeout|page.goto timeout"
+    suggestion: "目标 URL 可能无法访问,检查网络或服务可用性"

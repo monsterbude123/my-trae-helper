@@ -1,0 +1,25 @@
+[GUARD-SMITH] 4 skill 注册表预登记 — website-helper-skill / cpcc / add-all / aigc-smart-kit
+
+背景:主代理执行"commit 所有未提交内容"指令,ai-testmate 已就绪但被 skill-registration-guard BLOCK(因另 4 个 skill 已存在于 skill-markets/ 但未在 registry 注册)。本 commit 仅做治理前置,不动 skill 本体。
+
+第一项:registry/skills.yaml schema 条目新增 4 条
+  - website-helper-skill(active, 薄壳 guard + L1 gate)
+  - common-project-coding-conf / cpcc(active, 薄壳 guard + L1 gate)
+  - add-all(active, 引用 META_GUARD_SKILLS 已含;薄壳 guard + L1 gate)
+  - aigc-smart-kit(active, 薄壳 guard + L1 gate)
+顶部 last_updated + total_skills 52→56 同步(非 schema 注释行,主代理豁免)
+
+第二项:scripts/<name>-guard.py 薄壳(项目侧,白名单路径)
+  - scripts/website-helper-skill-guard.py
+  - scripts/common-project-coding-conf-guard.py
+  - scripts/add-all-guard.py(已存在,确认)
+  - scripts/aigc-smart-kit-guard.py(已存在,确认)
+
+第三项:.husky/<name>-gate + pre-commit step 追加
+  - .husky/website-helper-skill-gate(step 12)
+  - .husky/common-project-coding-conf-gate(step 13)
+  - .husky/add-all-gate(step 14)
+  - .husky/aigc-smart-kit-gate(step 15)
+
+白名单:仅动 registry/skills.yaml + scripts/<name>-guard.* + .husky/<name>-gate + .husky/pre-commit
+不动:skill 本体目录 / src/ / bin/ / package.json / *.env.example / *.md 文档 / project-rules-gate/ 删除

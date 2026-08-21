@@ -42,6 +42,7 @@
 | [product-teardown](product-teardown/AGENTS.md) | 纯Skill | 产品拆解分析 — 6 维度解构 + PRD 生成 | 无（子Skill: analyze, prd） |
 | [vision-audit](vision-audit/SKILL.md) | 纯Skill | UI/UX 视觉验收 — Qwen3-VL 分析截图 | vision-audit.mjs, vision-audit.py |
 | [shuxia-novel-engine](shuxia-novel-engine/SKILL.md) | Agent驱动 | 小说创作引擎 — 世界观构建、剧情编织、一致性审计 | 12 脚本（check, combat, drama, enumerate, evaluate, ripple 等） |
+| [common-project-coding-conf](common-project-coding-conf/SKILL.md) (V1.0 NEW 2026-08-19) | 纯Skill + 工具链 | 通用项目级编码配置中心 — §1 路由表（13 场景关键词 → 必加载 skills）+ §2 自检协议 + §3 forge 协议（接管 project-rules-gate v0.2 整目录迁移） | `scripts/cpcc-self-check.mjs`(Node 自检) + `scripts/forge_project_rules_skill.py`(Python forge,原 project-rules-gate 工具链) |
 | [modelscope-assistant](modelscope-assistant/SKILL.md) | 纯Skill | 魔搭社区助手 — 模型搜索、SDK 调用、微调指导 | mymodelscope/ Python 库 + scan-models.ps1 |
 | [minimax-multimodal](minimax-multimodal/SKILL.md) | 纯Skill | MiniMax(海螺 AI)开放平台多模态 — 6 大模态可跑通 Python 客户端(文本/图像/视频/语音/音乐/视觉) | 12 脚本(_client + 6 模态 + verify_all + run_all + 4 check_*) + 7 references + 31 pytest 测试;**2026-08-14 实跑 PASS** — 国内 `api.minimaxi.com` 真实 Key 验证 6/6 模态端到端通过(产物落 `output/`) |
 | [test-experience](test-experience/SKILL.md) | 纯Skill | **⚠ DEPRECATED** → acceptance-discipline（兼容壳）| 无 |

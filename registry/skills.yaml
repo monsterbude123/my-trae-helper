@@ -3,7 +3,8 @@
 # 设计目的（2026-08-14 §3 三层控制体系收紧方案 A）：
 #   每个 skill 在本文件中按同名条目注册 guard + gate 引用,确保:
 #     1. 每个 skill 必须有自己专属的 guard（项目侧 scripts/<name>-guard.*,不在 skill 子目录）
-# 版本（last_updated）：2026-08-19 common-project-coding-conf v1.0 新建注册 + project-rules-gate 整块删除(目录已删)+ github-kownledge-helper agents/ 子目录 + case-driven-skill-audit (V1.0.0) 接入
+# 版本（last_updated）：2026-08-20 aigc-smart-kit v1.0 新建注册(I2V 多模态创意工作台统一入口)
+# 2026-08-20 微更新: ai-testmate v1.0.0 新建注册(独立专精测试工程师 Skill,8 references + 5 agents + 4 scripts),注册表条目新增 + total_skills 51→52
 # 2026-08-19 微更新: agent-dev-control-kit SKILL.md 文档瘦身 (482→244 行),注册表条目本身无变更,仅顶部 last_updated 注释同步(§1.11 增补条款 — 注释行豁免)
 #     2. 每个 skill 必须有自己的 gate 路由条目（项目侧 .husky/<name>-gate 或 scripts/<name>-gate）
 #     3. 只有 guard-smith agent 有写权维护此文件 + scripts/<name>-guard.* + .husky/<name>-gate
@@ -30,8 +31,8 @@
 
 version: 1.0.0
 description: My Trae Helper 技能注册表 — 每个 skill 必带同名 guard + gate 路由
-updated: 2026-08-16
-total_skills: 49
+updated: 2026-08-21
+total_skills: 56
 
 skills:
 
@@ -489,10 +490,106 @@ skills:
       作为知识引用,实际安装通过 `npx skills find` / `npx skills add` 命令完成(aspect = structure-only)。
       注册由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
 
-  # ── 新增:add-all — CLI 一键全量安装命令(2026-08-18) ─────────────────────
+# ── 新增:common-project-coding-conf — 通用项目级编码配置中心(2026-08-21 正式版注册) ─────
+  # 注:旧 2026-08-19 版本指向 skill-markets/<pkg>/scripts/cpcc-self-check.mjs 直接调用,
+  # 不符合 §1.11 项目侧 guard 范式。2026-08-21 升级为正式版本,薄壳 + 项目侧委派。
+
+  # ── 新增:add-all — CLI 一键全量安装命令(2026-08-21 正式版注册) ─────
+  # 注:旧 2026-08-18 版本已存在;2026-08-21 保留并新增 website-helper-skill/cpcc 同时合并管理。
+  # 旧条目已迁移到下方"新增"区,以保持注册表条目按时间倒序排列。
+
+  # ── 新增:ai-testmate — 独立专精测试工程师 Skill(2026-08-20) ─────
+  # 借鉴 fullstack4TraeV11 三层骨架(协议程序化解析思路),不替代 V11 / zentao-cli / lark MCP。
+  # 8 references + 5 agents(planner/credential-keeper/api-tester/ui-tester/reporter)
+  # + 4 scripts(detect-python.sh / run-test.sh / ai-testmate-guard.py / publish-protocol.py)
+  # + tests/unit/test_ai_testmate.py 8 用例全过。集成 zentao-cli(只读 + 写权收敛 reporter) + lark MCP。
+  # 8 AP 反例库(AP-1~AP-8)见 skill-markets/ai-testmate/references/trap-instructions.yaml。
+  - skill: ai-testmate
+    status: active
+    guards:
+      - { id: ai-testmate-structure, category: structure, script: scripts/ai-testmate-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: ai-testmate-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [ai-testmate-structure] }
+      - { id: ai-testmate-gate-pre-commit, level: L1, hooks: [.husky/ai-testmate-gate], runs_guards: [ai-testmate-structure] }
+    maintainer: guard-smith
+    notes: |
+      独立专精测试工程师 Skill(2026-08-20 NEW) — 借鉴 fullstack4TraeV11 三层骨架(协议程序化解析),
+      不替代 V11。4 份报告(测试报告 HTML/MD + JUnit XML)+ 禅道(测试单登记 + Bug 同步)+
+      飞书 MCP(报告推送)三集成。8 AP 反例守卫(AP-1~AP-8):工作空间硬编码 / 账号池泄露 /
+      禅道写权越界 / webhook 直连 / 截图未脱敏 / 缺 .env / 报告覆盖 / 跨平台硬编码。
+      项目侧 scripts/ai-testmate-guard.py 为薄壳,委托 skill 内置 8 AP 检测器。
+      本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
+
+  # ── 新增:aigc-smart-kit — I2V 多模态创意工作台统一入口(2026-08-20) ─────
+  # 主入口只做路由,4 个子 skill(i2v-image-analyzer/i2v-h3-prompt/i2v-seedance-prompt/i2v-kling-prompt)
+  # 共享同一份顶层 SKILL.md 的 frontmatter + 行数守卫,故注册表只算一个条目。
+  # 平台覆盖:MiniMax H3 / Hailuo 2.3(默认)/ ByteDance Seedance 2.0/2.5 / Kling 3.0/V3 Omni/O1。
+  # 顶层 scripts/ 含 2 个跨平台 Python 工具:i2v_vision_call.py(vision API 客户端)
+  # + i2v_prompt_build.py(跨平台 prompt 构造器,std-lib only)。
+  - skill: aigc-smart-kit
+    status: active
+    guards:
+      - { id: aigc-smart-kit-structure, category: structure, script: scripts/aigc-smart-kit-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: aigc-smart-kit-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [aigc-smart-kit-structure] }
+      - { id: aigc-smart-kit-gate-pre-commit, level: L1, hooks: [.husky/aigc-smart-kit-gate], runs_guards: [aigc-smart-kit-structure] }
+    maintainer: guard-smith
+    notes: |
+      AIGC 多模态创意工作台统一入口(2026-08-20 NEW) — 主入口做路由,4 子 skill 共享一份守卫。
+      守卫 6 项硬检查(>errors 即 BLOCK):
+        (1) 顶层 SKILL.md frontmatter(name/description,version 警告)
+        (2) 顶层 SKILL.md 行数 ≤350(vibe-coding-standards v2.5 阈值)
+        (3) 4 子 skill 目录齐全 + 各 SKILL.md 含 frontmatter
+        (4) 顶层 scripts/{i2v_vision_call.py, i2v_prompt_build.py} + docstring + 语法可解析
+        (5) 硬编码 API Key 扫描(OpenAI/Stripe/AWS/Bearer 风格前缀,占位符豁免)
+        (6) JSON schema 引用 skills/i2v-image-analyzer/references/image-schema.md 存在 + ≥200 字符 + 含 image-report
+      平台默认 MiniMax H3,可选 Seedance/Kling;按 description 触发关键词自动加载主入口。
+      本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
+
+  # ── 新增:website-helper-skill — 自动子域名发布(2026-08-21) ─────
+  # 自闭环 publish 工具链(skill-markets/website-helper-skill/publish/),含 DNS / Nginx / SSL /
+  # SSH / Docker 子模块 + cli.py 入口 + pyproject.toml。凭据从 .env 读,绝不回显。
+  - skill: website-helper-skill
+    status: active
+    guards:
+      - { id: website-helper-skill-structure, category: structure, script: scripts/website-helper-skill-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: website-helper-skill-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [website-helper-skill-structure] }
+      - { id: website-helper-skill-gate-pre-commit, level: L1, hooks: [.husky/website-helper-skill-gate], runs_guards: [website-helper-skill-structure] }
+    maintainer: guard-smith
+    notes: |
+      自动子域名发布技能(2026-08-21 NEW) — 自闭环 publish CLI(HTTPS 自动证书),
+      凭据从 .env 读不硬编码。薄壳守卫 4 项硬检查(>errors 即 BLOCK):
+        (1) SKILL.md frontmatter(name + description 必填)
+        (2) publish/ 自闭环目录 + cli.py 入口存在
+        (3) pyproject.toml 存在
+        (4) 硬编码密钥扫描(OpenAI/Stripe/AWS/Bearer 风格前缀,占位符豁免)
+      本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
+
+  # ── 新增:common-project-coding-conf (cpcc) — 通用项目级编码配置中心(2026-08-21) ─────
+  # 三件套:路由表 + 自检协议(cpcc-self-check.mjs)+ forge 协议(从 .trae/rules/*.md 锻造入口 skill)。
+  # 接管 project-rules-gate v0.2 + vibe-coding-routes(未落地)合并职责。
+  - skill: common-project-coding-conf
+    status: active
+    guards:
+      - { id: common-project-coding-conf-structure, category: structure, script: scripts/common-project-coding-conf-guard.py, triggers: [pre-commit] }
+    gates:
+      - { id: common-project-coding-conf-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [common-project-coding-conf-structure] }
+      - { id: common-project-coding-conf-gate-pre-commit, level: L1, hooks: [.husky/common-project-coding-conf-gate], runs_guards: [common-project-coding-conf-structure] }
+    maintainer: guard-smith
+    notes: |
+      通用项目级编码配置中心(2026-08-21 NEW) — 注册表预登记前置版本,薄壳守卫 3 项硬检查:
+        (1) cpcc SKILL.md frontmatter(name + description + version + triggers 必填)
+        (2) cpcc-self-check.mjs node 语法 OK
+        (3) 硬编码密钥扫描(references/*.md + SKILL.md)
+      注:2026-08-19 已注册一份(cpcc-self-check.mjs 直接指向 skill 子目录),
+      本条目为正式版本(scripts/common-project-coding-conf-guard.py 项目侧薄壳,委托 cpcc-self-check.mjs)。
+      本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
+
+  # ── 新增:add-all — CLI 一键全量安装命令(2026-08-21 正式版注册) ─────
   # 注:add-all 不是 skill 包,是 bin/cli.mjs add-all CLI 命令,
-  # 按 find-skills / github-kownledge-helper 先例注册为 meta skill。
-  # src/guards/skill-registration-guard.mjs 的 META_GUARD_SKILLS 白名单已扩 add-all。
+  # 按 find-skills / github-kownledge-helper / doc-sync 先例注册为 meta skill。
+  # src/guards/skill-registration-guard.mjs 的 META_GUARD_SKILLS 白名单已含 add-all(2026-08-18)。
   - skill: add-all
     status: active
     guards:
@@ -501,33 +598,13 @@ skills:
       - { id: add-all-pre-commit, level: L1, hooks: [.husky/add-all-gate, .husky/pre-commit], runs_guards: [add-all-cli] }
     maintainer: guard-smith
     notes: |
-      add-all CLI 一键全量安装(2026-08-18 NEW) — 替代逐个 add,把 skill-markets 全部 skill
-      装到目标 agent(40 顶层 + 63 子 skill,默认 trae-cn 全局;支持 --include / --exclude / --bundles)。
-      实现:`src/add-all.mjs`(419 行,三层控制全跑) + `bin/cli.mjs` 路由(别名 install-all)
-      + `tests/unit/test_add_all.mjs`(6 个反例端到端测试 PASS)。
-      不是 skill 包而是 CLI 命令,按 find-skills / github-kownledge-helper 先例注册为 meta skill
-      (无需 skill-markets/add-all/ 目录,通过 src/guards/skill-registration-guard.mjs 的
-      META_GUARD_SKILLS 白名单豁免目录存在性校验)。
+      add-all CLI 一键全量安装(2026-08-18 NEW,2026-08-21 正式版注册)— 替代逐个 add,把
+      skill-markets 全部 skill 装到目标 agent(40 顶层 + 63 子 skill,默认 trae-cn 全局)。
+      实现:`src/add-all.mjs`(三层控制全跑) + `bin/cli.mjs` 路由(别名 install-all)
+      + `tests/unit/test_add_all.mjs`(反例端到端测试)。
+      不是 skill 包而是 CLI 命令,按 meta skill 先例注册(META_GUARD_SKILLS 白名单豁免目录存在性校验)。
       守卫 scripts/add-all-guard.py 验证 3 项:
         (1) node --check src/add-all.mjs(语法 OK)
         (2) bin/cli.mjs add-all --help + install-all --help(已注册)
         (3) tests/unit/test_add_all.mjs node 跑通(exit 0)
       本条目由 guard-smith agent 按 AGENTS.md §1.11 铁律 11 自治维护。
-
-
-  # ── 新增:common-project-coding-conf — 通用项目级编码配置中心(2026-08-19) ─────
-  - skill: common-project-coding-conf
-    status: active
-    guards:
-      - { id: common-project-coding-conf-self-check, category: structure, script: skill-markets/common-project-coding-conf/scripts/cpcc-self-check.mjs, triggers: [pre-commit] }
-      - { id: common-project-coding-conf-registration, category: registration, script: src/guards/skill-registration-guard.mjs, triggers: [pre-commit] }
-    gates:
-      - { id: common-project-coding-conf-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [common-project-coding-conf-self-check, common-project-coding-conf-registration] }
-    maintainer: guard-smith
-    notes: |
-      新建 skill(2026-08-19)— 接管 project-rules-gate v0.2 + vibe-coding-routes 合并职责。
-      三件套:§1 路由表 / §2 自检协议(cpcc-self-check.mjs)/ §3 forge 协议。
-      删除整个 skill-markets/project-rules-gate/,forge 脚本/templates 全量迁移到 cpcc。
-      注:cpcc 的 guard 脚本位于 skill 子目录(因 forge 工具链全部内聚在 cpcc 内),
-      暂未拆出项目侧 scripts/common-project-coding-conf-guard.* — 后续如需符合 §1.11
-      项目侧 guard 范式,可由 guard-smith 委派补建薄壳脚本转发到 cpcc-self-check.mjs。

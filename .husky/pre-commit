@@ -213,4 +213,84 @@ else
   echo "⚠️  跳过: .husky/vibe-coding-standards-gate 不存在"
 fi
 
+# 10. add-all CLI 命令专属守卫(2026-08-18 NEW — meta skill 入口)
+# 检查:若改了 src/add-all.mjs / bin/cli.mjs / tests/unit/test_add_all.mjs,
+# 跑 scripts/add-all-guard.py 验证 src 语法 + CLI 注册 + 单元测试。
+# 委托: .husky/add-all-gate(自身带 changed-files 短路 — 改其他文件时 skip)
+echo "🔟 add-all CLI 守卫 (meta skill)..."
+if [ -x ".husky/add-all-gate" ]; then
+  bash .husky/add-all-gate
+elif [ -f "scripts/add-all-guard.py" ]; then
+  # 守卫已就绪但 gate 脚本缺失 → 兜底直接跑(PATH 已通过 . detect-python.sh 设置)
+  "$PY" scripts/add-all-guard.py add-all
+else
+  echo "⚠️  跳过: scripts/add-all-guard.py 不存在"
+fi
+
+# 11. ai-testmate 独立测试工程师 Skill 守卫(2026-08-20 NEW — guard-smith 委派落地)
+# 检查:若改了 skill-markets/ai-testmate/ 内任何文件,
+# 跑项目侧 scripts/ai-testmate-guard.py → 委托 skill 内置 8 AP 检测器。
+# 委托: .husky/ai-testmate-gate(自身带 changed-files 短路 — 改其他文件时 skip)
+echo "1️⃣1️⃣  ai-testmate L1 守卫 (独立测试工程师 Skill)..."
+if [ -x ".husky/ai-testmate-gate" ]; then
+  bash .husky/ai-testmate-gate
+elif [ -f "scripts/ai-testmate-guard.py" ]; then
+  # 守卫已就绪但 gate 脚本缺失 → 兜底直接跑(PATH 已通过 . detect-python.sh 设置)
+  "$PY" scripts/ai-testmate-guard.py skill-markets/ai-testmate
+else
+  echo "⚠️  跳过: scripts/ai-testmate-guard.py 不存在"
+fi
+
+# 12. website-helper-skill 自动子域名发布守卫(2026-08-21 NEW — guard-smith 委派落地)
+# 检查:若改了 skill-markets/website-helper-skill/ 内任何文件,
+# 跑项目侧 scripts/website-helper-skill-guard.py → 4 项薄壳检查(SKILL.md / 自闭环 / pyproject / 密钥)。
+# 委托: .husky/website-helper-skill-gate(自身带 changed-files 短路 — 改其他文件时 skip)
+echo "1️⃣2️⃣  website-helper-skill L1 守卫 (自动子域名发布)..."
+if [ -x ".husky/website-helper-skill-gate" ]; then
+  bash .husky/website-helper-skill-gate
+elif [ -f "scripts/website-helper-skill-guard.py" ]; then
+  "$PY" scripts/website-helper-skill-guard.py skill-markets/website-helper-skill
+else
+  echo "⚠️  跳过: scripts/website-helper-skill-guard.py 不存在"
+fi
+
+# 13. common-project-coding-conf (cpcc) 通用项目级编码配置中心守卫(2026-08-21 NEW — guard-smith 委派落地)
+# 检查:若改了 skill-markets/common-project-coding-conf/ 内任何文件,
+# 跑项目侧 scripts/common-project-coding-conf-guard.py → 委托 cpcc-self-check.mjs。
+# 委托: .husky/common-project-coding-conf-gate(自身带 changed-files 短路)
+echo "1️⃣3️⃣  cpcc L1 守卫 (通用项目级编码配置中心)..."
+if [ -x ".husky/common-project-coding-conf-gate" ]; then
+  bash .husky/common-project-coding-conf-gate
+elif [ -f "scripts/common-project-coding-conf-guard.py" ]; then
+  "$PY" scripts/common-project-coding-conf-guard.py skill-markets/common-project-coding-conf
+else
+  echo "⚠️  跳过: scripts/common-project-coding-conf-guard.py 不存在"
+fi
+
+# 14. add-all CLI 命令专属守卫(2026-08-21 — meta skill 入口正式版注册)
+# 检查:若改了 src/add-all.mjs / bin/cli.mjs / tests/unit/test_add_all.mjs,
+# 跑 scripts/add-all-guard.py 验证 src 语法 + CLI 注册 + 单元测试。
+# 委托: .husky/add-all-gate(自身带 changed-files 短路 — 改其他文件时 skip)
+echo "1️⃣4️⃣  add-all CLI 守卫 (meta skill 入口正式版)..."
+if [ -x ".husky/add-all-gate" ]; then
+  bash .husky/add-all-gate
+elif [ -f "scripts/add-all-guard.py" ]; then
+  "$PY" scripts/add-all-guard.py add-all
+else
+  echo "⚠️  跳过: scripts/add-all-guard.py 不存在"
+fi
+
+# 15. aigc-smart-kit I2V 多模态创意工作台守卫(2026-08-21 NEW — guard-smith 委派落地)
+# 检查:若改了 skill-markets/aigc-smart-kit/ 内任何文件,
+# 跑项目侧 scripts/aigc-smart-kit-guard.py → 6 项硬检查(顶层 SKILL.md + 子 skill + 脚本 + 密钥 + schema)。
+# 委托: .husky/aigc-smart-kit-gate(自身带 changed-files 短路)
+echo "1️⃣5️⃣  aigc-smart-kit L1 守卫 (I2V 多模态创意工作台)..."
+if [ -x ".husky/aigc-smart-kit-gate" ]; then
+  bash .husky/aigc-smart-kit-gate
+elif [ -f "scripts/aigc-smart-kit-guard.py" ]; then
+  "$PY" scripts/aigc-smart-kit-guard.py skill-markets/aigc-smart-kit
+else
+  echo "⚠️  跳过: scripts/aigc-smart-kit-guard.py 不存在"
+fi
+
 echo "✅ L1 Commit Gate 通过"

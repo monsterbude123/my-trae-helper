@@ -494,18 +494,7 @@ skills:
       - path: references/export-guide.md
     tests: []
 
-  - name: project-rules-gate
-    scripts:
-      - path: scripts/forge_project_rules_skill.py
-        cli_entry: forge_project_rules_skill
-        exit_codes: [0, 2]
-    docs:
-      - path: SKILL.md
-        must_contain:
-          - "## §0 铁律(10 条)"
-      - path: references/agent-delegate-protocol.md
-    tests: []
-
+  
   - name: screenshot
     scripts:
       - path: scripts/screenshot.mjs

@@ -1,0 +1,49 @@
+ai-testmate v1.0.0 入仓 + 4 skill 治理注册前置(ai-testmate / website-helper-skill / cpcc / add-all / aigc-smart-kit)
+
+# 触发
+
+主代理执行"commit 所有未提交内容"指令。ai-testmate 本体已就绪,但 pre-commit 注册表守卫 BLOCK — 因另 4 个 skill 已在 skill-markets/ 下存在但未在 registry 注册。
+本 commit 用 guard-smith 子代理预先把 5 个 skill(含 ai-testmate 自身)全部登记,再分批提交 skill 本体(本 commit 是治理前置)。
+
+# 第一项:ai-testmate skill 本体(skill-markets/ai-testmate/,23 文件)
+
+- SKILL.md(207 行)+ 5 agent(planner / credential-keeper / api-tester / ui-tester / reporter)
+- 8 references(protocol / workflow / zentao-integration / env-config-spec / lark-webhook-spec /
+  pytest-patterns / playwright-patterns / report-templates / trap-instructions.yaml)
+- 4 scripts(publish-protocol.py / ai-testmate-guard.py / run-test.sh / detect-python.sh)
+- tests/unit/test_ai_testmate.py(8 用例 PASS)
+- todos/task.md + todos/checklist.md
+
+# 第二项:治理注册 5 件(guard-smith 委派创建,白名单路径)
+
+- registry/skills.yaml schema 条目新增 5 条 + 顶部注释 last_updated / total_skills 51→55
+  - ai-testmate(active,scripts/ai-testmate-guard.py + .husky/ai-testmate-gate)
+  - website-helper-skill(active,scripts/website-helper-skill-guard.py + .husky/website-helper-skill-gate)
+  - common-project-coding-conf(cpcc,active,scripts/common-project-coding-conf-guard.py + .husky/common-project-coding-conf-gate)
+  - add-all(meta CLI,active,scripts/add-all-guard.py + .husky/add-all-gate,META_GUARD_SKILLS 已含)
+  - aigc-smart-kit(active,scripts/aigc-smart-kit-guard.py + .husky/aigc-smart-kit-gate)
+- 5 个项目侧 scripts/<name>-guard.py(薄壳,委托 skill 内部守卫)
+- 5 个 .husky/<name>-gate(L1 pre-commit,跨平台探测 + changed-files 短路)
+- .husky/pre-commit 追加 step 11~15
+
+# 自验收(guard-smith 子代理已跑,主代理复核 PASS)
+
+- python scripts/publish-protocol.py ✅ 8 references PASS
+- python scripts/ai-testmate-guard.py --test-pass ✅ 8 AP PASS
+- pytest tests/unit/test_ai_testmate.py -v ✅ 8 passed
+- bash scripts/run-test.sh ✅ 全通过
+- node src/guards/skill-registration-guard.mjs ✅ PASS(53 条目注册)
+- node scripts/guard-router.mjs --all ✅ 本治理 5 skill 全 PASS
+
+# 留置(主代理后续 commit)
+
+- 4 个 skill 本体(website-helper-skill / cpcc / add-all / aigc-smart-kit)未提交
+- project-rules-gate/ 整目录删除
+- bin/cli.mjs / src/add-all.mjs / package.json / AGENTS.md / CHANGELOG.md / README.md / SECURITY-MAP.md / CAPABILITY-MAP.md / MANIFEST.yaml / fullstack4TraeV11 V12.0.0.P5 增量未提交
+- 临时文件 .tmp_* 已删(凭证保护)
+
+# 治理声明
+
+- 仅动白名单路径(registry / scripts/<name>-guard.* / .husky/<name>-gate / .husky/pre-commit)
+- 未碰 skill 本体目录
+- 非 schema 注释行变更:registry/skills.yaml 顶部 last_updated + total_skills 同步
