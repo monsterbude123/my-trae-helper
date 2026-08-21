@@ -279,6 +279,7 @@ skills:
       - { id: skill-creator-claude-pre-commit, level: L1, hooks: [.husky/pre-commit], runs_guards: [skill-creator-claude-structure] }
     maintainer: guard-smith
 
+  # notes: product-teardown 已升级为 P/T 双层隔离架构（2026-08-21）— P 层 5 产品维度(product-teardown-analyze) + T 层技术拆解(product-teardown.tech) + PRD 生成(product-teardown-prd)，双层交付物：《产品 PRD》+《技术拆解文档》
   - skill: product-teardown
     status: active
     guards:

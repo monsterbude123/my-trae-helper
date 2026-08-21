@@ -40,7 +40,6 @@ SOFT_LINE_LIMIT = 350  # SKILL.md 超过此行 → 提示考虑提取 references
 EXCLUDED_NON_SKILL_DIRS = {
     "gitnexus4Trae",       # GitNexus 项目级配置模板
     "ponytail4Trae",       # ponytail 项目级配置模板
-    "product-teardown",    # product-teardown 项目级配置模板
 }
 
 # V11.8.0 标注:历史命名兼容包(2026-08-15)

@@ -39,7 +39,7 @@
 | [openapi-doc-exporter](openapi-doc-exporter/SKILL.md) | 纯Skill | OpenAPI → Markdown 文档导出，框架无关 | render_md.py, split_by_prefix.py, validate_openapi.py |
 | [deep-research](deep-research/SKILL.md) | 纯Skill | 多源深度研究 — firecrawl/exa MCP 综合 + 引用报告（V1.0 NEW 2026-08-13 蒸馏自 ECC .agents/skills/deep-research，按 §11 接入治理） | 无（依赖 MCP: firecrawl 或 exa，至少 1 个） |
 | [trae-professional](trae-professional/SKILL.md) | 纯Skill | TRAE IDE / TRAE Work / TRAE APP 专业知识库（2026-08-14 同步 docs.trae.cn 全 22 个分类）| 无 |
-| [product-teardown](product-teardown/AGENTS.md) | 纯Skill | 产品拆解分析 — 6 维度解构 + PRD 生成 | 无（子Skill: analyze, prd） |
+| [product-teardown](product-teardown/SKILL.md) | 纯Skill | 双层产品/技术拆解 — P 层 5 产品维度 + T 层技术→模块映射，产出《产品 PRD》+《技术拆解文档》（P/T 隔离） | 无（子Skill: analyze + tech + prd） |
 | [vision-audit](vision-audit/SKILL.md) | 纯Skill | UI/UX 视觉验收 — Qwen3-VL 分析截图 | vision-audit.mjs, vision-audit.py |
 | [shuxia-novel-engine](shuxia-novel-engine/SKILL.md) | Agent驱动 | 小说创作引擎 — 世界观构建、剧情编织、一致性审计 | 12 脚本（check, combat, drama, enumerate, evaluate, ripple 等） |
 | [common-project-coding-conf](common-project-coding-conf/SKILL.md) (V1.0 NEW 2026-08-19) | 纯Skill + 工具链 | 通用项目级编码配置中心 — §1 路由表（13 场景关键词 → 必加载 skills）+ §2 自检协议 + §3 forge 协议（接管 project-rules-gate v0.2 整目录迁移） | `scripts/cpcc-self-check.mjs`(Node 自检) + `scripts/forge_project_rules_skill.py`(Python forge,原 project-rules-gate 工具链) |

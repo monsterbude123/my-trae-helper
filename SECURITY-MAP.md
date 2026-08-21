@@ -39,7 +39,7 @@
 | openapi-doc-exporter | 1 md + 3 ref + 3 py | 0 | 1 | 0 | **4.8** | 🟢 | 1 个 MEDIUM 为 export-guide.md 中的 HTTP 示例 |
 | **deep-research** (V1.0 NEW 2026-08-13) | 1 md + 3 ref | 0 | 0 | 0 | **5.0** | 🟢 | **实跑扫描（2026-08-13 15:25，最新）**：trae-security-review scan_skills_dir.py V2.1 → **HIGH 0 + MEDIUM 0 + LOW 0 → PASS**。**质疑性验收治理**：源材料 ECC .agents/skills/deep-research（含 3 份同源副本在 docs/references/）未注册到 skill-markets/，按 AGENTS.md §5 落地。**精简骨架**：SKILL.md 59 行 / 6 铁律（≤150 + ≤10 双约束），详细内容按需 references/{workflow, report-template, quality-rules}.md。**网络面**：依赖外部 firecrawl/exa MCP（用户配置），SKILL.md 本身无 HTTP/Shell 调用面（无脚本）。**与现有能力差异化**：browser-use-cloud 通用 web 自动化 / doc-map-manager 项目文档索引 / trae-remote-official:lark 通讯办公 — 均不重复"多源研究+引用报告"垂直场景 |
 | trae-professional | 1 md + 25 ref | 1 | 0 | 0 | **4.5** | 🟢 | 1 个 HIGH 为 sandbox.md 中的 rm -rf 说明（文档引用，非可执行）；2026-08-14 扩展至 25 个 references 覆盖 docs.trae.cn 全部分类 |
-| product-teardown | 3 md + 2 agent | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档，无脚本 |
+| product-teardown | 1 SKILL + 1 README + 3 sub-skills | 0 | 0 | 0 | **5.0** | 🟢 | 纯文档，无脚本（P/T 双层隔离，删除冗余副本归一化） |
 | vision-audit | 1 md + 2 scripts | 0 | 1 | 0 | **4.8** | 🟢 | 1 个 MEDIUM 为 vision-audit.py 中的 HTTP 引用 |
 | shuxia-novel-engine | 1 md + 5 agent + 12 py + 9 wf | 0 | 1 | 0 | **4.8** | 🟢 | 1 个 MEDIUM 为 export_subculture_package.py 中的 subprocess 调用 |
 | Voice-Acting-Script-Skill | 1 md + 5 skill + 20 py | 0 | 7 | 0 | **3.6** | 🟡 | 7 个 MEDIUM：HTTP 引用 + 少量 Shell 调用（TTS adapter 网络请求） |
